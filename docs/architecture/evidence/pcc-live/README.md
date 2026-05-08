@@ -80,8 +80,11 @@ pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pc
 pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.doctrine-source.spec.ts
 pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.conditional.spec.ts
 pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.surface-blocks.spec.ts
+pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.package-completeness.spec.ts
 pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.scorecard-report.spec.ts
 ```
+
+Prompt 03 closeout sequence uses the four focused specs above (doctrine-source, surface-blocks, package-completeness, and scorecard-report). No single orchestration command is assumed.
 
 ## 6. Expected Evidence Output Groups
 

@@ -15,6 +15,7 @@ export type PccScorecardReportDisposition =
   | 'report-ready-for-expert-review'
   | 'expert-review-required'
   | 'operator-review-pending'
+  | 'evidence-package-gap'
   | 'source-missing'
   | 'not-observed'
   | 'registry-listed'
@@ -32,6 +33,7 @@ export type PccScorecardReportSourceLane =
   | 'breakpoint'
   | 'screenshot'
   | 'surface-smoke'
+  | 'package-completeness'
   | 'runtime'
   | 'operator';
 
@@ -88,6 +90,7 @@ export interface PccScorecardReportFinding {
   id: string;
   category:
     | 'coverage-gap'
+    | 'evidence-package-gap'
     | 'source-missing'
     | 'manual-review-required'
     | 'taxonomy'

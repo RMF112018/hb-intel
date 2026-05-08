@@ -3,6 +3,7 @@ import {
   type PccEvidenceId,
   type PccEvidenceRecord,
 } from './pcc-evidence.types';
+import type { PccEvidencePackageCompletenessRun } from './pcc-live.package-completeness.types';
 import { PCC_EVIDENCE_REGISTRY } from './pcc-evidence.registry';
 import {
   buildPccHardStopWorksheet,
@@ -96,6 +97,7 @@ function safeArtifactPath(pathLike: string): boolean {
 
 function asLane(pathText: string): PccScorecardReportSourceLane {
   const lower = pathText.toLowerCase();
+  if (lower.includes('evidence-package-completeness.')) return 'package-completeness';
   if (lower.includes('surface-block')) return 'surface-blocks';
   if (lower.includes('doctrine')) return 'doctrine-source';
   if (lower.includes('content')) return 'content';
@@ -118,7 +120,7 @@ function toUniqueEvidence(ids: readonly PccEvidenceId[]): PccEvidenceId[] {
 }
 
 function defaultAuditPackageIndex(): PccScorecardReportAuditPackageIndexItem[] {
-  return [...PCC_SCORECARD_REPORT_OUTPUT_FILES]
+  const base = [...PCC_SCORECARD_REPORT_OUTPUT_FILES]
     .sort((a, b) => a.localeCompare(b))
     .map((file) => ({
       file,
@@ -129,6 +131,25 @@ function defaultAuditPackageIndex(): PccScorecardReportAuditPackageIndexItem[] {
       description: sanitizeText(`Prompt 13 audit package output: ${file}`),
       required: true,
     }));
+
+  const packageCompletenessSupport: PccScorecardReportAuditPackageIndexItem[] = [
+    {
+      file: 'evidence-package-completeness.json',
+      artifactKind: 'json-summary',
+      sourceLane: 'package-completeness',
+      description: sanitizeText('Prompt 02 package completeness support artifact.'),
+      required: true,
+    },
+    {
+      file: 'evidence-package-completeness.md',
+      artifactKind: 'markdown-summary',
+      sourceLane: 'package-completeness',
+      description: sanitizeText('Prompt 02 package completeness review summary artifact.'),
+      required: true,
+    },
+  ];
+
+  return [...base, ...packageCompletenessSupport];
 }
 
 export interface AssemblePccScorecardReportInput {
@@ -140,6 +161,7 @@ export interface AssemblePccScorecardReportInput {
   repoCommit?: string;
   registry?: readonly PccEvidenceRecord[];
   artifactPaths?: readonly string[];
+  packageCompletenessRun?: PccEvidencePackageCompletenessRun;
   environmentValidationExceptions?: readonly string[];
 }
 
@@ -320,6 +342,43 @@ export function assemblePccScorecardReport(
       statement: detail,
       mitigation: sanitizeText('Resolve environment policy blocker and rerun validation.'),
     });
+  }
+
+  if (input.packageCompletenessRun) {
+    const packageRun = input.packageCompletenessRun;
+    const gapGroups = packageRun.groups.filter(
+      (group) =>
+        ['doctrine-source', 'surface-blocks', 'scorecard-report'].includes(group.groupId) &&
+        group.status !== 'present',
+    );
+
+    if (gapGroups.length > 0) {
+      findings.push({
+        id: 'finding-evidence-package-gap',
+        category: 'evidence-package-gap',
+        disposition: 'evidence-package-gap',
+        sourceLane: 'package-completeness',
+        title: 'evidence-package-gap: closeout package groups require operator follow-up',
+        detail: sanitizeText(
+          `Package completeness reported non-present closeout groups: ${gapGroups
+            .map((group) => `${group.groupId}:${group.status}`)
+            .join(', ')}.`,
+        ),
+        evidenceIds: [],
+      });
+
+      for (const group of gapGroups) {
+        residualRisks.push({
+          id: `risk-package-gap-${group.groupId}`,
+          sourceLane: 'package-completeness',
+          disposition: 'operator-review-pending',
+          statement: sanitizeText(
+            `evidence-package-gap for ${group.groupId}: status ${group.status}.`,
+          ),
+          mitigation: sanitizeText(group.recommendedAction),
+        });
+      }
+    }
   }
 
   const sourceMissingCount = evidenceCoverage.filter(

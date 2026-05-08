@@ -52,6 +52,15 @@ pnpm pcc:e2e:live:list
 pnpm pcc:e2e:live
 ```
 
+## Prompt 03 focused closeout sequence
+
+```bash
+pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.doctrine-source.spec.ts
+pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.surface-blocks.spec.ts
+pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.package-completeness.spec.ts
+pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.scorecard-report.spec.ts
+```
+
 ## Optional Brave parity
 
 Set `PCC_LIVE_BRAVE_EXECUTABLE_PATH` to enable the conditional `brave-optional` project.
