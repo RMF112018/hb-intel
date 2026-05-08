@@ -211,3 +211,14 @@ Prompt 06 accessibility enhancements add localized review-support issue artifact
 - `pcc-live-accessibility-issue-register.md`
 
 These accessibility issue-register artifacts are closeout support only. They are not WCAG conformance authority, not accessibility pass/fail authority, not hard-stop disposition authority, and not scoring authority.
+
+## Prompt 07 touch-target reconciliation
+
+Prompt 07 reconciles touch-target measurement context between breakpoint and accessibility lanes:
+
+- breakpoint lane: responsive/viewport field-fit touch-target measurement (`44px` on touch viewports, `32px` on non-touch viewports);
+- accessibility lane: accessibility/touch review measurement (`44px`);
+- scope and root selection may differ by lane;
+- diagnostics now explain candidate counts, filtered counts, fallback usage, and zero-measure reasons.
+
+Lane count differences are review context and are not automated pass/fail outcomes.

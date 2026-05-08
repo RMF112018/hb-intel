@@ -1,5 +1,9 @@
 import type { PccEvidenceId, PccHardStopRef, PccScorecardPillarRef } from './pcc-evidence.types';
 import type { PccLiveSurfaceId } from './pcc-live.surfaces';
+import type {
+  PccTouchTargetMeasurementLane,
+  PccTouchTargetScopeDiagnostics,
+} from './pcc-live.touch-targets';
 
 export const PCC_ACCESSIBILITY_EVIDENCE_IDS = [
   'EV-72',
@@ -100,6 +104,12 @@ export interface PccA11yTouchTargetObservation {
   tagName: string;
   width: number;
   height: number;
+  thresholdPx: number;
+  measurementLane: 'accessibility';
+  disabled?: boolean;
+  visible?: boolean;
+  x?: number;
+  y?: number;
   belowRecommendedSize: boolean;
 }
 
@@ -114,6 +124,7 @@ export interface PccAccessibilitySurfaceEvidence {
   hoverOnly: PccHoverOnlyObservation;
   dialogFocus: PccDialogFocusObservation;
   touchTargets: PccA11yTouchTargetObservation[];
+  touchTargetScopeDiagnostics?: PccTouchTargetScopeDiagnostics;
   warnings: string[];
 }
 
@@ -138,6 +149,21 @@ export interface PccAccessibilityEvidenceRun {
     totalDialogFocusNeedsReview: number;
     totalTouchTargetIssues: number;
     totalWarnings: number;
+    touchTargetDiagnostics?: {
+      candidateCount: number;
+      measuredCount: number;
+      hiddenFilteredCount: number;
+      disabledCount: number;
+      disabledFilteredCount: number;
+      fallbackUsedCount: number;
+      zeroMeasureReasonCounts: {
+        'root-not-found': number;
+        'no-candidates-in-root': number;
+        'all-candidates-hidden': number;
+        'all-candidates-disabled-or-excluded': number;
+        'measurement-error': number;
+      };
+    };
   };
   warnings: string[];
   disclaimer: string;
@@ -173,6 +199,8 @@ export interface PccAccessibilityIssueRegisterRow {
   boundingHeight?: number;
   width?: number;
   height?: number;
+  thresholdPx?: number;
+  measurementLane?: PccTouchTargetMeasurementLane;
   details?: string;
   status?: PccA11yObservationStatus;
   evRefs: readonly PccEvidenceId[];

@@ -6,6 +6,7 @@ import {
   PCC_LIVE_RESPONSIVE_COLUMNS,
   resolvePccLiveResponsiveMode,
 } from './pcc-live.breakpoint-matrix';
+import { measureTouchTargets } from './pcc-live.touch-targets';
 import type {
   PccLiveBreakpointScreenshotArtifact,
   PccLiveBreakpointSurfaceEvidence,
@@ -19,8 +20,6 @@ import type { PccLiveSurfaceDefinition } from './pcc-live.surfaces';
 const GRID_SELECTOR = '[data-pcc-bento-grid]';
 const CARD_SELECTOR = '[data-pcc-card]';
 const PANEL_SELECTOR = '[data-pcc-active-surface-panel]';
-const INTERACTIVE_SELECTOR =
-  'button, a[href], [role="button"], [role="tab"], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 const MASK_SELECTORS = [
   'input',
@@ -194,49 +193,40 @@ export async function measureBreakpointTouchTargets(
   surface: PccLiveSurfaceDefinition,
   viewport: PccLiveViewportDefinition,
   cap: number,
-): Promise<PccLiveTouchTargetMeasurement[]> {
-  const panel = page
-    .locator(`${PANEL_SELECTOR}[data-pcc-active-surface-panel="${surface.id}"]`)
-    .first();
-  const root = (await panel.count()) > 0 ? panel : page.locator('body').first();
-  const targets = root.locator(INTERACTIVE_SELECTOR);
-  const count = Math.min(await targets.count(), cap);
+): Promise<{
+  touchTargets: PccLiveTouchTargetMeasurement[];
+  diagnostics: PccLiveBreakpointSurfaceEvidence['touchTargetScopeDiagnostics'];
+}> {
   const threshold = viewport.touch ? 44 : 32;
-  const items: PccLiveTouchTargetMeasurement[] = [];
+  const measured = await measureTouchTargets({
+    page,
+    primaryRootSelector: `${PANEL_SELECTOR}[data-pcc-active-surface-panel="${surface.id}"]`,
+    fallbackRootSelector: 'body',
+    thresholdPx: threshold,
+    measurementLane: 'breakpoint',
+    cap,
+    excludeDisabled: false,
+  });
 
-  for (let i = 0; i < count; i += 1) {
-    const target = targets.nth(i);
-    const data = await target
-      .evaluate((node, idx) => {
-        const el = node as HTMLElement;
-        if (!el.offsetParent) return null;
-        if ((el as HTMLInputElement).disabled) return null;
-        const rect = el.getBoundingClientRect();
-        return {
-          selector: `${el.tagName.toLowerCase()}:nth-of-type(${idx + 1})`,
-          role: el.getAttribute('role') ?? undefined,
-          tagName: el.tagName.toLowerCase(),
-          width: rect.width,
-          height: rect.height,
-        };
-      }, i)
-      .catch(() => null);
-
-    if (!data) continue;
-
-    items.push({
+  return {
+    touchTargets: measured.rows.map((item) => ({
       surfaceId: surface.id,
       viewportId: viewport.id,
-      selector: data.selector,
-      role: data.role,
-      tagName: data.tagName,
-      width: data.width,
-      height: data.height,
-      belowRecommendedSize: data.width < threshold || data.height < threshold,
-    });
-  }
-
-  return items;
+      selector: item.selector,
+      role: item.role,
+      tagName: item.tagName,
+      width: item.width,
+      height: item.height,
+      thresholdPx: item.thresholdPx,
+      measurementLane: 'breakpoint',
+      disabled: item.disabled,
+      visible: item.visible,
+      x: item.x,
+      y: item.y,
+      belowRecommendedSize: item.belowRecommendedSize,
+    })),
+    diagnostics: measured.diagnostics,
+  };
 }
 
 async function takeBreakpointScreenshot(
@@ -327,14 +317,20 @@ export async function capturePccBreakpoints(
         warnings.push(`Card clipping/overflow issues detected on viewport=${viewport.id}.`);
       }
 
-      const touchTargets = await measureBreakpointTouchTargets(
+      const touchTargetResult = await measureBreakpointTouchTargets(
         input.page,
         surface,
         viewport,
         maxTouchTargets,
       );
+      const touchTargets = touchTargetResult.touchTargets;
       if (touchTargets.some((target) => target.belowRecommendedSize)) {
         warnings.push(`Touch target size issues detected on viewport=${viewport.id}.`);
+      }
+      if (touchTargets.length === 0 && touchTargetResult.diagnostics?.zeroMeasureReason) {
+        warnings.push(
+          `Touch-target diagnostics (${viewport.id}): ${touchTargetResult.diagnostics.zeroMeasureReason}.`,
+        );
       }
 
       const screenshot = await takeBreakpointScreenshot(
@@ -352,6 +348,7 @@ export async function capturePccBreakpoints(
         grid,
         cards,
         touchTargets,
+        touchTargetScopeDiagnostics: touchTargetResult.diagnostics,
         screenshot,
         warnings: warnings.map((warning) => sanitizeWarning(warning)),
       });

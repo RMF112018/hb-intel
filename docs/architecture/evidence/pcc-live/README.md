@@ -155,6 +155,15 @@ pcc-live-accessibility-issue-register.md
 
 Accessibility issue-register artifacts are review support only and are not WCAG conformance authority, accessibility pass/fail authority, hard-stop disposition authority, or scoring authority.
 
+Touch-target reconciliation guidance:
+
+- breakpoint lane = responsive/viewport field-fit touch-target measurement;
+- accessibility lane = accessibility/touch review measurement;
+- thresholds may differ by lane/viewport;
+- root/scope selection may differ by lane;
+- diagnostics explain zero-count cases and filtered candidates;
+- neither lane produces automated pass/fail outcomes.
+
 ## 7. Commit Eligibility
 
 Commit-eligible after operator review and scrubbing:

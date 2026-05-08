@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { PCC_EVIDENCE_REGISTRY } from './pcc-evidence.registry';
 import type { PccEvidenceId, PccHardStopRef, PccScorecardPillarRef } from './pcc-evidence.types';
+import { aggregateTouchTargetDiagnostics } from './pcc-live.touch-targets';
 import type {
   PccLiveBreakpointEvidenceRun,
   PccLiveBreakpointIssueRegisterRow,
@@ -317,7 +318,6 @@ function buildBreakpointIssues(
       if (card.overflowX) pushIssue('card-overflow-x', cardPatch);
       if (card.overflowY) pushIssue('card-overflow-y', cardPatch);
       if (!card.directChildOfGrid) pushIssue('direct-child-invariant', cardPatch);
-      if (card.minTouchTargetIssueCount > 0) pushIssue('touch-target-size', cardPatch);
     }
     for (const target of surface.touchTargets) {
       if (!target.belowRecommendedSize) continue;
@@ -325,6 +325,8 @@ function buildBreakpointIssues(
         selector: target.selector,
         touchTargetWidth: target.width,
         touchTargetHeight: target.height,
+        thresholdPx: target.thresholdPx,
+        measurementLane: target.measurementLane,
       });
     }
   }
@@ -386,6 +388,11 @@ export async function writePccBreakpointEvidence(
       (sum, surface) =>
         sum + surface.touchTargets.filter((target) => target.belowRecommendedSize).length,
       0,
+    ),
+    touchTargetDiagnostics: aggregateTouchTargetDiagnostics(
+      surfaces.flatMap((surface) =>
+        surface.touchTargetScopeDiagnostics ? [surface.touchTargetScopeDiagnostics] : [],
+      ),
     ),
   };
 
@@ -486,7 +493,35 @@ export async function writePccBreakpointEvidence(
   lines.push(`- Clipped card count: ${summary.clippedCardCount}`);
   lines.push(`- Direct-child issue count: ${summary.directChildIssueCount}`);
   lines.push(`- Touch target issue count: ${summary.touchTargetIssueCount}`);
+  lines.push(
+    `- Touch target diagnostics (candidate/measured/hidden/disabled/disabled-filtered/fallback-used): ${summary.touchTargetDiagnostics.candidateCount}/${summary.touchTargetDiagnostics.measuredCount}/${summary.touchTargetDiagnostics.hiddenFilteredCount}/${summary.touchTargetDiagnostics.disabledCount}/${summary.touchTargetDiagnostics.disabledFilteredCount}/${summary.touchTargetDiagnostics.fallbackUsedCount}`,
+  );
   lines.push(`- Breakpoint issue register count: ${issues.length}`);
+  lines.push('');
+  lines.push('## Touch Target Reconciliation Diagnostics');
+  lines.push('- Breakpoint lane purpose: responsive/viewport field-fit touch-target measurement.');
+  lines.push(
+    '- Breakpoint threshold policy: 44px on touch viewports and 32px on non-touch viewports.',
+  );
+  lines.push(
+    '- Breakpoint and accessibility touch-target counts may differ by lane scope and threshold; count differences alone are not failure outcomes.',
+  );
+  lines.push('- Zero-measure reason counts:');
+  lines.push(
+    `  - root-not-found: ${summary.touchTargetDiagnostics.zeroMeasureReasonCounts['root-not-found']}`,
+  );
+  lines.push(
+    `  - no-candidates-in-root: ${summary.touchTargetDiagnostics.zeroMeasureReasonCounts['no-candidates-in-root']}`,
+  );
+  lines.push(
+    `  - all-candidates-hidden: ${summary.touchTargetDiagnostics.zeroMeasureReasonCounts['all-candidates-hidden']}`,
+  );
+  lines.push(
+    `  - all-candidates-disabled-or-excluded: ${summary.touchTargetDiagnostics.zeroMeasureReasonCounts['all-candidates-disabled-or-excluded']}`,
+  );
+  lines.push(
+    `  - measurement-error: ${summary.touchTargetDiagnostics.zeroMeasureReasonCounts['measurement-error']}`,
+  );
   lines.push('');
   lines.push('## Breakpoint Issue Register');
   lines.push(`- JSON: ${path.basename(issueRegisterJsonPath)}`);
@@ -583,6 +618,9 @@ export async function writePccBreakpointEvidence(
           issueLines.push(`- Selector: ${row.selector ?? 'n/a'}`);
           issueLines.push(
             `- Measurements: viewport ${row.viewportWidth}x${row.viewportHeight}; card ${row.boundingWidth ?? 'n/a'}x${row.boundingHeight ?? 'n/a'}; touch ${row.touchTargetWidth ?? 'n/a'}x${row.touchTargetHeight ?? 'n/a'}`,
+          );
+          issueLines.push(
+            `- Touch target context: threshold ${row.thresholdPx ?? 'n/a'}px; lane ${row.measurementLane ?? 'n/a'}`,
           );
           issueLines.push(
             `- Grid/meta: observedMode ${row.observedMode ?? 'n/a'}; derivedMode ${row.derivedMode ?? 'n/a'}; expectedColumns ${row.expectedColumns ?? 'n/a'}; overflowX ${row.viewportOverflowX ?? 'n/a'}`,

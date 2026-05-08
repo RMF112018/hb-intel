@@ -5,6 +5,8 @@ import { expect, test } from '@playwright/test';
 import { REQUIRED_PCC_EVIDENCE_IDS, type PccEvidenceId } from './pcc-evidence.types';
 import { skipIfMissingPccLiveEnv } from './pcc-live.env';
 import { PccLivePageObject } from './pcc-live.page-object';
+import { measureBreakpointTouchTargets } from './pcc-live.breakpoint-capture';
+import { PCC_LIVE_VIEWPORT_MATRIX } from './pcc-live.breakpoint-matrix';
 import {
   capturePccAccessibility,
   collectAriaLabelObservations,
@@ -123,6 +125,10 @@ test('Accessibility writer preserves sanitized output policy', async () => {
             tagName: 'button',
             width: 30,
             height: 30,
+            thresholdPx: 44,
+            measurementLane: 'accessibility',
+            disabled: false,
+            visible: true,
             belowRecommendedSize: true,
           },
         ],
@@ -285,6 +291,11 @@ test('Accessibility writer preserves sanitized output policy', async () => {
       issues: Array<{
         issueType: string;
         surfaceId: string;
+        thresholdPx?: number;
+        measurementLane?: string;
+        width?: number;
+        height?: number;
+        selector?: string;
         evRefs: string[];
         pillarRefs: string[];
         hardStopRefs: string[];
@@ -323,6 +334,15 @@ test('Accessibility writer preserves sanitized output policy', async () => {
       expect(row.evRefs.length).toBeGreaterThan(0);
       expect(row.pillarRefs.length).toBeGreaterThan(0);
       expect(row.hardStopRefs.length).toBeGreaterThan(0);
+    }
+    const touchRows = issuePayload.issues.filter((row) => row.issueType === 'touch-target-size');
+    expect(touchRows.length).toBeGreaterThan(0);
+    for (const row of touchRows) {
+      expect(row.thresholdPx).toBe(44);
+      expect(row.measurementLane).toBe('accessibility');
+      expect((row.width ?? 0) > 0).toBe(true);
+      expect((row.height ?? 0) > 0).toBe(true);
+      expect((row.selector ?? '').length).toBeGreaterThan(0);
     }
 
     const noClaimTerms = [
@@ -379,11 +399,41 @@ test('Accessibility capture helpers preserve synthetic DOM boundaries', async ({
     '[data-pcc-active-surface-panel="project-home"]',
     40,
   );
-  expect(touches.some((x) => x.belowRecommendedSize)).toBe(true);
+  expect(touches.touchTargets.some((x) => x.belowRecommendedSize)).toBe(true);
+  expect(touches.diagnostics.candidateCount).toBeGreaterThan(0);
 
-  const serialized = JSON.stringify({ aria, touches });
+  const serialized = JSON.stringify({ aria, touches: touches.touchTargets });
   expect(serialized).not.toContain('Reason text here');
   expect(serialized).not.toContain('Small');
+});
+
+test('Touch-target lane count differences can be expected with diagnostics', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.setContent(`
+    <div data-pcc-active-surface-panel="project-home">
+      <button style="width:34px;height:34px;">Inside panel</button>
+    </div>
+    <div>
+      <button style="width:20px;height:20px;">Outside panel</button>
+    </div>
+  `);
+
+  const surface =
+    PCC_LIVE_SURFACES.find((item) => item.id === 'project-home') ?? PCC_LIVE_SURFACES[0];
+  const nonTouchViewport =
+    PCC_LIVE_VIEWPORT_MATRIX.find((item) => !item.touch) ?? PCC_LIVE_VIEWPORT_MATRIX[2];
+  const breakpoint = await measureBreakpointTouchTargets(page, surface, nonTouchViewport, 20);
+  const accessibility = await collectTouchTargetObservations(page, 'project-home', 'body', 20);
+
+  expect(breakpoint.touchTargets.length).toBeLessThan(accessibility.touchTargets.length);
+  expect(breakpoint.diagnostics.rootSelector).toContain(
+    '[data-pcc-active-surface-panel="project-home"]',
+  );
+  expect(accessibility.diagnostics.rootSelector).toBe('body');
+  expect(breakpoint.diagnostics.thresholdPx).toBe(32);
+  expect(accessibility.diagnostics.thresholdPx).toBe(44);
+  expect(breakpoint.diagnostics.measurementLane).toBe('breakpoint');
+  expect(accessibility.diagnostics.measurementLane).toBe('accessibility');
 });
 
 test('Axe summary strips raw DOM HTML', () => {

@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import type { PccLivePageObject } from './pcc-live.page-object';
+import { measureTouchTargets } from './pcc-live.touch-targets';
 import type {
   PccAccessibilitySurfaceEvidence,
   PccAriaLabelObservation,
@@ -13,9 +14,6 @@ import type {
   PccReducedMotionObservation,
 } from './pcc-live.accessibility.types';
 import type { PccLiveSurfaceDefinition } from './pcc-live.surfaces';
-
-const INTERACTIVE_SELECTOR =
-  'button, a[href], [role="button"], [role="tab"], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 function sanitizeText(input: string): string {
   const noQuery = input.replace(/\?.*$/g, '');
@@ -153,6 +151,8 @@ export async function collectAriaLabelObservations(
   rootSelector: string,
   cap: number,
 ): Promise<PccAriaLabelObservation[]> {
+  const INTERACTIVE_SELECTOR =
+    'button, a[href], [role="button"], [role="tab"], input, select, textarea, [tabindex]:not([tabindex="-1"])';
   const nodes = page.locator(`${rootSelector} ${INTERACTIVE_SELECTOR}`);
   const count = Math.min(await nodes.count(), cap);
   const items: PccAriaLabelObservation[] = [];
@@ -215,35 +215,37 @@ export async function collectTouchTargetObservations(
   surfaceId: PccAccessibilitySurfaceEvidence['surfaceId'],
   rootSelector: string,
   cap: number,
-): Promise<PccA11yTouchTargetObservation[]> {
-  const nodes = page.locator(`${rootSelector} ${INTERACTIVE_SELECTOR}`);
-  const count = Math.min(await nodes.count(), cap);
-  const items: PccA11yTouchTargetObservation[] = [];
+): Promise<{
+  touchTargets: PccA11yTouchTargetObservation[];
+  diagnostics: PccAccessibilitySurfaceEvidence['touchTargetScopeDiagnostics'];
+}> {
+  const measured = await measureTouchTargets({
+    page,
+    primaryRootSelector: rootSelector,
+    thresholdPx: 44,
+    measurementLane: 'accessibility',
+    cap,
+    excludeDisabled: false,
+  });
 
-  for (let i = 0; i < count; i += 1) {
-    const value = await nodes.nth(i).evaluate((node, idx) => {
-      const el = node as HTMLElement;
-      if (!el.offsetParent) return null;
-      const rect = el.getBoundingClientRect();
-      return {
-        selector: `${el.tagName.toLowerCase()}:nth-of-type(${idx + 1})`,
-        role: el.getAttribute('role') ?? undefined,
-        tagName: el.tagName.toLowerCase(),
-        width: rect.width,
-        height: rect.height,
-        belowRecommendedSize: rect.width < 44 || rect.height < 44,
-      };
-    }, i);
-
-    if (!value) continue;
-    items.push({
+  return {
+    touchTargets: measured.rows.map((row) => ({
       surfaceId,
-      ...value,
-      selector: sanitizeSelector(value.selector),
-    });
-  }
-
-  return items;
+      selector: sanitizeSelector(row.selector),
+      role: row.role ? sanitizeText(row.role) : undefined,
+      tagName: sanitizeText(row.tagName),
+      width: row.width,
+      height: row.height,
+      thresholdPx: row.thresholdPx,
+      measurementLane: 'accessibility',
+      disabled: row.disabled,
+      visible: row.visible,
+      x: row.x,
+      y: row.y,
+      belowRecommendedSize: row.belowRecommendedSize,
+    })),
+    diagnostics: measured.diagnostics,
+  };
 }
 
 async function collectReducedMotionObservation(
@@ -438,12 +440,13 @@ export async function capturePccAccessibility(
       rootSelector,
       maxAria,
     );
-    const touchTargets = await collectTouchTargetObservations(
+    const touchTargetResult = await collectTouchTargetObservations(
       input.page,
       surface.id,
       rootSelector,
       maxTouchTargets,
     );
+    const touchTargets = touchTargetResult.touchTargets;
     const contrast = await collectContrastObservation(surface.id, axeViolations);
     const reducedMotion = await collectReducedMotionObservation(
       input.page,
@@ -464,6 +467,7 @@ export async function capturePccAccessibility(
       hoverOnly,
       dialogFocus,
       touchTargets,
+      touchTargetScopeDiagnostics: touchTargetResult.diagnostics,
       warnings,
     });
   }

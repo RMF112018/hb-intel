@@ -1,6 +1,10 @@
 import type { PccEvidenceId } from './pcc-evidence.types';
 import type { PccHardStopRef, PccScorecardPillarRef } from './pcc-evidence.types';
 import type { PccLiveSurfaceId } from './pcc-live.surfaces';
+import type {
+  PccTouchTargetMeasurementLane,
+  PccTouchTargetScopeDiagnostics,
+} from './pcc-live.touch-targets';
 
 export const PCC_BREAKPOINT_EVIDENCE_IDS = [
   'EV-59',
@@ -85,6 +89,12 @@ export interface PccLiveTouchTargetMeasurement {
   tagName: string;
   width: number;
   height: number;
+  thresholdPx: number;
+  measurementLane: 'breakpoint';
+  disabled?: boolean;
+  visible?: boolean;
+  x?: number;
+  y?: number;
   belowRecommendedSize: boolean;
 }
 
@@ -106,6 +116,7 @@ export interface PccLiveBreakpointSurfaceEvidence {
   grid: PccLiveGridMeasurement;
   cards: PccLiveCardMeasurement[];
   touchTargets: PccLiveTouchTargetMeasurement[];
+  touchTargetScopeDiagnostics?: PccTouchTargetScopeDiagnostics;
   screenshot?: PccLiveBreakpointScreenshotArtifact;
   warnings: string[];
 }
@@ -131,6 +142,21 @@ export interface PccLiveBreakpointEvidenceRun {
     clippedCardCount: number;
     directChildIssueCount: number;
     touchTargetIssueCount: number;
+    touchTargetDiagnostics?: {
+      candidateCount: number;
+      measuredCount: number;
+      hiddenFilteredCount: number;
+      disabledCount: number;
+      disabledFilteredCount: number;
+      fallbackUsedCount: number;
+      zeroMeasureReasonCounts: {
+        'root-not-found': number;
+        'no-candidates-in-root': number;
+        'all-candidates-hidden': number;
+        'all-candidates-disabled-or-excluded': number;
+        'measurement-error': number;
+      };
+    };
   };
   warnings: string[];
   disclaimer: string;
@@ -179,6 +205,8 @@ export interface PccLiveBreakpointIssueRegisterRow {
   viewportOverflowX?: number;
   touchTargetWidth?: number;
   touchTargetHeight?: number;
+  thresholdPx?: number;
+  measurementLane?: PccTouchTargetMeasurementLane;
   evRefs: readonly PccEvidenceId[];
   pillarRefs: readonly PccScorecardPillarRef[];
   hardStopRefs: readonly PccHardStopRef[];

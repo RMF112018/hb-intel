@@ -115,6 +115,10 @@ test('Breakpoint writer preserves sanitized output policy', async () => {
             tagName: 'button',
             width: 40,
             height: 40,
+            thresholdPx: 44,
+            measurementLane: 'breakpoint',
+            disabled: false,
+            visible: true,
             belowRecommendedSize: true,
           },
         ],
@@ -243,6 +247,11 @@ test('Breakpoint writer preserves sanitized output policy', async () => {
       summary: { totalIssueCount: number; issueCountByType: Record<string, number> };
       issues: Array<{
         issueType: string;
+        thresholdPx?: number;
+        measurementLane?: string;
+        touchTargetWidth?: number;
+        touchTargetHeight?: number;
+        selector?: string;
         evRefs: string[];
         pillarRefs: string[];
         hardStopRefs: string[];
@@ -268,12 +277,27 @@ test('Breakpoint writer preserves sanitized output policy', async () => {
       expect(row.pillarRefs.length).toBeGreaterThan(0);
       expect(row.hardStopRefs.length).toBeGreaterThan(0);
     }
+    const touchRows = issuePayload.issues.filter((row) => row.issueType === 'touch-target-size');
+    expect(touchRows.length).toBeGreaterThan(0);
+    for (const row of touchRows) {
+      expect(row.thresholdPx).toBeGreaterThan(0);
+      expect(row.measurementLane).toBe('breakpoint');
+      expect((row.touchTargetWidth ?? 0) > 0).toBe(true);
+      expect((row.touchTargetHeight ?? 0) > 0).toBe(true);
+      expect((row.selector ?? '').length).toBeGreaterThan(0);
+    }
 
     const cardRecords = JSON.parse(cardsJson) as Array<{ minTouchTargetIssueCount: number }>;
-    const touchRecords = JSON.parse(touchJson) as Array<{ belowRecommendedSize: boolean }>;
+    const touchRecords = JSON.parse(touchJson) as Array<{
+      belowRecommendedSize: boolean;
+      thresholdPx: number;
+      measurementLane: string;
+    }>;
     const matrixRecords = JSON.parse(matrixJson) as Array<{ viewportId: string }>;
     expect(cardRecords.length).toBeGreaterThan(0);
     expect(touchRecords.length).toBeGreaterThan(0);
+    expect(touchRecords.every((row) => row.thresholdPx > 0)).toBe(true);
+    expect(touchRecords.every((row) => row.measurementLane === 'breakpoint')).toBe(true);
     expect(matrixRecords.length).toBeGreaterThan(0);
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -311,8 +335,9 @@ test('Breakpoint capture helpers preserve measurement boundaries', async ({ page
   expect(cards[0].measuredHeight).toBe(240);
 
   const touchTargets = await measureBreakpointTouchTargets(page, surface, viewport, 50);
-  expect(touchTargets.length).toBeGreaterThan(0);
-  expect(touchTargets.some((target) => target.belowRecommendedSize)).toBe(true);
+  expect(touchTargets.touchTargets.length).toBeGreaterThan(0);
+  expect(touchTargets.touchTargets.some((target) => target.belowRecommendedSize)).toBe(true);
+  expect(touchTargets.diagnostics.candidateCount).toBeGreaterThan(0);
 
   const serializedCards = JSON.stringify(cards);
   expect(serializedCards).not.toContain('Too Small');

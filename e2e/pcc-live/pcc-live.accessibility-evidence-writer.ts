@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { PCC_EVIDENCE_REGISTRY } from './pcc-evidence.registry';
 import type { PccEvidenceId, PccHardStopRef, PccScorecardPillarRef } from './pcc-evidence.types';
+import { aggregateTouchTargetDiagnostics } from './pcc-live.touch-targets';
 import type {
   PccAccessibilityIssueRegisterRow,
   PccAccessibilityIssueSeveritySignal,
@@ -348,6 +349,8 @@ function buildAccessibilityIssues(
           tagName: target.tagName,
           width: target.width,
           height: target.height,
+          thresholdPx: target.thresholdPx,
+          measurementLane: target.measurementLane,
         });
       }
     }
@@ -433,6 +436,11 @@ export async function writePccAccessibilityEvidence(
       0,
     ),
     totalWarnings: warnings.length + surfaces.reduce((sum, s) => sum + s.warnings.length, 0),
+    touchTargetDiagnostics: aggregateTouchTargetDiagnostics(
+      surfaces.flatMap((surface) =>
+        surface.touchTargetScopeDiagnostics ? [surface.touchTargetScopeDiagnostics] : [],
+      ),
+    ),
   };
 
   const runPayload: PccAccessibilityEvidenceRun = {
@@ -525,8 +533,34 @@ export async function writePccAccessibilityEvidence(
   lines.push(`- Hover-only risk count: ${summary.totalHoverOnlyRisks}`);
   lines.push(`- Dialog/modal needs-review count: ${summary.totalDialogFocusNeedsReview}`);
   lines.push(`- Touch target issue count: ${summary.totalTouchTargetIssues}`);
+  lines.push(
+    `- Touch target diagnostics (candidate/measured/hidden/disabled/disabled-filtered/fallback-used): ${summary.touchTargetDiagnostics.candidateCount}/${summary.touchTargetDiagnostics.measuredCount}/${summary.touchTargetDiagnostics.hiddenFilteredCount}/${summary.touchTargetDiagnostics.disabledCount}/${summary.touchTargetDiagnostics.disabledFilteredCount}/${summary.touchTargetDiagnostics.fallbackUsedCount}`,
+  );
   lines.push(`- Accessibility issue register count: ${issueRows.length}`);
   lines.push(`- Warning count: ${summary.totalWarnings}`);
+  lines.push('');
+  lines.push('## Touch Target Reconciliation Diagnostics');
+  lines.push('- Accessibility lane purpose: accessibility/touch review measurement.');
+  lines.push('- Accessibility threshold policy: 44px.');
+  lines.push(
+    '- Breakpoint and accessibility touch-target counts may differ by lane scope and threshold; count differences alone are not failure outcomes.',
+  );
+  lines.push('- Zero-measure reason counts:');
+  lines.push(
+    `  - root-not-found: ${summary.touchTargetDiagnostics.zeroMeasureReasonCounts['root-not-found']}`,
+  );
+  lines.push(
+    `  - no-candidates-in-root: ${summary.touchTargetDiagnostics.zeroMeasureReasonCounts['no-candidates-in-root']}`,
+  );
+  lines.push(
+    `  - all-candidates-hidden: ${summary.touchTargetDiagnostics.zeroMeasureReasonCounts['all-candidates-hidden']}`,
+  );
+  lines.push(
+    `  - all-candidates-disabled-or-excluded: ${summary.touchTargetDiagnostics.zeroMeasureReasonCounts['all-candidates-disabled-or-excluded']}`,
+  );
+  lines.push(
+    `  - measurement-error: ${summary.touchTargetDiagnostics.zeroMeasureReasonCounts['measurement-error']}`,
+  );
   lines.push('');
   lines.push('## Accessibility Issue Register');
   lines.push(`- JSON: ${path.basename(issueRegisterJsonPath)}`);
@@ -639,6 +673,9 @@ export async function writePccAccessibilityEvidence(
         );
         issueMd.push(
           `- Measurements: bounds ${row.boundingWidth ?? 'n/a'}x${row.boundingHeight ?? 'n/a'}; target ${row.width ?? 'n/a'}x${row.height ?? 'n/a'}`,
+        );
+        issueMd.push(
+          `- Touch target context: threshold ${row.thresholdPx ?? 'n/a'}px; lane ${row.measurementLane ?? 'n/a'}`,
         );
         issueMd.push(`- Details: ${row.details ?? 'n/a'}`);
         issueMd.push(`- EV refs: ${row.evRefs.join(', ') || 'none'}`);
