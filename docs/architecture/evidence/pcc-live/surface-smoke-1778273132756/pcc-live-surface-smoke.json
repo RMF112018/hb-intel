@@ -1,0 +1,380 @@
+{
+  "runId": "pcc-live-surface-smoke-1778273132756",
+  "generatedAtIso": "2026-05-08T20:45:32.756Z",
+  "tenantSiteUrl": "https://hedrickbrotherscom.sharepoint.[redacted-blob]",
+  "tenantPageUrl": "https://hedrickbrotherscom.sharepoint.[redacted-blob].aspx",
+  "expectedPackageVersion": "1.0.0.19",
+  "evRefs": [
+    "EV-52",
+    "EV-55"
+  ],
+  "selfSkipped": false,
+  "runState": "completed",
+  "surfaces": [
+    {
+      "surfaceId": "project-home",
+      "label": "Project Home",
+      "passed": true,
+      "activePanelFound": true,
+      "activePanelCount": 2,
+      "activePanelOwnerTagName": "MAIN",
+      "activePanelRole": "tabpanel",
+      "activePanelId": "pcc-active-surface-panel",
+      "activePanelIsShellMain": true,
+      "shellActivePanelFound": true,
+      "shellActivePanelCount": 1,
+      "gridCount": 1,
+      "cardCount": 16,
+      "tabActive": true,
+      "heroBandFound": true,
+      "heroSummaryZoneCount": 1,
+      "heroSummaryItemIds": [
+        "mode",
+        "source",
+        "authority"
+      ],
+      "heroCueZoneCount": 1,
+      "heroCueIds": [
+        "priority-actions",
+        "hbi-boundary"
+      ],
+      "heroReadOnlyCueCount": 1,
+      "heroReadOnlyCueText": "Read-only preview — no decisions, approvals, or writeback authority.",
+      "heroSecondaryTitleText": "Project Home",
+      "heroCommandSearchCount": 1,
+      "heroCommandSearchPreviewStateFound": true,
+      "heroCommandSearchInteractiveCounts": {
+        "input": 0,
+        "button": 0,
+        "anchor": 0,
+        "select": 0,
+        "textarea": 0,
+        "tabindex0": 0,
+        "roleButton": 0
+      }
+    },
+    {
+      "surfaceId": "team-and-access",
+      "label": "Team & Access",
+      "passed": true,
+      "activePanelFound": true,
+      "activePanelCount": 2,
+      "activePanelOwnerTagName": "MAIN",
+      "activePanelRole": "tabpanel",
+      "activePanelId": "pcc-active-surface-panel",
+      "activePanelIsShellMain": true,
+      "shellActivePanelFound": true,
+      "shellActivePanelCount": 1,
+      "gridCount": 1,
+      "cardCount": 4,
+      "tabActive": true,
+      "heroBandFound": true,
+      "heroSummaryZoneCount": 1,
+      "heroSummaryItemIds": [
+        "mode",
+        "source",
+        "authority"
+      ],
+      "heroCueZoneCount": 1,
+      "heroCueIds": [
+        "team-visibility",
+        "access-boundary"
+      ],
+      "heroReadOnlyCueCount": 1,
+      "heroReadOnlyCueText": "Read-only preview — access changes require governed workflows.",
+      "heroSecondaryTitleText": "Team & Access",
+      "heroCommandSearchCount": 1,
+      "heroCommandSearchPreviewStateFound": true,
+      "heroCommandSearchInteractiveCounts": {
+        "input": 0,
+        "button": 0,
+        "anchor": 0,
+        "select": 0,
+        "textarea": 0,
+        "tabindex0": 0,
+        "roleButton": 0
+      }
+    },
+    {
+      "surfaceId": "documents",
+      "label": "Documents",
+      "passed": true,
+      "activePanelFound": true,
+      "activePanelCount": 2,
+      "activePanelOwnerTagName": "MAIN",
+      "activePanelRole": "tabpanel",
+      "activePanelId": "pcc-active-surface-panel",
+      "activePanelIsShellMain": true,
+      "shellActivePanelFound": true,
+      "shellActivePanelCount": 1,
+      "gridCount": 1,
+      "cardCount": 6,
+      "tabActive": true,
+      "heroBandFound": true,
+      "heroSummaryZoneCount": 1,
+      "heroSummaryItemIds": [
+        "mode",
+        "source",
+        "authority"
+      ],
+      "heroCueZoneCount": 1,
+      "heroCueIds": [
+        "document-posture",
+        "external-files"
+      ],
+      "heroReadOnlyCueCount": 1,
+      "heroReadOnlyCueText": "Read-only preview — no uploads, moves, deletes, or external launches.",
+      "heroSecondaryTitleText": "Documents",
+      "heroCommandSearchCount": 1,
+      "heroCommandSearchPreviewStateFound": true,
+      "heroCommandSearchInteractiveCounts": {
+        "input": 0,
+        "button": 0,
+        "anchor": 0,
+        "select": 0,
+        "textarea": 0,
+        "tabindex0": 0,
+        "roleButton": 0
+      }
+    },
+    {
+      "surfaceId": "project-readiness",
+      "label": "Project Readiness",
+      "passed": true,
+      "activePanelFound": true,
+      "activePanelCount": 2,
+      "activePanelOwnerTagName": "MAIN",
+      "activePanelRole": "tabpanel",
+      "activePanelId": "pcc-active-surface-panel",
+      "activePanelIsShellMain": true,
+      "shellActivePanelFound": true,
+      "shellActivePanelCount": 1,
+      "gridCount": 1,
+      "cardCount": 9,
+      "tabActive": true,
+      "heroBandFound": true,
+      "heroSummaryZoneCount": 1,
+      "heroSummaryItemIds": [
+        "mode",
+        "source",
+        "authority"
+      ],
+      "heroCueZoneCount": 1,
+      "heroCueIds": [
+        "readiness-posture",
+        "module-boundary",
+        "no-execution"
+      ],
+      "heroReadOnlyCueCount": 1,
+      "heroReadOnlyCueText": "Read-only preview — readiness actions remain governed by source modules.",
+      "heroSecondaryTitleText": "Project Readiness",
+      "heroCommandSearchCount": 1,
+      "heroCommandSearchPreviewStateFound": true,
+      "heroCommandSearchInteractiveCounts": {
+        "input": 0,
+        "button": 0,
+        "anchor": 0,
+        "select": 0,
+        "textarea": 0,
+        "tabindex0": 0,
+        "roleButton": 0
+      }
+    },
+    {
+      "surfaceId": "approvals",
+      "label": "Approvals",
+      "passed": true,
+      "activePanelFound": true,
+      "activePanelCount": 2,
+      "activePanelOwnerTagName": "MAIN",
+      "activePanelRole": "tabpanel",
+      "activePanelId": "pcc-active-surface-panel",
+      "activePanelIsShellMain": true,
+      "shellActivePanelFound": true,
+      "shellActivePanelCount": 1,
+      "gridCount": 1,
+      "cardCount": 11,
+      "tabActive": true,
+      "heroBandFound": true,
+      "heroSummaryZoneCount": 1,
+      "heroSummaryItemIds": [
+        "mode",
+        "source",
+        "authority"
+      ],
+      "heroCueZoneCount": 1,
+      "heroCueIds": [
+        "routing-posture",
+        "approval-boundary"
+      ],
+      "heroReadOnlyCueCount": 1,
+      "heroReadOnlyCueText": "Read-only preview — approvals require explicit governed action outside the shell header.",
+      "heroSecondaryTitleText": "Approvals",
+      "heroCommandSearchCount": 1,
+      "heroCommandSearchPreviewStateFound": true,
+      "heroCommandSearchInteractiveCounts": {
+        "input": 0,
+        "button": 0,
+        "anchor": 0,
+        "select": 0,
+        "textarea": 0,
+        "tabindex0": 0,
+        "roleButton": 0
+      }
+    },
+    {
+      "surfaceId": "external-systems",
+      "label": "External Platforms",
+      "passed": true,
+      "activePanelFound": true,
+      "activePanelCount": 2,
+      "activePanelOwnerTagName": "MAIN",
+      "activePanelRole": "tabpanel",
+      "activePanelId": "pcc-active-surface-panel",
+      "activePanelIsShellMain": true,
+      "shellActivePanelFound": true,
+      "shellActivePanelCount": 1,
+      "gridCount": 1,
+      "cardCount": 10,
+      "tabActive": true,
+      "heroBandFound": true,
+      "heroSummaryZoneCount": 1,
+      "heroSummaryItemIds": [
+        "mode",
+        "source",
+        "authority"
+      ],
+      "heroCueZoneCount": 1,
+      "heroCueIds": [
+        "registry-posture",
+        "integration-boundary",
+        "launch-context"
+      ],
+      "heroReadOnlyCueCount": 1,
+      "heroReadOnlyCueText": "Read-only preview — external platform actions remain outside this header.",
+      "heroSecondaryTitleText": "External Platforms",
+      "heroCommandSearchCount": 1,
+      "heroCommandSearchPreviewStateFound": true,
+      "heroCommandSearchInteractiveCounts": {
+        "input": 0,
+        "button": 0,
+        "anchor": 0,
+        "select": 0,
+        "textarea": 0,
+        "tabindex0": 0,
+        "roleButton": 0
+      }
+    },
+    {
+      "surfaceId": "control-center-settings",
+      "label": "Control Center Settings",
+      "passed": true,
+      "activePanelFound": true,
+      "activePanelCount": 2,
+      "activePanelOwnerTagName": "MAIN",
+      "activePanelRole": "tabpanel",
+      "activePanelId": "pcc-active-surface-panel",
+      "activePanelIsShellMain": true,
+      "shellActivePanelFound": true,
+      "shellActivePanelCount": 1,
+      "gridCount": 1,
+      "cardCount": 3,
+      "tabActive": true,
+      "heroBandFound": true,
+      "heroSummaryZoneCount": 1,
+      "heroSummaryItemIds": [
+        "mode",
+        "source",
+        "authority"
+      ],
+      "heroCueZoneCount": 1,
+      "heroCueIds": [
+        "settings-posture",
+        "settings-boundary"
+      ],
+      "heroReadOnlyCueCount": 1,
+      "heroReadOnlyCueText": "Read-only preview — configuration changes require governed settings workflows.",
+      "heroSecondaryTitleText": "Control Center Settings",
+      "heroCommandSearchCount": 1,
+      "heroCommandSearchPreviewStateFound": true,
+      "heroCommandSearchInteractiveCounts": {
+        "input": 0,
+        "button": 0,
+        "anchor": 0,
+        "select": 0,
+        "textarea": 0,
+        "tabindex0": 0,
+        "roleButton": 0
+      }
+    },
+    {
+      "surfaceId": "site-health",
+      "label": "Site Health",
+      "passed": true,
+      "activePanelFound": true,
+      "activePanelCount": 2,
+      "activePanelOwnerTagName": "MAIN",
+      "activePanelRole": "tabpanel",
+      "activePanelId": "pcc-active-surface-panel",
+      "activePanelIsShellMain": true,
+      "shellActivePanelFound": true,
+      "shellActivePanelCount": 1,
+      "gridCount": 1,
+      "cardCount": 5,
+      "tabActive": true,
+      "heroBandFound": true,
+      "heroSummaryZoneCount": 1,
+      "heroSummaryItemIds": [
+        "mode",
+        "source",
+        "authority"
+      ],
+      "heroCueZoneCount": 1,
+      "heroCueIds": [
+        "health-posture",
+        "repair-boundary"
+      ],
+      "heroReadOnlyCueCount": 1,
+      "heroReadOnlyCueText": "Read-only preview — repair acknowledgements require governed source workflows.",
+      "heroSecondaryTitleText": "Site Health",
+      "heroCommandSearchCount": 1,
+      "heroCommandSearchPreviewStateFound": true,
+      "heroCommandSearchInteractiveCounts": {
+        "input": 0,
+        "button": 0,
+        "anchor": 0,
+        "select": 0,
+        "textarea": 0,
+        "tabindex0": 0,
+        "roleButton": 0
+      }
+    }
+  ],
+  "runtimeErrors": {
+    "consoleErrorCount": 0,
+    "pageErrorCount": 1,
+    "items": [
+      {
+        "type": "pageerror",
+        "message": "undefined",
+        "messageHash": "h1038130864",
+        "count": 1
+      }
+    ]
+  },
+  "summary": {
+    "totalSurfaces": 8,
+    "passedSurfaces": 8,
+    "failedSurfaces": 0,
+    "totalGridCount": 8,
+    "totalCardCount": 64,
+    "consoleErrorCount": 0,
+    "pageErrorCount": 1
+  },
+  "warnings": [],
+  "artifactPaths": [
+    "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-smoke-1778273132756/pcc-live-surface-smoke.json",
+    "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-smoke-1778273132756/pcc-live-surface-smoke.md"
+  ],
+  "disclaimer": "This output is baseline live-runtime evidence for EV-52 and EV-55 only. It is not a final scorecard result and does not mark any EV captured without operator review."
+}

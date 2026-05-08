@@ -1,0 +1,1171 @@
+{
+  "runId": "surface-screenshots-1778273118953",
+  "generatedAtIso": "2026-05-08T20:45:23.457Z",
+  "tenantSiteUrl": "https://hedrickbrotherscom.sharepoint.[redacted-blob]",
+  "tenantPageUrl": "https://hedrickbrotherscom.sharepoint.[redacted-blob].aspx",
+  "expectedPackageVersion": "1.0.0.19",
+  "selfSkipped": false,
+  "runState": "completed",
+  "evRefs": [
+    "EV-37",
+    "EV-38",
+    "EV-39",
+    "EV-40",
+    "EV-41",
+    "EV-42",
+    "EV-43",
+    "EV-44",
+    "EV-45",
+    "EV-46",
+    "EV-47",
+    "EV-48",
+    "EV-49",
+    "EV-125",
+    "EV-126",
+    "EV-127",
+    "EV-128",
+    "EV-129",
+    "EV-130",
+    "EV-131",
+    "EV-132",
+    "EV-133",
+    "EV-134"
+  ],
+  "surfaces": [
+    {
+      "surfaceId": "project-home",
+      "label": "Project Home",
+      "passed": true,
+      "screenshots": [
+        {
+          "surfaceId": "project-home",
+          "kind": "above-fold",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-project-home-above-fold.png",
+          "fileName": "surface-project-home-above-fold.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "project-home",
+          "kind": "full-page",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-project-home-full-page.png",
+          "fileName": "surface-project-home-full-page.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "project-home",
+          "kind": "scroll-segment",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-project-home-scroll-001.png",
+          "fileName": "surface-project-home-scroll-001.png",
+          "width": 1280,
+          "height": 720,
+          "scrollY": 0,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        }
+      ],
+      "cardSummaries": [
+        {
+          "surfaceId": "project-home",
+          "index": 0,
+          "hierarchy": "primary",
+          "tier": "tier1",
+          "region": "command",
+          "footprint": "hero",
+          "headingLevel": "2",
+          "headingText": "Project Intelligence",
+          "cardSelector": "[data-pcc-card]:nth-of-type(1)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 1,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Priority Actions",
+          "cardSelector": "[data-pcc-card]:nth-of-type(2)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 2,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Approvals & Checkpoints",
+          "cardSelector": "[data-pcc-card]:nth-of-type(3)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 3,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Project Readiness",
+          "cardSelector": "[data-pcc-card]:nth-of-type(4)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 4,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Document Control Center",
+          "cardSelector": "[data-pcc-card]:nth-of-type(5)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 5,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Site Health Summary",
+          "cardSelector": "[data-pcc-card]:nth-of-type(6)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 6,
+          "hierarchy": "standard",
+          "tier": "state",
+          "region": "state",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Missing Configurations",
+          "cardSelector": "[data-pcc-card]:nth-of-type(7)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 7,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "detail",
+          "footprint": "detail",
+          "headingLevel": "3",
+          "headingText": "Lifecycle Timeline",
+          "cardSelector": "[data-pcc-card]:nth-of-type(8)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 8,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "detail",
+          "footprint": "detail",
+          "headingLevel": "3",
+          "headingText": "Ask HBI — Grounded Project Answers",
+          "cardSelector": "[data-pcc-card]:nth-of-type(9)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 9,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "deferred",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Procore snapshot",
+          "cardSelector": "[data-pcc-card]:nth-of-type(10)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 10,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "External Platforms",
+          "cardSelector": "[data-pcc-card]:nth-of-type(11)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 11,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "rail",
+          "footprint": "rail",
+          "headingLevel": "3",
+          "headingText": "Team Snapshot",
+          "cardSelector": "[data-pcc-card]:nth-of-type(12)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 12,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "tall",
+          "headingLevel": "3",
+          "headingText": "Recent Activity",
+          "cardSelector": "[data-pcc-card]:nth-of-type(13)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 13,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Project Memory",
+          "cardSelector": "[data-pcc-card]:nth-of-type(14)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 14,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "rail",
+          "footprint": "rail",
+          "headingLevel": "3",
+          "headingText": "Project Lens",
+          "cardSelector": "[data-pcc-card]:nth-of-type(15)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-home",
+          "index": 15,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "detail",
+          "footprint": "detail",
+          "headingLevel": "3",
+          "headingText": "Related Records",
+          "cardSelector": "[data-pcc-card]:nth-of-type(16)",
+          "textWasSanitized": false
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "surfaceId": "team-and-access",
+      "label": "Team & Access",
+      "passed": true,
+      "screenshots": [
+        {
+          "surfaceId": "team-and-access",
+          "kind": "above-fold",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-team-and-access-above-fold.png",
+          "fileName": "surface-team-and-access-above-fold.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "team-and-access",
+          "kind": "full-page",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-team-and-access-full-page.png",
+          "fileName": "surface-team-and-access-full-page.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "team-and-access",
+          "kind": "scroll-segment",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-team-and-access-scroll-001.png",
+          "fileName": "surface-team-and-access-scroll-001.png",
+          "width": 1280,
+          "height": 720,
+          "scrollY": 0,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        }
+      ],
+      "cardSummaries": [
+        {
+          "surfaceId": "team-and-access",
+          "index": 0,
+          "hierarchy": "standard",
+          "tier": "tier1",
+          "region": "command",
+          "footprint": "full",
+          "headingLevel": "2",
+          "headingText": "Team & Access Center",
+          "cardSelector": "[data-pcc-card]:nth-of-type(1)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "team-and-access",
+          "index": 1,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Project Team Map",
+          "cardSelector": "[data-pcc-card]:nth-of-type(2)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "team-and-access",
+          "index": 2,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Request access",
+          "cardSelector": "[data-pcc-card]:nth-of-type(3)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "team-and-access",
+          "index": 3,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "Assignment and approval",
+          "cardSelector": "[data-pcc-card]:nth-of-type(4)",
+          "textWasSanitized": false
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "surfaceId": "documents",
+      "label": "Documents",
+      "passed": true,
+      "screenshots": [
+        {
+          "surfaceId": "documents",
+          "kind": "above-fold",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-documents-above-fold.png",
+          "fileName": "surface-documents-above-fold.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "documents",
+          "kind": "full-page",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-documents-full-page.png",
+          "fileName": "surface-documents-full-page.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "documents",
+          "kind": "scroll-segment",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-documents-scroll-001.png",
+          "fileName": "surface-documents-scroll-001.png",
+          "width": 1280,
+          "height": 720,
+          "scrollY": 0,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        }
+      ],
+      "cardSummaries": [
+        {
+          "surfaceId": "documents",
+          "index": 0,
+          "hierarchy": "standard",
+          "tier": "tier1",
+          "region": "command",
+          "footprint": "full",
+          "headingLevel": "2",
+          "headingText": "HB Document Control Center",
+          "cardSelector": "[data-pcc-card]:nth-of-type(1)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "documents",
+          "index": 1,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Project Record",
+          "cardSelector": "[data-pcc-card]:nth-of-type(2)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "documents",
+          "index": 2,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "My Project Files",
+          "cardSelector": "[data-pcc-card]:nth-of-type(3)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "documents",
+          "index": 3,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "deferred",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "External Platforms",
+          "cardSelector": "[data-pcc-card]:nth-of-type(4)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "documents",
+          "index": 4,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "detail",
+          "footprint": "detail",
+          "headingLevel": "3",
+          "headingText": "Permissions & Guardrails",
+          "cardSelector": "[data-pcc-card]:nth-of-type(5)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "documents",
+          "index": 5,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "detail",
+          "footprint": "detail",
+          "headingLevel": "3",
+          "headingText": "Reviews & Approvals",
+          "cardSelector": "[data-pcc-card]:nth-of-type(6)",
+          "textWasSanitized": false
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "surfaceId": "project-readiness",
+      "label": "Project Readiness",
+      "passed": true,
+      "screenshots": [
+        {
+          "surfaceId": "project-readiness",
+          "kind": "above-fold",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-project-readiness-above-fold.png",
+          "fileName": "surface-project-readiness-above-fold.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "project-readiness",
+          "kind": "full-page",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-project-readiness-full-page.png",
+          "fileName": "surface-project-readiness-full-page.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "project-readiness",
+          "kind": "scroll-segment",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-project-readiness-scroll-001.png",
+          "fileName": "surface-project-readiness-scroll-001.png",
+          "width": 1280,
+          "height": 720,
+          "scrollY": 0,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        }
+      ],
+      "cardSummaries": [
+        {
+          "surfaceId": "project-readiness",
+          "index": 0,
+          "hierarchy": "standard",
+          "tier": "tier1",
+          "region": "command",
+          "footprint": "full",
+          "headingLevel": "2",
+          "headingText": "Project readiness",
+          "cardSelector": "[data-pcc-card]:nth-of-type(1)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-readiness",
+          "index": 1,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "detail",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "Project lifecycle map",
+          "cardSelector": "[data-pcc-card]:nth-of-type(2)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-readiness",
+          "index": 2,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "Blockers and exceptions",
+          "cardSelector": "[data-pcc-card]:nth-of-type(3)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-readiness",
+          "index": 3,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "detail",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "Domain posture",
+          "cardSelector": "[data-pcc-card]:nth-of-type(4)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-readiness",
+          "index": 4,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Ownership and accountability",
+          "cardSelector": "[data-pcc-card]:nth-of-type(5)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-readiness",
+          "index": 5,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Eligible for Priority Actions",
+          "cardSelector": "[data-pcc-card]:nth-of-type(6)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-readiness",
+          "index": 6,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "detail",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "Evidence and source-health posture",
+          "cardSelector": "[data-pcc-card]:nth-of-type(7)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-readiness",
+          "index": 7,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "Downstream module readiness",
+          "cardSelector": "[data-pcc-card]:nth-of-type(8)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "project-readiness",
+          "index": 8,
+          "hierarchy": "standard",
+          "tier": "tier1",
+          "region": "command",
+          "footprint": "wide",
+          "headingLevel": "2",
+          "headingText": "Section overview",
+          "cardSelector": "[data-pcc-card]:nth-of-type(9)",
+          "textWasSanitized": false
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "surfaceId": "approvals",
+      "label": "Approvals",
+      "passed": true,
+      "screenshots": [
+        {
+          "surfaceId": "approvals",
+          "kind": "above-fold",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-approvals-above-fold.png",
+          "fileName": "surface-approvals-above-fold.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "approvals",
+          "kind": "full-page",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-approvals-full-page.png",
+          "fileName": "surface-approvals-full-page.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "approvals",
+          "kind": "scroll-segment",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-approvals-scroll-001.png",
+          "fileName": "surface-approvals-scroll-001.png",
+          "width": 1280,
+          "height": 720,
+          "scrollY": 0,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        }
+      ],
+      "cardSummaries": [
+        {
+          "surfaceId": "approvals",
+          "index": 0,
+          "hierarchy": "primary",
+          "tier": "tier1",
+          "region": "command",
+          "footprint": "full",
+          "headingLevel": "2",
+          "headingText": "Approvals home",
+          "cardSelector": "[data-pcc-card]:nth-of-type(1)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "approvals",
+          "index": 1,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Approval queue",
+          "cardSelector": "[data-pcc-card]:nth-of-type(2)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "approvals",
+          "index": 2,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "My approvals",
+          "cardSelector": "[data-pcc-card]:nth-of-type(3)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "approvals",
+          "index": 3,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "detail",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Checkpoint registry",
+          "cardSelector": "[data-pcc-card]:nth-of-type(4)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "approvals",
+          "index": 4,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Escalation queue",
+          "cardSelector": "[data-pcc-card]:nth-of-type(5)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "approvals",
+          "index": 5,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Admin verification queue",
+          "cardSelector": "[data-pcc-card]:nth-of-type(6)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "approvals",
+          "index": 6,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Approval policy summary",
+          "cardSelector": "[data-pcc-card]:nth-of-type(7)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "approvals",
+          "index": 7,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Source-module integration",
+          "cardSelector": "[data-pcc-card]:nth-of-type(8)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "approvals",
+          "index": 8,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "deferred",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Decision history",
+          "cardSelector": "[data-pcc-card]:nth-of-type(9)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "approvals",
+          "index": 9,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "deferred",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Source / evidence lineage",
+          "cardSelector": "[data-pcc-card]:nth-of-type(10)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "approvals",
+          "index": 10,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "HBI boundary — no decision authority",
+          "cardSelector": "[data-pcc-card]:nth-of-type(11)",
+          "textWasSanitized": false
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "surfaceId": "external-systems",
+      "label": "External Platforms",
+      "passed": true,
+      "screenshots": [
+        {
+          "surfaceId": "external-systems",
+          "kind": "above-fold",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-external-systems-above-fold.png",
+          "fileName": "surface-external-systems-above-fold.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "external-systems",
+          "kind": "full-page",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-external-systems-full-page.png",
+          "fileName": "surface-external-systems-full-page.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "external-systems",
+          "kind": "scroll-segment",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-external-systems-scroll-001.png",
+          "fileName": "surface-external-systems-scroll-001.png",
+          "width": 1280,
+          "height": 720,
+          "scrollY": 0,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        }
+      ],
+      "cardSummaries": [
+        {
+          "surfaceId": "external-systems",
+          "index": 0,
+          "hierarchy": "primary",
+          "tier": "tier1",
+          "region": "command",
+          "footprint": "full",
+          "headingLevel": "2",
+          "headingText": "Launch Pad",
+          "cardSelector": "[data-pcc-card]:nth-of-type(1)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "external-systems",
+          "index": 1,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Launch Pad summary",
+          "cardSelector": "[data-pcc-card]:nth-of-type(2)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "external-systems",
+          "index": 2,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "Project launch links",
+          "cardSelector": "[data-pcc-card]:nth-of-type(3)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "external-systems",
+          "index": 3,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "Custom link review queue",
+          "cardSelector": "[data-pcc-card]:nth-of-type(4)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "external-systems",
+          "index": 4,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Procore configuration & status",
+          "cardSelector": "[data-pcc-card]:nth-of-type(5)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "external-systems",
+          "index": 5,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "External system registry",
+          "cardSelector": "[data-pcc-card]:nth-of-type(6)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "external-systems",
+          "index": 6,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "detail",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "Mapping status",
+          "cardSelector": "[data-pcc-card]:nth-of-type(7)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "external-systems",
+          "index": 7,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "External source health",
+          "cardSelector": "[data-pcc-card]:nth-of-type(8)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "external-systems",
+          "index": 8,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "Audit history",
+          "cardSelector": "[data-pcc-card]:nth-of-type(9)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "external-systems",
+          "index": 9,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "reference",
+          "footprint": "full",
+          "headingLevel": "3",
+          "headingText": "HBI source lineage",
+          "cardSelector": "[data-pcc-card]:nth-of-type(10)",
+          "textWasSanitized": false
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "surfaceId": "control-center-settings",
+      "label": "Control Center Settings",
+      "passed": true,
+      "screenshots": [
+        {
+          "surfaceId": "control-center-settings",
+          "kind": "above-fold",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-control-center-settings-above-fold.png",
+          "fileName": "surface-control-center-settings-above-fold.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "control-center-settings",
+          "kind": "full-page",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-control-center-settings-full-page.png",
+          "fileName": "surface-control-center-settings-full-page.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "control-center-settings",
+          "kind": "scroll-segment",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-control-center-settings-scroll-001.png",
+          "fileName": "surface-control-center-settings-scroll-001.png",
+          "width": 1280,
+          "height": 720,
+          "scrollY": 0,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        }
+      ],
+      "cardSummaries": [
+        {
+          "surfaceId": "control-center-settings",
+          "index": 0,
+          "hierarchy": "primary",
+          "tier": "tier1",
+          "region": "command",
+          "footprint": "full",
+          "headingLevel": "2",
+          "headingText": "Control Center Settings",
+          "cardSelector": "[data-pcc-card]:nth-of-type(1)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "control-center-settings",
+          "index": 1,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "detail",
+          "footprint": "detail",
+          "headingLevel": "3",
+          "headingText": "Project / Site / Persona / Integration Scope",
+          "cardSelector": "[data-pcc-card]:nth-of-type(2)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "control-center-settings",
+          "index": 2,
+          "hierarchy": "standard",
+          "tier": "state",
+          "region": "state",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Items needing setup",
+          "cardSelector": "[data-pcc-card]:nth-of-type(3)",
+          "textWasSanitized": false
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "surfaceId": "site-health",
+      "label": "Site Health",
+      "passed": true,
+      "screenshots": [
+        {
+          "surfaceId": "site-health",
+          "kind": "above-fold",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-site-health-above-fold.png",
+          "fileName": "surface-site-health-above-fold.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "site-health",
+          "kind": "full-page",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-site-health-full-page.png",
+          "fileName": "surface-site-health-full-page.png",
+          "width": 1280,
+          "height": 720,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        },
+        {
+          "surfaceId": "site-health",
+          "kind": "scroll-segment",
+          "path": "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/screenshots/surface-site-health-scroll-001.png",
+          "fileName": "surface-site-health-scroll-001.png",
+          "width": 1280,
+          "height": 720,
+          "scrollY": 0,
+          "viewportWidth": 1280,
+          "viewportHeight": 720,
+          "operatorReviewRequired": true
+        }
+      ],
+      "cardSummaries": [
+        {
+          "surfaceId": "site-health",
+          "index": 0,
+          "hierarchy": "primary",
+          "tier": "tier1",
+          "region": "command",
+          "footprint": "full",
+          "headingLevel": "2",
+          "headingText": "Site Health",
+          "cardSelector": "[data-pcc-card]:nth-of-type(1)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "site-health",
+          "index": 1,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Site Health Checks",
+          "cardSelector": "[data-pcc-card]:nth-of-type(2)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "site-health",
+          "index": 2,
+          "hierarchy": "standard",
+          "tier": "tier2",
+          "region": "operational",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Drift Indicators",
+          "cardSelector": "[data-pcc-card]:nth-of-type(3)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "site-health",
+          "index": 3,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "deferred",
+          "footprint": "wide",
+          "headingLevel": "3",
+          "headingText": "Repair Requests",
+          "cardSelector": "[data-pcc-card]:nth-of-type(4)",
+          "textWasSanitized": false
+        },
+        {
+          "surfaceId": "site-health",
+          "index": 4,
+          "hierarchy": "standard",
+          "tier": "tier3",
+          "region": "deferred",
+          "footprint": "standard",
+          "headingLevel": "3",
+          "headingText": "Procore sync & repair posture",
+          "cardSelector": "[data-pcc-card]:nth-of-type(5)",
+          "textWasSanitized": false
+        }
+      ],
+      "warnings": []
+    }
+  ],
+  "summary": {
+    "totalSurfaces": 8,
+    "surfacesWithScreenshots": 8,
+    "totalScreenshots": 24,
+    "totalCards": 64,
+    "totalWarnings": 0
+  },
+  "warnings": [],
+  "disclaimer": "This output is screenshot and DOM-summary evidence support for EV-37..EV-49 and EV-125..EV-134 only. It is not a final scorecard result and does not mark any EV captured without operator review.",
+  "artifactPaths": [
+    "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/pcc-live-screenshot-evidence.json",
+    "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/pcc-live-screenshot-evidence.md",
+    "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/pcc-live-screenshot-inventory.json",
+    "/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/surface-screenshots-1778273118953/pcc-live-dom-card-summary.json"
+  ]
+}

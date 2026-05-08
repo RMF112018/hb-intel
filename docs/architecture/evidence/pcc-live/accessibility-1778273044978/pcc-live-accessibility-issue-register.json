@@ -1,0 +1,4296 @@
+{
+  "runId": "accessibility-1778273044978",
+  "generatedAtIso": "2026-05-08T20:44:23.360Z",
+  "summary": {
+    "totalIssueCount": 145,
+    "issueCountByType": {
+      "axe-violation": 15,
+      "aria-name-missing": 11,
+      "disabled-reason-missing": 1,
+      "focus-indicator-missing": 28,
+      "contrast-needs-review": 15,
+      "touch-target-size": 66,
+      "hover-only-risk": 8,
+      "reduced-motion-risk": 1,
+      "dialog-focus-needs-review": 0
+    },
+    "majorIssueCount": 77,
+    "moderateIssueCount": 55,
+    "reviewIssueCount": 13
+  },
+  "issues": [
+    {
+      "id": "A11Y-ISSUE-0065",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(23)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0136",
+      "surfaceId": "control-center-settings",
+      "surfaceLabel": "Control Center Settings",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(24)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0043",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(24)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0042",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "input[role=\"combobox\"]:nth-of-type(4)",
+      "role": "combobox",
+      "tagName": "input"
+    },
+    {
+      "id": "A11Y-ISSUE-0083",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(23)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0004",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(22)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0003",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "input[role=\"combobox\"]:nth-of-type(4)",
+      "role": "combobox",
+      "tagName": "input"
+    },
+    {
+      "id": "A11Y-ISSUE-0057",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(23)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0142",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(24)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0030",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "a:nth-of-type(22)",
+      "tagName": "a"
+    },
+    {
+      "id": "A11Y-ISSUE-0029",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "aria-name-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-74",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm interactive elements expose an accessible name and context-specific purpose.",
+      "recommendedAction": "Add or correct accessible naming and rerun keyboard + accessibility evidence.",
+      "selector": "input[role=\"combobox\"]:nth-of-type(4)",
+      "role": "combobox",
+      "tagName": "input"
+    },
+    {
+      "id": "A11Y-ISSUE-0063",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "axe-violation",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "aria-allowed-role",
+      "impact": "minor",
+      "count": 1,
+      "details": "ARIA role should be appropriate for the element"
+    },
+    {
+      "id": "A11Y-ISSUE-0064",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "axe-violation",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "count": 4,
+      "details": "Elements must meet minimum color contrast ratio thresholds"
+    },
+    {
+      "id": "A11Y-ISSUE-0134",
+      "surfaceId": "control-center-settings",
+      "surfaceLabel": "Control Center Settings",
+      "issueType": "axe-violation",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "aria-allowed-role",
+      "impact": "minor",
+      "count": 1,
+      "details": "ARIA role should be appropriate for the element"
+    },
+    {
+      "id": "A11Y-ISSUE-0135",
+      "surfaceId": "control-center-settings",
+      "surfaceLabel": "Control Center Settings",
+      "issueType": "axe-violation",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "count": 5,
+      "details": "Elements must meet minimum color contrast ratio thresholds"
+    },
+    {
+      "id": "A11Y-ISSUE-0040",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "axe-violation",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "aria-allowed-role",
+      "impact": "minor",
+      "count": 1,
+      "details": "ARIA role should be appropriate for the element"
+    },
+    {
+      "id": "A11Y-ISSUE-0041",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "axe-violation",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "count": 4,
+      "details": "Elements must meet minimum color contrast ratio thresholds"
+    },
+    {
+      "id": "A11Y-ISSUE-0081",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "axe-violation",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "aria-allowed-role",
+      "impact": "minor",
+      "count": 1,
+      "details": "ARIA role should be appropriate for the element"
+    },
+    {
+      "id": "A11Y-ISSUE-0082",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "axe-violation",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "count": 4,
+      "details": "Elements must meet minimum color contrast ratio thresholds"
+    },
+    {
+      "id": "A11Y-ISSUE-0001",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "axe-violation",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "aria-allowed-role",
+      "impact": "minor",
+      "count": 1,
+      "details": "ARIA role should be appropriate for the element"
+    },
+    {
+      "id": "A11Y-ISSUE-0002",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "axe-violation",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "count": 95,
+      "details": "Elements must meet minimum color contrast ratio thresholds"
+    },
+    {
+      "id": "A11Y-ISSUE-0055",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "axe-violation",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "aria-allowed-role",
+      "impact": "minor",
+      "count": 1,
+      "details": "ARIA role should be appropriate for the element"
+    },
+    {
+      "id": "A11Y-ISSUE-0056",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "axe-violation",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "count": 146,
+      "details": "Elements must meet minimum color contrast ratio thresholds"
+    },
+    {
+      "id": "A11Y-ISSUE-0140",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "axe-violation",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "aria-allowed-role",
+      "impact": "minor",
+      "count": 1,
+      "details": "ARIA role should be appropriate for the element"
+    },
+    {
+      "id": "A11Y-ISSUE-0141",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "axe-violation",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "color-contrast",
+      "impact": "serious",
+      "count": 40,
+      "details": "Elements must meet minimum color contrast ratio thresholds"
+    },
+    {
+      "id": "A11Y-ISSUE-0028",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "axe-violation",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-72",
+        "EV-73",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Review this summarized axe rule finding and validate impact and affected controls in context.",
+      "recommendedAction": "Inspect related component markup/state and rerun the accessibility lane after remediation.",
+      "ruleId": "aria-allowed-role",
+      "impact": "minor",
+      "count": 1,
+      "details": "ARIA role should be appropriate for the element"
+    },
+    {
+      "id": "A11Y-ISSUE-0066",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "color-contrast",
+      "count": 4,
+      "details": "Axe color-contrast summary. Operator review required."
+    },
+    {
+      "id": "A11Y-ISSUE-0067",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0137",
+      "surfaceId": "control-center-settings",
+      "surfaceLabel": "Control Center Settings",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "color-contrast",
+      "count": 5,
+      "details": "Axe color-contrast summary. Operator review required."
+    },
+    {
+      "id": "A11Y-ISSUE-0138",
+      "surfaceId": "control-center-settings",
+      "surfaceLabel": "Control Center Settings",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0044",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "color-contrast",
+      "count": 4,
+      "details": "Axe color-contrast summary. Operator review required."
+    },
+    {
+      "id": "A11Y-ISSUE-0045",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0111",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "color-contrast",
+      "count": 4,
+      "details": "Axe color-contrast summary. Operator review required."
+    },
+    {
+      "id": "A11Y-ISSUE-0112",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0007",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "color-contrast",
+      "count": 95,
+      "details": "Axe color-contrast summary. Operator review required."
+    },
+    {
+      "id": "A11Y-ISSUE-0008",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0058",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "color-contrast",
+      "count": 146,
+      "details": "Axe color-contrast summary. Operator review required."
+    },
+    {
+      "id": "A11Y-ISSUE-0059",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0143",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "color-contrast",
+      "count": 40,
+      "details": "Axe color-contrast summary. Operator review required."
+    },
+    {
+      "id": "A11Y-ISSUE-0144",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0031",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "contrast-needs-review",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-76",
+        "EV-77",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Manually validate contrast behavior on critical status and action surfaces.",
+      "recommendedAction": "Adjust color/contrast palette values and rerun contrast-oriented accessibility checks.",
+      "ruleId": "computed-contrast-heuristic",
+      "count": 0,
+      "details": "Computed contrast heuristic is informational only."
+    },
+    {
+      "id": "A11Y-ISSUE-0005",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "disabled-reason-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-74",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm disabled controls communicate a clear reason and recovery path to users.",
+      "recommendedAction": "Provide disabled-reason semantics and rerun accessibility evidence capture.",
+      "selector": "button:nth-of-type(52)",
+      "tagName": "button"
+    },
+    {
+      "id": "A11Y-ISSUE-0084",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "div > header > div > button",
+      "focusStep": 1,
+      "tagName": "button",
+      "boundingWidth": 114.84375,
+      "boundingHeight": 25
+    },
+    {
+      "id": "A11Y-ISSUE-0085",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 15,
+      "tagName": "button",
+      "boundingWidth": 1308,
+      "boundingHeight": 64
+    },
+    {
+      "id": "A11Y-ISSUE-0086",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 16,
+      "tagName": "button",
+      "boundingWidth": 1308,
+      "boundingHeight": 62
+    },
+    {
+      "id": "A11Y-ISSUE-0087",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 17,
+      "tagName": "button",
+      "boundingWidth": 1308,
+      "boundingHeight": 62
+    },
+    {
+      "id": "A11Y-ISSUE-0088",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 18,
+      "tagName": "button",
+      "boundingWidth": 1308,
+      "boundingHeight": 62
+    },
+    {
+      "id": "A11Y-ISSUE-0089",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 19,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0090",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 20,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0091",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 21,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0092",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 22,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 45
+    },
+    {
+      "id": "A11Y-ISSUE-0093",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 23,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 45
+    },
+    {
+      "id": "A11Y-ISSUE-0094",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 24,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 45
+    },
+    {
+      "id": "A11Y-ISSUE-0095",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 25,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0096",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 26,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0097",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 27,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0098",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 28,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0099",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 29,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0100",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 30,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0101",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 31,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0102",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 32,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0103",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 33,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0104",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 34,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0105",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 35,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0106",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 36,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0107",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 37,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0108",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 38,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0109",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 39,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0110",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "moderate",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "li > ul > li > button",
+      "focusStep": 40,
+      "tagName": "button",
+      "boundingWidth": 1292,
+      "boundingHeight": 43
+    },
+    {
+      "id": "A11Y-ISSUE-0006",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "focus-indicator-missing",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-73",
+        "EV-75",
+        "EV-78",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P4",
+        "P7",
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-03",
+        "HS-05",
+        "HS-07",
+        "HS-08"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm keyboard focus remains visible and unambiguous during navigation.",
+      "recommendedAction": "Fix focus-visible styling/logic and rerun keyboard focus observations.",
+      "selector": "div > div > section > button",
+      "focusStep": 1,
+      "tagName": "button",
+      "boundingWidth": 208.890625,
+      "boundingHeight": 23
+    },
+    {
+      "id": "A11Y-ISSUE-0080",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0139",
+      "surfaceId": "control-center-settings",
+      "surfaceLabel": "Control Center Settings",
+      "issueType": "hover-only-risk",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0054",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0132",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0027",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0062",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0145",
+      "surfaceId": "site-health",
+      "surfaceLabel": "Site Health",
+      "issueType": "hover-only-risk",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0039",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "hover-only-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Confirm critical information or actions are not hover-exclusive.",
+      "recommendedAction": "Provide non-hover access paths and rerun hover-risk observations.",
+      "count": 0
+    },
+    {
+      "id": "A11Y-ISSUE-0133",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "reduced-motion-risk",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-78",
+        "EV-81",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Validate reduced-motion preferences are respected for animations and transitions.",
+      "recommendedAction": "Honor reduced-motion settings for risky transitions and rerun reduced-motion checks.",
+      "count": 1
+    },
+    {
+      "id": "A11Y-ISSUE-0068",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(1)",
+      "tagName": "button",
+      "width": 395.953125,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0077",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(10)",
+      "tagName": "button",
+      "width": 409.59375,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0078",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(11)",
+      "tagName": "button",
+      "width": 426.671875,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0079",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(12)",
+      "tagName": "button",
+      "width": 358,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0069",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(2)",
+      "tagName": "button",
+      "width": 420.515625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0070",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(3)",
+      "tagName": "button",
+      "width": 382.140625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0071",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(4)",
+      "tagName": "button",
+      "width": 396.734375,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0072",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(5)",
+      "tagName": "button",
+      "width": 380.046875,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0073",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(6)",
+      "tagName": "button",
+      "width": 395.953125,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0074",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(7)",
+      "tagName": "button",
+      "width": 630,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0075",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(8)",
+      "tagName": "button",
+      "width": 407.859375,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0076",
+      "surfaceId": "approvals",
+      "surfaceLabel": "Approvals",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(9)",
+      "tagName": "button",
+      "width": 387.25,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0046",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(1)",
+      "tagName": "button",
+      "width": 122.796875,
+      "height": 29,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0047",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(2)",
+      "tagName": "button",
+      "width": 122.796875,
+      "height": 29,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0048",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(3)",
+      "tagName": "button",
+      "width": 122.796875,
+      "height": 29,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0049",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(4)",
+      "tagName": "button",
+      "width": 177,
+      "height": 29,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0050",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(5)",
+      "tagName": "button",
+      "width": 177,
+      "height": 29,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0051",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(6)",
+      "tagName": "button",
+      "width": 177,
+      "height": 29,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0052",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(7)",
+      "tagName": "button",
+      "width": 177,
+      "height": 29,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0053",
+      "surfaceId": "documents",
+      "surfaceLabel": "Documents",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(8)",
+      "tagName": "button",
+      "width": 177,
+      "height": 29,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0113",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(1)",
+      "tagName": "button",
+      "width": 114.84375,
+      "height": 25,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0122",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(10)",
+      "tagName": "button",
+      "width": 151.625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0123",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(11)",
+      "tagName": "button",
+      "width": 151.625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0124",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(12)",
+      "tagName": "button",
+      "width": 231.203125,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0125",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(13)",
+      "tagName": "button",
+      "width": 161.140625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0126",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(14)",
+      "tagName": "button",
+      "width": 159.21875,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0127",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(19)",
+      "tagName": "button",
+      "width": 1292,
+      "height": 43,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0114",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(2)",
+      "tagName": "button",
+      "width": 151.625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0128",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(20)",
+      "tagName": "button",
+      "width": 1292,
+      "height": 43,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0129",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(21)",
+      "tagName": "button",
+      "width": 1292,
+      "height": 43,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0130",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(25)",
+      "tagName": "button",
+      "width": 1292,
+      "height": 43,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0131",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(26)",
+      "tagName": "button",
+      "width": 1292,
+      "height": 43,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0115",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(3)",
+      "tagName": "button",
+      "width": 151.625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0116",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(4)",
+      "tagName": "button",
+      "width": 151.625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0117",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(5)",
+      "tagName": "button",
+      "width": 151.625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0118",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(6)",
+      "tagName": "button",
+      "width": 151.625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0119",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(7)",
+      "tagName": "button",
+      "width": 151.625,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0120",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(8)",
+      "tagName": "button",
+      "width": 260.28125,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0121",
+      "surfaceId": "external-systems",
+      "surfaceLabel": "External Platforms",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(9)",
+      "tagName": "button",
+      "width": 260.28125,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0009",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(1)",
+      "tagName": "button",
+      "width": 208.890625,
+      "height": 23,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0018",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(10)",
+      "tagName": "button",
+      "width": 55.328125,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0019",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(11)",
+      "tagName": "button",
+      "width": 69.84375,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0020",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(12)",
+      "tagName": "button",
+      "width": 69.875,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0021",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(13)",
+      "tagName": "button",
+      "width": 101.0625,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0022",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(14)",
+      "tagName": "button",
+      "width": 264.90625,
+      "height": 25.59375,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0023",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(15)",
+      "tagName": "button",
+      "width": 172.546875,
+      "height": 25.59375,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0024",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(16)",
+      "tagName": "button",
+      "width": 244.578125,
+      "height": 25.59375,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0025",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(17)",
+      "tagName": "button",
+      "width": 328.09375,
+      "height": 25.59375,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0026",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(18)",
+      "tagName": "button",
+      "width": 202.203125,
+      "height": 25.59375,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0010",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(2)",
+      "tagName": "button",
+      "width": 56.328125,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0011",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(3)",
+      "tagName": "button",
+      "width": 46.171875,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0012",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(4)",
+      "tagName": "button",
+      "width": 55.328125,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0013",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(5)",
+      "tagName": "button",
+      "width": 69.84375,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0014",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(6)",
+      "tagName": "button",
+      "width": 69.875,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0015",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(7)",
+      "tagName": "button",
+      "width": 101.0625,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0016",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(8)",
+      "tagName": "button",
+      "width": 56.328125,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0017",
+      "surfaceId": "project-home",
+      "surfaceLabel": "Project Home",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(9)",
+      "tagName": "button",
+      "width": 46.171875,
+      "height": 19,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0060",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "touch-target-size",
+      "severitySignal": "review",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(1)",
+      "tagName": "button",
+      "width": 295.734375,
+      "height": 20.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0061",
+      "surfaceId": "project-readiness",
+      "surfaceLabel": "Project Readiness",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(2)",
+      "tagName": "button",
+      "width": 295.734375,
+      "height": 20.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0032",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(1)",
+      "tagName": "button",
+      "width": 105,
+      "height": 27,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0033",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(2)",
+      "tagName": "button",
+      "width": 212.15625,
+      "height": 27,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0034",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(3)",
+      "tagName": "button",
+      "width": 77.78125,
+      "height": 27,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0035",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(4)",
+      "tagName": "button",
+      "width": 77.78125,
+      "height": 27,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0036",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(5)",
+      "tagName": "button",
+      "width": 469.703125,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0037",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(6)",
+      "tagName": "button",
+      "width": 469.703125,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    },
+    {
+      "id": "A11Y-ISSUE-0038",
+      "surfaceId": "team-and-access",
+      "surfaceLabel": "Team & Access",
+      "issueType": "touch-target-size",
+      "severitySignal": "major",
+      "evRefs": [
+        "EV-79",
+        "EV-80",
+        "EV-82"
+      ],
+      "pillarRefs": [
+        "P8"
+      ],
+      "hardStopRefs": [
+        "HS-07"
+      ],
+      "operatorReviewRequired": true,
+      "artifactPolicy": "operator-review-required",
+      "reviewPrompt": "Verify touch target size supports field/tablet interaction reliability.",
+      "recommendedAction": "Increase target dimensions/spacing and rerun touch-target observations.",
+      "selector": "button:nth-of-type(7)",
+      "tagName": "button",
+      "width": 469.703125,
+      "height": 28.390625,
+      "thresholdPx": 44,
+      "measurementLane": "accessibility"
+    }
+  ],
+  "disclaimer": "Review support only. Expert review required. No final score is calculated. No hard stop is passed or failed. No EV is finally captured. No WCAG conformance result is claimed. No Phase 4 readiness is approved."
+}
