@@ -46,7 +46,6 @@ export const PccTeamAccessReadModelContent: FC<PccTeamAccessReadModelContentProp
         headingLevel={2}
         eyebrow={SURFACE.displayName}
         title="Loading team & access"
-        dataActiveSurfacePanel="team-and-access"
       >
         <PccPreviewState
           state="loading"
@@ -66,7 +65,6 @@ export const PccTeamAccessReadModelContent: FC<PccTeamAccessReadModelContentProp
         headingLevel={2}
         eyebrow={SURFACE.displayName}
         title="Team and access unavailable"
-        dataActiveSurfacePanel="team-and-access"
       >
         <PccPreviewState
           state="error"

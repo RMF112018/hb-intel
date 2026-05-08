@@ -43,7 +43,6 @@ import {
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { FIXTURE_PROCORE_SURFACE_VIEW_MODEL } from '../../viewModels/procoreSurfaceFixture';
-import { PccExternalSystemsLaunchPadHeaderCard } from './PccExternalSystemsLaunchPadHeaderCard';
 import { PccExternalSystemsLaunchPadSummaryCard } from './PccExternalSystemsLaunchPadSummaryCard';
 import { PccExternalSystemsProjectLinksCard } from './PccExternalSystemsProjectLinksCard';
 import { PccExternalSystemsReviewQueueCard } from './PccExternalSystemsReviewQueueCard';
@@ -128,7 +127,6 @@ const PccExternalSystemsSurfaceCards: FC<PccExternalSystemsSurfaceCardsProps> = 
         headingLevel={2}
         eyebrow="External Platforms"
         title="Launch Pad"
-        dataActiveSurfacePanel="external-systems"
       >
         <div
           className={styles.body}
@@ -149,7 +147,6 @@ const PccExternalSystemsSurfaceCards: FC<PccExternalSystemsSurfaceCardsProps> = 
         headingLevel={2}
         eyebrow="External Platforms"
         title="Launch Pad"
-        dataActiveSurfacePanel="external-systems"
       >
         <div
           className={styles.body}
@@ -185,11 +182,6 @@ const ReadyCards: FC<ReadyCardsProps> = ({ viewModel }) => {
 
   return (
     <>
-      <PccExternalSystemsLaunchPadHeaderCard
-        header={viewModel.header}
-        cardState={viewModel.cardState}
-        isAvailable={isAvailable}
-      />
       <PccExternalSystemsLaunchPadSummaryCard
         summary={viewModel.summary}
         cardState={viewModel.cardState}

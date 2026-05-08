@@ -56,6 +56,32 @@ const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
   'project-readiness',
 ];
 
+// Wave 15A wave-b9 Prompt 04 — bifurcated surface sets after the first
+// runtime duplicate-header-card removal pass. The universal explicit-
+// sources / layout / aria / direct-child invariants iterate
+// `IN_SCOPE_SURFACES` (all eight surfaces). The compatibility-card-
+// specific heading-level assertion only iterates surfaces whose
+// operational/header-hybrid first card still emits the temporary
+// `[data-pcc-card][data-pcc-active-surface-panel]` marker.
+//
+// Documents stays in the compatibility-card set because its dynamic
+// loading / error / source-unavailable copy has no surviving home
+// post-removal; the header card is preserved until a state-aware seam
+// exists (Prompt 04 §3 BLOCKED gate).
+const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
+  'project-home',
+  'project-readiness',
+  'approvals',
+  'site-health',
+  'documents',
+];
+
+const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
+  'team-and-access',
+  'external-systems',
+  'control-center-settings',
+];
+
 function renderPccAppOnSurface(surfaceId: PccMvpSurfaceId): HTMLElement {
   const { container } = render(<PccApp forceMode="desktop" />);
   const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
@@ -246,8 +272,8 @@ describe('PCC card-tier contract — every in-scope surface card has explicit so
   }
 });
 
-describe('PCC card-tier contract — active command card heading-level is "2" on every surface', () => {
-  for (const surfaceId of IN_SCOPE_SURFACES) {
+describe('PCC card-tier contract — active command card heading-level is "2" on every compatibility-card surface', () => {
+  for (const surfaceId of SURFACES_WITH_COMPATIBILITY_CARD) {
     it(`'${surfaceId}' compatibility command card emits data-pcc-heading-level="2"`, () => {
       const container = renderPccAppOnSurface(surfaceId);
       const bento = getActiveBento(container, surfaceId);
@@ -256,6 +282,27 @@ describe('PCC card-tier contract — active command card heading-level is "2" on
         compatibilityCard.getAttribute('data-pcc-heading-level'),
         `surface '${surfaceId}' compatibility command card must declare heading level 2`,
       ).toBe('2');
+    });
+  }
+});
+
+describe('PCC card-tier contract — shell-only surfaces have no direct-child compatibility card', () => {
+  for (const surfaceId of SURFACES_WITH_SHELL_ONLY_PANEL) {
+    it(`'${surfaceId}' bento contains zero direct-child [data-pcc-card][data-pcc-active-surface-panel]`, () => {
+      const container = renderPccAppOnSurface(surfaceId);
+      const bento = getActiveBento(container, surfaceId);
+      const matches = Array.from(bento.children).filter((child) =>
+        child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`),
+      );
+      expect(
+        matches,
+        `surface '${surfaceId}' must NOT render a direct bento-child compatibility card after Phase 04`,
+      ).toHaveLength(0);
+      const cards = Array.from(bento.querySelectorAll('[data-pcc-card]'));
+      expect(
+        cards.length,
+        `surface '${surfaceId}' must still render at least one direct-child card`,
+      ).toBeGreaterThan(0);
     });
   }
 });

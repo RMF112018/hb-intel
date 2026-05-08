@@ -85,11 +85,12 @@ describe('PccExternalSystemsSurface — Wave 15 Launch Pad shell (fixture fallba
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    // Card count matches the lane id tuple's renderable lanes (header,
-    // summary, project-links, review-queue, procore-status, registry,
-    // mapping-status, source-health, audit-history, hbi-lineage). The
-    // drawer is portal-mounted and not a direct child of the grid.
-    expect(cards.length).toBe(10);
+    // Wave 15A wave-b9 Prompt 04 — `PccExternalSystemsLaunchPadHeaderCard`
+    // was removed; the surviving lanes are summary, project-links,
+    // review-queue, procore-status, registry, mapping-status, source-
+    // health, audit-history, hbi-lineage. The drawer is portal-mounted
+    // and is not a direct child of the grid.
+    expect(cards.length).toBe(9);
     for (const card of cards) {
       expect(card.parentElement).toBe(grid);
     }
@@ -110,21 +111,16 @@ describe('PccExternalSystemsSurface — Wave 15 Launch Pad shell (fixture fallba
     }
   });
 
-  it('renders exactly one [data-pcc-active-surface-panel="external-systems"] carrying the registry display name', () => {
+  it('renders zero card-level [data-pcc-active-surface-panel] markers in surface-isolation (shell-only after Phase 04)', () => {
+    // Wave 15A wave-b9 Prompt 04 — External Systems became uniformly
+    // shell-only across ready / loading / error branches. The shell
+    // <main role="tabpanel"> is not rendered in this surface-isolation
+    // harness, so the only emitter that previously appeared here was the
+    // Launch Pad header card; that card was removed and the loading /
+    // error state cards no longer carry the marker.
     const { container } = renderSurface();
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels.length).toBe(1);
-    expect(panels[0]?.getAttribute('data-pcc-active-surface-panel')).toBe('external-systems');
-    expect(panels[0]?.textContent).toContain(PCC_MVP_SURFACES['external-systems'].displayName);
-  });
-
-  it('LaunchPad header card emits data-pcc-card-hierarchy="primary" (Prompt 08 promotion)', () => {
-    const { container } = renderSurface();
-    const headerPanel = container.querySelector(
-      '[data-pcc-active-surface-panel="external-systems"]',
-    );
-    expect(headerPanel, 'launch pad header card should render').not.toBeNull();
-    expect(headerPanel?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(panels.length).toBe(0);
   });
 
   it('renders one link row per fixture launch link with approval-state, policy-state, hostname markers', () => {
@@ -225,13 +221,21 @@ describe('PccExternalSystemsSurface — sourceStatus → state UI', () => {
   }
 
   async function waitForReady(container: HTMLElement): Promise<void> {
+    // Wave 15A wave-b9 Prompt 04 — External Systems is uniformly shell-
+    // only across ready / loading / error branches; surface-isolation
+    // rendering has no `[data-pcc-active-surface-panel]` to wait on. The
+    // loading / error branches each render exactly ONE direct-child
+    // PccDashboardCard, while the ready branch (including empty /
+    // source-unavailable / backend-unavailable cardStates) renders the
+    // full ten-card composition. Waiting for >1 direct-child card is a
+    // reliable readiness signal that does not depend on a removed marker.
     await waitFor(() => {
-      const panel = container.querySelector('[data-pcc-active-surface-panel="external-systems"]');
-      expect(panel).not.toBeNull();
-      // Active-surface panel renders for loading + error + ready states; wait
-      // until the panel body is no longer the loading preview spec.
-      const loadingBadge = panel!.querySelector('[data-pcc-state="loading"]');
-      expect(loadingBadge).toBeNull();
+      const bento = container.querySelector('[data-pcc-bento-grid]');
+      expect(bento).not.toBeNull();
+      const directChildren = Array.from(bento!.children).filter((child) =>
+        child.matches('[data-pcc-card]'),
+      );
+      expect(directChildren.length).toBeGreaterThan(1);
     });
   }
 

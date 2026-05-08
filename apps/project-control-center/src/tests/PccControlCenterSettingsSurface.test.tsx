@@ -36,38 +36,25 @@ describe('Control Center Settings — composition + bento invariants', () => {
     }
   });
 
-  it('emits exactly one [data-pcc-active-surface-panel="control-center-settings"]', () => {
+  it('emits zero card-level [data-pcc-active-surface-panel] markers (shell-only after Phase 04)', () => {
+    // Wave 15A wave-b9 Prompt 04 — the duplicate first inline overview
+    // card was removed; Control Center Settings is uniformly shell-only.
+    // The shell <main role="tabpanel"> is not rendered in this surface-
+    // isolation harness, so the only emitter that previously appeared
+    // here was the removed overview card.
     const { container } = renderSurface();
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('control-center-settings');
-  });
-
-  it('header card emits data-pcc-card-hierarchy="primary"', () => {
-    const { container } = renderSurface();
-    const headerPanel = container.querySelector(
-      '[data-pcc-active-surface-panel="control-center-settings"]',
-    );
-    expect(headerPanel, 'header card should render').not.toBeNull();
-    expect(headerPanel?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
+    expect(panels).toHaveLength(0);
   });
 });
 
 // Wave 15A wave-b3 Prompt 05 — tier/region/footprint contract per
 // 02_SURFACE_CARD_INVENTORY_MATRIX.md.
+// Wave 15A wave-b9 Prompt 04 — duplicate overview card removed; the
+// "overview card is Tier 1 command with hierarchy='primary'" assertion
+// is dropped. Surviving operational cards (scope-lanes tier2 / detail,
+// items-needing-setup state / state) keep their tier/region contract.
 describe('Control Center Settings — wave-b3 tier/region contract', () => {
-  it('overview card is Tier 1 command with an h2 heading and retains hierarchy="primary"', () => {
-    const { container } = renderSurface();
-    const overview = container.querySelector(
-      '[data-pcc-active-surface-panel="control-center-settings"]',
-    );
-    expect(overview, 'overview card should render').not.toBeNull();
-    expect(overview!.getAttribute('data-pcc-card-tier')).toBe('tier1');
-    expect(overview!.getAttribute('data-pcc-card-region')).toBe('command');
-    expect(overview!.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
-    expect(overview!.querySelector('h2')).not.toBeNull();
-  });
-
   it('scope-lanes card is Tier 2 detail with footprint="detail"', () => {
     const { container } = renderSurface();
     const scopeGrid = container.querySelector('[data-pcc-settings-scope-grid]');

@@ -67,11 +67,14 @@ describe('Team & Access — lane footprints + bento direct-child invariants', ()
     expect(accessManagerCard.getAttribute('data-pcc-footprint')).toBe('full');
   });
 
-  it('exactly one [data-pcc-active-surface-panel="team-and-access"] exists (active-panel ownership preserved)', () => {
+  it('emits zero card-level [data-pcc-active-surface-panel] markers in surface-isolation (Wave 15A wave-b9 Prompt 04 — Team & Access is shell-only)', () => {
+    // Wave 15A wave-b9 Prompt 04 — `PccTeamAccessHeaderCard` (the only
+    // surface-isolation emitter of the marker) was removed; Team & Access
+    // is uniformly shell-only across all branches. In surface-isolation
+    // rendering the shell <main> is not mounted, so the marker count is 0.
     const { container } = renderAccessManagerSurface();
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('team-and-access');
+    expect(panels).toHaveLength(0);
   });
 
   it('no Team & Access lane card is nested inside another card (no card-in-card)', () => {
@@ -179,9 +182,10 @@ describe('Team & Access — read-model preview path bento direct-child invariant
       expect(outerCard, `lane '${laneId}' must not be nested inside another card`).toBeNull();
     }
 
+    // Wave 15A wave-b9 Prompt 04 — Team & Access is uniformly shell-only;
+    // surface-isolation rendering has no card-level marker.
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('team-and-access');
+    expect(panels).toHaveLength(0);
   });
 });
 
@@ -211,9 +215,10 @@ describe('Team & Access — read-model loading path bento direct-child invariant
     expect(loadingCard, 'loading state should be wrapped in a PccDashboardCard').not.toBeNull();
     expect(loadingCard!.parentElement === grid).toBe(true);
 
+    // Wave 15A wave-b9 Prompt 04 — Team & Access is uniformly shell-only;
+    // surface-isolation rendering has no card-level marker.
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('team-and-access');
+    expect(panels).toHaveLength(0);
 
     expect(container.querySelector('[data-pcc-team-access-lane]')).toBeNull();
   });
@@ -246,9 +251,10 @@ describe('Team & Access — read-model error path bento direct-child invariant',
     expect(errorCard, 'error state should be wrapped in a PccDashboardCard').not.toBeNull();
     expect(errorCard!.parentElement === grid).toBe(true);
 
+    // Wave 15A wave-b9 Prompt 04 — Team & Access is uniformly shell-only;
+    // surface-isolation rendering has no card-level marker.
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('team-and-access');
+    expect(panels).toHaveLength(0);
 
     expect(container.querySelector('[data-pcc-team-access-lane]')).toBeNull();
   });

@@ -178,7 +178,7 @@ describe('External Platforms taxonomy and active tab/hero/panel consistency (wav
     }
   });
 
-  it('External Platforms active panel composes the "External Platforms Launch Pad" page title', () => {
+  it('External Platforms active panel renders the surface displayName via shell hero (Wave 15A wave-b9 Prompt 04 — Launch Pad header card removed)', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
     const tab = container.querySelector(
       '[data-pcc-tab-id="external-systems"]',
@@ -186,13 +186,17 @@ describe('External Platforms taxonomy and active tab/hero/panel consistency (wav
     expect(tab).not.toBeNull();
     fireEvent.click(tab!);
 
-    const panel = container.querySelector(
-      '[data-pcc-active-surface-panel="external-systems"]',
-    ) as HTMLElement | null;
-    expect(panel).not.toBeNull();
-    // The header card composes eyebrow="External Platforms" + title="Launch Pad".
-    // Combined visible text reads as "External Platforms Launch Pad".
-    expect(panel!.textContent ?? '').toContain('External Platforms');
-    expect(panel!.textContent ?? '').toContain('Launch Pad');
+    // Wave 15A wave-b9 Prompt 04 — `PccExternalSystemsLaunchPadHeaderCard`
+    // (which composed eyebrow="External Platforms" + title="Launch Pad")
+    // was removed; External Systems is uniformly shell-only across all
+    // branches. The shell hero (rendered as a sibling of <main>, not
+    // inside it) carries the displayName as its secondary title; the
+    // "Launch Pad" page-title coupling is intentionally dropped because
+    // it lived only on the doomed header card.
+    const shellPanel = container.querySelector(
+      'main[role="tabpanel"][data-pcc-active-surface-panel="external-systems"]',
+    );
+    expect(shellPanel).not.toBeNull();
+    expect(container.textContent ?? '').toContain('External Platforms');
   });
 });

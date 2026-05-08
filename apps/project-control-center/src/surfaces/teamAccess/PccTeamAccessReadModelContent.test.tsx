@@ -62,8 +62,14 @@ describe('PccTeamAccessReadModelContent — state-rendering coverage', () => {
     await waitFor(() => {
       expect(container.querySelector('[data-pcc-team-access-lane="team-viewer"]')).not.toBeNull();
     });
+    // Wave 15A wave-b9 Prompt 04 — `PccTeamAccessHeaderCard` (the only
+    // surface-isolation emitter of `data-pcc-active-surface-panel="team-
+    // and-access"` on the read-model preview path) was removed; Team &
+    // Access is uniformly shell-only across all branches. In surface-
+    // isolation rendering the shell <main> is not mounted, so the marker
+    // count is now 0.
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel="team-and-access"]');
-    expect(panels).toHaveLength(1);
+    expect(panels).toHaveLength(0);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 

@@ -98,9 +98,10 @@ describe('PccSurfaceRouter — external-systems pass-through (Wave 15 / Prompt 0
       expect(card.parentElement).toBe(grid);
     }
 
+    // Wave 15A wave-b9 Prompt 04 — External Systems is uniformly shell-only;
+    // surface-router rendering (no shell <main>) has no card-level marker.
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels.length).toBe(1);
-    expect(panels[0]?.getAttribute('data-pcc-active-surface-panel')).toBe('external-systems');
+    expect(panels.length).toBe(0);
 
     expect(container.querySelectorAll('iframe').length).toBe(0);
     const anchors = container.querySelectorAll('a[href]');

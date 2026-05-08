@@ -1,10 +1,7 @@
 import { Fragment, type FC } from 'react';
-import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import styles from './PccControlCenterSettingsSurface.module.css';
-
-const SURFACE = PCC_MVP_SURFACES['control-center-settings'];
 
 const SETTINGS_SCOPE_PREVIEW = [
   { id: 'project', label: 'Project scope', value: 'Project profile' },
@@ -21,25 +18,6 @@ const MISSING_CONFIG_ITEMS = [
 
 export const PccControlCenterSettingsSurface: FC = () => (
   <Fragment>
-    <PccDashboardCard
-      footprint="full"
-      hierarchy="primary"
-      tier="tier1"
-      region="command"
-      headingLevel={2}
-      eyebrow={SURFACE.displayName}
-      title="Control Center Settings"
-      dataActiveSurfacePanel="control-center-settings"
-    >
-      <div className={styles.body}>
-        <PccPreviewState
-          state="preview"
-          title="Settings overview"
-          description="Saving, updating, and tenant changes are managed by your PCC administrator."
-        />
-      </div>
-    </PccDashboardCard>
-
     <PccDashboardCard
       footprint="detail"
       tier="tier2"

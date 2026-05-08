@@ -367,10 +367,9 @@ describe('External Platforms surface — Prompt 07 cross-card guardrails', () =>
     }
   });
 
-  it('preserves the active-surface-panel singleton', () => {
+  it('emits zero card-level [data-pcc-active-surface-panel] markers in surface-isolation (Wave 15A wave-b9 Prompt 04 — External Systems is shell-only)', () => {
     const { container } = renderSurface();
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels.length).toBe(1);
-    expect(panels[0]?.getAttribute('data-pcc-active-surface-panel')).toBe('external-systems');
+    expect(panels.length).toBe(0);
   });
 });

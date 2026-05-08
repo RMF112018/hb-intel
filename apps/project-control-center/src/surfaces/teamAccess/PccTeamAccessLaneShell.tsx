@@ -1,6 +1,5 @@
 import { Fragment, type FC } from 'react';
 import type { PccPersona } from '@hbc/models/pcc';
-import { PccTeamAccessHeaderCard } from './PccTeamAccessHeaderCard';
 import { PccTeamViewerLaneCard } from './PccTeamViewerLaneCard';
 import { PccPermissionRequestLaneCard } from './PccPermissionRequestLaneCard';
 import { PccAccessManagerLaneCard } from './PccAccessManagerLaneCard';
@@ -37,7 +36,6 @@ export const PccTeamAccessLaneShell: FC<PccTeamAccessLaneShellProps> = ({
 
   return (
     <Fragment>
-      <PccTeamAccessHeaderCard />
       {model.branch !== 'access-manager' ? (
         <PccDashboardCard
           footprint="wide"

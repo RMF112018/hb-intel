@@ -1,7 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
-import { PCC_MVP_SURFACE_IDS } from '@hbc/models/pcc';
+import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
+
+// Wave 15A wave-b9 Prompt 04 — bifurcated surface sets.
+const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
+  'project-home',
+  'project-readiness',
+  'approvals',
+  'site-health',
+  'documents',
+];
+
+function expectsCompatibilityCard(surfaceId: PccMvpSurfaceId): boolean {
+  return SURFACES_WITH_COMPATIBILITY_CARD.includes(surfaceId);
+}
 
 describe('PccShell all-surface smoke (shell-level)', () => {
   // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> is the
@@ -40,10 +53,20 @@ describe('PccShell all-surface smoke (shell-level)', () => {
       const compatibilityCards = Array.from(bento!.children).filter((child) =>
         child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${id}"]`),
       );
+      const expectedCount = expectsCompatibilityCard(id) ? 1 : 0;
       expect(
         compatibilityCards,
-        `surface '${id}' must render exactly one direct bento-child compatibility card`,
-      ).toHaveLength(1);
+        expectedCount === 1
+          ? `surface '${id}' must render exactly one direct bento-child compatibility card`
+          : `surface '${id}' must NOT render a direct bento-child compatibility card after Phase 04`,
+      ).toHaveLength(expectedCount);
+      const directCards = Array.from(bento!.children).filter((child) =>
+        child.matches('[data-pcc-card]'),
+      );
+      expect(
+        directCards.length,
+        `surface '${id}' must still render at least one direct-child card`,
+      ).toBeGreaterThan(0);
     }
   });
 });

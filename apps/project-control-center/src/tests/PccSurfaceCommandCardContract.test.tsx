@@ -20,7 +20,11 @@
 
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { PCC_MVP_SURFACE_IDS, type PccProjectId, type PccReadModelEnvelope } from '@hbc/models/pcc';
+import {
+  type PccMvpSurfaceId,
+  type PccProjectId,
+  type PccReadModelEnvelope,
+} from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
@@ -34,6 +38,31 @@ const NEVER_RESOLVES = <T,>(): Promise<T> => new Promise<T>(() => {});
 const ALWAYS_REJECTS = <T,>(): Promise<T> => Promise.reject(new Error('test: forced rejection'));
 
 const STUB_PROJECT_ID = 'fixture-pcc-project-001' as PccProjectId;
+
+// Wave 15A wave-b9 Prompt 04 — bifurcated surface sets after the first
+// runtime duplicate-header-card removal pass. Surfaces that retain an
+// operational/header-hybrid card still emit the temporary card-level
+// `[data-pcc-card][data-pcc-active-surface-panel]` compatibility marker;
+// surfaces whose first card was removed are now uniformly shell-only
+// across all render branches (ready / loading / error).
+//
+// Documents stays in the compatibility-card set because the dynamic
+// loading / error / source-unavailable copy on `PccDocumentsHeaderCard`
+// has no surviving renderable home post-removal (Prompt 04 §3 BLOCKED
+// gate); Documents removal is deferred until a state-aware seam exists.
+const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
+  'project-home',
+  'project-readiness',
+  'approvals',
+  'site-health',
+  'documents',
+];
+
+const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
+  'team-and-access',
+  'external-systems',
+  'control-center-settings',
+];
 
 interface CommandCardExpectations {
   readonly tier: 'tier1' | 'state';
@@ -56,10 +85,12 @@ function expectCommandCardPosture(
 
 function getSoleActivePanel(container: HTMLElement, surfaceId: string): Element {
   // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> owns the
-  // active-surface marker semantically; surface command cards still emit
-  // a `[data-pcc-card][data-pcc-active-surface-panel]` compatibility
-  // marker. The card-level posture (tier, region, heading-level) lives on
-  // the compatibility card, so this helper resolves to that card.
+  // active-surface marker semantically; for SURFACES_WITH_COMPATIBILITY_CARD
+  // the surface still emits a `[data-pcc-card][data-pcc-active-surface-panel]`
+  // compatibility marker on its operational/header-hybrid first card. The
+  // card-level posture (tier, region, heading-level) lives on that card,
+  // so this helper resolves to it. SURFACES_WITH_SHELL_ONLY_PANEL no longer
+  // emit the marker on any branch — use `getSoleStateCard` for those.
   const cards = container.querySelectorAll(
     `[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`,
   );
@@ -70,6 +101,29 @@ function getSoleActivePanel(container: HTMLElement, surfaceId: string): Element 
   const card = cards[0]!;
   expect(card.getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
   return card;
+}
+
+// Wave 15A wave-b9 Prompt 04 — for SURFACES_WITH_SHELL_ONLY_PANEL in
+// loading / error branches the surface renders exactly one direct-child
+// `[data-pcc-card]` and no card-level active-panel marker. Locating the
+// state card by direct-child + tier/region keeps tier/region/heading-level
+// posture under test without re-introducing the removed marker.
+function getSoleStateCard(container: HTMLElement): Element {
+  const cards = container.querySelectorAll('[data-pcc-card]');
+  expect(cards, 'shell-only state branch must render exactly one direct-child card').toHaveLength(
+    1,
+  );
+  return cards[0]!;
+}
+
+function expectStateCardPosture(card: Element): void {
+  expect(card.hasAttribute('data-pcc-card')).toBe(true);
+  expect(card.getAttribute('data-pcc-card-tier')).toBe('state');
+  expect(card.getAttribute('data-pcc-card-region')).toBe('state');
+  expect(card.getAttribute('data-pcc-card-tier-source')).toBe('explicit');
+  expect(card.getAttribute('data-pcc-card-region-source')).toBe('explicit');
+  expect(card.getAttribute('data-pcc-heading-level')).toBe('2');
+  expect(card.hasAttribute('data-pcc-active-surface-panel')).toBe(false);
 }
 
 // Wave 15A wave-b3 Prompt 05 — accessibility helpers. PccPreviewState
@@ -91,8 +145,8 @@ function expectErrorA11y(card: Element, surfaceId: string): void {
   ).not.toBeNull();
 }
 
-describe('PCC route command card — ready (tier1 / command, explicit, h2)', () => {
-  for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+describe('PCC route command card — ready (tier1 / command, explicit, h2) — surfaces with compatibility card', () => {
+  for (const surfaceId of SURFACES_WITH_COMPATIBILITY_CARD) {
     it(`'${surfaceId}' route renders one tier1 / command compatibility command card`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
       const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
@@ -101,6 +155,39 @@ describe('PCC route command card — ready (tier1 / command, explicit, h2)', () 
 
       const card = getSoleActivePanel(container, surfaceId);
       expectCommandCardPosture(card, surfaceId, { tier: 'tier1', region: 'command' });
+    });
+  }
+});
+
+describe('PCC route command card — ready (shell-only ownership) — surfaces with no compatibility card', () => {
+  for (const surfaceId of SURFACES_WITH_SHELL_ONLY_PANEL) {
+    it(`'${surfaceId}' route shell <main> owns the active panel and the bento contains no direct-child compatibility card`, () => {
+      const { container } = render(<PccApp forceMode="desktop" />);
+      const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
+      expect(tab, `tab for '${surfaceId}' must exist in shell`).not.toBeNull();
+      fireEvent.click(tab!);
+
+      const shellPanel = container.querySelector(
+        `main[role="tabpanel"][data-pcc-active-surface-panel="${surfaceId}"]`,
+      );
+      expect(shellPanel, `surface '${surfaceId}' shell active panel must mount`).not.toBeNull();
+
+      const bento = shellPanel!.querySelector('[data-pcc-bento-grid]');
+      expect(bento, `surface '${surfaceId}' bento grid must render`).not.toBeNull();
+
+      const compatibilityCards = Array.from(bento!.children).filter((child) =>
+        child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`),
+      );
+      expect(
+        compatibilityCards,
+        `surface '${surfaceId}' must NOT render a direct bento-child compatibility card after Phase 04`,
+      ).toHaveLength(0);
+
+      const cards = bento!.querySelectorAll('[data-pcc-card]');
+      expect(
+        cards.length,
+        `surface '${surfaceId}' must still render at least one direct-child card`,
+      ).toBeGreaterThan(0);
     });
   }
 });
@@ -120,7 +207,7 @@ describe('PCC route command card — loading branches (state / state, explicit, 
     expectLoadingA11y(card, 'approvals');
   });
 
-  it('external-systems loading branch carries state / state with explicit sources', () => {
+  it('external-systems loading branch carries state / state with explicit sources (shell-only)', () => {
     const loadingClient: IPccLaunchPadReadModelClient = {
       getExternalSystemsLaunchPad: () => NEVER_RESOLVES(),
     };
@@ -129,8 +216,8 @@ describe('PCC route command card — loading branches (state / state, explicit, 
         <PccExternalSystemsSurface readModelClient={loadingClient} projectId={STUB_PROJECT_ID} />
       </PccBentoGrid>,
     );
-    const card = getSoleActivePanel(container, 'external-systems');
-    expectCommandCardPosture(card, 'external-systems', { tier: 'state', region: 'state' });
+    const card = getSoleStateCard(container);
+    expectStateCardPosture(card);
     expectLoadingA11y(card, 'external-systems');
   });
 
@@ -182,7 +269,7 @@ describe('PCC route command card — error branches (state / state, explicit, h2
     });
   });
 
-  it('external-systems error branch carries state / state with explicit sources', async () => {
+  it('external-systems error branch carries state / state with explicit sources (shell-only)', async () => {
     const errorClient: IPccLaunchPadReadModelClient = {
       getExternalSystemsLaunchPad: () => ALWAYS_REJECTS(),
     };
@@ -192,8 +279,8 @@ describe('PCC route command card — error branches (state / state, explicit, h2
       </PccBentoGrid>,
     );
     await waitFor(() => {
-      const card = getSoleActivePanel(container, 'external-systems');
-      expectCommandCardPosture(card, 'external-systems', { tier: 'state', region: 'state' });
+      const card = getSoleStateCard(container);
+      expectStateCardPosture(card);
       expectErrorA11y(card, 'external-systems');
     });
   });

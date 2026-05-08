@@ -3,6 +3,28 @@ import { cleanup, fireEvent, render } from '@testing-library/react';
 import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 
+// Wave 15A wave-b9 Prompt 04 — bifurcated surface sets after the first
+// runtime duplicate-header-card removal pass. Compatibility-card surfaces
+// still emit a card-level `[data-pcc-card][data-pcc-active-surface-panel]`
+// marker; shell-only surfaces no longer do.
+const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
+  'project-home',
+  'project-readiness',
+  'approvals',
+  'site-health',
+  'documents',
+];
+
+const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
+  'team-and-access',
+  'external-systems',
+  'control-center-settings',
+];
+
+function expectsCompatibilityCard(surfaceId: PccMvpSurfaceId): boolean {
+  return SURFACES_WITH_COMPATIBILITY_CARD.includes(surfaceId);
+}
+
 describe('PccApp bento integration (regression)', () => {
   it('every dashboard card is a direct child of the bento grid', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
@@ -132,10 +154,13 @@ describe('PccApp bento integration — all active surfaces direct-child guardrai
       const compatibilityCards = Array.from(bento.children).filter((child) =>
         child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`),
       );
+      const expectedCount = expectsCompatibilityCard(surfaceId) ? 1 : 0;
       expect(
         compatibilityCards,
-        `surface '${surfaceId}' must keep one direct bento-child compatibility active-panel card`,
-      ).toHaveLength(1);
+        expectedCount === 1
+          ? `surface '${surfaceId}' must keep one direct bento-child compatibility active-panel card`
+          : `surface '${surfaceId}' must NOT keep a direct bento-child compatibility active-panel card after Phase 04`,
+      ).toHaveLength(expectedCount);
     });
   }
 });
