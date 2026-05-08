@@ -91,12 +91,42 @@ export interface IPccPriorityRailGroup {
 }
 
 /**
+ * Wave 15A wave-b6 Prompt 03 — homepage compact projection.
+ *
+ * Cap on the homepage rail's compact-default visible row count. The
+ * compact projection is computed once by the adapter and consumed by the
+ * presentational rail; consumers do not recompute the slice.
+ */
+export const PCC_PRIORITY_RAIL_COMPACT_MAX_VISIBLE_ITEMS = 5;
+
+export interface IPccPriorityRailHiddenGroupSummary {
+  readonly groupId: PccPriorityRailGroupId;
+  readonly displayName: string;
+  readonly hiddenCount: number;
+}
+
+export interface IPccPriorityActionsRailCompactSummary {
+  readonly maxVisibleItems: number;
+  readonly visibleItems: readonly IPccPriorityRailItem[];
+  readonly hiddenCount: number;
+  readonly hiddenByGroup: readonly IPccPriorityRailHiddenGroupSummary[];
+  readonly suppressedCount: number;
+  readonly totalCandidateCount: number;
+}
+
+/**
  * Rail view-model. All four groups are always present, in canonical order,
  * even when empty. `visibleCount` and `suppressedCount` are accounting
  * fields; suppressed items are NOT exposed via `groups` (W5-OD-005).
+ *
+ * `compactSummary` (Wave 15A wave-b6 Prompt 03) is the canonical homepage
+ * projection: the global top-N items (by tone → due-date → id) plus a
+ * per-group hidden-count breakdown, used to render the compact rail and
+ * its overflow summary.
  */
 export interface IPccPriorityActionsRailViewModel {
   readonly groups: readonly IPccPriorityRailGroup[];
   readonly visibleCount: number;
   readonly suppressedCount: number;
+  readonly compactSummary: IPccPriorityActionsRailCompactSummary;
 }

@@ -1,8 +1,8 @@
-import type { FC } from 'react';
-import { useId } from 'react';
+import { useId, useState, type FC } from 'react';
 import { PRIORITY_ACTION_CATEGORY_LABELS } from '@hbc/models/pcc';
 import type { PccPriorityTone } from './shared.js';
 import type {
+  IPccPriorityActionsRailCompactSummary,
   IPccPriorityActionsRailViewModel,
   IPccPriorityRailGroup,
   IPccPriorityRailItem,
@@ -23,17 +23,21 @@ const PRIORITY_TONE_LABELS: Readonly<Record<PccPriorityTone, string>> = {
 /**
  * Wave 5 / Prompt 03 — PCC-local Priority Actions Rail UI.
  *
- * Renders the Prompt 02 view-model. Presentational only:
+ * Renders the Wave 5 view-model, augmented in Wave 15A wave-b6 Prompt 03
+ * with a compact-by-default homepage projection plus a local display-only
+ * toggle that reveals the existing four-group full view. Presentational
+ * only:
  *  - no backend consumption;
  *  - no `fetch(`;
  *  - no execution affordance — per-row affordance is a non-interactive
- *    "Preview only" span (no button, no onClick, no anchor, no href);
+ *    "Source-owned" `<span>` with `data-pcc-priority-rail-disabled-action`
+ *    (no button, no onClick, no anchor, no href);
  *  - no auth/persona derivation, no shared-model mutation, no
- *    `HbcPriorityRail` reuse.
- *
- * Integration into `PccPriorityActionsCard` belongs to Prompt 04. Backend
- * `priority-actions` consumption is deferred to Prompt 05 under explicit
- * opt-in only (W5-OD-002).
+ *    `HbcPriorityRail` reuse;
+ *  - the rail's expand/collapse toggle is a local display-only control —
+ *    it changes only React UI state and never executes a source-system
+ *    action, workflow action, approval, submission, save, sync, upload,
+ *    writeback, or external launch.
  */
 
 export interface PccPriorityActionsRailProps {
@@ -70,7 +74,7 @@ const RailRow: FC<RailRowProps> = ({ item }) => (
       </span>
     </div>
     <span className={styles.rowAffordance} data-pcc-priority-rail-disabled-action="">
-      Reference
+      Source-owned
     </span>
   </li>
 );
@@ -110,10 +114,41 @@ const RailGroup: FC<RailGroupProps> = ({ group }) => {
   );
 };
 
+interface OverflowSummaryProps {
+  readonly summary: IPccPriorityActionsRailCompactSummary;
+}
+
+const OverflowSummary: FC<OverflowSummaryProps> = ({ summary }) => {
+  const visibleHiddenGroups = summary.hiddenByGroup.filter((g) => g.hiddenCount > 0);
+  return (
+    <div className={styles.overflowSummary} data-pcc-priority-rail-overflow="">
+      <p className={styles.overflowSummaryHeading} data-pcc-priority-rail-overflow-summary="">
+        Remaining reference items: {summary.hiddenCount}
+      </p>
+      {visibleHiddenGroups.length > 0 ? (
+        <ul
+          role="list"
+          className={styles.overflowByGroup}
+          data-pcc-priority-rail-overflow-by-group=""
+        >
+          {visibleHiddenGroups.map((g) => (
+            <li key={g.groupId} data-pcc-priority-rail-overflow-group-id={g.groupId}>
+              {g.displayName}: {g.hiddenCount} hidden
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+};
+
 export const PccPriorityActionsRail: FC<PccPriorityActionsRailProps> = ({
   viewModel,
   ariaLabel,
 }) => {
+  const [expanded, setExpanded] = useState(false);
+  const bodyId = useId();
+
   // Rail-level empty: single clear state beats stacking a secondary empty
   // inside each empty lane. Skip the four lanes when nothing visible.
   if (viewModel.visibleCount === 0) {
@@ -129,15 +164,42 @@ export const PccPriorityActionsRail: FC<PccPriorityActionsRailProps> = ({
       </section>
     );
   }
+
+  const { compactSummary } = viewModel;
+  const showToggle = compactSummary.hiddenCount > 0;
+  const showOverflow = !expanded && compactSummary.hiddenCount > 0;
+
   return (
     <section
       className={styles.rail}
       data-pcc-priority-rail=""
       aria-label={ariaLabel ?? 'Priority Actions'}
     >
-      {viewModel.groups.map((group) => (
-        <RailGroup key={group.id} group={group} />
-      ))}
+      <div id={bodyId} data-pcc-priority-rail-body="">
+        {expanded ? (
+          viewModel.groups.map((group) => <RailGroup key={group.id} group={group} />)
+        ) : (
+          <ul role="list" className={styles.compactList} data-pcc-priority-rail-compact-list="">
+            {compactSummary.visibleItems.map((item) => (
+              <RailRow key={item.id} item={item} />
+            ))}
+          </ul>
+        )}
+      </div>
+      {showOverflow ? <OverflowSummary summary={compactSummary} /> : null}
+      {showToggle ? (
+        <button
+          type="button"
+          className={styles.toggle}
+          data-pcc-priority-rail-toggle=""
+          data-pcc-priority-rail-toggle-state={expanded ? 'expanded' : 'collapsed'}
+          aria-expanded={expanded}
+          aria-controls={bodyId}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? 'Show fewer reference items' : 'Show additional reference items'}
+        </button>
+      ) : null}
     </section>
   );
 };

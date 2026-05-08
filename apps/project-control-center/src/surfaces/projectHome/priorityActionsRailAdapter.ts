@@ -22,10 +22,13 @@
 import type { IPriorityAction, PriorityActionCategory } from '@hbc/models/pcc';
 import { priorityToneForAction, type PccPriorityTone } from './shared.js';
 import {
+  PCC_PRIORITY_RAIL_COMPACT_MAX_VISIBLE_ITEMS,
   PCC_PRIORITY_RAIL_GROUP_IDS,
   PCC_PRIORITY_RAIL_GROUP_META,
+  type IPccPriorityActionsRailCompactSummary,
   type IPccPriorityActionsRailViewModel,
   type IPccPriorityRailGroup,
+  type IPccPriorityRailHiddenGroupSummary,
   type IPccPriorityRailItem,
   type PccPriorityRailGroupId,
 } from './priorityActionsRailViewModel.js';
@@ -152,5 +155,50 @@ export function buildPccPriorityActionsRailViewModel(
     };
   });
   const visibleCount = groups.reduce((acc, group) => acc + group.count, 0);
-  return { groups, visibleCount, suppressedCount };
+  const compactSummary = buildCompactSummary(groups, visibleCount, suppressedCount);
+  return { groups, visibleCount, suppressedCount, compactSummary };
+}
+
+/**
+ * Wave 15A wave-b6 Prompt 03 — derive the homepage compact projection from
+ * the assembled groups. Items are flattened in canonical group order, then
+ * re-sorted globally by `compareItems` so the visible top-N is deterministic
+ * across groups. Pure: never mutates the inputs, never re-runs upstream
+ * adapters.
+ */
+function buildCompactSummary(
+  groups: readonly IPccPriorityRailGroup[],
+  visibleCount: number,
+  suppressedCount: number,
+): IPccPriorityActionsRailCompactSummary {
+  const allItems: IPccPriorityRailItem[] = [];
+  for (const group of groups) {
+    for (const item of group.items) {
+      allItems.push(item);
+    }
+  }
+  const globallySorted = [...allItems].sort(compareItems);
+  const visibleItems = globallySorted.slice(0, PCC_PRIORITY_RAIL_COMPACT_MAX_VISIBLE_ITEMS);
+  const visibleIds = new Set(visibleItems.map((i) => i.id));
+  const hiddenByGroup: IPccPriorityRailHiddenGroupSummary[] = groups.map((group) => {
+    let hidden = 0;
+    for (const item of group.items) {
+      if (!visibleIds.has(item.id)) {
+        hidden += 1;
+      }
+    }
+    return {
+      groupId: group.id,
+      displayName: group.meta.displayName,
+      hiddenCount: hidden,
+    };
+  });
+  return {
+    maxVisibleItems: PCC_PRIORITY_RAIL_COMPACT_MAX_VISIBLE_ITEMS,
+    visibleItems,
+    hiddenCount: visibleCount - visibleItems.length,
+    hiddenByGroup,
+    suppressedCount,
+    totalCandidateCount: visibleCount,
+  };
 }

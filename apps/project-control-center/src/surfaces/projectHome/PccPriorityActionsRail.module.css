@@ -156,7 +156,7 @@
   color: var(--pcc-color-text-muted);
 }
 
-/* Inert affordance — non-interactive span. Not a button, no onClick, no
+/* Non-interactive affordance — `<span>`, not a button, no onClick, no
    anchor, no href. Visual style intentionally communicates "read-only"
    without implying a future click affordance. No hover-only critical
    meaning (§5.4 Full-Page Overlay). */
@@ -176,4 +176,66 @@
   line-height: 1.4;
   user-select: none;
   flex: 0 0 auto;
+}
+
+/* Wave 15A wave-b6 Prompt 03 — compact homepage rail. The compact list is
+   a flat <ul> rendered when the rail is collapsed; same row styles apply.
+   The overflow summary and the local display-only toggle button sit below
+   the list. Token-disciplined; no new custom properties. */
+
+.compactList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+}
+
+.overflowSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--pcc-space-xs) 0;
+}
+
+.overflowSummaryHeading {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--pcc-color-text-primary) 70%, var(--pcc-color-text-muted));
+}
+
+.overflowByGroup {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--pcc-color-text-primary) 70%, var(--pcc-color-text-muted));
+}
+
+/* Local display-only toggle — non-workflow control. Changes only local
+   React UI state; never executes a source-system action, workflow action,
+   approval, submission, save, sync, upload, writeback, or external launch. */
+.toggle {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-full);
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--pcc-status-info);
+  outline-offset: 2px;
 }

@@ -1,5 +1,5 @@
 import { afterEach, describe, it, expect } from 'vitest';
-import { cleanup, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import {
   DOCUMENT_CONTROL_SOURCE_IDS,
   PRIORITY_ACTION_CATEGORY_LABELS,
@@ -20,7 +20,10 @@ import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccProjectHome } from '../surfaces/projectHome/PccProjectHome';
 import { PccPriorityActionsCard } from '../surfaces/projectHome/PccPriorityActionsCard';
 import { TEAM_SNAPSHOT_PLACEHOLDER } from '../surfaces/projectHome/teamSnapshotPlaceholder';
-import { PCC_PRIORITY_RAIL_GROUP_IDS } from '../surfaces/projectHome/priorityActionsRailViewModel';
+import {
+  PCC_PRIORITY_RAIL_COMPACT_MAX_VISIBLE_ITEMS,
+  PCC_PRIORITY_RAIL_GROUP_IDS,
+} from '../surfaces/projectHome/priorityActionsRailViewModel';
 import {
   PCC_CARD_STATES,
   priorityToneForAction,
@@ -195,22 +198,27 @@ describe('Project Home bento dashboard', () => {
 
   // ── Priority Actions Rail (Wave 5) ───────────────────────────────────
 
-  it('Priority Actions card renders the Wave 5 four-group rail in canonical order', () => {
+  it('Priority Actions card renders the Wave 5 four-group rail in canonical order after the local toggle is expanded', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const rails = container.querySelectorAll('[data-pcc-priority-rail]');
     expect(rails).toHaveLength(1);
-    const rail = rails[0]!;
+    const rail = rails[0] as HTMLElement;
+    // Wave 15A wave-b6 Prompt 03 — group order is an expanded-mode invariant.
+    const toggle = rail.querySelector<HTMLButtonElement>('[data-pcc-priority-rail-toggle]');
+    expect(toggle, 'compact rail must expose the local display-only toggle').not.toBeNull();
+    fireEvent.click(toggle!);
     const lanes = rail.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-group]');
     const ids = Array.from(lanes).map((el) => el.getAttribute('data-pcc-priority-rail-group'));
     expect(ids).toEqual([...PCC_PRIORITY_RAIL_GROUP_IDS]);
   });
 
-  it('Priority Actions rail renders 15 visible rows from SAMPLE_PRIORITY_ACTIONS, each with valid tone', () => {
+  it('Priority Actions rail compact default renders <= PCC_PRIORITY_RAIL_COMPACT_MAX_VISIBLE_ITEMS visible rows with valid tones', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const rail = container.querySelector('[data-pcc-priority-rail]');
     expect(rail).not.toBeNull();
     const rows = rail!.querySelectorAll<HTMLElement>('[data-pcc-priority-rail-action-id]');
-    expect(rows).toHaveLength(15);
+    expect(rows.length).toBeLessThanOrEqual(PCC_PRIORITY_RAIL_COMPACT_MAX_VISIBLE_ITEMS);
+    expect(rows.length).toBeGreaterThan(0);
     const tones = new Set<PccPriorityTone>();
     for (const row of Array.from(rows)) {
       const tone = row.getAttribute('data-pcc-priority-rail-action-tone') as PccPriorityTone | null;
@@ -219,6 +227,9 @@ describe('Project Home bento dashboard', () => {
       tones.add(tone!);
     }
     expect(tones.size).toBeGreaterThan(0);
+    // Compact mode is flat — no group sections render until the toggle is clicked.
+    expect(rail!.querySelectorAll('[data-pcc-priority-rail-group]')).toHaveLength(0);
+    expect(rail!.querySelector('[data-pcc-priority-rail-overflow-summary]')).not.toBeNull();
   });
 
   it('Priority Actions rail suppresses documents/health/safety from the user-facing MVP rail (scoped to rail root)', () => {
@@ -244,20 +255,22 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
-  it('Priority Actions rail renders inert non-executing affordances (no anchors, no hrefs, no buttons)', () => {
+  it('Priority Actions rail renders no row-level executing affordances; the only button is the local display-only toggle', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const rail = container.querySelector<HTMLElement>('[data-pcc-priority-rail]');
     expect(rail).not.toBeNull();
     expect(rail!.querySelectorAll('a')).toHaveLength(0);
     expect(rail!.querySelectorAll('[href]')).toHaveLength(0);
-    expect(rail!.querySelectorAll('button')).toHaveLength(0);
+    const buttons = rail!.querySelectorAll<HTMLButtonElement>('button');
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0].getAttribute('data-pcc-priority-rail-toggle')).not.toBeNull();
     const affordances = rail!.querySelectorAll<HTMLElement>(
       '[data-pcc-priority-rail-disabled-action]',
     );
-    expect(affordances.length).toBe(15);
+    expect(affordances.length).toBe(PCC_PRIORITY_RAIL_COMPACT_MAX_VISIBLE_ITEMS);
     for (const el of Array.from(affordances)) {
       expect(el.tagName).toBe('SPAN');
-      expect(el.textContent).toBe('Reference');
+      expect(el.textContent).toBe('Source-owned');
     }
   });
 
