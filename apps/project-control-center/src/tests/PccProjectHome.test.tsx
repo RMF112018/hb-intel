@@ -270,7 +270,7 @@ describe('Project Home bento dashboard', () => {
     expect(affordances.length).toBe(PCC_PRIORITY_RAIL_COMPACT_MAX_VISIBLE_ITEMS);
     for (const el of Array.from(affordances)) {
       expect(el.tagName).toBe('SPAN');
-      expect(el.textContent).toBe('Source-owned');
+      expect(el.textContent).toBe('Source-owned · act in owning module');
     }
   });
 
@@ -543,6 +543,106 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
+  // ── Wave 15A wave-b6 Prompt 06 — content / source / HBI authority ────
+
+  it('Priority Actions rail row affordance is "Source-owned · act in owning module" and remains a non-interactive span', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const affordances = container.querySelectorAll<HTMLElement>(
+      '[data-pcc-priority-rail-disabled-action]',
+    );
+    expect(affordances.length).toBeGreaterThan(0);
+    for (const el of Array.from(affordances)) {
+      expect(el.tagName).toBe('SPAN');
+      expect(el.textContent).toBe('Source-owned · act in owning module');
+    }
+  });
+
+  it('Document Control Microsoft-lane disabled actions link to a visible source-boundary reason via aria-describedby', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const microsoftLane = container.querySelector('[data-pcc-doc-lane="microsoft-files"]');
+    expect(microsoftLane).not.toBeNull();
+    const reasons = microsoftLane!.querySelectorAll<HTMLElement>('[data-pcc-doc-action-reason]');
+    expect(reasons.length).toBeGreaterThan(0);
+    for (const r of Array.from(reasons)) {
+      const txt = r.textContent ?? '';
+      expect(txt).toContain('Preview only');
+      expect(txt).toContain('Microsoft/SharePoint');
+      expect(txt).toContain('source posture');
+    }
+    const buttons = microsoftLane!.querySelectorAll<HTMLButtonElement>('[data-pcc-doc-action]');
+    expect(buttons.length).toBeGreaterThan(0);
+    for (const btn of Array.from(buttons)) {
+      expect(btn.disabled).toBe(true);
+      expect(btn.getAttribute('aria-disabled')).toBe('true');
+      expect(btn.getAttribute('href')).toBeNull();
+      expect(btn.getAttribute('onclick')).toBeNull();
+      const describedBy = btn.getAttribute('aria-describedby');
+      expect(describedBy, 'disabled action button must link to a reason node').not.toBeNull();
+      expect(microsoftLane!.querySelector(`#${CSS.escape(describedBy!)}`)).not.toBeNull();
+    }
+  });
+
+  it('Document Control external-lane launch cue is bounded "Visibility only — open source systems outside PCC."', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const externalLane = container.querySelector('[data-pcc-doc-lane="external-document-systems"]');
+    expect(externalLane).not.toBeNull();
+    const cues = externalLane!.querySelectorAll<HTMLElement>('[data-pcc-doc-launch-cue]');
+    expect(cues.length).toBeGreaterThan(0);
+    for (const cue of Array.from(cues)) {
+      expect(cue.textContent).toContain('Visibility only');
+      expect(cue.textContent).toContain('outside PCC');
+    }
+    expect(externalLane!.querySelectorAll('[data-pcc-doc-action]')).toHaveLength(0);
+    expect(externalLane!.querySelectorAll('a[href]')).toHaveLength(0);
+  });
+
+  it('Procore snapshot card renders the source-boundary line on the read-model path', async () => {
+    const { container } = render(
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
+    );
+    await waitFor(() => {
+      const boundary = container.querySelector('[data-pcc-procore-source-boundary]');
+      expect(boundary).not.toBeNull();
+      expect(boundary!.textContent).toContain('Procore remains the system of record');
+      expect(boundary!.textContent).toContain('no PCC writeback');
+      expect(boundary!.querySelectorAll('a')).toHaveLength(0);
+      expect(boundary!.querySelectorAll('button')).toHaveLength(0);
+    });
+  });
+
+  it('External Platforms card renders the bounded source-boundary line', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const boundary = container.querySelector('[data-pcc-external-source-boundary]');
+    expect(boundary).not.toBeNull();
+    expect(boundary!.textContent).toContain('Reference only');
+    expect(boundary!.textContent).toContain('source-system actions');
+    expect(boundary!.textContent).toContain('outside Project Home');
+  });
+
+  it('Missing Configurations rows render an owner/next-step cue per row', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const cues = container.querySelectorAll<HTMLElement>('[data-pcc-missing-config-next-step]');
+    expect(cues.length).toBe(SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS.length);
+    for (const cue of Array.from(cues)) {
+      expect(cue.tagName).toBe('SPAN');
+      expect(cue.textContent).toContain('Next step:');
+      expect(cue.textContent).toContain('source configuration workflow');
+    }
+  });
+
+  it('Project Home grid text does not assert any autonomous HBI/AI mutation authority', async () => {
+    const { container } = render(
+      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
+    );
+    await waitFor(() => {
+      expect(container.querySelector('[data-pcc-bento-grid]')).not.toBeNull();
+    });
+    const FORBIDDEN_HBI_MUTATION_CLAIM =
+      /\b(?:hbi|ai)\b(?![^.\n]*(?:not|no|does not|cannot|is not authorized to))[^.\n]*(?:approves?|submits?|syncs?|writes? back|creates?|deletes?|modifies?|completes?)/i;
+    const gridText = container.querySelector('[data-pcc-bento-grid]')!.textContent ?? '';
+    expect(gridText).not.toMatch(FORBIDDEN_HBI_MUTATION_CLAIM);
+  });
+
   it('Project Home fixture path orders the core operational cluster before state/deferred/reference cards', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const grid = container.querySelector('[data-pcc-bento-grid]');
@@ -578,7 +678,9 @@ describe('Project Home bento dashboard', () => {
     const hbiCue = summary!.querySelector('[data-pcc-command-summary-hbi]');
     expect(hbiCue, 'HBI advisory cue must render').not.toBeNull();
     expect(hbiCue!.textContent ?? '').toContain('HBI advisory');
-    expect(hbiCue!.textContent ?? '').toContain('no writeback');
+    // Wave 15A wave-b6 Prompt 06 — bounded HBI cue: negates both decisions and writeback.
+    expect(hbiCue!.textContent ?? '').toContain('no decisions');
+    expect(hbiCue!.textContent ?? '').toContain('writeback');
   });
 
   it('Project Intelligence command summary row renders inert spans only — no anchors, no buttons, no http hrefs (fixture path)', () => {

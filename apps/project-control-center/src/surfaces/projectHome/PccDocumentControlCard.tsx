@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import { useId, type FC } from 'react';
 import {
   DOCUMENT_CONTROL_ACTIONS,
   DOCUMENT_CONTROL_LANES,
@@ -55,6 +55,77 @@ function fixtureSourcesInLane(lane: DocumentControlLane): readonly IDocumentCont
  * `IDocumentControlSource` lane / capabilityPosture / sourceOfRecordLabel
  * fields). No app-local lane or action duplication.
  */
+/**
+ * Per-source tile. Wave 15A wave-b6 Prompt 06 — `useId()` lives here, not
+ * inside the lane `.map(...)`, so the rules of hooks are preserved (hooks
+ * must not be called inside iteration callbacks). The generated id is
+ * shared by the visible source-boundary reason node and every disabled
+ * action button's `aria-describedby` attribute, so the reason is announced
+ * by assistive tech and visible on screen — not tooltip-only.
+ */
+const DocumentControlSourceTile: FC<{ source: IDocumentControlSource }> = ({ source }) => {
+  const reasonId = useId();
+  return (
+    <div
+      className={styles.sourceTile}
+      data-pcc-document-source-id={source.id}
+      data-pcc-document-posture={source.posture}
+      data-pcc-document-link-behavior={source.linkBehavior}
+      data-pcc-doc-lane={source.lane}
+    >
+      <span className={styles.sourceName}>{source.displayName}</span>
+      <PccStatusPill tone={postureTone(source.posture)}>{source.posture}</PccStatusPill>
+      <span className={styles.sourceMeta}>{source.sourceOfRecordLabel}</span>
+      {source.lane === 'microsoft-files' ? (
+        <>
+          <p id={reasonId} className={styles.contextNote} data-pcc-doc-action-reason="">
+            Preview only — complete document actions in Microsoft/SharePoint. PCC shows source
+            posture only.
+          </p>
+          <ul
+            className={styles.surfaceList}
+            data-pcc-doc-actions=""
+            style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--pcc-space-xs)' }}
+          >
+            {source.previewActionIds.map((actionId) => {
+              const action = DOCUMENT_CONTROL_ACTIONS[actionId];
+              return (
+                <li key={actionId} style={{ listStyle: 'none' }}>
+                  <button
+                    type="button"
+                    disabled
+                    aria-disabled="true"
+                    aria-describedby={reasonId}
+                    data-pcc-doc-action={actionId}
+                    data-pcc-doc-action-execution-state={action.executionState}
+                    title={`${action.description} · ${action.futureCapability}`}
+                    style={{
+                      padding: '2px 8px',
+                      fontSize: 11,
+                      borderRadius: 'var(--pcc-radius-sm)',
+                      border: '1px solid var(--pcc-color-border)',
+                      background: 'var(--pcc-color-canvas)',
+                      color: 'var(--pcc-color-text-muted)',
+                      cursor: 'not-allowed',
+                      opacity: 0.78,
+                    }}
+                  >
+                    {action.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      ) : (
+        <span data-pcc-doc-launch-cue className={styles.sourceMeta}>
+          Visibility only — open source systems outside PCC.
+        </span>
+      )}
+    </div>
+  );
+};
+
 const DocumentControlBody: FC<{ sources: readonly IDocumentControlSource[] }> = ({ sources }) => (
   <div className={styles.sourceGrid} data-pcc-document-control-body="">
     {DOCUMENT_CONTROL_LANES.map((lane) => (
@@ -69,57 +140,7 @@ const DocumentControlBody: FC<{ sources: readonly IDocumentControlSource[] }> = 
           {sources
             .filter((source) => source.lane === lane)
             .map((source) => (
-              <div
-                key={source.id}
-                className={styles.sourceTile}
-                data-pcc-document-source-id={source.id}
-                data-pcc-document-posture={source.posture}
-                data-pcc-document-link-behavior={source.linkBehavior}
-                data-pcc-doc-lane={source.lane}
-              >
-                <span className={styles.sourceName}>{source.displayName}</span>
-                <PccStatusPill tone={postureTone(source.posture)}>{source.posture}</PccStatusPill>
-                <span className={styles.sourceMeta}>{source.sourceOfRecordLabel}</span>
-                {source.lane === 'microsoft-files' ? (
-                  <ul
-                    className={styles.surfaceList}
-                    data-pcc-doc-actions=""
-                    style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--pcc-space-xs)' }}
-                  >
-                    {source.previewActionIds.map((actionId) => {
-                      const action = DOCUMENT_CONTROL_ACTIONS[actionId];
-                      return (
-                        <li key={actionId} style={{ listStyle: 'none' }}>
-                          <button
-                            type="button"
-                            disabled
-                            aria-disabled="true"
-                            data-pcc-doc-action={actionId}
-                            data-pcc-doc-action-execution-state={action.executionState}
-                            title={`${action.description} · ${action.futureCapability}`}
-                            style={{
-                              padding: '2px 8px',
-                              fontSize: 11,
-                              borderRadius: 'var(--pcc-radius-sm)',
-                              border: '1px solid var(--pcc-color-border)',
-                              background: 'var(--pcc-color-canvas)',
-                              color: 'var(--pcc-color-text-muted)',
-                              cursor: 'not-allowed',
-                              opacity: 0.78,
-                            }}
-                          >
-                            {action.label}
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : (
-                  <span data-pcc-doc-launch-cue className={styles.sourceMeta}>
-                    Launch / visibility only
-                  </span>
-                )}
-              </div>
+              <DocumentControlSourceTile key={source.id} source={source} />
             ))}
         </div>
       </section>

@@ -153,6 +153,20 @@ describe('buildProjectCommandSummary', () => {
     const summary = buildProjectCommandSummary({ sourceMode: 'fixture' });
     expect(summary.hbiAdvisoryCue).toBe(PROJECT_COMMAND_HBI_ADVISORY_CUE);
     expect(summary.hbiAdvisoryCue).toContain('HBI advisory');
-    expect(summary.hbiAdvisoryCue).toContain('no writeback');
+    expect(summary.hbiAdvisoryCue).toContain('writeback');
+  });
+
+  // Wave 15A wave-b6 Prompt 06 — bounded HBI authority: cue must negate
+  // both decision authority and writeback, and must not assert any
+  // autonomous mutation verb.
+  it('HBI advisory cue negates both decision authority and writeback', () => {
+    const summary = buildProjectCommandSummary({ sourceMode: 'fixture' });
+    const text = summary.hbiAdvisoryCue.toLowerCase();
+    expect(text).toContain('hbi advisory');
+    expect(text).toContain('no decisions');
+    expect(text).toContain('writeback');
+    for (const verb of ['approve', 'submit', 'sync', 'create', 'delete', 'modify', 'complete']) {
+      expect(text, `cue must not assert HBI '${verb}' authority`).not.toContain(verb);
+    }
   });
 });

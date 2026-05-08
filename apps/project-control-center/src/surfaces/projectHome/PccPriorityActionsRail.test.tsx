@@ -193,7 +193,7 @@ describe('PccPriorityActionsRail', () => {
     expect(affordances).toHaveLength(PCC_PRIORITY_RAIL_COMPACT_MAX_VISIBLE_ITEMS);
     for (const el of Array.from(affordances)) {
       expect(el.tagName).toBe('SPAN');
-      expect(el.textContent).toBe('Source-owned');
+      expect(el.textContent).toBe('Source-owned · act in owning module');
     }
   });
 
@@ -206,7 +206,7 @@ describe('PccPriorityActionsRail', () => {
     expect(affordances).toHaveLength(SAMPLE_VIEW_MODEL.visibleCount);
     for (const el of Array.from(affordances)) {
       expect(el.tagName).toBe('SPAN');
-      expect(el.textContent).toBe('Source-owned');
+      expect(el.textContent).toBe('Source-owned · act in owning module');
     }
   });
 
