@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import type { PccLivePageObject } from './pcc-live.page-object';
+import { sanitizePccLiveText } from './pcc-live.sanitization';
 import type {
   PccApprovalsQueueObservation,
   PccContinuityObservation,
@@ -30,34 +31,8 @@ const READONLY_CONTEXT_RE =
 const OWNER_RE = /owner|responsible|assignee|role|trade|vendor|ball in court/i;
 const NEXT_ACTION_RE =
   /next action|due|lifecycle|readiness|documents|approvals|site health|external systems/i;
-const PHONE_RE = /\+?[0-9][0-9()\-\s]{7,}[0-9]/g;
-
 function sanitizeText(input: string): string {
-  const noQuery = input.replace(/\?.*$/g, '');
-  const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
-  const noPhone = noEmail.replace(PHONE_RE, '[redacted-phone]');
-  const noCred = noPhone.replace(
-    /\b(storageState|storage-state|cookie|token|auth|session|secrets)\b/gi,
-    '[redacted-cred]',
-  );
-  const noRawArtifacts = noCred
-    .replace(/test-results/gi, '[redacted-artifact]')
-    .replace(/playwright-report/gi, '[redacted-artifact]')
-    .replace(/trace\.zip/gi, '[redacted-artifact]')
-    .replace(/video\.webm/gi, '[redacted-artifact]')
-    .replace(/network\.har/gi, '[redacted-artifact]')
-    .replace(/\.auth/gi, '[redacted-cred]');
-  const noPolicyClaims = noRawArtifacts
-    .replace(/hard stop passed/gi, '[redacted-claim]')
-    .replace(/hard stop failed/gi, '[redacted-claim]')
-    .replace(/score-ready/gi, '[redacted-claim]')
-    .replace(/Phase 4 ready/gi, '[redacted-claim]');
-  const noHtml = noPolicyClaims.replace(/<[^>]+>/g, '[redacted-html]');
-  const noBlob = noHtml.replace(
-    /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g,
-    '[redacted-blob]',
-  );
-  return noBlob.slice(0, 240);
+  return sanitizePccLiveText(input, { maxLength: 240, redactPolicyClaims: true });
 }
 
 function sanitizeSnippet(input: string, max = 120): string {

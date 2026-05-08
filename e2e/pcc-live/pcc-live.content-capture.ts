@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 import type { PccEvidenceId } from './pcc-evidence.types';
 import type { PccLivePageObject } from './pcc-live.page-object';
 import type { PccLiveSurfaceDefinition } from './pcc-live.surfaces';
+import { sanitizePccLiveText } from './pcc-live.sanitization';
 import {
   PCC_CONTENT_LANGUAGE_EVIDENCE_IDS,
   type PccContentReviewFinding,
@@ -11,8 +12,6 @@ import {
 } from './pcc-live.content.types';
 
 const MAX_SNIPPET = 160;
-const PHONE_RE = /\+?[0-9][0-9()\-\s]{7,}[0-9]/g;
-
 const COPY_SELECTOR = [
   '[data-pcc-card-heading]',
   '[data-pcc-heading-level]',
@@ -45,32 +44,7 @@ const COPY_SELECTOR = [
 ].join(',');
 
 function sanitizeText(input: string): string {
-  const normalized = input.replace(/\s+/g, ' ').trim();
-  const noQuery = normalized.replace(/\?.*$/g, '');
-  const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
-  const noPhone = noEmail.replace(PHONE_RE, '[redacted-phone]');
-  const noCred = noPhone.replace(
-    /\b(storageState|storage-state|cookie|token|auth|session|secrets)\b/gi,
-    '[redacted-cred]',
-  );
-  const noArtifacts = noCred
-    .replace(/test-results/gi, '[redacted-artifact]')
-    .replace(/playwright-report/gi, '[redacted-artifact]')
-    .replace(/trace\.zip/gi, '[redacted-artifact]')
-    .replace(/video\.webm/gi, '[redacted-artifact]')
-    .replace(/network\.har/gi, '[redacted-artifact]')
-    .replace(/\.auth/gi, '[redacted-cred]');
-  const noClaims = noArtifacts
-    .replace(/hard stop passed/gi, '[redacted-claim]')
-    .replace(/hard stop failed/gi, '[redacted-claim]')
-    .replace(/score-ready/gi, '[redacted-claim]')
-    .replace(/Phase 4 ready/gi, '[redacted-claim]');
-  const noHtml = noClaims.replace(/<[^>]+>/g, '[redacted-html]');
-  const noBlob = noHtml.replace(
-    /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g,
-    '[redacted-blob]',
-  );
-  return noBlob.slice(0, MAX_SNIPPET);
+  return sanitizePccLiveText(input, { maxLength: MAX_SNIPPET, redactPolicyClaims: true });
 }
 
 function hashSnippet(snippet: string): string {

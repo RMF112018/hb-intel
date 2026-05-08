@@ -11,6 +11,11 @@ import {
   type PccSurfaceEvidenceBlockRun,
   type PccSurfaceEvidenceGapItem,
 } from './pcc-live.surface-blocks.types';
+import {
+  isPccLiveUnsafeArtifactPath,
+  sanitizePccLiveArtifactPath,
+  sanitizePccLiveText,
+} from './pcc-live.sanitization';
 
 export const PCC_SURFACE_BLOCKS_DISCLAIMER =
   'This output is surface and primitive evidence block review support for EV-125 through EV-134 only. It is not a final scorecard result, does not mark any EV captured, and does not mark any hard stop passed or failed.';
@@ -19,50 +24,20 @@ const MAX_SNIPPET = 160;
 const MAX_REFS_PER_LANE = 5;
 const MAX_GAPS = 8;
 const MAX_QUESTIONS = 8;
-const PHONE_RE = /\+?[0-9][0-9()\-\s]{7,}[0-9]/g;
 const OUT_OF_SCOPE_EV_RE = /\bEV-(\d+)\b/g;
 
 function sanitizeText(input: string): string {
-  const normalized = input.replace(/\s+/g, ' ').trim();
-  const noQuery = normalized.replace(/\?.*$/g, '');
-  const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
-  const noPhone = noEmail.replace(PHONE_RE, '[redacted-phone]');
-  const noCred = noPhone.replace(
-    /\b(storageState|storage-state|cookie|token|auth|session|secret|secrets)\b/gi,
-    '[redacted-cred]',
-  );
-  const noArtifacts = noCred
-    .replace(/test-results/gi, '[redacted-artifact]')
-    .replace(/playwright-report/gi, '[redacted-artifact]')
-    .replace(/trace\.zip/gi, '[redacted-artifact]')
-    .replace(/video\.webm/gi, '[redacted-artifact]')
-    .replace(/network\.har/gi, '[redacted-artifact]');
-  const noClaims = noArtifacts
-    .replace(/hard stop passed/gi, '[redacted-claim]')
-    .replace(/hard stop failed/gi, '[redacted-claim]')
-    .replace(/score-ready/gi, '[redacted-claim]')
-    .replace(/Phase 4 ready/gi, '[redacted-claim]')
-    .replace(/56\/56 achieved/gi, '[redacted-claim]')
-    .replace(/100\/100/gi, '[redacted-claim]')
-    .replace(/mold breaker achieved/gi, '[redacted-claim]')
-    .replace(/\bcaptured\b/gi, '[redacted-claim]');
-  const noHtml = noClaims.replace(/<[^>]+>/g, '[redacted-html]');
-  const noBlob = noHtml.replace(
-    /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g,
-    '[redacted-blob]',
-  );
+  const noBlob = sanitizePccLiveText(input, { maxLength: MAX_SNIPPET, redactPolicyClaims: true });
   const scopedEv = noBlob.replace(OUT_OF_SCOPE_EV_RE, (_m, num) => {
     const id = Number(num);
     if (id >= 125 && id <= 134) return `EV-${id}`;
     return '[redacted-ev]';
   });
-  return scopedEv.slice(0, MAX_SNIPPET);
+  return scopedEv;
 }
 
 function safeArtifactPath(pathLike: string): boolean {
-  return !/(^|[\\/])(?:test-results|playwright-report|\.auth|\.e2e-auth|\.secrets|\.storage-state)(?:[\\/]|$)|storagestate|storage-state|cookie|token|auth|session|secret|trace|video|har/i.test(
-    pathLike,
-  );
+  return !isPccLiveUnsafeArtifactPath(pathLike);
 }
 
 function asNum(value: unknown): number {
@@ -118,7 +93,7 @@ function collectArtifactRefs(
 
   for (const raw of artifactPaths) {
     if (!safeArtifactPath(raw)) continue;
-    const p = sanitizeText(raw);
+    const p = sanitizePccLiveArtifactPath(raw);
     if (!p) continue;
     const lower = p.toLowerCase();
     if (!lower.includes(surfaceHint.toLowerCase()) && block.blockType === 'surface') continue;

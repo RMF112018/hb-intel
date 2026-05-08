@@ -4,6 +4,7 @@ import type { PccEvidenceId } from './pcc-evidence.types';
 import type { PccLiveEnv } from './pcc-live.env';
 import type { PccLivePageObject } from './pcc-live.page-object';
 import type { PccLiveSurfaceDefinition, PccLiveSurfaceId } from './pcc-live.surfaces';
+import { sanitizePccLiveText } from './pcc-live.sanitization';
 import {
   PCC_CONDITIONAL_CORE_EVIDENCE_IDS,
   PCC_CONDITIONAL_EVIDENCE_IDS,
@@ -18,7 +19,6 @@ import {
 
 const ACTION_SELECTOR =
   'button, a[href], [role="button"], [role="link"], [data-pcc-action], [data-pcc-command], [data-pcc-launch], [data-pcc-external-system]';
-const PHONE_RE = /\+?[0-9][0-9()\-\s]{7,}[0-9]/g;
 
 const LANE_EV_REFS: Record<PccConditionalLaneId, readonly PccEvidenceId[]> = {
   'edit-mode': ['EV-57', 'EV-94', 'EV-96', 'EV-102'],
@@ -30,31 +30,7 @@ const LANE_EV_REFS: Record<PccConditionalLaneId, readonly PccEvidenceId[]> = {
 };
 
 function sanitizeText(input: string): string {
-  const noQuery = input.replace(/\?.*$/g, '');
-  const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
-  const noPhone = noEmail.replace(PHONE_RE, '[redacted-phone]');
-  const noCred = noPhone.replace(
-    /\b(storageState|storage-state|cookie|token|auth|session|secrets)\b/gi,
-    '[redacted-cred]',
-  );
-  const noRawArtifacts = noCred
-    .replace(/test-results/gi, '[redacted-artifact]')
-    .replace(/playwright-report/gi, '[redacted-artifact]')
-    .replace(/trace\.zip/gi, '[redacted-artifact]')
-    .replace(/video\.webm/gi, '[redacted-artifact]')
-    .replace(/network\.har/gi, '[redacted-artifact]')
-    .replace(/\.auth/gi, '[redacted-cred]');
-  const noPolicyClaims = noRawArtifacts
-    .replace(/hard stop passed/gi, '[redacted-claim]')
-    .replace(/hard stop failed/gi, '[redacted-claim]')
-    .replace(/score-ready/gi, '[redacted-claim]')
-    .replace(/Phase 4 ready/gi, '[redacted-claim]');
-  const noHtml = noPolicyClaims.replace(/<[^>]+>/g, '[redacted-html]');
-  const noBlob = noHtml.replace(
-    /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g,
-    '[redacted-blob]',
-  );
-  return noBlob.slice(0, 240);
+  return sanitizePccLiveText(input, { maxLength: 240, redactPolicyClaims: true });
 }
 
 function sanitizeSnippet(input: string, max = 120): string {

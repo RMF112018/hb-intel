@@ -6,43 +6,20 @@ import type {
   PccContentReviewFinding,
   PccVisibleCopyRecord,
 } from './pcc-live.content.types';
+import {
+  isPccLiveUnsafeArtifactPath,
+  sanitizePccLiveArtifactPath,
+  sanitizePccLiveText,
+} from './pcc-live.sanitization';
 
 const DISCLAIMER =
   'This output is visible-copy, construction-language, source-of-record, state-copy, disabled-reason, and HBI authority review support for EV-83 through EV-106 only. It is not a final scorecard result and does not mark any EV captured or any hard-stop disposition.';
-const PHONE_RE = /\+?[0-9][0-9()\-\s]{7,}[0-9]/g;
-const UNSAFE_PATH_PATTERN =
-  /(^|[\\/])(?:test-results|playwright-report|\.auth|\.e2e-auth|\.secrets|\.storage-state)(?:[\\/]|$)|storagestate|storage-state|cookie|token|auth|session|secrets|trace|video|har|unauthorized/i;
-
 function sanitizeText(input: string): string {
-  const noQuery = input.replace(/\?.*$/g, '');
-  const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
-  const noPhone = noEmail.replace(PHONE_RE, '[redacted-phone]');
-  const noCred = noPhone.replace(
-    /\b(storageState|storage-state|cookie|token|auth|session|secrets)\b/gi,
-    '[redacted-cred]',
-  );
-  const noRawArtifacts = noCred
-    .replace(/test-results/gi, '[redacted-artifact]')
-    .replace(/playwright-report/gi, '[redacted-artifact]')
-    .replace(/trace\.zip/gi, '[redacted-artifact]')
-    .replace(/video\.webm/gi, '[redacted-artifact]')
-    .replace(/network\.har/gi, '[redacted-artifact]')
-    .replace(/\.auth/gi, '[redacted-cred]');
-  const noPolicyClaims = noRawArtifacts
-    .replace(/hard stop passed/gi, '[redacted-claim]')
-    .replace(/hard stop failed/gi, '[redacted-claim]')
-    .replace(/score-ready/gi, '[redacted-claim]')
-    .replace(/Phase 4 ready/gi, '[redacted-claim]');
-  const noHtml = noPolicyClaims.replace(/<[^>]+>/g, '[redacted-html]');
-  const noBlob = noHtml.replace(
-    /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g,
-    '[redacted-blob]',
-  );
-  return noBlob.slice(0, 240);
+  return sanitizePccLiveText(input, { maxLength: 240, redactPolicyClaims: true });
 }
 
 function safeArtifactPath(pathLike: string): boolean {
-  return !UNSAFE_PATH_PATTERN.test(pathLike);
+  return !isPccLiveUnsafeArtifactPath(pathLike);
 }
 
 function sanitizeRecord(r: PccVisibleCopyRecord): PccVisibleCopyRecord {
@@ -194,7 +171,7 @@ export async function writePccContentReview(
 
   const artifactPaths = (input.artifactPaths ?? [])
     .filter(safeArtifactPath)
-    .map((p) => sanitizeText(p));
+    .map((p) => sanitizePccLiveArtifactPath(p));
 
   const evidenceJsonPath = path.join(input.outputDir, 'pcc-live-content-evidence.json');
   const evidenceMarkdownPath = path.join(input.outputDir, 'pcc-live-content-evidence.md');

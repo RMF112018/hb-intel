@@ -10,6 +10,11 @@ import {
   buildPccPillarEvidenceMap,
   buildPccScorecardWorksheet,
 } from './pcc-scorecard.traceability';
+import {
+  isPccLiveUnsafeArtifactPath,
+  sanitizePccLiveArtifactPath,
+  sanitizePccLiveText,
+} from './pcc-live.sanitization';
 import type {
   PccScorecardReportArtifactRef,
   PccScorecardReportAuditPackageIndexItem,
@@ -51,48 +56,12 @@ export const PCC_SCORECARD_REPORT_OUTPUT_FILES = [
   'final-report-readme.md',
 ] as const;
 
-const PHONE_RE = /\+?[0-9][0-9()\-\s]{7,}[0-9]/g;
-
 function sanitizeText(input: string, max = 180): string {
-  const normalized = input.replace(/\s+/g, ' ').trim();
-  const noQuery = normalized.replace(/\?.*$/g, '');
-  const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
-  const noPhone = noEmail.replace(PHONE_RE, '[redacted-phone]');
-  const noCred = noPhone.replace(
-    /\b(storageState|storage-state|cookie|token|auth|session|secret|secrets)\b/gi,
-    '[redacted-cred]',
-  );
-  const noArtifacts = noCred
-    .replace(/test-results/gi, '[redacted-artifact]')
-    .replace(/playwright-report/gi, '[redacted-artifact]')
-    .replace(/trace\.zip/gi, '[redacted-artifact]')
-    .replace(/video\.webm/gi, '[redacted-artifact]')
-    .replace(/network\.har/gi, '[redacted-artifact]')
-    .replace(/\.auth/gi, '[redacted-cred]')
-    .replace(/\.e2e-auth/gi, '[redacted-cred]');
-  const noClaims = noArtifacts
-    .replace(/hard stop passed/gi, '[redacted-claim]')
-    .replace(/hard stop failed/gi, '[redacted-claim]')
-    .replace(/score-ready/gi, '[redacted-claim]')
-    .replace(/phase 4 ready/gi, '[redacted-claim]')
-    .replace(/56\/56 achieved/gi, '[redacted-claim]')
-    .replace(/100\/100/gi, '[redacted-claim]')
-    .replace(/mold breaker achieved/gi, '[redacted-claim]')
-    .replace(/deployment ready/gi, '[redacted-claim]')
-    .replace(/ready for phase 4/gi, '[redacted-claim]')
-    .replace(/\bcaptured\b/gi, '[redacted-claim]');
-  const noHtml = noClaims.replace(/<[^>]+>/g, '[redacted-html]');
-  const noBlob = noHtml.replace(
-    /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g,
-    '[redacted-blob]',
-  );
-  return noBlob.slice(0, max);
+  return sanitizePccLiveText(input, { maxLength: max, redactPolicyClaims: true });
 }
 
 function safeArtifactPath(pathLike: string): boolean {
-  return !/(^|[\\/])(?:test-results|playwright-report|\.auth|\.e2e-auth|\.secrets|\.storage-state)(?:[\\/]|$)|storagestate|storage-state|cookie|token|auth|session|secret|trace|video|har/i.test(
-    pathLike,
-  );
+  return !isPccLiveUnsafeArtifactPath(pathLike);
 }
 
 function asLane(pathText: string): PccScorecardReportSourceLane {
@@ -181,7 +150,7 @@ export function assemblePccScorecardReport(
   const artifactInventory: PccScorecardReportArtifactRef[] = (input.artifactPaths ?? [])
     .filter((p): p is string => typeof p === 'string')
     .filter((p) => safeArtifactPath(p))
-    .map((pathText) => sanitizeText(pathText))
+    .map((pathText) => sanitizePccLiveArtifactPath(pathText))
     .filter(Boolean)
     .map((p) => ({
       artifactKind: p.endsWith('.md') ? ('markdown-summary' as const) : ('json-summary' as const),

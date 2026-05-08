@@ -32,7 +32,10 @@ test('Workflow writer preserves sanitized output policy', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pcc-workflow-writer-'));
 
   try {
-    const curated = 'docs/architecture/evidence/pcc-live/run-001/pcc-live-workflow-evidence.json';
+    const curated =
+      'docs/architecture/evidence/pcc-live/20260507-134047/workflow-1778175784527/pcc-live-workflow-evidence.json';
+    const curatedMultiNumeric =
+      'docs/architecture/evidence/pcc-live/20260507-134047/surface-screenshots-1778175753367/card-01-1280x720.png';
 
     const surfaces: PccWorkflowSurfaceEvidence[] = [
       {
@@ -160,6 +163,7 @@ test('Workflow writer preserves sanitized output policy', async () => {
       },
       artifactPaths: [
         curated,
+        curatedMultiNumeric,
         'test-results/raw-output.json',
         'playwright-report/index.html',
         '.auth/private.json',
@@ -181,7 +185,10 @@ test('Workflow writer preserves sanitized output policy', async () => {
     ].map((file) => fs.readFileSync(file, 'utf-8'));
 
     expect(files[0]).toContain(curated);
+    expect(files[0]).toContain(curatedMultiNumeric);
     expect(files[1]).toContain(curated);
+    expect(files[1]).toContain(curatedMultiNumeric);
+    expect(files[0]).not.toContain('[redacted-phone]/workflow-[redacted-phone]');
 
     const forbidden = [
       'qa.user@hedrickbrothers.com',

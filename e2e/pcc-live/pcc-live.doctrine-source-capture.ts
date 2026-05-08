@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { PccEvidenceId } from './pcc-evidence.types';
+import { sanitizePccLiveText } from './pcc-live.sanitization';
 import {
   PCC_DOCTRINE_SOURCE_EVIDENCE_IDS,
   type PccDoctrineCategory,
@@ -17,20 +18,6 @@ import {
 
 const MAX_SNIPPETS_PER_FILE = 3;
 const MAX_SNIPPET_CHARS = 160;
-
-const PHONE_RE = /\+?[0-9][0-9()\-\s]{7,}[0-9]/g;
-const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
-const HTML_RE = /<[^>]+>/g;
-const TOKEN_RE =
-  /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g;
-const QUERY_RE = /\?.*$/g;
-
-const REDACT_TERMS_RE =
-  /\b(storageState|storage-state|cookies?|tokens?|auth|sessions?|secrets?)\b/gi;
-const FORBIDDEN_CLAIMS_RE =
-  /(hard stop passed|hard stop failed|score-ready|phase 4 ready|56\/56 achieved|100\/100|mold breaker achieved)/gi;
-const PLAYWRIGHT_ARTIFACT_RE =
-  /(test-results|playwright-report|trace\.zip|video\.webm|network\.har|\.auth)/gi;
 
 const SOURCE_MARKERS = [
   'data-pcc-',
@@ -123,16 +110,11 @@ const EXCLUDED_PATH_RE =
 type SourceKind = PccSourceFileIndexEntry['kind'];
 
 function sanitizeText(input: string): string {
-  const normalized = input.replace(/\s+/g, ' ').trim();
-  const noQuery = normalized.replace(QUERY_RE, '');
-  const noEmail = noQuery.replace(EMAIL_RE, '[redacted-email]');
-  const noPhone = noEmail.replace(PHONE_RE, '[redacted-phone]');
-  const noCred = noPhone.replace(REDACT_TERMS_RE, '[redacted-cred]');
-  const noArtifact = noCred.replace(PLAYWRIGHT_ARTIFACT_RE, '[redacted-artifact]');
-  const noClaim = noArtifact.replace(FORBIDDEN_CLAIMS_RE, '[redacted-claim]');
-  const noHtml = noClaim.replace(HTML_RE, '[redacted-html]');
-  const noBlob = noHtml.replace(TOKEN_RE, '[redacted-blob]');
-  const evScoped = noBlob.replace(/\bEV-(\d+)\b/g, (_match, idRaw: string) => {
+  const sanitized = sanitizePccLiveText(input, {
+    maxLength: MAX_SNIPPET_CHARS,
+    redactPolicyClaims: true,
+  });
+  const evScoped = sanitized.replace(/\bEV-(\d+)\b/g, (_match, idRaw: string) => {
     const id = Number(idRaw);
     if (Number.isNaN(id)) return '[redacted-ev]';
     return id >= 37 && id <= 58 ? `EV-${id}` : '[redacted-ev]';

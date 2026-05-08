@@ -5,49 +5,21 @@ import {
   type CapturePccDoctrineSourceResult,
 } from './pcc-live.doctrine-source-capture';
 import type { PccDoctrineSourceEvidenceRun } from './pcc-live.doctrine-source.types';
+import {
+  isPccLiveUnsafeArtifactPath,
+  sanitizePccLiveArtifactPath,
+  sanitizePccLiveText,
+} from './pcc-live.sanitization';
 
 const DISCLAIMER =
   'This output is doctrine, source, and Mold Breaker review support for EV-37 through EV-58 only. It is not a final scorecard result, does not mark any EV captured, and does not mark any hard stop passed or failed.';
 
-const PHONE_RE = /\+?[0-9][0-9()\-\s]{7,}[0-9]/g;
-const UNSAFE_PATH_PATTERN =
-  /(^|[\\/])(?:test-results|playwright-report|\.auth|\.e2e-auth|\.secrets|\.storage-state)(?:[\\/]|$)|storagestate|storage-state|cookies?|tokens?|auth|sessions?|secrets|trace|video|har/gi;
-
 function sanitizeText(input: string): string {
-  const normalized = input.replace(/\s+/g, ' ').trim();
-  const noQuery = normalized.replace(/\?.*$/g, '');
-  const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
-  const noPhone = noEmail.replace(PHONE_RE, '[redacted-phone]');
-  const noCred = noPhone.replace(
-    /\b(storageState|storage-state|cookies?|tokens?|auth|sessions?|secrets?)\b/gi,
-    '[redacted-cred]',
-  );
-  const noArtifacts = noCred
-    .replace(/test-results/gi, '[redacted-artifact]')
-    .replace(/playwright-report/gi, '[redacted-artifact]')
-    .replace(/trace\.zip/gi, '[redacted-artifact]')
-    .replace(/video\.webm/gi, '[redacted-artifact]')
-    .replace(/network\.har/gi, '[redacted-artifact]')
-    .replace(/\.auth/gi, '[redacted-cred]');
-  const noClaims = noArtifacts
-    .replace(/hard stop passed/gi, '[redacted-claim]')
-    .replace(/hard stop failed/gi, '[redacted-claim]')
-    .replace(/score-ready/gi, '[redacted-claim]')
-    .replace(/Phase 4 ready/gi, '[redacted-claim]')
-    .replace(/56\/56 achieved/gi, '[redacted-claim]')
-    .replace(/100\/100/gi, '[redacted-claim]')
-    .replace(/mold breaker achieved/gi, '[redacted-claim]')
-    .replace(/\bcaptured\b/gi, '[redacted-claim]');
-  const noHtml = noClaims.replace(/<[^>]+>/g, '[redacted-html]');
-  const noBlob = noHtml.replace(
-    /\b(?=[A-Za-z0-9+/=]{24,}\b)(?=[A-Za-z0-9+/=]*\d)(?=[A-Za-z0-9+/=]*[A-Z])[A-Za-z0-9+/=]+\b/g,
-    '[redacted-blob]',
-  );
-  return noBlob.slice(0, 240);
+  return sanitizePccLiveText(input, { maxLength: 240, redactPolicyClaims: true });
 }
 
 function safePath(pathLike: string): boolean {
-  return !UNSAFE_PATH_PATTERN.test(pathLike);
+  return !isPccLiveUnsafeArtifactPath(pathLike);
 }
 
 function mdHeader(run: PccDoctrineSourceEvidenceRun): string[] {
@@ -121,9 +93,11 @@ function sanitizeRun(run: CapturePccDoctrineSourceResult): PccDoctrineSourceEvid
     packageVersionProof: {
       ...run.packageVersionProof,
       packageSolutionPath: run.packageVersionProof.packageSolutionPath
-        ? sanitizeText(run.packageVersionProof.packageSolutionPath)
+        ? sanitizePccLiveArtifactPath(run.packageVersionProof.packageSolutionPath)
         : undefined,
-      manifestPaths: run.packageVersionProof.manifestPaths.filter(safePath).map(sanitizeText),
+      manifestPaths: run.packageVersionProof.manifestPaths
+        .filter(safePath)
+        .map(sanitizePccLiveArtifactPath),
       detectedVersions: run.packageVersionProof.detectedVersions.map(sanitizeText),
       packageNameSignals: run.packageVersionProof.packageNameSignals.map(sanitizeText),
       notes: run.packageVersionProof.notes.map(sanitizeText),
