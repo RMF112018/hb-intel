@@ -79,6 +79,8 @@ const EXPECTED_GROUPS: readonly PccEvidencePackageExpectedGroup[] = [
       'pcc-live-keyboard-focus-summary.json',
       'pcc-live-aria-label-summary.json',
       'pcc-live-contrast-summary.json',
+      'pcc-live-accessibility-issue-register.json',
+      'pcc-live-accessibility-issue-register.md',
     ],
     absenceDefaultStatus: 'missing',
     notes: ['Accessibility lane output remains review support, not pass/fail automation.'],

@@ -140,6 +140,21 @@ pcc-live-breakpoint-issue-register.md
 
 Breakpoint issue-register artifacts are review support only and are not scoring authority.
 
+Accessibility lane closeout support artifacts include:
+
+```text
+pcc-live-accessibility-evidence.json
+pcc-live-accessibility-evidence.md
+pcc-live-axe-summary.json
+pcc-live-keyboard-focus-summary.json
+pcc-live-aria-label-summary.json
+pcc-live-contrast-summary.json
+pcc-live-accessibility-issue-register.json
+pcc-live-accessibility-issue-register.md
+```
+
+Accessibility issue-register artifacts are review support only and are not WCAG conformance authority, accessibility pass/fail authority, hard-stop disposition authority, or scoring authority.
+
 ## 7. Commit Eligibility
 
 Commit-eligible after operator review and scrubbing:

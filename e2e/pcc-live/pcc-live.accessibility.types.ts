@@ -1,4 +1,4 @@
-import type { PccEvidenceId } from './pcc-evidence.types';
+import type { PccEvidenceId, PccHardStopRef, PccScorecardPillarRef } from './pcc-evidence.types';
 import type { PccLiveSurfaceId } from './pcc-live.surfaces';
 
 export const PCC_ACCESSIBILITY_EVIDENCE_IDS = [
@@ -141,6 +141,47 @@ export interface PccAccessibilityEvidenceRun {
   };
   warnings: string[];
   disclaimer: string;
+}
+
+export type PccAccessibilityIssueType =
+  | 'axe-violation'
+  | 'aria-name-missing'
+  | 'disabled-reason-missing'
+  | 'focus-indicator-missing'
+  | 'contrast-needs-review'
+  | 'touch-target-size'
+  | 'hover-only-risk'
+  | 'reduced-motion-risk'
+  | 'dialog-focus-needs-review';
+
+export type PccAccessibilityIssueSeveritySignal = 'review' | 'moderate' | 'major';
+
+export interface PccAccessibilityIssueRegisterRow {
+  id: string;
+  surfaceId: PccLiveSurfaceId;
+  surfaceLabel?: string;
+  issueType: PccAccessibilityIssueType;
+  severitySignal: PccAccessibilityIssueSeveritySignal;
+  selector?: string;
+  ruleId?: string;
+  impact?: string;
+  count?: number;
+  role?: string;
+  tagName?: string;
+  focusStep?: number;
+  boundingWidth?: number;
+  boundingHeight?: number;
+  width?: number;
+  height?: number;
+  details?: string;
+  status?: PccA11yObservationStatus;
+  evRefs: readonly PccEvidenceId[];
+  pillarRefs: readonly PccScorecardPillarRef[];
+  hardStopRefs: readonly PccHardStopRef[];
+  operatorReviewRequired: true;
+  artifactPolicy: 'operator-review-required';
+  reviewPrompt: string;
+  recommendedAction: string;
 }
 
 type IsExactlyString<T> = [T] extends [string] ? ([string] extends [T] ? true : false) : false;

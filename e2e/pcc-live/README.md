@@ -202,3 +202,12 @@ Prompt 05 breakpoint enhancements add localized review-support issue artifacts:
 - `pcc-live-breakpoint-issue-register.md`
 
 These issue-register artifacts are closeout support only and are not scoring authority. They do not pass/fail hard stops, do not mark EVs finally captured, and do not approve Phase 4 readiness.
+
+## Prompt 06 accessibility issue register
+
+Prompt 06 accessibility enhancements add localized review-support issue artifacts:
+
+- `pcc-live-accessibility-issue-register.json`
+- `pcc-live-accessibility-issue-register.md`
+
+These accessibility issue-register artifacts are closeout support only. They are not WCAG conformance authority, not accessibility pass/fail authority, not hard-stop disposition authority, and not scoring authority.

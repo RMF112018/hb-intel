@@ -47,6 +47,8 @@ const SAFE_SYNTHETIC_PATHS = [
   'accessibility-001/pcc-live-keyboard-focus-summary.json',
   'accessibility-001/pcc-live-aria-label-summary.json',
   'accessibility-001/pcc-live-contrast-summary.json',
+  'accessibility-001/pcc-live-accessibility-issue-register.json',
+  'accessibility-001/pcc-live-accessibility-issue-register.md',
   'workflow-001/pcc-live-workflow-evidence.json',
   'workflow-001/pcc-live-workflow-evidence.md',
   'content-001/pcc-live-content-evidence.json',
