@@ -10,8 +10,10 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
       const tab = container.querySelector(`[data-pcc-horizontal-tabs] [data-pcc-tab-id="${id}"]`);
       expect(tab, `tab for '${id}' should render`).not.toBeNull();
     }
-    const initialPanel = container.querySelector('[data-pcc-active-surface-panel="project-home"]');
-    expect(initialPanel, 'project-home is the default active surface panel').not.toBeNull();
+    const initialPanel = container.querySelector(
+      'main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]',
+    );
+    expect(initialPanel, 'project-home is the default shell active-surface panel').not.toBeNull();
     const initialTab = container.querySelector('[data-pcc-tab-id="project-home"]');
     expect(initialTab?.getAttribute('aria-selected')).toBe('true');
     expect(initialTab?.getAttribute('data-pcc-tab-active')).toBe('true');
@@ -40,12 +42,27 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
         ).toBe('false');
       }
 
-      // 3. exactly one active panel exists
-      const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-      expect(panels).toHaveLength(1);
+      // 3. shell <main> owns the active-surface panel marker for the clicked
+      //    surface. Wave 15A wave-b7 Prompt 01 — the broad
+      //    `[data-pcc-active-surface-panel]` count may legitimately be > 1
+      //    in shell-rendered trees because surface command cards still emit
+      //    a card-level compatibility marker; the semantic owner is shell.
+      const shellPanels = container.querySelectorAll(
+        `main[role="tabpanel"][data-pcc-active-surface-panel="${id}"]`,
+      );
+      expect(shellPanels).toHaveLength(1);
+      const shellPanel = shellPanels[0]!;
+      expect(shellPanel.getAttribute('id')).toBe('pcc-active-surface-panel');
+      expect(shellPanel.getAttribute('aria-labelledby')).toBe(`pcc-tab-${id}`);
 
-      // 4. active panel marker equals the clicked surface id
-      expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe(id);
+      // 4. shell panel contains [data-pcc-bento-grid] with exactly one
+      //    direct-child compatibility command card for the active surface.
+      const bento = shellPanel.querySelector('[data-pcc-bento-grid]') as HTMLElement | null;
+      expect(bento, `shell panel for '${id}' must contain [data-pcc-bento-grid]`).not.toBeNull();
+      const compatibilityCards = Array.from(bento!.children).filter((child) =>
+        child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${id}"]`),
+      );
+      expect(compatibilityCards).toHaveLength(1);
 
       // 5. panel includes that surface's display name from PCC_MVP_SURFACES (the
       //    eyebrow on the surface's primary dashboard card). The surface
@@ -55,7 +72,7 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
       //    Wave-b2 Prompt 03 removed the duplicated context header from happy-path
       //    surfaces, so the surface description is no longer asserted in the panel.
       const surface = PCC_MVP_SURFACES[id];
-      expect(panels[0].textContent).toContain(surface.displayName);
+      expect(shellPanel.textContent).toContain(surface.displayName);
 
       // Hero owns surface description; assert the marker is present and non-empty.
       const heroDescription = container.querySelector('[data-pcc-hero-surface-description]');
@@ -89,7 +106,7 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
     ).toBe(PCC_MVP_SURFACE_IDS[1]);
     expect(
       container
-        .querySelector('[data-pcc-active-surface-panel]')
+        .querySelector('main[role="tabpanel"][data-pcc-active-surface-panel]')
         ?.getAttribute('data-pcc-active-surface-panel'),
     ).toBe(PCC_MVP_SURFACE_IDS[1]);
 
@@ -103,7 +120,7 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
     ).toBe(lastId);
     expect(
       container
-        .querySelector('[data-pcc-active-surface-panel]')
+        .querySelector('main[role="tabpanel"][data-pcc-active-surface-panel]')
         ?.getAttribute('data-pcc-active-surface-panel'),
     ).toBe(lastId);
 
@@ -133,7 +150,9 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
     fireEvent.keyUp(documentsTab, { key: 'Enter' });
 
     const selectedAfterEnter = container.querySelector('[data-pcc-tab-id][aria-selected="true"]');
-    const panelAfterEnter = container.querySelector('[data-pcc-active-surface-panel]');
+    const panelAfterEnter = container.querySelector(
+      'main[role="tabpanel"][data-pcc-active-surface-panel]',
+    );
     expect(selectedAfterEnter?.getAttribute('data-pcc-tab-id')).toBe('documents');
     expect(panelAfterEnter?.getAttribute('data-pcc-active-surface-panel')).toBe('documents');
 
@@ -144,7 +163,9 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
     fireEvent.keyUp(approvalsTab, { key: ' ' });
 
     const selectedAfterSpace = container.querySelector('[data-pcc-tab-id][aria-selected="true"]');
-    const panelAfterSpace = container.querySelector('[data-pcc-active-surface-panel]');
+    const panelAfterSpace = container.querySelector(
+      'main[role="tabpanel"][data-pcc-active-surface-panel]',
+    );
     expect(selectedAfterSpace?.getAttribute('data-pcc-tab-id')).toBe('approvals');
     expect(panelAfterSpace?.getAttribute('data-pcc-active-surface-panel')).toBe('approvals');
   });
@@ -156,8 +177,14 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
     ) as HTMLButtonElement;
     fireEvent.click(documentsTab);
     expect(documentsTab.getAttribute('aria-selected')).toBe('true');
-    expect(container.querySelector('[data-pcc-active-surface-panel="documents"]')).not.toBeNull();
-    expect(container.querySelector('[data-pcc-active-surface-panel="project-home"]')).toBeNull();
+    expect(
+      container.querySelector('main[role="tabpanel"][data-pcc-active-surface-panel="documents"]'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector(
+        'main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]',
+      ),
+    ).toBeNull();
     const secondary = container.querySelector('[data-pcc-hero-secondary-title]');
     expect(secondary?.textContent).toBe('Documents');
     const description = container.querySelector('[data-pcc-hero-surface-description]');

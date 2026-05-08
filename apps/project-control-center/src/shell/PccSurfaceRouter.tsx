@@ -67,10 +67,16 @@ export interface PccSurfaceRouterProps {
  *   init and on setter; this `default:` is the defense-in-depth backstop
  *   for callers that bypass the hook.
  *
- * The Prompt 03 corrective bento invariant and the Prompt 04 single
- * active-surface-panel invariant continue to hold: only one element in
- * the rendered tree carries `data-pcc-active-surface-panel`, equal to the
- * active surface id.
+ * The Prompt 03 corrective bento direct-child invariant continues to
+ * hold. After Wave 15A wave-b7 Prompt 01, semantic ownership of the
+ * active-surface panel marker moved up to shell `<main role="tabpanel">`
+ * (`apps/project-control-center/src/shell/PccShell.tsx`). Surface
+ * command/header cards may continue to emit a card-level
+ * `data-pcc-active-surface-panel` attribute as a temporary
+ * compatibility marker, so the broad count of marker-bearing elements
+ * in shell-rendered trees is legitimately `>= 1`. Tests must scope to
+ * shell ownership (`main[role="tabpanel"][data-pcc-active-surface-panel]`)
+ * rather than infer ownership from a card marker.
  */
 export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
   activeSurfaceId,

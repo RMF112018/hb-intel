@@ -161,21 +161,33 @@ describe('Project Home bento dashboard', () => {
     expect(priorityActionsCard?.getAttribute('data-pcc-card-region')).toBe('operational');
     expect(priorityActionsCard?.hasAttribute('data-pcc-active-surface-panel')).toBe(false);
 
-    const activePanels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(activePanels).toHaveLength(1);
-    expect(activePanels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
+    // Wave 15A wave-b7 Prompt 01 — shell <main> now owns the semantic
+    // active-panel marker; the Project Intelligence card retains it as a
+    // compatibility marker. Lock card-level uniqueness via the bento-card
+    // compatibility selector.
+    const compatibilityCards = container.querySelectorAll(
+      '[data-pcc-card][data-pcc-active-surface-panel="project-home"]',
+    );
+    expect(compatibilityCards).toHaveLength(1);
+    expect(compatibilityCards[0].getAttribute('data-pcc-active-surface-panel')).toBe(
+      'project-home',
+    );
   });
 
-  it('exactly one [data-pcc-active-surface-panel] exists with value "project-home", carried by the Project Intelligence card', () => {
+  it('exactly one Project Intelligence card carries the compatibility [data-pcc-active-surface-panel="project-home"] marker (Wave 15A wave-b7 Prompt 01 — shell <main> owns the semantic marker)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
-    expect(panels[0].textContent).toContain('Project Intelligence');
+    const compatibilityCards = container.querySelectorAll(
+      '[data-pcc-card][data-pcc-active-surface-panel="project-home"]',
+    );
+    expect(compatibilityCards).toHaveLength(1);
+    expect(compatibilityCards[0].getAttribute('data-pcc-active-surface-panel')).toBe(
+      'project-home',
+    );
+    expect(compatibilityCards[0].textContent).toContain('Project Intelligence');
     // Wave 15A wave-b6 Prompt 02 — the legacy "Header" suffix was an
     // internal-feeling label; the operator-facing title drops it. Defend
     // against accidental regression to the pre-rename string.
-    expect(panels[0].textContent).not.toContain('Project Intelligence Header');
+    expect(compatibilityCards[0].textContent).not.toContain('Project Intelligence Header');
   });
 
   it('the bento grid does not use grid-auto-flow: dense', () => {

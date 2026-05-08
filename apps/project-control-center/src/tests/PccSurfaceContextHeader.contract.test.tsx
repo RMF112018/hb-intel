@@ -50,9 +50,15 @@ describe('PccSurfaceContextHeader contract — happy-path negative invariant', (
       expect(tab).not.toBeNull();
       fireEvent.click(tab!);
 
-      const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-      expect(panels).toHaveLength(1);
-      expect(panels[0]?.getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
+      // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> is the
+      // semantic active-panel owner; surface command cards may retain a
+      // card-level compatibility marker. Scope ownership assertion to the
+      // shell panel.
+      const shellPanels = container.querySelectorAll(
+        `main[role="tabpanel"][data-pcc-active-surface-panel="${surfaceId}"]`,
+      );
+      expect(shellPanels).toHaveLength(1);
+      expect(shellPanels[0]?.getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
 
       // Wave-b2 Prompt 03: PccSurfaceContextHeader is removed from happy-path.
       const context = container.querySelector(`[data-pcc-surface-context-id="${surfaceId}"]`);

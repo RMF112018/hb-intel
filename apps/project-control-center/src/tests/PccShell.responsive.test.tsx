@@ -74,6 +74,9 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
   });
 
   // Wave-b2 Prompt 04: tablist / tab / tabpanel ARIA contract.
+  // Wave 15A wave-b7 Prompt 01: shell <main> is the semantic active-panel
+  // owner — the active-surface marker is rendered on the tabpanel itself,
+  // not derived from card-level compatibility markers.
   it('wires the tablist/tab/tabpanel relationship via id, role, aria-labelledby, and aria-controls', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
     const main = container.querySelector('[data-pcc-canvas]') as HTMLElement | null;
@@ -88,9 +91,18 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
     for (const tab of tabs) {
       expect(tab.getAttribute('aria-controls')).toBe('pcc-active-surface-panel');
     }
+
+    // Shell <main> owns the active-surface panel marker for project-home by default.
+    const shellPanels = container.querySelectorAll(
+      'main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]',
+    );
+    expect(shellPanels.length).toBe(1);
+    expect(shellPanels[0]?.getAttribute('id')).toBe('pcc-active-surface-panel');
+    expect(shellPanels[0]?.getAttribute('aria-labelledby')).toBe('pcc-tab-project-home');
+    expect(shellPanels[0]?.hasAttribute('data-pcc-canvas')).toBe(true);
   });
 
-  it('updates <main> aria-labelledby to the new active tab id after a tab click', () => {
+  it('updates <main> aria-labelledby and shell active-panel marker after a Documents tab click', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
     const documentsTab = container.querySelector(
       '[data-pcc-tab-id="documents"]',
@@ -100,6 +112,28 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
 
     const main = container.querySelector('[data-pcc-canvas]') as HTMLElement | null;
     expect(main!.getAttribute('aria-labelledby')).toBe('pcc-tab-documents');
+    expect(main!.getAttribute('data-pcc-active-surface-panel')).toBe('documents');
+    const documentsShellPanels = container.querySelectorAll(
+      'main[role="tabpanel"][data-pcc-active-surface-panel="documents"]',
+    );
+    expect(documentsShellPanels.length).toBe(1);
+  });
+
+  it('updates <main> aria-labelledby and shell active-panel marker after a Site Health tab click', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    const siteHealthTab = container.querySelector(
+      '[data-pcc-tab-id="site-health"]',
+    ) as HTMLButtonElement | null;
+    expect(siteHealthTab).not.toBeNull();
+    fireEvent.click(siteHealthTab!);
+
+    const main = container.querySelector('[data-pcc-canvas]') as HTMLElement | null;
+    expect(main!.getAttribute('aria-labelledby')).toBe('pcc-tab-site-health');
+    expect(main!.getAttribute('data-pcc-active-surface-panel')).toBe('site-health');
+    const siteHealthShellPanels = container.querySelectorAll(
+      'main[role="tabpanel"][data-pcc-active-surface-panel="site-health"]',
+    );
+    expect(siteHealthShellPanels.length).toBe(1);
   });
 
   // Wave-b2 Prompt 04: command-search affordance is purely informational.

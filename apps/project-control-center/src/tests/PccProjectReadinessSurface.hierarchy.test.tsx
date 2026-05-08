@@ -118,12 +118,16 @@ describe('Project Readiness — Wave 9 lifecycle blocker posture', () => {
 });
 
 describe('Project Readiness — active-panel ownership preserved', () => {
-  it('HeroCard remains the sole [data-pcc-active-surface-panel="project-readiness"] owner', () => {
+  it('HeroCard remains the sole compatibility card owner of [data-pcc-active-surface-panel="project-readiness"] (Wave 15A wave-b7 Prompt 01 — shell <main> owns the semantic marker)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
-    const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
+    const compatibilityCards = container.querySelectorAll(
+      '[data-pcc-card][data-pcc-active-surface-panel="project-readiness"]',
+    );
+    expect(compatibilityCards).toHaveLength(1);
+    expect(compatibilityCards[0].getAttribute('data-pcc-active-surface-panel')).toBe(
+      'project-readiness',
+    );
   });
 });
 

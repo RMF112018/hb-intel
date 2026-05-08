@@ -24,12 +24,14 @@ function readinessRegion(container: HTMLElement, region: string): HTMLElement | 
 }
 
 describe('Project Readiness Center surface', () => {
-  it('renders exactly one active-surface marker for project-readiness', () => {
+  it('renders exactly one shell-owned active-surface panel for project-readiness (Wave 15A wave-b7 Prompt 01 — shell <main> owns the semantic marker)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
-    const markers = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(markers).toHaveLength(1);
-    expect(markers[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
+    const shellPanels = container.querySelectorAll(
+      'main[role="tabpanel"][data-pcc-active-surface-panel="project-readiness"]',
+    );
+    expect(shellPanels).toHaveLength(1);
+    expect(shellPanels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
   });
 
   it('renders all six framework regions', () => {
@@ -491,10 +493,15 @@ describe('Project Readiness Center surface — Wave 15A B5 selected-section view
         ).toBe(0);
       }
 
-      // Hero/active-surface marker remains unique.
-      const surfaceMarkers = container.querySelectorAll('[data-pcc-active-surface-panel]');
-      expect(surfaceMarkers).toHaveLength(1);
-      expect(surfaceMarkers[0].getAttribute('data-pcc-active-surface-panel')).toBe(
+      // Hero/active-surface marker remains unique on the shell semantic
+      // owner. Wave 15A wave-b7 Prompt 01 — shell <main> owns the
+      // semantic marker; the HeroCard still emits a card-level
+      // compatibility marker, so the broad count would be > 1.
+      const shellPanels = container.querySelectorAll(
+        'main[role="tabpanel"][data-pcc-active-surface-panel="project-readiness"]',
+      );
+      expect(shellPanels).toHaveLength(1);
+      expect(shellPanels[0].getAttribute('data-pcc-active-surface-panel')).toBe(
         'project-readiness',
       );
 

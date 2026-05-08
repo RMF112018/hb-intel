@@ -115,6 +115,7 @@ export const PccShell: FC<PccShellProps> = ({
         aria-labelledby={`pcc-tab-${activeSurfaceId}`}
         className={styles.canvas}
         data-pcc-canvas=""
+        data-pcc-active-surface-panel={activeSurfaceId}
       >
         <PccBentoGrid forceMode={forceMode}>{children}</PccBentoGrid>
       </main>

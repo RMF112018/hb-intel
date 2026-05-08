@@ -65,19 +65,40 @@ function renderPccAppOnSurface(surfaceId: PccMvpSurfaceId): HTMLElement {
 }
 
 function getActiveBento(container: HTMLElement, surfaceId: PccMvpSurfaceId): HTMLElement {
-  // The active-panel card is a direct child of the bento grid; its
-  // parentElement IS the [data-pcc-bento-grid] node. Asserting the marker
-  // on that node prevents future regressions where the active panel card
-  // gets wrapped in an extra container.
-  const surfacePanel = container.querySelector(`[data-pcc-active-surface-panel="${surfaceId}"]`);
-  expect(surfacePanel, `surface '${surfaceId}' must mount its active-panel carrier`).not.toBeNull();
-  const parent = surfacePanel!.parentElement;
-  expect(parent, `bento parent for '${surfaceId}' must exist`).not.toBeNull();
+  // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> is the
+  // semantic active-panel owner. Resolve the bento grid through the shell
+  // panel rather than via a card `parentElement` lookup, since surface
+  // command cards still emit a card-level `data-pcc-active-surface-panel`
+  // compatibility marker and broad selectors are now ambiguous.
+  const shellPanel = container.querySelector(
+    `main[role="tabpanel"][data-pcc-active-surface-panel="${surfaceId}"]`,
+  );
+  expect(shellPanel, `surface '${surfaceId}' must mount its shell active panel`).not.toBeNull();
+  expect(shellPanel!.getAttribute('id')).toBe('pcc-active-surface-panel');
+  expect(shellPanel!.getAttribute('aria-labelledby')).toBe(`pcc-tab-${surfaceId}`);
+
+  const bento = shellPanel!.querySelector('[data-pcc-bento-grid]');
   expect(
-    (parent as HTMLElement).hasAttribute('data-pcc-bento-grid'),
-    `surface '${surfaceId}' active-panel parent must be [data-pcc-bento-grid]`,
-  ).toBe(true);
-  return parent as HTMLElement;
+    bento,
+    `surface '${surfaceId}' shell panel must contain [data-pcc-bento-grid]`,
+  ).not.toBeNull();
+
+  return bento as HTMLElement;
+}
+
+function getActiveCompatibilityCard(bento: HTMLElement, surfaceId: PccMvpSurfaceId): HTMLElement {
+  // The compatibility command card is a direct child of the bento grid
+  // and still emits the temporary `data-pcc-active-surface-panel`
+  // marker. Scoping to direct children prevents false positives from
+  // descendant cards that share a marker namespace.
+  const matches = Array.from(bento.children).filter((child) =>
+    child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`),
+  );
+  expect(
+    matches,
+    `surface '${surfaceId}' must render one direct bento-child compatibility card`,
+  ).toHaveLength(1);
+  return matches[0] as HTMLElement;
 }
 
 function activePanelCards(container: HTMLElement, surfaceId: PccMvpSurfaceId): readonly Element[] {
@@ -227,15 +248,13 @@ describe('PCC card-tier contract — every in-scope surface card has explicit so
 
 describe('PCC card-tier contract — active command card heading-level is "2" on every surface', () => {
   for (const surfaceId of IN_SCOPE_SURFACES) {
-    it(`'${surfaceId}' active-panel card emits data-pcc-heading-level="2"`, () => {
+    it(`'${surfaceId}' compatibility command card emits data-pcc-heading-level="2"`, () => {
       const container = renderPccAppOnSurface(surfaceId);
-      const surfacePanel = container.querySelector(
-        `[data-pcc-active-surface-panel="${surfaceId}"]`,
-      );
-      expect(surfacePanel, `surface '${surfaceId}' must mount its active panel`).not.toBeNull();
+      const bento = getActiveBento(container, surfaceId);
+      const compatibilityCard = getActiveCompatibilityCard(bento, surfaceId);
       expect(
-        surfacePanel!.getAttribute('data-pcc-heading-level'),
-        `surface '${surfaceId}' active-panel card must declare heading level 2`,
+        compatibilityCard.getAttribute('data-pcc-heading-level'),
+        `surface '${surfaceId}' compatibility command card must declare heading level 2`,
       ).toBe('2');
     });
   }

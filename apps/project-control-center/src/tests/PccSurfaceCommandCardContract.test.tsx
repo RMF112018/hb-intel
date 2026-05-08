@@ -55,24 +55,31 @@ function expectCommandCardPosture(
 }
 
 function getSoleActivePanel(container: HTMLElement, surfaceId: string): Element {
-  const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
+  // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> owns the
+  // active-surface marker semantically; surface command cards still emit
+  // a `[data-pcc-card][data-pcc-active-surface-panel]` compatibility
+  // marker. The card-level posture (tier, region, heading-level) lives on
+  // the compatibility card, so this helper resolves to that card.
+  const cards = container.querySelectorAll(
+    `[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`,
+  );
   expect(
-    panels,
-    `surface '${surfaceId}' must render exactly one active-panel carrier`,
+    cards,
+    `surface '${surfaceId}' must render exactly one compatibility command card carrying the active-panel marker`,
   ).toHaveLength(1);
-  const panel = panels[0]!;
-  expect(panel.getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
-  return panel;
+  const card = cards[0]!;
+  expect(card.getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
+  return card;
 }
 
 // Wave 15A wave-b3 Prompt 05 — accessibility helpers. PccPreviewState
 // already emits aria-busy="true" on loading and role="alert" on error;
-// these helpers lock that contract for the active-panel card.
+// these helpers lock that contract for the compatibility command card.
 function expectLoadingA11y(card: Element, surfaceId: string): void {
   const busy = card.querySelector('[aria-busy="true"]');
   expect(
     busy,
-    `surface '${surfaceId}' loading branch must expose aria-busy="true" inside the active-panel card`,
+    `surface '${surfaceId}' loading branch must expose aria-busy="true" inside the compatibility command card`,
   ).not.toBeNull();
 }
 
@@ -80,13 +87,13 @@ function expectErrorA11y(card: Element, surfaceId: string): void {
   const alert = card.querySelector('[role="alert"]');
   expect(
     alert,
-    `surface '${surfaceId}' error branch must expose role="alert" inside the active-panel card`,
+    `surface '${surfaceId}' error branch must expose role="alert" inside the compatibility command card`,
   ).not.toBeNull();
 }
 
 describe('PCC route command card — ready (tier1 / command, explicit, h2)', () => {
   for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-    it(`'${surfaceId}' route renders one tier1 / command active-panel card`, () => {
+    it(`'${surfaceId}' route renders one tier1 / command compatibility command card`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
       const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
       expect(tab, `tab for '${surfaceId}' must exist in shell`).not.toBeNull();

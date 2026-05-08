@@ -84,12 +84,16 @@ describe('Project Home — first-impression composition order', () => {
       expect(card?.getAttribute('data-pcc-footprint')).toBe('standard');
     });
 
-    it('exactly one [data-pcc-active-surface-panel="project-home"] exists, carried by the Project Intelligence card (active-panel ownership preserved)', () => {
+    it('exactly one [data-pcc-card][data-pcc-active-surface-panel="project-home"] compatibility command card exists, carried by the Project Intelligence card (Wave 15A wave-b7 Prompt 01 — shell <main> owns the semantic marker; the card retains a compatibility marker)', () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-      expect(panels).toHaveLength(1);
-      expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
-      expect(panels[0].textContent).toContain('Project Intelligence');
+      const compatibilityCards = container.querySelectorAll(
+        '[data-pcc-card][data-pcc-active-surface-panel="project-home"]',
+      );
+      expect(compatibilityCards).toHaveLength(1);
+      expect(compatibilityCards[0].getAttribute('data-pcc-active-surface-panel')).toBe(
+        'project-home',
+      );
+      expect(compatibilityCards[0].textContent).toContain('Project Intelligence');
     });
   });
 

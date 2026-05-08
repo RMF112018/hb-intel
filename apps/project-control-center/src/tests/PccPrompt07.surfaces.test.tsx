@@ -22,16 +22,22 @@ const SURFACE_PREVIEW_COPY: Record<(typeof PROMPT_07_SURFACES)[number], string> 
 
 describe('Prompt 07 routed surface invariants', () => {
   for (const surfaceId of PROMPT_07_SURFACES) {
-    it(`renders '${surfaceId}' with exactly one active-surface marker`, () => {
+    it(`renders '${surfaceId}' with the shell-owned active-surface panel and surface preview copy`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
       const button = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
       expect(button).not.toBeNull();
       fireEvent.click(button!);
 
-      const markers = container.querySelectorAll('[data-pcc-active-surface-panel]');
-      expect(markers).toHaveLength(1);
-      expect(markers[0].getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
-      expect(markers[0].textContent).toContain(SURFACE_PREVIEW_COPY[surfaceId]);
+      // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> is the
+      // semantic active-panel owner; the surface command card retains a
+      // compatibility marker. Lock shell ownership and verify panel copy
+      // through the shell panel (which contains the surface card).
+      const shellPanels = container.querySelectorAll(
+        `main[role="tabpanel"][data-pcc-active-surface-panel="${surfaceId}"]`,
+      );
+      expect(shellPanels).toHaveLength(1);
+      expect(shellPanels[0].getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
+      expect(shellPanels[0].textContent).toContain(SURFACE_PREVIEW_COPY[surfaceId]);
     });
   }
 });

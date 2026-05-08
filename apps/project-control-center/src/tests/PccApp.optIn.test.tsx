@@ -240,9 +240,14 @@ describe('mount(...) opt-in', () => {
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }
-    const panels = host.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0]!.getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
+    // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> is the
+    // semantic active-panel owner; surface command cards may retain a
+    // card-level compatibility marker. Assert shell ownership directly.
+    const shellPanels = host.querySelectorAll(
+      'main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]',
+    );
+    expect(shellPanels).toHaveLength(1);
+    expect(shellPanels[0]!.getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
   });
 
   it('mount(el, ctx, { readModel: { readModelMode: "backend" } }) without baseUrl does not invoke fetch and renders error states', async () => {
