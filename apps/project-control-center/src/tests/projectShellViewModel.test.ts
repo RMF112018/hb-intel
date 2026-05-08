@@ -175,3 +175,87 @@ describe('deriveShellHeroViewModel — wave-b7 Prompt 02 surface header metadata
     expect(serialized).not.toContain('data-pcc-hero-pill');
   });
 });
+
+describe('PCC_SHELL_SURFACE_HEADER_METADATA — wave-b7 Prompt 03 contract floor', () => {
+  // Affirmative-action verbs that must never appear AS A LABEL on a
+  // summary item or cue. We assert label *equality*, not substring on
+  // values, because per-surface readOnlyCue / cue value copy
+  // legitimately mentions these verbs in negating phrases (e.g.
+  // "No approve / reject action from this header"). Memory:
+  // feedback_word_blocklists_break_on_corrected_copy.
+  const AFFIRMATIVE_ACTION_LABELS = [
+    'Approve',
+    'Reject',
+    'Upload',
+    'Delete',
+    'Sync',
+    'Launch',
+  ] as const;
+
+  it.each([...PCC_MVP_SURFACE_IDS])(
+    '"%s" carries at least three summary items and two cues with non-empty fields',
+    (surfaceId) => {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+      expect(metadata.surfaceSummaryItems.length).toBeGreaterThanOrEqual(3);
+      expect(metadata.surfaceCues.length).toBeGreaterThanOrEqual(2);
+      expect(metadata.readOnlyCue.trim().length).toBeGreaterThan(0);
+      for (const item of metadata.surfaceSummaryItems) {
+        expect(item.id.length).toBeGreaterThan(0);
+        expect(item.label.length).toBeGreaterThan(0);
+        expect(item.value.length).toBeGreaterThan(0);
+      }
+      for (const cue of metadata.surfaceCues) {
+        expect(cue.id.length).toBeGreaterThan(0);
+        expect(cue.label.length).toBeGreaterThan(0);
+        expect(cue.value.length).toBeGreaterThan(0);
+      }
+    },
+  );
+
+  it('every entry covers exactly the canonical surface tuple', () => {
+    expect(Object.keys(PCC_SHELL_SURFACE_HEADER_METADATA).sort()).toEqual(
+      [...PCC_MVP_SURFACE_IDS].sort(),
+    );
+  });
+
+  it('no metadata value contains a live URL', () => {
+    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+      for (const item of metadata.surfaceSummaryItems) {
+        expect(
+          item.value,
+          `summary item "${item.id}" on "${surfaceId}" must not contain a live URL`,
+        ).not.toMatch(/https?:\/\//i);
+      }
+      for (const cue of metadata.surfaceCues) {
+        expect(
+          cue.value,
+          `cue "${cue.id}" on "${surfaceId}" must not contain a live URL`,
+        ).not.toMatch(/https?:\/\//i);
+      }
+      expect(
+        metadata.readOnlyCue,
+        `readOnlyCue on "${surfaceId}" must not contain a live URL`,
+      ).not.toMatch(/https?:\/\//i);
+    }
+  });
+
+  it('no metadata label is an affirmative-action verb', () => {
+    const affirmativeSet = new Set<string>(AFFIRMATIVE_ACTION_LABELS);
+    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+      for (const item of metadata.surfaceSummaryItems) {
+        expect(
+          affirmativeSet.has(item.label),
+          `summary item "${item.id}" on "${surfaceId}" must not use affirmative-action label "${item.label}"`,
+        ).toBe(false);
+      }
+      for (const cue of metadata.surfaceCues) {
+        expect(
+          affirmativeSet.has(cue.label),
+          `cue "${cue.id}" on "${surfaceId}" must not use affirmative-action label "${cue.label}"`,
+        ).toBe(false);
+      }
+    }
+  });
+});
