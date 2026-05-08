@@ -1,4 +1,5 @@
 import type { PccEvidenceId } from './pcc-evidence.types';
+import type { PccHardStopRef, PccScorecardPillarRef } from './pcc-evidence.types';
 import type { PccLiveSurfaceId } from './pcc-live.surfaces';
 
 export const PCC_BREAKPOINT_EVIDENCE_IDS = [
@@ -133,6 +134,58 @@ export interface PccLiveBreakpointEvidenceRun {
   };
   warnings: string[];
   disclaimer: string;
+}
+
+export type PccLiveBreakpointIssueType =
+  | 'mode-mismatch'
+  | 'horizontal-overflow'
+  | 'card-clipping'
+  | 'card-overflow-x'
+  | 'card-overflow-y'
+  | 'direct-child-invariant'
+  | 'touch-target-size'
+  | 'missing-grid';
+
+export type PccLiveBreakpointIssueSeveritySignal = 'review' | 'moderate' | 'major';
+
+export interface PccLiveBreakpointIssueRegisterRow {
+  id: string;
+  surfaceId: PccLiveSurfaceId;
+  surfaceLabel?: string;
+  viewportId: string;
+  viewportLabel?: string;
+  issueType: PccLiveBreakpointIssueType;
+  severitySignal: PccLiveBreakpointIssueSeveritySignal;
+  cardIndex?: number;
+  selector?: string;
+  footprint?: string;
+  hierarchy?: string;
+  tier?: string;
+  region?: string;
+  boundingWidth?: number;
+  boundingHeight?: number;
+  columnSpan?: number;
+  rowSpan?: number;
+  measuredHeight?: number;
+  viewportWidth: number;
+  viewportHeight: number;
+  observedMode?: string;
+  derivedMode?: PccLiveResponsiveMode | string;
+  expectedColumns?: number;
+  measuredContainerWidth?: number;
+  measuredContainerHeight?: number;
+  documentScrollWidth?: number;
+  documentClientWidth?: number;
+  viewportOverflowX?: number;
+  touchTargetWidth?: number;
+  touchTargetHeight?: number;
+  evRefs: readonly PccEvidenceId[];
+  pillarRefs: readonly PccScorecardPillarRef[];
+  hardStopRefs: readonly PccHardStopRef[];
+  operatorReviewRequired: true;
+  artifactPolicy: 'operator-review-required';
+  reviewPrompt: string;
+  recommendedAction: string;
 }
 
 type IsExactlyString<T> = [T] extends [string] ? ([string] extends [T] ? true : false) : false;

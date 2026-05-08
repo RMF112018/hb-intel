@@ -61,6 +61,8 @@ const EXPECTED_GROUPS: readonly PccEvidencePackageExpectedGroup[] = [
       'pcc-live-breakpoint-matrix.json',
       'pcc-live-breakpoint-card-measurements.json',
       'pcc-live-breakpoint-touch-targets.json',
+      'pcc-live-breakpoint-issue-register.json',
+      'pcc-live-breakpoint-issue-register.md',
     ],
     absenceDefaultStatus: 'missing',
     notes: ['Breakpoint and container behavior is required for field-context review.'],

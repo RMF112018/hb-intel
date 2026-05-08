@@ -193,3 +193,12 @@ pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pc
 
 This is evidence collection and traceability support only; it is not a final scorecard result.
 Screenshot contact sheet / manifest / first-screen index are closeout support only and are not scoring authority.
+
+## Prompt 05 breakpoint issue register
+
+Prompt 05 breakpoint enhancements add localized review-support issue artifacts:
+
+- `pcc-live-breakpoint-issue-register.json`
+- `pcc-live-breakpoint-issue-register.md`
+
+These issue-register artifacts are closeout support only and are not scoring authority. They do not pass/fail hard stops, do not mark EVs finally captured, and do not approve Phase 4 readiness.

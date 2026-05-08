@@ -39,6 +39,8 @@ const SAFE_SYNTHETIC_PATHS = [
   'breakpoints-001/pcc-live-breakpoint-matrix.json',
   'breakpoints-001/pcc-live-breakpoint-card-measurements.json',
   'breakpoints-001/pcc-live-breakpoint-touch-targets.json',
+  'breakpoints-001/pcc-live-breakpoint-issue-register.json',
+  'breakpoints-001/pcc-live-breakpoint-issue-register.md',
   'accessibility-001/pcc-live-accessibility-evidence.json',
   'accessibility-001/pcc-live-accessibility-evidence.md',
   'accessibility-001/pcc-live-axe-summary.json',

@@ -126,6 +126,20 @@ first-screen-review-index.md
 
 These screenshot artifacts remain operator/expert review support and are not scoring authority.
 
+Breakpoint lane closeout support artifacts include:
+
+```text
+pcc-live-breakpoint-evidence.json
+pcc-live-breakpoint-evidence.md
+pcc-live-breakpoint-matrix.json
+pcc-live-breakpoint-card-measurements.json
+pcc-live-breakpoint-touch-targets.json
+pcc-live-breakpoint-issue-register.json
+pcc-live-breakpoint-issue-register.md
+```
+
+Breakpoint issue-register artifacts are review support only and are not scoring authority.
+
 ## 7. Commit Eligibility
 
 Commit-eligible after operator review and scrubbing:

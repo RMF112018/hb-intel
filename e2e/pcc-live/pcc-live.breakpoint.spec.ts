@@ -74,13 +74,13 @@ test('Breakpoint writer preserves sanitized output policy', async () => {
           browserViewportHeight: 844,
           measuredContainerWidth: 360,
           measuredContainerHeight: 700,
-          observedMode: 'phone',
+          observedMode: 'tabletPortrait',
           derivedMode: 'phone',
           expectedColumns: 1,
           observedGridSafety: 'enabled',
-          horizontalScrollDetected: false,
-          viewportOverflowX: 0,
-          documentScrollWidth: 390,
+          horizontalScrollDetected: true,
+          viewportOverflowX: 24,
+          documentScrollWidth: 414,
           documentClientWidth: 390,
         },
         cards: [
@@ -99,10 +99,10 @@ test('Breakpoint writer preserves sanitized output policy', async () => {
             measuredHeight: 320,
             boundingWidth: 350,
             boundingHeight: 310,
-            directChildOfGrid: true,
-            clipped: false,
-            overflowX: false,
-            overflowY: false,
+            directChildOfGrid: false,
+            clipped: true,
+            overflowX: true,
+            overflowY: true,
             minTouchTargetIssueCount: 1,
           },
         ],
@@ -153,10 +153,15 @@ test('Breakpoint writer preserves sanitized output policy', async () => {
       },
       artifactPaths: [
         curated,
+        'docs/architecture/evidence/pcc-live/run-001/pcc-live-breakpoint-issue-register.json',
+        'docs/architecture/evidence/pcc-live/run-001/pcc-live-breakpoint-issue-register.md',
         'test-results/raw-output.json',
         'playwright-report/index.html',
         '.auth/private.json',
         'tmp/storageState.json',
+        'tmp/cookies-dump.json',
+        'tmp/tokens-dump.json',
+        'tmp/sessions-dump.json',
         'out/trace.zip',
         'out/video.webm',
         'out/network.har',
@@ -168,8 +173,18 @@ test('Breakpoint writer preserves sanitized output policy', async () => {
     const matrixJson = fs.readFileSync(result.matrixJsonPath, 'utf-8');
     const cardsJson = fs.readFileSync(result.cardMeasurementsJsonPath, 'utf-8');
     const touchJson = fs.readFileSync(result.touchTargetsJsonPath, 'utf-8');
+    const issueJson = fs.readFileSync(result.issueRegisterJsonPath, 'utf-8');
+    const issueMd = fs.readFileSync(result.issueRegisterMarkdownPath, 'utf-8');
 
-    const allFiles = [evidenceJson, evidenceMd, matrixJson, cardsJson, touchJson];
+    const allFiles = [
+      evidenceJson,
+      evidenceMd,
+      matrixJson,
+      cardsJson,
+      touchJson,
+      issueJson,
+      issueMd,
+    ];
 
     expect(evidenceJson).toContain(curated);
     expect(evidenceMd).toContain(curated);
@@ -183,8 +198,11 @@ test('Breakpoint writer preserves sanitized output policy', async () => {
       '?x=1',
       'storageState',
       'cookie',
+      'cookies',
       'token',
+      'tokens',
       'session',
+      'sessions',
       '.auth',
       'test-results',
       'playwright-report',
@@ -202,6 +220,54 @@ test('Breakpoint writer preserves sanitized output policy', async () => {
     expect(evidenceMd).toContain('operator-review required');
     expect(evidenceMd).toContain('not a final scorecard result');
     expect(evidenceJson).not.toContain('"captured"');
+    expect(issueMd).toContain('Review support only.');
+    expect(issueMd).toContain('No hard stop is passed or failed.');
+    expect(issueMd).toContain('No final score is calculated.');
+    expect(issueMd).toContain('No EV is finally captured.');
+    expect(issueMd).toContain('No Phase 4 readiness is approved.');
+
+    expect(result.issueRegisterIssueCount).toBeGreaterThan(0);
+    expect(issueMd).toContain('## mode-mismatch');
+    expect(issueMd).toContain('## horizontal-overflow');
+    expect(issueMd).toContain('## card-clipping');
+    expect(issueMd).toContain('## card-overflow-x');
+    expect(issueMd).toContain('## card-overflow-y');
+    expect(issueMd).toContain('## direct-child-invariant');
+    expect(issueMd).toContain('## touch-target-size');
+    expect(issueMd).toContain('### project-home (Project Home)');
+    expect(issueMd).toContain('#### phone-390 (Phone 390)');
+
+    const issuePayload = JSON.parse(issueJson) as {
+      runId: string;
+      generatedAtIso: string;
+      summary: { totalIssueCount: number; issueCountByType: Record<string, number> };
+      issues: Array<{
+        issueType: string;
+        evRefs: string[];
+        pillarRefs: string[];
+        hardStopRefs: string[];
+        operatorReviewRequired: boolean;
+      }>;
+      disclaimer: string;
+    };
+    expect(issuePayload.runId).toBe('writer-test');
+    expect(issuePayload.generatedAtIso.length).toBeGreaterThan(0);
+    expect(issuePayload.summary.totalIssueCount).toBe(issuePayload.issues.length);
+    expect(issuePayload.summary.issueCountByType['mode-mismatch']).toBeGreaterThan(0);
+    expect(issuePayload.summary.issueCountByType['horizontal-overflow']).toBeGreaterThan(0);
+    expect(issuePayload.summary.issueCountByType['card-clipping']).toBeGreaterThan(0);
+    expect(issuePayload.summary.issueCountByType['card-overflow-x']).toBeGreaterThan(0);
+    expect(issuePayload.summary.issueCountByType['card-overflow-y']).toBeGreaterThan(0);
+    expect(issuePayload.summary.issueCountByType['direct-child-invariant']).toBeGreaterThan(0);
+    expect(issuePayload.summary.issueCountByType['touch-target-size']).toBeGreaterThan(0);
+    expect(issuePayload.disclaimer).toContain('Review support only');
+
+    for (const row of issuePayload.issues) {
+      expect(row.operatorReviewRequired).toBe(true);
+      expect(row.evRefs.length).toBeGreaterThan(0);
+      expect(row.pillarRefs.length).toBeGreaterThan(0);
+      expect(row.hardStopRefs.length).toBeGreaterThan(0);
+    }
 
     const cardRecords = JSON.parse(cardsJson) as Array<{ minTouchTargetIssueCount: number }>;
     const touchRecords = JSON.parse(touchJson) as Array<{ belowRecommendedSize: boolean }>;
@@ -291,6 +357,8 @@ test('Live breakpoint capture self-skips without live env', async ({ page }) => 
       path.join(outputDir, 'pcc-live-breakpoint-matrix.json'),
       path.join(outputDir, 'pcc-live-breakpoint-card-measurements.json'),
       path.join(outputDir, 'pcc-live-breakpoint-touch-targets.json'),
+      path.join(outputDir, 'pcc-live-breakpoint-issue-register.json'),
+      path.join(outputDir, 'pcc-live-breakpoint-issue-register.md'),
     ],
   });
 
@@ -299,6 +367,8 @@ test('Live breakpoint capture self-skips without live env', async ({ page }) => 
   expect(fs.existsSync(written.matrixJsonPath)).toBe(true);
   expect(fs.existsSync(written.cardMeasurementsJsonPath)).toBe(true);
   expect(fs.existsSync(written.touchTargetsJsonPath)).toBe(true);
+  expect(fs.existsSync(written.issueRegisterJsonPath)).toBe(true);
+  expect(fs.existsSync(written.issueRegisterMarkdownPath)).toBe(true);
 
   expect(new Set(captured.surfaces.map((s) => s.surfaceId)).size).toBe(PCC_LIVE_SURFACES.length);
   expect(new Set(captured.surfaces.map((s) => s.viewportId)).size).toBe(
