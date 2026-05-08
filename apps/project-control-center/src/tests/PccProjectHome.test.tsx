@@ -474,6 +474,30 @@ describe('Project Home bento dashboard', () => {
     expect(body!.textContent).toContain(SAMPLE_PROJECT_PROFILE.projectNumber);
   });
 
+  // ── Wave 15A wave-b6 Prompt 04 — core operational cluster order ──────
+
+  it('Project Home fixture path orders the core operational cluster before state/deferred/reference cards', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    const titles = Array.from(grid!.children)
+      .filter(
+        (child): child is HTMLElement =>
+          child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
+      )
+      .map((card) => card.querySelector('h2,h3,h4')?.textContent?.trim() ?? '(untitled)');
+    const idx = (t: string): number => {
+      const i = titles.indexOf(t);
+      expect(i, `card '${t}' should appear`).toBeGreaterThanOrEqual(0);
+      return i;
+    };
+    expect(idx('Approvals & Checkpoints')).toBeLessThan(idx('Project Readiness'));
+    expect(idx('Project Readiness')).toBeLessThan(idx('Document Control Center'));
+    expect(idx('Document Control Center')).toBeLessThan(idx('Site Health Summary'));
+    expect(idx('Site Health Summary')).toBeLessThan(idx('Missing Configurations'));
+    expect(idx('Missing Configurations')).toBeLessThan(idx('External Platforms'));
+  });
+
   // ── Wave 15A wave-b6 Prompt 02 — Project Command Summary posture row ──
 
   it('Project Intelligence card renders the first-fold command summary row with source and HBI advisory cues (fixture path)', () => {

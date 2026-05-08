@@ -52,11 +52,11 @@ export const PccProjectHome: FC<PccProjectHomeProps> = ({ readModelClient }) => 
     <Fragment>
       <PccProjectIntelligenceCard commandSummary={fixtureCommandSummary} />
       <PccPriorityActionsCard />
-      <PccMissingConfigurationsCard />
-      <PccSiteHealthSummaryCard />
       <PccApprovalsCheckpointsCard />
       <PccProjectReadinessCard />
       <PccDocumentControlCard />
+      <PccSiteHealthSummaryCard />
+      <PccMissingConfigurationsCard />
       <PccExternalSystemsCard />
       <PccTeamSnapshotCard />
       <PccRecentActivityCard />

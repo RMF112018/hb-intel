@@ -59,23 +59,23 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         state={viewModel?.priorityActions.state ?? 'preview'}
         actions={viewModel?.priorityActions.data}
       />
-      <PccMissingConfigurationsCard
-        state={viewModel?.missingConfigurations.state ?? 'preview'}
-        missingConfigurations={viewModel?.missingConfigurations.data}
-      />
-      <PccSiteHealthSummaryCard
-        state={viewModel?.siteHealth.state ?? 'preview'}
-        summary={viewModel?.siteHealth.data}
-      />
-      <PccProjectHomeProcoreSnapshotCard
-        state={viewModel?.procoreSnapshot.state ?? 'preview'}
-        snapshot={viewModel?.procoreSnapshot.data}
-      />
       <PccApprovalsCheckpointsCard viewModel={viewModel?.approvalsCard} />
       <PccProjectReadinessCard />
       <PccDocumentControlCard
         state={viewModel?.documentControl.state ?? 'preview'}
         sources={viewModel?.documentControl.data}
+      />
+      <PccSiteHealthSummaryCard
+        state={viewModel?.siteHealth.state ?? 'preview'}
+        summary={viewModel?.siteHealth.data}
+      />
+      <PccMissingConfigurationsCard
+        state={viewModel?.missingConfigurations.state ?? 'preview'}
+        missingConfigurations={viewModel?.missingConfigurations.data}
+      />
+      <PccProjectHomeProcoreSnapshotCard
+        state={viewModel?.procoreSnapshot.state ?? 'preview'}
+        snapshot={viewModel?.procoreSnapshot.data}
       />
       <PccExternalSystemsCard />
       <PccTeamSnapshotCard />

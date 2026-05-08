@@ -1,12 +1,15 @@
 /**
  * Project Home composition order — first-impression hierarchy contract.
  *
- * Asserts the bento card ordering surfaces high-frequency operational
- * signals (priority actions → setup gaps → operational health → pending
- * decisions → readiness) before reference / history content. Order
- * markers via card heading text scoped to direct bento children — never
- * sibling indexes — so future cards can be added without re-rewriting
- * the ordering invariant (per feedback_per_lane_marker_assertions).
+ * Asserts the locked Wave 15A wave-b6 Prompt 04 card sequence on both
+ * render paths using the direct-child bento card list (not nested
+ * heading scans) so card-body content cannot contaminate the order.
+ *
+ * Read-model order asserts inside `waitFor` so both async hooks
+ * (`useProjectHomeReadModel` and `useUnifiedLifecycleReadModel`) settle
+ * before the exhaustive sequence is read — title presence alone is not
+ * a sufficient signal because a card title can render before its body
+ * settles.
  */
 
 import { afterEach, describe, expect, it } from 'vitest';
@@ -18,50 +21,55 @@ afterEach(() => {
   cleanup();
 });
 
-function readCardTitlesInOrder(grid: Element): string[] {
-  // Wave 15A wave-b3 Prompt 04 — Tier 1 command cards now render `h2`
-  // (per `01_CARD_TIER_REGION_CONTRACT.md`) while every other card
-  // stays `h3`. Use the heading-tag union so the Project Intelligence
-  // hero card's title participates in the ordering check.
-  return Array.from(grid.querySelectorAll('[data-pcc-card] :is(h2,h3,h4)')).map((el) =>
-    (el.textContent ?? '').trim(),
-  );
+function readDirectCardTitlesInOrder(grid: Element): string[] {
+  return Array.from(grid.children)
+    .filter(
+      (child): child is HTMLElement =>
+        child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
+    )
+    .map((card) => card.querySelector('h2,h3,h4')?.textContent?.trim() ?? '(untitled)');
 }
 
-function indexOfTitle(titles: readonly string[], expected: string): number {
-  const idx = titles.indexOf(expected);
-  expect(idx, `card '${expected}' should appear in the bento grid`).toBeGreaterThanOrEqual(0);
-  return idx;
-}
+const FIXTURE_EXPECTED_ORDER = [
+  'Project Intelligence',
+  'Priority Actions',
+  'Approvals & Checkpoints',
+  'Project Readiness',
+  'Document Control Center',
+  'Site Health Summary',
+  'Missing Configurations',
+  'External Platforms',
+  'Team Snapshot',
+  'Recent Activity',
+] as const;
+
+const READ_MODEL_EXPECTED_ORDER = [
+  'Project Intelligence',
+  'Priority Actions',
+  'Approvals & Checkpoints',
+  'Project Readiness',
+  'Document Control Center',
+  'Site Health Summary',
+  'Missing Configurations',
+  'Procore snapshot',
+  'External Platforms',
+  'Team Snapshot',
+  'Recent Activity',
+  'Lifecycle Timeline',
+  'Project Memory',
+  'Project Lens',
+  'Related Records',
+  'Ask HBI — Grounded Project Answers',
+] as const;
 
 describe('Project Home — first-impression composition order', () => {
   describe('fixture path', () => {
-    it('renders the priority cluster (priority actions, missing configurations, site health, approvals, readiness) before reference and history cards', () => {
+    it('renders the locked Wave 15A wave-b6 Prompt 04 card sequence as direct bento children', () => {
       const { container } = render(<PccApp forceMode="desktop" />);
       const grid = container.querySelector('[data-pcc-bento-grid]');
       expect(grid, 'bento grid should render').not.toBeNull();
-      const titles = readCardTitlesInOrder(grid!);
-
-      const intelligence = indexOfTitle(titles, 'Project Intelligence');
-      const priority = indexOfTitle(titles, 'Priority Actions');
-      const missingConfig = indexOfTitle(titles, 'Missing Configurations');
-      const siteHealth = indexOfTitle(titles, 'Site Health Summary');
-      const approvals = indexOfTitle(titles, 'Approvals & Checkpoints');
-      const readiness = indexOfTitle(titles, 'Project Readiness');
-      const documents = indexOfTitle(titles, 'Document Control Center');
-      const externalSystems = indexOfTitle(titles, 'External Platforms');
-      const recentActivity = indexOfTitle(titles, 'Recent Activity');
-
-      // Hero is always first.
-      expect(intelligence).toBe(0);
-      // Priority cluster comes before reference + history cards.
-      expect(priority).toBeLessThan(missingConfig);
-      expect(missingConfig).toBeLessThan(siteHealth);
-      expect(siteHealth).toBeLessThan(approvals);
-      expect(approvals).toBeLessThan(readiness);
-      expect(readiness).toBeLessThan(documents);
-      expect(documents).toBeLessThan(externalSystems);
-      expect(externalSystems).toBeLessThan(recentActivity);
+      const titles = readDirectCardTitlesInOrder(grid!);
+      expect(titles).toEqual([...FIXTURE_EXPECTED_ORDER]);
     });
 
     it('Missing Configurations card adopts the standard footprint for first-scan presence', () => {
@@ -83,45 +91,20 @@ describe('Project Home — first-impression composition order', () => {
   });
 
   describe('read-model path', () => {
-    it('renders priority, missing-config, site-health, procore, approvals, and readiness before document/reference and unified-lifecycle cards', async () => {
+    it('renders the locked Wave 15A wave-b6 Prompt 04 16-card sequence (waits for both async hooks to settle)', async () => {
       const client = createPccFixtureReadModelClient();
       const { container } = render(<PccApp forceMode="desktop" readModelClient={client} />);
 
-      // The read-model path renders Procore + unified lifecycle + Ask HBI
-      // after a microtask resolves; wait for at least the Procore snapshot
-      // card heading to appear before reading order.
+      // Wrap the full sequence assertion in waitFor: both
+      // useProjectHomeReadModel and useUnifiedLifecycleReadModel resolve
+      // on independent microtasks, and a card title can render before
+      // its body settles. Wait until the exhaustive sequence matches.
       await waitFor(() => {
         const grid = container.querySelector('[data-pcc-bento-grid]');
         expect(grid).not.toBeNull();
-        const titles = readCardTitlesInOrder(grid!);
-        expect(titles).toContain('Procore snapshot');
+        const titles = readDirectCardTitlesInOrder(grid!);
+        expect(titles).toEqual([...READ_MODEL_EXPECTED_ORDER]);
       });
-
-      const grid = container.querySelector('[data-pcc-bento-grid]')!;
-      const titles = readCardTitlesInOrder(grid);
-
-      const intelligence = indexOfTitle(titles, 'Project Intelligence');
-      const priority = indexOfTitle(titles, 'Priority Actions');
-      const missingConfig = indexOfTitle(titles, 'Missing Configurations');
-      const siteHealth = indexOfTitle(titles, 'Site Health Summary');
-      const procoreSnapshot = indexOfTitle(titles, 'Procore snapshot');
-      const approvals = indexOfTitle(titles, 'Approvals & Checkpoints');
-      const readiness = indexOfTitle(titles, 'Project Readiness');
-      const documents = indexOfTitle(titles, 'Document Control Center');
-      const recentActivity = indexOfTitle(titles, 'Recent Activity');
-
-      expect(intelligence).toBe(0);
-      expect(priority).toBeLessThan(missingConfig);
-      expect(missingConfig).toBeLessThan(siteHealth);
-      expect(siteHealth).toBeLessThan(procoreSnapshot);
-      expect(procoreSnapshot).toBeLessThan(approvals);
-      expect(approvals).toBeLessThan(readiness);
-      expect(readiness).toBeLessThan(documents);
-      expect(documents).toBeLessThan(recentActivity);
-
-      // Unified-lifecycle and Ask HBI sections sit after the first-scan + reference cluster.
-      const lifecycleTimeline = indexOfTitle(titles, 'Lifecycle Timeline');
-      expect(recentActivity).toBeLessThan(lifecycleTimeline);
     });
   });
 });
