@@ -16,13 +16,28 @@ This lane establishes a safe, opt-in Playwright harness for the Project Control 
 - Final scorecard scoring or hard-stop pass status.
 - Full screenshot, breakpoint, accessibility, or report pipelines.
 
-## Required environment variables
+## Defaulted environment variables (override-aware)
 
-- `PCC_LIVE_SITE_URL`
-- `PCC_LIVE_PAGE_URL`
-- `PCC_LIVE_STORAGE_STATE`
-- `PCC_EVIDENCE_OUTPUT_DIR`
-- `PCC_EXPECTED_PACKAGE_VERSION`
+The lane resolves these to safe defaults when unset. Any explicit, non-empty environment value overrides the default.
+
+| Variable                       | Default                                                                                               |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `PCC_LIVE_SITE_URL`            | `https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject`                           |
+| `PCC_LIVE_PAGE_URL`            | `https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject/SitePages/CollabHome.aspx` |
+| `PCC_LIVE_STORAGE_STATE`       | `$HOME/.pcc-live-auth/pcc-live-storage-state.json`                                                    |
+| `PCC_EVIDENCE_OUTPUT_DIR`      | `<repo-root>/docs/architecture/evidence/pcc-live`                                                     |
+| `PCC_EXPECTED_PACKAGE_VERSION` | derived from `apps/project-control-center/config/package-solution.json` (`solution.version`)          |
+
+In the local repo at `/Users/bobbyfetting/hb-intel`, the default evidence root resolves to `/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/`. The expected package version is read at runtime from `apps/project-control-center/config/package-solution.json`; do not hard-code a version in env or scripts.
+
+Override examples:
+
+```bash
+export PCC_LIVE_PAGE_URL="https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject/SitePages/<other-page>.aspx"
+export PCC_LIVE_STORAGE_STATE="$HOME/.config/hbc/pcc-live-storageState.json"
+export PCC_EVIDENCE_OUTPUT_DIR="$HOME/tmp/pcc-live-evidence/<run-id>"
+export PCC_EXPECTED_PACKAGE_VERSION="1.0.0.17"
+```
 
 ## Optional environment variables
 
@@ -30,20 +45,33 @@ This lane establishes a safe, opt-in Playwright harness for the Project Control 
 - `PCC_LIVE_EDIT_PAGE_URL`
 - `PCC_LIVE_UNAUTHORIZED_STORAGE_STATE`
 - `PCC_LIVE_UNAUTHORIZED_PAGE_URL`
-- `PCC_LIVE_ENABLE_CONDITIONAL`
+- `PCC_LIVE_ENABLE_CONDITIONAL` — only the literal string `true` (case-insensitive) enables conditional behavior; absence, blank, `false`, `0`, or any other value remains disabled.
+
+## Env resolver status values
+
+`checkPccLiveEnv()` / `skipIfMissingPccLiveEnv(test)` return one of:
+
+- `ready` — defaults (or explicit overrides) resolve and the storageState file exists.
+- `missing-storage-state` — resolved storageState path (default or explicit) does not exist on disk.
+- `invalid-config` — repo root cannot be located, or `package-solution.json` is missing/unreadable/malformed/lacks `solution.version`.
+- `package-version-mismatch` — `solution.features[].version` disagrees with `solution.version`. Surfaces even when `PCC_EXPECTED_PACKAGE_VERSION` is explicitly set.
+- `missing-env` — retained on the type for compatibility; unreachable in the defaulted resolver flow.
 
 ## Tenant target example
 
 - Site: `https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject`
-- Page: `https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject/SitePages/<actual-page>.aspx`
+- Page: `https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject/SitePages/CollabHome.aspx`
 
-## Safe storageState capture
+## Safe storageState capture (default path)
 
 ```bash
-pnpm exec playwright codegen "$PCC_LIVE_PAGE_URL" --save-storage "$HOME/.config/hbc/pcc-live-storageState.json"
+mkdir -p "$HOME/.pcc-live-auth"
+pnpm exec playwright codegen \
+  "https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject/SitePages/CollabHome.aspx" \
+  --save-storage "$HOME/.pcc-live-auth/pcc-live-storage-state.json"
 ```
 
-Store auth state outside the repo (prefer `$HOME/.config/hbc/`). Rotate periodically. Never paste storageState contents into chat, tickets, or docs.
+Store auth state outside the repo (default `$HOME/.pcc-live-auth/`, alternative `$HOME/.config/hbc/`). Rotate periodically. Never paste storageState contents into chat, tickets, or docs. The `.pcc-live-auth/` directory and `*storage-state*.json` / `*pcc*storage*.json` files are gitignored.
 
 ## Commands
 
@@ -100,8 +128,9 @@ This lane is opt-in only and is not required in default CI/test pipelines.
 
 ## Troubleshooting
 
-- Missing env: lane self-skips with missing variable names.
-- Missing storageState: lane self-skips with file-missing message.
+- Missing storageState: lane self-skips with `missing-storage-state`. Capture using the command above (default path) or set `PCC_LIVE_STORAGE_STATE` to your existing capture.
+- Invalid config: lane self-skips with `invalid-config` when the repo root cannot be resolved or `package-solution.json` is missing/unreadable/malformed.
+- Package version mismatch: lane self-skips with `package-version-mismatch` when solution and feature versions disagree in `apps/project-control-center/config/package-solution.json`. Reconcile in source; do not work around with `PCC_EXPECTED_PACKAGE_VERSION`.
 - Wrong page URL: smoke test fails with clear instruction to update `PCC_LIVE_PAGE_URL`.
 - Web part not installed: tab-marker test self-skips when `[data-pcc-tab-id]` is absent.
 - Expired auth/session: refresh storageState and retry.

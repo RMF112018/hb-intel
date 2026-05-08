@@ -1,11 +1,26 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
 import { defineConfig, devices, type Project } from '@playwright/test';
 
-const storageState = process.env.PCC_LIVE_STORAGE_STATE?.trim();
+import { PCC_DEFAULT_STORAGE_STATE_RELATIVE_TO_HOME } from './e2e/pcc-live/pcc-live.env';
+
+const explicitStorageState = process.env.PCC_LIVE_STORAGE_STATE?.trim();
+const defaultStorageState = path.join(os.homedir(), PCC_DEFAULT_STORAGE_STATE_RELATIVE_TO_HOME);
+const resolvedStorageState =
+  explicitStorageState && explicitStorageState.length > 0
+    ? explicitStorageState
+    : defaultStorageState;
+const storageStateForRunner = fs.existsSync(resolvedStorageState)
+  ? resolvedStorageState
+  : undefined;
+
 const braveExecutablePath = process.env.PCC_LIVE_BRAVE_EXECUTABLE_PATH?.trim();
 
 const baseUse = {
   ...devices['Desktop Chrome'],
-  storageState: storageState && storageState.length > 0 ? storageState : undefined,
+  storageState: storageStateForRunner,
   trace: 'retain-on-failure' as const,
 };
 

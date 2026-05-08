@@ -89,6 +89,7 @@ test-results/
 *storage-state*.json
 *pcc*storage*.json
 *pcc*auth*.json
+.pcc-live-auth/
 # Claude Code local settings (may contain approved commands with env-specific values)
 .claude/settings.local.json
 .claude/plans/spicy-forging-knuth.md

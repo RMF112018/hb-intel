@@ -21,14 +21,33 @@ docs/reference/spfx-surfaces/project-control-center/PCC_100_Point_UIUX_Evidence_
 docs/reference/spfx-surfaces/project-control-center/PCC_Playwright_Evidence_Subset_Map.md
 ```
 
-## 3. Required Environment
+## 3. Environment (defaults + overrides)
+
+The five primary variables default to safe values. Export only the ones you intend to override; the lane resolves the rest at runtime.
+
+| Variable                       | Default                                                                                               |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `PCC_LIVE_SITE_URL`            | `https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject`                           |
+| `PCC_LIVE_PAGE_URL`            | `https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject/SitePages/CollabHome.aspx` |
+| `PCC_LIVE_STORAGE_STATE`       | `$HOME/.pcc-live-auth/pcc-live-storage-state.json`                                                    |
+| `PCC_EVIDENCE_OUTPUT_DIR`      | `<repo-root>/docs/architecture/evidence/pcc-live`                                                     |
+| `PCC_EXPECTED_PACKAGE_VERSION` | derived from `apps/project-control-center/config/package-solution.json` (`solution.version`)          |
+
+In the local repo at `/Users/bobbyfetting/hb-intel`, the default evidence root resolves to:
+
+```text
+/Users/bobbyfetting/hb-intel/docs/architecture/evidence/pcc-live/
+```
+
+The default evidence root is intentionally **not** the OS temp directory, **not** `test-results/`, and **not** `playwright-report/`. The version is derived at runtime — do not hard-code a value in scripts or env. Mismatched solution/feature versions surface as the `package-version-mismatch` resolver status.
+
+Override examples (only export what you need to change):
 
 ```bash
-export PCC_LIVE_SITE_URL="https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject"
-export PCC_LIVE_PAGE_URL="https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject/SitePages/<page>.aspx"
+export PCC_LIVE_PAGE_URL="https://hedrickbrotherscom.sharepoint.com/sites/26999HBCentralTestProject/SitePages/<other-page>.aspx"
 export PCC_LIVE_STORAGE_STATE="$HOME/.config/hbc/pcc-live-storageState.json"
-export PCC_EVIDENCE_OUTPUT_DIR="/tmp/pcc-live-evidence/<run-id>"
-export PCC_EXPECTED_PACKAGE_VERSION="<spfx-package-version>"
+export PCC_EVIDENCE_OUTPUT_DIR="$HOME/tmp/pcc-live-evidence/<run-id>"
+export PCC_EXPECTED_PACKAGE_VERSION="1.0.0.17"
 ```
 
 Optional:
@@ -54,11 +73,13 @@ Never commit:
 - Unsanitized console output.
 - Unscrubbed screenshots.
 
-Store auth state outside the repo, preferably:
+Store auth state outside the repo. The default path is:
 
 ```text
-$HOME/.config/hbc/
+$HOME/.pcc-live-auth/pcc-live-storage-state.json
 ```
+
+An alternative (`$HOME/.config/hbc/`) remains supported when supplied via `PCC_LIVE_STORAGE_STATE`. Capture using the documented `playwright codegen --save-storage` command in `e2e/pcc-live/README.md`. The `.pcc-live-auth/` directory and `*storage-state*.json` / `*pcc*storage*.json` filenames are gitignored.
 
 ## 5. Commands
 
