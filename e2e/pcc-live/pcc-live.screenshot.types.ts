@@ -1,4 +1,5 @@
 import type { PccEvidenceId } from './pcc-evidence.types';
+import type { PccHardStopRef, PccScorecardPillarRef } from './pcc-evidence.types';
 import type { PccLiveSurfaceId } from './pcc-live.surfaces';
 
 export const PCC_SCREENSHOT_INITIAL_EVIDENCE_IDS = [
@@ -104,4 +105,24 @@ export interface PccScreenshotEvidenceRun {
   };
   warnings: string[];
   disclaimer: string;
+}
+
+export interface PccScreenshotManifestByEvRow {
+  evId: PccEvidenceId;
+  pillarRefs: readonly PccScorecardPillarRef[];
+  hardStopRefs: readonly PccHardStopRef[];
+  surfaceId: PccLiveSurfaceId;
+  surfaceLabel: string;
+  screenshotKind: PccScreenshotKind;
+  fileName: string;
+  path: string;
+  displayPath: string;
+  viewportWidth: number;
+  viewportHeight: number;
+  operatorReviewRequired: true;
+  artifactPolicy:
+    | 'operator-review-required'
+    | 'not-auto-commit-eligible'
+    | 'commit-eligible-after-scrub';
+  reviewPrompts: readonly string[];
 }

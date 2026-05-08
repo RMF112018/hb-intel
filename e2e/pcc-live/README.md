@@ -174,6 +174,9 @@ Artifacts are written under `PCC_EVIDENCE_OUTPUT_DIR` in a run folder:
 - `pcc-live-screenshot-evidence.md`
 - `pcc-live-screenshot-inventory.json`
 - `pcc-live-dom-card-summary.json`
+- `screenshot-contact-sheet.md`
+- `screenshot-manifest-by-ev.json`
+- `first-screen-review-index.md`
 - `screenshots/*.png`
 
 Policy boundary:
@@ -189,3 +192,4 @@ pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pc
 ```
 
 This is evidence collection and traceability support only; it is not a final scorecard result.
+Screenshot contact sheet / manifest / first-screen index are closeout support only and are not scoring authority.

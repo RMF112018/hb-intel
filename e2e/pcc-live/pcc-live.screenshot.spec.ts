@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { expect, test } from '@playwright/test';
+import { chromium, expect, test } from '@playwright/test';
+import { PCC_EVIDENCE_REGISTRY } from './pcc-evidence.registry';
 import { REQUIRED_PCC_EVIDENCE_IDS, type PccEvidenceId } from './pcc-evidence.types';
 import { skipIfMissingPccLiveEnv } from './pcc-live.env';
 import { PccLivePageObject } from './pcc-live.page-object';
@@ -18,7 +19,7 @@ function sanitizeHeadingForTest(input: string): string {
   const noQuery = input.replace(/\?.*$/g, '');
   const noEmail = noQuery.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted-email]');
   const noCred = noEmail.replace(
-    /\b(storageState|storage-state|cookie|token|auth|session|secrets)\b/gi,
+    /\b(storageState|storage-state|cookies?|tokens?|auth|sessions?|secrets)\b/gi,
     '[redacted-cred]',
   );
   const noBlob = noCred.replace(
@@ -124,9 +125,15 @@ test('Screenshot writer preserves sanitized output policy', async () => {
     const markdownText = fs.readFileSync(result.evidenceMarkdownPath, 'utf-8');
     const inventoryText = fs.readFileSync(result.inventoryJsonPath, 'utf-8');
     const domSummaryText = fs.readFileSync(result.domSummaryJsonPath, 'utf-8');
+    const contactSheetText = fs.readFileSync(result.screenshotContactSheetPath, 'utf-8');
+    const manifestText = fs.readFileSync(result.screenshotManifestByEvPath, 'utf-8');
+    const firstScreenText = fs.readFileSync(result.firstScreenReviewIndexPath, 'utf-8');
 
     expect(fs.existsSync(result.inventoryJsonPath)).toBe(true);
     expect(fs.existsSync(result.domSummaryJsonPath)).toBe(true);
+    expect(fs.existsSync(result.screenshotContactSheetPath)).toBe(true);
+    expect(fs.existsSync(result.screenshotManifestByEvPath)).toBe(true);
+    expect(fs.existsSync(result.firstScreenReviewIndexPath)).toBe(true);
 
     expect(jsonText).toContain(curated);
     expect(markdownText).toContain(curated);
@@ -142,14 +149,18 @@ test('Screenshot writer preserves sanitized output policy', async () => {
       '?x=1',
       'storageState',
       'cookie',
+      'cookies',
       'token',
+      'tokens',
       'session',
+      'sessions',
       '.auth',
       'test-results',
       'playwright-report',
       'trace.zip',
       'video.webm',
       'network.har',
+      'PCC_100_Point_UIUX_Mold_Breaker_Scorecard_v2.md',
     ];
 
     for (const bad of forbidden) {
@@ -157,9 +168,30 @@ test('Screenshot writer preserves sanitized output policy', async () => {
       expect(markdownText).not.toContain(bad);
       expect(inventoryText).not.toContain(bad);
       expect(domSummaryText).not.toContain(bad);
+      expect(contactSheetText).not.toContain(bad);
+      expect(manifestText).not.toContain(bad);
+      expect(firstScreenText).not.toContain(bad);
     }
 
     expect(markdownText).toContain('operator-review required');
+    expect(contactSheetText).toContain('operator-review-required');
+    expect(contactSheetText).toContain('commit-eligible-after-scrub');
+    expect(contactSheetText).toContain('Surface');
+    expect(contactSheetText).toContain('Kind');
+    expect(contactSheetText).toContain('Viewport');
+    expect(contactSheetText).toContain('File');
+    expect(firstScreenText).toContain('expert-review-required');
+    expect(firstScreenText).toContain('operator-review-required');
+    expect(firstScreenText).toContain('command-center clarity');
+    expect(firstScreenText).not.toContain('full-page');
+    expect(firstScreenText).not.toContain('scroll-segment');
+
+    expect(contactSheetText).toContain('No final score is calculated.');
+    expect(contactSheetText).toContain('No hard stop is passed or failed.');
+    expect(contactSheetText).toContain('No EV is finally captured.');
+    expect(contactSheetText).toContain('No Phase 4 readiness is approved.');
+
+    expect(contactSheetText).not.toMatch(/!\[[^\]]*]\((\/|[A-Za-z]:\\)/);
 
     const inventory = JSON.parse(inventoryText) as Array<{
       operatorReviewRequired: boolean;
@@ -173,7 +205,51 @@ test('Screenshot writer preserves sanitized output policy', async () => {
       expect(shot.path).not.toContain('.auth');
     }
 
-    expect(jsonText).not.toContain('"captured"');
+    const manifestRows = JSON.parse(manifestText) as Array<{
+      evId: string;
+      pillarRefs: string[];
+      hardStopRefs: string[];
+      surfaceId: string;
+      surfaceLabel: string;
+      screenshotKind: string;
+      fileName: string;
+      viewportWidth: number;
+      viewportHeight: number;
+      operatorReviewRequired: boolean;
+      artifactPolicy: string;
+      reviewPrompts: string[];
+      displayPath: string;
+    }>;
+    expect(manifestRows.length).toBeGreaterThan(0);
+    const first = manifestRows[0];
+    expect(first.evId).toMatch(/^EV-\d+$/);
+    expect(first.pillarRefs.length).toBeGreaterThan(0);
+    expect(first.hardStopRefs.length).toBeGreaterThan(0);
+    expect(first.surfaceId).toBe('project-home');
+    expect(first.surfaceLabel).toBe('Project Home');
+    expect(first.screenshotKind.length).toBeGreaterThan(0);
+    expect(first.fileName.length).toBeGreaterThan(0);
+    expect(first.viewportWidth).toBeGreaterThan(0);
+    expect(first.viewportHeight).toBeGreaterThan(0);
+    expect(first.operatorReviewRequired).toBe(true);
+    expect(first.artifactPolicy).toBe('operator-review-required');
+    expect(first.reviewPrompts.length).toBeGreaterThan(0);
+    for (const row of manifestRows) {
+      const registry = PCC_EVIDENCE_REGISTRY.find((record) => record.id === row.evId);
+      expect(registry).toBeDefined();
+      expect(row.pillarRefs).toEqual(registry!.pillarRefs);
+      expect(row.hardStopRefs).toEqual(registry!.hardStopRefs);
+      expect(row.displayPath.startsWith('/')).toBe(false);
+    }
+
+    const noClaimsText =
+      `${jsonText}\n${markdownText}\n${contactSheetText}\n${manifestText}\n${firstScreenText}`.toLowerCase();
+    expect(noClaimsText).not.toContain('hard stop passed');
+    expect(noClaimsText).not.toContain('hard stop failed');
+    expect(noClaimsText).not.toContain('100/100');
+    expect(noClaimsText).not.toContain('56/56 achieved');
+    expect(noClaimsText).not.toContain('phase 4 ready');
+    expect(noClaimsText).not.toContain('"captured"');
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
@@ -187,6 +263,8 @@ test('DOM card summary sanitizer trims unsafe heading text', () => {
   expect(sanitized).not.toContain('qa.user@hedrickbrothers.com');
   expect(sanitized).not.toContain('ABCDEFGHIJKLMNOPQRSTUVWXYZ123456');
   expect(sanitized).not.toContain('storageState');
+  expect(sanitized).not.toContain('cookie');
+  expect(sanitized).not.toContain('session');
   expect(sanitized).not.toContain('?secret=yes');
   expect(sanitized).toContain('[redacted-email]');
   expect(sanitized).toContain('[redacted-cred]');
@@ -194,9 +272,25 @@ test('DOM card summary sanitizer trims unsafe heading text', () => {
   expect(sanitized.length).toBeLessThanOrEqual(120);
 });
 
-test('Screenshot capture self-skips without live env', async ({ page }) => {
+test('Screenshot capture self-skips without live env', async () => {
   const check = skipIfMissingPccLiveEnv(test);
   const env = check.env!;
+
+  let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
+  try {
+    browser = await chromium.launch({ headless: true });
+  } catch {
+    test.skip(
+      true,
+      'Browser launch unavailable in current runtime; skipping live screenshot lane test.',
+    );
+    return;
+  }
+
+  const context = await browser.newContext({
+    storageState: env.storageStatePath,
+  });
+  const page = await context.newPage();
 
   const pageObject = new PccLivePageObject(page);
   await pageObject.goto(env.pageUrl);
@@ -238,6 +332,9 @@ test('Screenshot capture self-skips without live env', async ({ page }) => {
   expect(fs.existsSync(runResult.evidenceMarkdownPath)).toBe(true);
   expect(fs.existsSync(runResult.inventoryJsonPath)).toBe(true);
   expect(fs.existsSync(runResult.domSummaryJsonPath)).toBe(true);
+  expect(fs.existsSync(runResult.screenshotContactSheetPath)).toBe(true);
+  expect(fs.existsSync(runResult.screenshotManifestByEvPath)).toBe(true);
+  expect(fs.existsSync(runResult.firstScreenReviewIndexPath)).toBe(true);
 
   expect(captured.surfaces).toHaveLength(8);
   for (const surface of captured.surfaces) {
@@ -253,6 +350,8 @@ test('Screenshot capture self-skips without live env', async ({ page }) => {
   }
 
   expect(runResult.screenshotCount).toBeGreaterThan(0);
+  await context.close();
+  await browser.close();
 });
 
 function runResultPath(outputDir: string, fileName: string): string {

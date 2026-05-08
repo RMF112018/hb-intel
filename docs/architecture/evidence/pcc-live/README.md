@@ -112,6 +112,20 @@ Completeness support artifacts (machine + human review):
 
 These completeness artifacts are closeout support only. They do not calculate final scorecard points, do not pass/fail hard stops, do not mark EVs finally captured, and do not approve Phase 4 readiness.
 
+Screenshot lane closeout support artifacts include:
+
+```text
+pcc-live-screenshot-evidence.json
+pcc-live-screenshot-evidence.md
+pcc-live-screenshot-inventory.json
+pcc-live-dom-card-summary.json
+screenshot-contact-sheet.md
+screenshot-manifest-by-ev.json
+first-screen-review-index.md
+```
+
+These screenshot artifacts remain operator/expert review support and are not scoring authority.
+
 ## 7. Commit Eligibility
 
 Commit-eligible after operator review and scrubbing:
