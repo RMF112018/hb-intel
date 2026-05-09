@@ -1,168 +1,448 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render } from '@testing-library/react';
-import type { PccMvpSurfaceId } from '@hbc/models/pcc';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
+import {
+  PCC_NAVIGATION_MODULES,
+  PCC_PRIMARY_TAB_IDS,
+  type PccModuleId,
+  type PccPrimaryTabId,
+} from '@hbc/models/pcc';
 import { PccHorizontalTabs } from '../shell/PccHorizontalTabs';
 
 afterEach(() => {
   cleanup();
 });
 
-const TOP_LEVEL_TAB_IDS: readonly PccMvpSurfaceId[] = [
-  'project-home',
-  'documents',
-  'project-readiness',
-  'approvals',
+const FORBIDDEN_DEVELOPER_TERMS: readonly string[] = [
+  'todo',
+  'tbd',
+  'placeholder',
+  'stub',
+  'mock',
+  'fixture',
+  'debug',
+  'dev-only',
+  'not implemented',
+  'lorem',
+  'developer',
+  'code agent',
+  'prompt',
+  'repo',
+  'test selector',
+  'internal only',
 ];
 
-const PROJECT_HOME_CHILD_IDS: readonly PccMvpSurfaceId[] = [
-  'team-and-access',
-  'external-systems',
-  'control-center-settings',
-  'site-health',
-];
+const escapeRegex = (input: string): string => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-function renderTabs(
-  overrides: {
-    activeSurfaceId?: PccMvpSurfaceId;
-    panelId?: string;
-    onSelectSurface?: (id: PccMvpSurfaceId) => void;
-  } = {},
-) {
-  const onSelectSurface = overrides.onSelectSurface ?? vi.fn();
+const FORBIDDEN_TERM_PATTERNS = FORBIDDEN_DEVELOPER_TERMS.map((term) => ({
+  term,
+  pattern: new RegExp(`\\b${escapeRegex(term)}\\b`, 'i'),
+}));
+
+const EXPECTED_VISIBLE_LABELS: Record<PccPrimaryTabId, string> = {
+  'project-home': 'Project Home',
+  'core-tools': 'Core Tools',
+  documents: 'Document Control',
+  'estimating-preconstruction': 'Estimating & Preconstruction',
+  'startup-closeout': 'Project Startup & Closeout',
+  'project-controls': 'Project Controls',
+  'cost-time': 'Cost & Time',
+  'systems-administration': 'Systems Administration',
+};
+
+interface RenderOverrides {
+  activePrimaryTabId?: PccPrimaryTabId;
+  activeModuleId?: PccModuleId;
+  panelId?: string;
+  onSelectPrimarySurface?: (id: PccPrimaryTabId) => void;
+  onSelectModule?: (id: PccModuleId) => void;
+}
+
+function renderTabs(overrides: RenderOverrides = {}) {
+  const onSelectPrimarySurface = overrides.onSelectPrimarySurface ?? vi.fn();
+  const onSelectModule = overrides.onSelectModule ?? vi.fn();
   const result = render(
     <PccHorizontalTabs
       mode="desktop"
-      activeSurfaceId={overrides.activeSurfaceId ?? 'project-home'}
-      onSelectSurface={onSelectSurface}
+      activePrimaryTabId={overrides.activePrimaryTabId ?? 'project-home'}
+      activeModuleId={overrides.activeModuleId}
+      onSelectPrimarySurface={onSelectPrimarySurface}
+      onSelectModule={onSelectModule}
       panelId={overrides.panelId ?? 'pcc-active-panel'}
     />,
   );
-  return { ...result, onSelectSurface };
+  return { ...result, onSelectPrimarySurface, onSelectModule };
 }
 
-describe('PccHorizontalTabs nested navigation', () => {
-  it('renders only four visible top-level tabs by default', () => {
+function getPrimaryTab(container: HTMLElement, id: PccPrimaryTabId): HTMLButtonElement {
+  return container.querySelector(`[data-pcc-tab-id="${id}"]`) as HTMLButtonElement;
+}
+
+function getToggle(container: HTMLElement, id: PccPrimaryTabId): HTMLButtonElement {
+  return container.querySelector(`[data-pcc-nav-toggle="${id}"]`) as HTMLButtonElement;
+}
+
+function getMenu(container: HTMLElement, id: PccPrimaryTabId): HTMLElement | null {
+  return container.querySelector(`[data-pcc-module-menu="${id}"]`) as HTMLElement | null;
+}
+
+function getModuleItem(container: HTMLElement, id: PccModuleId): HTMLButtonElement | null {
+  return container.querySelector(`[data-pcc-module-nav-item="${id}"]`) as HTMLButtonElement | null;
+}
+
+function flushFocus(): Promise<void> {
+  return new Promise((resolve) => {
+    queueMicrotask(() => resolve());
+  });
+}
+
+describe('PccHorizontalTabs — Phase 05 grouped primary tab + module dropdowns', () => {
+  it('renders all eight primary tabs from the registry', () => {
     const { container } = renderTabs();
-    for (const id of TOP_LEVEL_TAB_IDS) {
-      expect(
-        container.querySelector(`[data-pcc-horizontal-tabs] [data-pcc-tab-id="${id}"]`),
-      ).not.toBeNull();
-    }
-    for (const id of PROJECT_HOME_CHILD_IDS) {
-      expect(
-        container.querySelector(`:scope [data-pcc-horizontal-tabs] > [data-pcc-tab-id="${id}"]`),
-      ).toBeNull();
+    for (const id of PCC_PRIMARY_TAB_IDS) {
+      expect(getPrimaryTab(container, id), `primary tab ${id}`).not.toBeNull();
     }
   });
 
-  it('Project Home tab click selects project-home', () => {
-    const { container, onSelectSurface } = renderTabs({ activeSurfaceId: 'documents' });
-    const projectHome = container.querySelector(
-      '[data-pcc-tab-id="project-home"]',
-    ) as HTMLButtonElement;
-    fireEvent.click(projectHome);
-    expect(onSelectSurface).toHaveBeenCalledWith('project-home');
-  });
-
-  it('caret click opens and closes dropdown without selecting a surface', () => {
-    const { container, onSelectSurface } = renderTabs();
-    const caret = container.querySelector(
-      '[data-pcc-nav-toggle="project-home"]',
-    ) as HTMLButtonElement;
-    fireEvent.click(caret);
-    expect(onSelectSurface).not.toHaveBeenCalled();
-    for (const childId of PROJECT_HOME_CHILD_IDS) {
-      expect(container.querySelector(`[data-pcc-surface-nav-child="${childId}"]`)).not.toBeNull();
-    }
-    fireEvent.click(caret);
-    for (const childId of PROJECT_HOME_CHILD_IDS) {
-      expect(container.querySelector(`[data-pcc-surface-nav-child="${childId}"]`)).toBeNull();
-    }
-    expect(onSelectSurface).not.toHaveBeenCalled();
-  });
-
-  it('mouseEnter alone does not open the menu', () => {
+  it('renders primary tabs in the locked registry order', () => {
     const { container } = renderTabs();
-    const wrapper = container.querySelector(
-      '[data-pcc-surface-nav-parent="project-home"]',
-    ) as HTMLElement;
-    fireEvent.mouseEnter(wrapper);
-    for (const childId of PROJECT_HOME_CHILD_IDS) {
-      expect(container.querySelector(`[data-pcc-surface-nav-child="${childId}"]`)).toBeNull();
+    // Filter to actual Phase 05 primary-tab buttons; the tablist also
+    // contains sr-only legacy compatibility markers (also role="tab"
+    // for legacy a11y, but tagged data-pcc-legacy-compat) which are
+    // intentionally excluded from the order assertion.
+    const renderedOrder = Array.from(
+      container.querySelectorAll(
+        '[data-pcc-horizontal-tabs] [role="tab"]:not([data-pcc-legacy-compat])',
+      ),
+    ).map((el) => el.getAttribute('data-pcc-tab-id'));
+    expect(renderedOrder).toEqual([...PCC_PRIMARY_TAB_IDS]);
+  });
+
+  it("renders the visible 'Document Control' primary tab label", () => {
+    const { container } = renderTabs();
+    const documentsTab = getPrimaryTab(container, 'documents');
+    expect(documentsTab.textContent).toContain('Document Control');
+  });
+
+  it("does not render a visible primary tab label of 'Documents'", () => {
+    const { container } = renderTabs();
+    const labels = Array.from(
+      container.querySelectorAll('[data-pcc-horizontal-tabs] [data-pcc-tab-id]'),
+    ).map((el) => el.textContent?.trim());
+    expect(labels).not.toContain('Documents');
+  });
+
+  it('every primary tab has a dropdown toggle', () => {
+    const { container } = renderTabs();
+    for (const id of PCC_PRIMARY_TAB_IDS) {
+      expect(getToggle(container, id), `toggle for ${id}`).not.toBeNull();
     }
   });
 
-  it('closed dropdown child controls are not tabbable and only active child gets offscreen label when needed', () => {
-    const { container } = renderTabs({ activeSurfaceId: 'external-systems' });
-    const srOnly = container.querySelector(
-      '[data-pcc-sr-only-tab-label]',
-    ) as HTMLButtonElement | null;
-    expect(srOnly).not.toBeNull();
-    expect(srOnly?.getAttribute('id')).toBe('pcc-tab-external-systems');
-    expect(srOnly?.tabIndex).toBe(-1);
-    expect(container.querySelector('[data-pcc-surface-nav-child="team-and-access"]')).toBeNull();
-    expect(container.querySelector('[data-pcc-surface-nav-child="site-health"]')).toBeNull();
-  });
-
-  it('ArrowDown on Project Home opens dropdown and exposes first child tab', () => {
+  it('toggle click opens the matching module menu', () => {
     const { container } = renderTabs();
-    const projectHome = container.querySelector(
-      '[data-pcc-tab-id="project-home"]',
-    ) as HTMLButtonElement;
-    projectHome.focus();
-    fireEvent.keyDown(projectHome, { key: 'ArrowDown' });
-    const firstChild = container.querySelector(
-      '[data-pcc-surface-nav-child="team-and-access"]',
-    ) as HTMLButtonElement | null;
-    expect(firstChild).not.toBeNull();
-    expect(firstChild?.getAttribute('role')).toBe('tab');
+    const toggle = getToggle(container, 'documents');
+    expect(getMenu(container, 'documents')).toBeNull();
+    fireEvent.click(toggle);
+    expect(getMenu(container, 'documents')).not.toBeNull();
   });
 
-  it('open dropdown child click selects child surface', () => {
-    const { container, onSelectSurface } = renderTabs();
-    fireEvent.click(
-      container.querySelector('[data-pcc-nav-toggle="project-home"]') as HTMLButtonElement,
-    );
-    fireEvent.click(
-      container.querySelector(
-        '[data-pcc-surface-nav-child="control-center-settings"]',
-      ) as HTMLButtonElement,
-    );
-    expect(onSelectSurface).toHaveBeenCalledWith('control-center-settings');
+  it('opening one dropdown closes the previously open dropdown', () => {
+    const { container } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    expect(getMenu(container, 'documents')).not.toBeNull();
+    fireEvent.click(getToggle(container, 'core-tools'));
+    expect(getMenu(container, 'core-tools')).not.toBeNull();
+    expect(getMenu(container, 'documents')).toBeNull();
   });
 
-  it('prevents duplicate pcc-tab-* ids across closed/open menu states', () => {
-    const { container } = renderTabs({ activeSurfaceId: 'team-and-access' });
+  it('toggle click does not call onSelectPrimarySurface', () => {
+    const { container, onSelectPrimarySurface } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    expect(onSelectPrimarySurface).not.toHaveBeenCalled();
+  });
+
+  it('toggle click does not call onSelectModule', () => {
+    const { container, onSelectModule } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    expect(onSelectModule).not.toHaveBeenCalled();
+  });
+
+  it('toggle mouse click keeps focus on the toggle (no auto focus into the menu)', () => {
+    const { container } = renderTabs();
+    const toggle = getToggle(container, 'documents');
+    toggle.focus();
+    fireEvent.click(toggle);
+    expect(document.activeElement).toBe(toggle);
+    expect(getMenu(container, 'documents')).not.toBeNull();
+  });
+
+  it('Escape on a focused module item closes the menu and returns focus to the parent tab', () => {
+    const { container } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    const item = getModuleItem(container, 'document-control-center')!;
+    item.focus();
+    fireEvent.keyDown(item, { key: 'Escape' });
+    expect(getMenu(container, 'documents')).toBeNull();
+    expect(document.activeElement).toBe(getPrimaryTab(container, 'documents'));
+  });
+
+  it('ArrowDown on a primary tab opens the menu and focuses the first module item', async () => {
+    const { container } = renderTabs();
+    const documentsTab = getPrimaryTab(container, 'documents');
+    documentsTab.focus();
+    fireEvent.keyDown(documentsTab, { key: 'ArrowDown' });
+    expect(getMenu(container, 'documents')).not.toBeNull();
+    await act(async () => {
+      await flushFocus();
+    });
+    const firstModule = getModuleItem(container, 'primary-documents');
+    expect(document.activeElement).toBe(firstModule);
+  });
+
+  const focusedModuleId = (): string | null =>
+    document.activeElement?.getAttribute('data-pcc-module-nav-item') ?? null;
+
+  it('ArrowDown / ArrowUp navigate module items and wrap', async () => {
+    const { container } = renderTabs();
+    const documentsTab = getPrimaryTab(container, 'documents');
+    documentsTab.focus();
+    fireEvent.keyDown(documentsTab, { key: 'ArrowDown' });
+    await act(async () => {
+      await flushFocus();
+    });
+    expect(focusedModuleId()).toBe('primary-documents');
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
+    expect(focusedModuleId()).toBe('document-control-center');
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' });
+    expect(focusedModuleId()).toBe('primary-documents');
+    // Wrap upward to the last item
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' });
+    expect(focusedModuleId()).toBe('adobe-sign');
+  });
+
+  it('Home / End jump to first / last module item', () => {
+    const { container } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    const items = Array.from(
+      container.querySelectorAll('[data-pcc-module-menu="documents"] [data-pcc-module-nav-item]'),
+    ) as HTMLButtonElement[];
+    expect(items.length).toBe(8);
+
+    // Sanity: direct focus works in this jsdom environment
+    items[2]!.focus();
+    expect(document.activeElement).toBe(items[2]);
+
+    // Home from item[2] should land focus on item[0]
+    fireEvent.keyDown(items[2]!, { key: 'Home' });
+    expect(document.activeElement).toBe(items[0]);
+
+    // End should land focus on items[items.length - 1]
+    fireEvent.keyDown(items[0]!, { key: 'End' });
+    expect(document.activeElement).toBe(items[items.length - 1]);
+  });
+
+  it('selectable module click calls onSelectModule with the module id and closes the menu', () => {
+    const { container, onSelectModule } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    const item = getModuleItem(container, 'document-control-center')!;
+    fireEvent.click(item);
+    expect(onSelectModule).toHaveBeenCalledTimes(1);
+    expect(onSelectModule).toHaveBeenCalledWith('document-control-center');
+    expect(getMenu(container, 'documents')).toBeNull();
+  });
+
+  it('selectable module Enter calls onSelectModule once', () => {
+    const { container, onSelectModule } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    const item = getModuleItem(container, 'document-control-center')!;
+    item.focus();
+    fireEvent.keyDown(item, { key: 'Enter' });
+    expect(onSelectModule).toHaveBeenCalledTimes(1);
+    expect(onSelectModule).toHaveBeenCalledWith('document-control-center');
+  });
+
+  it('selectable module Space calls onSelectModule once', () => {
+    const { container, onSelectModule } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    const item = getModuleItem(container, 'document-control-center')!;
+    item.focus();
+    fireEvent.keyDown(item, { key: ' ' });
+    expect(onSelectModule).toHaveBeenCalledTimes(1);
+    expect(onSelectModule).toHaveBeenCalledWith('document-control-center');
+  });
+
+  it('non-selectable module click does not call onSelectModule', () => {
+    const { container, onSelectModule } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    const item = getModuleItem(container, 'drawing-model-center')!;
+    fireEvent.click(item);
+    expect(onSelectModule).not.toHaveBeenCalled();
+    // Menu stays open so reason copy remains reviewable
+    expect(getMenu(container, 'documents')).not.toBeNull();
+  });
+
+  it('non-selectable module Enter / Space does not call onSelectModule', () => {
+    const { container, onSelectModule } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    const item = getModuleItem(container, 'drawing-model-center')!;
+    item.focus();
+    fireEvent.keyDown(item, { key: 'Enter' });
+    fireEvent.keyDown(item, { key: ' ' });
+    expect(onSelectModule).not.toHaveBeenCalled();
+  });
+
+  it('deferred module exposes its disabled reason copy', () => {
+    const { container } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    const item = getModuleItem(container, 'drawing-model-center')!;
+    expect(item.textContent).toContain('Planned for a future release');
+  });
+
+  it('active module item carries data-pcc-module-active="true"', () => {
+    const { container } = renderTabs({ activeModuleId: 'document-control-center' });
+    fireEvent.click(getToggle(container, 'documents'));
+    const item = getModuleItem(container, 'document-control-center')!;
+    expect(item.getAttribute('data-pcc-module-active')).toBe('true');
+  });
+
+  it('non-selectable module item carries selectable=false and aria-disabled=true', () => {
+    const { container } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    const item = getModuleItem(container, 'drawing-model-center')!;
+    expect(item.getAttribute('data-pcc-module-selectable')).toBe('false');
+    expect(item.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('primary tab click calls onSelectPrimarySurface and closes any open menu', () => {
+    const { container, onSelectPrimarySurface } = renderTabs();
+    fireEvent.click(getToggle(container, 'documents'));
+    expect(getMenu(container, 'documents')).not.toBeNull();
+    fireEvent.click(getPrimaryTab(container, 'core-tools'));
+    expect(onSelectPrimarySurface).toHaveBeenCalledWith('core-tools');
+    expect(getMenu(container, 'documents')).toBeNull();
+  });
+
+  it('primary tab Enter / Space calls onSelectPrimarySurface once', () => {
+    const { container, onSelectPrimarySurface } = renderTabs();
+    const tab = getPrimaryTab(container, 'core-tools');
+    tab.focus();
+    fireEvent.keyDown(tab, { key: 'Enter' });
+    expect(onSelectPrimarySurface).toHaveBeenCalledTimes(1);
+    expect(onSelectPrimarySurface).toHaveBeenLastCalledWith('core-tools');
+
+    const otherTab = getPrimaryTab(container, 'cost-time');
+    otherTab.focus();
+    fireEvent.keyDown(otherTab, { key: ' ' });
+    expect(onSelectPrimarySurface).toHaveBeenCalledTimes(2);
+    expect(onSelectPrimarySurface).toHaveBeenLastCalledWith('cost-time');
+  });
+
+  it('ArrowLeft / ArrowRight / Home / End select primary tabs via onSelectPrimarySurface', () => {
+    const { container, onSelectPrimarySurface } = renderTabs();
+    const tablist = container.querySelector('[data-pcc-horizontal-tabs]') as HTMLElement;
+    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
+    expect(onSelectPrimarySurface).toHaveBeenLastCalledWith('core-tools');
+    fireEvent.keyDown(tablist, { key: 'End' });
+    expect(onSelectPrimarySurface).toHaveBeenLastCalledWith('systems-administration');
+    fireEvent.keyDown(tablist, { key: 'Home' });
+    expect(onSelectPrimarySurface).toHaveBeenLastCalledWith('project-home');
+    fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
+    expect(onSelectPrimarySurface).toHaveBeenLastCalledWith('systems-administration');
+  });
+
+  it('no forbidden developer copy renders in the tablist', () => {
+    const { container } = renderTabs();
+    const tablist = container.querySelector('[data-pcc-horizontal-tabs]') as HTMLElement;
+    const offenders = new Set<string>();
+    const scanCurrentText = () => {
+      const text = tablist.textContent ?? '';
+      for (const { term, pattern } of FORBIDDEN_TERM_PATTERNS) {
+        if (pattern.test(text)) {
+          offenders.add(term);
+        }
+      }
+    };
+    // Closed-menu render
+    scanCurrentText();
+    // Each menu's copy in turn — opening a menu closes the prior one,
+    // so we must scan once per open menu.
+    for (const id of PCC_PRIMARY_TAB_IDS) {
+      fireEvent.click(getToggle(container, id));
+      scanCurrentText();
+    }
+    expect(Array.from(offenders)).toEqual([]);
+  });
+
+  // Phase 05 ARIA-discipline guards (additional plan-level constraints)
+
+  it('guard: primary tab id collisions are impossible (every pcc-tab-* id is unique across menu states)', () => {
+    const { container } = renderTabs();
     const allIds = (): string[] =>
       Array.from(container.querySelectorAll('[id^="pcc-tab-"]'))
         .map((el) => el.getAttribute('id'))
         .filter((id): id is string => Boolean(id));
-
     const idsClosed = allIds();
     expect(new Set(idsClosed).size).toBe(idsClosed.length);
 
-    fireEvent.click(
-      container.querySelector('[data-pcc-nav-toggle="project-home"]') as HTMLButtonElement,
-    );
-    const idsOpen = allIds();
-    expect(new Set(idsOpen).size).toBe(idsOpen.length);
+    // Open each dropdown one at a time (only one menu can be open at
+    // once) and re-check the id set per state.
+    for (const id of PCC_PRIMARY_TAB_IDS) {
+      fireEvent.click(getToggle(container, id));
+      const idsOpen = allIds();
+      expect(new Set(idsOpen).size, `unique pcc-tab-* ids with ${id} menu open`).toBe(
+        idsOpen.length,
+      );
+    }
   });
 
-  it('Escape closes menu and returns focus to Project Home tab', () => {
-    const { container } = renderTabs({ activeSurfaceId: 'team-and-access' });
-    fireEvent.click(
-      container.querySelector('[data-pcc-nav-toggle="project-home"]') as HTMLButtonElement,
+  it('guard: role boundaries — only primary tabs are role="tab"; module items are role="menuitem"; toggles are neither', () => {
+    const { container } = renderTabs();
+    // Phase 05 primary tabs always render. Filter out the sr-only
+    // legacy compatibility tab markers (role="tab" + data-pcc-legacy-compat)
+    // that the Prompt 03 bridge renders for tests that bypass the
+    // shellSurfaceSelection helper.
+    const tabs = Array.from(
+      container.querySelectorAll(
+        '[data-pcc-horizontal-tabs] [role="tab"]:not([data-pcc-legacy-compat])',
+      ),
     );
-    const child = container.querySelector(
-      '[data-pcc-surface-nav-child="team-and-access"]',
-    ) as HTMLButtonElement;
-    child.focus();
-    fireEvent.keyDown(child, { key: 'Escape' });
-    expect(
-      container.querySelector('[data-pcc-surface-nav-child]:not([data-pcc-sr-only-tab-label])'),
-    ).toBeNull();
-    expect(document.activeElement).toBe(
-      container.querySelector('[data-pcc-tab-id="project-home"]'),
+    expect(tabs.length).toBe(PCC_PRIMARY_TAB_IDS.length);
+    const tabTabIds = tabs
+      .map((el) => el.getAttribute('data-pcc-tab-id'))
+      .filter((id): id is string => Boolean(id));
+    expect(new Set(tabTabIds)).toEqual(new Set(PCC_PRIMARY_TAB_IDS));
+
+    // Toggles always render and are neither tabs nor menuitems
+    const toggles = Array.from(
+      container.querySelectorAll('[data-pcc-horizontal-tabs] [data-pcc-nav-toggle]'),
     );
+    for (const toggle of toggles) {
+      expect(toggle.getAttribute('role')).not.toBe('tab');
+      expect(toggle.getAttribute('role')).not.toBe('menuitem');
+      expect(toggle.getAttribute('aria-haspopup')).toBe('menu');
+    }
+
+    // Open each menu in turn; aggregate per-menu module-id counts to
+    // prove every registry module renders as a role="menuitem" with no
+    // duplicates and no role="tab" leakage into menu items.
+    const seenModuleIds = new Set<string>();
+    let totalModuleCount = 0;
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      fireEvent.click(getToggle(container, tabId));
+      const items = Array.from(
+        container.querySelectorAll(`[data-pcc-module-menu="${tabId}"] [data-pcc-module-nav-item]`),
+      );
+      for (const item of items) {
+        expect(item.getAttribute('role')).toBe('menuitem');
+        const id = item.getAttribute('data-pcc-module-nav-item');
+        expect(id).not.toBeNull();
+        expect(seenModuleIds.has(id!), `module ${id} should appear in exactly one menu`).toBe(
+          false,
+        );
+        seenModuleIds.add(id!);
+      }
+      totalModuleCount += items.length;
+    }
+    expect(totalModuleCount).toBe(PCC_NAVIGATION_MODULES.length);
   });
 });

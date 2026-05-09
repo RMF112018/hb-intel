@@ -25,7 +25,11 @@ export const PccApp: FC<PccAppProps> = ({ forceMode, readModelClient }) => {
     <PccShell
       heroViewModel={heroViewModel}
       activeSurfaceId={shell.activeSurfaceId}
-      onSelectSurface={shell.setActiveSurface}
+      activePrimaryTabId={shell.activePrimaryTabId}
+      activeModuleId={shell.activeModuleId}
+      onSelectPrimarySurface={shell.selectPrimarySurface}
+      onSelectModule={shell.selectModule}
+      onSelectLegacySurface={shell.setActiveSurface}
       forceMode={forceMode}
     >
       <PccSurfaceRouter activeSurfaceId={shell.activeSurfaceId} readModelClient={readModelClient} />

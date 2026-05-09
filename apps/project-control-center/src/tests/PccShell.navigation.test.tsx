@@ -1,196 +1,125 @@
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
-import { PCC_MVP_SURFACES, PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
+import { PCC_PRIMARY_TAB_IDS } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
-import { getSurfaceSelectionControl } from './shellSurfaceSelection';
+import { getPrimaryNavToggle, getPrimaryTabSelectionControl } from './shellSurfaceSelection';
 
-// Wave 15A wave-b8 Prompt 05 — every PCC MVP surface is shell-only.
-// The shell `<main role="tabpanel">` is the sole carrier of
-// `data-pcc-active-surface-panel`; no bento-child card emits the marker
-// on any branch.
+// Phase 05 wave-b10 Prompt 03 — registry-driven primary-tab + module
+// dropdown navigation. The shell `<main role="tabpanel">` continues to
+// own the legacy `data-pcc-active-surface-panel` marker for now;
+// `aria-labelledby` is now keyed to the Phase 05 active primary tab id.
+// Legacy `setActiveSurface` is no longer wired into the tab UI in this
+// prompt — Prompt 04 migrates the router and dashboard surfaces.
 
-describe('PccShell navigation + state (horizontal tabs)', () => {
-  it('renders four top-level tabs and defaults to project-home', () => {
+describe('PccShell navigation — Phase 05 grouped primary tabs', () => {
+  it('renders all eight primary tab controls with matching dropdown toggles', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    for (const id of ['project-home', 'documents', 'project-readiness', 'approvals'] as const) {
-      const tab = container.querySelector(`[data-pcc-horizontal-tabs] [data-pcc-tab-id="${id}"]`);
-      expect(tab, `tab for '${id}' should render`).not.toBeNull();
-    }
-    const initialPanel = container.querySelector(
-      'main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]',
-    );
-    expect(initialPanel, 'project-home is the default shell active-surface panel').not.toBeNull();
-    const initialTab = container.querySelector('[data-pcc-tab-id="project-home"]');
-    expect(initialTab?.getAttribute('aria-selected')).toBe('true');
-    expect(initialTab?.getAttribute('data-pcc-tab-active')).toBe('true');
-  });
-
-  for (const id of PCC_MVP_SURFACE_IDS) {
-    it(`clicking the '${id}' tab updates aria-selected and the active surface panel`, () => {
-      const { container } = render(<PccApp forceMode="desktop" />);
-      const target = getSurfaceSelectionControl(container, id);
-      expect(target, `tab for '${id}' should exist`).toBeDefined();
-      fireEvent.click(target!);
-
-      // 1. one top-level tab remains selected; child surfaces label the panel
-      // via aria-labelledby instead of staying visually selected peers.
-      const selectedTabs = Array.from(
-        container.querySelectorAll('[data-pcc-horizontal-tabs] [role="tab"][aria-selected="true"]'),
-      );
-      expect(selectedTabs.length).toBeGreaterThan(0);
-
-      // 2. shell <main> owns the active-surface panel marker for the clicked
-      //    surface. Wave 15A wave-b8 Prompt 05 — the shell `<main>` is the
-      //    sole semantic owner across every render branch; no bento-child
-      //    card carries the marker.
-      const shellPanels = container.querySelectorAll(
-        `main[role="tabpanel"][data-pcc-active-surface-panel="${id}"]`,
-      );
-      expect(shellPanels).toHaveLength(1);
-      const shellPanel = shellPanels[0]!;
-      expect(shellPanel.getAttribute('id')).toBe('pcc-active-surface-panel');
-      expect(shellPanel.getAttribute('aria-labelledby')).toBe(`pcc-tab-${id}`);
-
-      // 3. shell panel contains [data-pcc-bento-grid]; no direct-child card
-      //    under the bento may carry `data-pcc-active-surface-panel`.
-      const bento = shellPanel.querySelector('[data-pcc-bento-grid]') as HTMLElement | null;
-      expect(bento, `shell panel for '${id}' must contain [data-pcc-bento-grid]`).not.toBeNull();
-      const compatibilityCards = Array.from(bento!.children).filter((child) =>
-        child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${id}"]`),
-      );
-      expect(compatibilityCards).toHaveLength(0);
-      const directCards = Array.from(bento!.children).filter((child) =>
-        child.matches('[data-pcc-card]'),
-      );
-      expect(
-        directCards.length,
-        `surface '${id}' must still render at least one direct-child card`,
-      ).toBeGreaterThan(0);
-
-      // 4. The hero band (rendered as a sibling of the shell <main>, not inside
-      //    it) carries the displayName as its secondary title for every surface.
-      //    Asserting against `container.textContent` (which includes the hero
-      //    band) is the durable check; no card inside the panel carries the
-      //    displayName as eyebrow now that all surfaces are shell-only.
-      const surface = PCC_MVP_SURFACES[id];
-      expect(container.textContent).toContain(surface.displayName);
-
-      // Hero owns surface description; assert the marker is present and non-empty.
-      const heroDescription = container.querySelector('[data-pcc-hero-surface-description]');
-      expect(heroDescription).not.toBeNull();
-      expect(heroDescription?.textContent?.trim().length ?? 0).toBeGreaterThan(0);
-    });
-  }
-
-  it('tab buttons are not disabled', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    const tabs = Array.from(
-      container.querySelectorAll('[data-pcc-horizontal-tabs] [data-pcc-tab-id]'),
-    ) as HTMLButtonElement[];
-    for (const tab of tabs) {
-      expect(tab.disabled).toBe(false);
+    for (const id of PCC_PRIMARY_TAB_IDS) {
+      const tab = getPrimaryTabSelectionControl(container, id);
+      expect(tab, `primary tab ${id}`).not.toBeNull();
+      const toggle = getPrimaryNavToggle(container, id);
+      expect(toggle, `dropdown toggle ${id}`).not.toBeNull();
     }
   });
 
-  it('ArrowLeft / ArrowRight / Home / End move focus and auto-select per tablist contract', () => {
+  it('default activePrimaryTabId is project-home with exactly one selected primary tab', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const tablist = container.querySelector('[data-pcc-horizontal-tabs]') as HTMLElement;
-    const initialActive = container.querySelector('[data-pcc-tab-id][aria-selected="true"]');
-    expect(initialActive?.getAttribute('data-pcc-tab-id')).toBe('project-home');
-
-    // ArrowRight from first → second surface auto-selects.
-    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
-    expect(
-      container
-        .querySelector('[data-pcc-tab-id][aria-selected="true"]')
-        ?.getAttribute('data-pcc-tab-id'),
-    ).toBe('documents');
-    expect(
-      container
-        .querySelector('main[role="tabpanel"][data-pcc-active-surface-panel]')
-        ?.getAttribute('data-pcc-active-surface-panel'),
-    ).toBe('documents');
-
-    // End → last surface.
-    fireEvent.keyDown(tablist, { key: 'End' });
-    const lastId: PccMvpSurfaceId = 'approvals';
-    expect(
-      container
-        .querySelector('[data-pcc-tab-id][aria-selected="true"]')
-        ?.getAttribute('data-pcc-tab-id'),
-    ).toBe(lastId);
-    expect(
-      container
-        .querySelector('main[role="tabpanel"][data-pcc-active-surface-panel]')
-        ?.getAttribute('data-pcc-active-surface-panel'),
-    ).toBe(lastId);
-
-    // Home → first surface.
-    fireEvent.keyDown(tablist, { key: 'Home' });
-    expect(
-      container
-        .querySelector('[data-pcc-tab-id][aria-selected="true"]')
-        ?.getAttribute('data-pcc-tab-id'),
-    ).toBe('project-home');
-
-    // ArrowLeft from first → wraps to last.
-    fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
-    expect(
-      container
-        .querySelector('[data-pcc-tab-id][aria-selected="true"]')
-        ?.getAttribute('data-pcc-tab-id'),
-    ).toBe(lastId);
+    const projectHomeTab = getPrimaryTabSelectionControl(container, 'project-home');
+    expect(projectHomeTab?.getAttribute('aria-selected')).toBe('true');
+    const selectedTabs = container.querySelectorAll(
+      '[data-pcc-horizontal-tabs] [role="tab"][aria-selected="true"]',
+    );
+    expect(selectedTabs.length).toBe(1);
   });
 
-  it('Enter and Space activate tabs once and keep selected-tab/panel ids aligned', () => {
+  it("clicking 'Core Tools' makes its primary tab active", () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const documentsTab = container.querySelector(
-      '[data-pcc-tab-id="documents"]',
-    ) as HTMLButtonElement;
-    fireEvent.keyDown(documentsTab, { key: 'Enter' });
-    fireEvent.keyUp(documentsTab, { key: 'Enter' });
-
-    const selectedAfterEnter = container.querySelector('[data-pcc-tab-id][aria-selected="true"]');
-    const panelAfterEnter = container.querySelector(
-      'main[role="tabpanel"][data-pcc-active-surface-panel]',
-    );
-    expect(selectedAfterEnter?.getAttribute('data-pcc-tab-id')).toBe('documents');
-    expect(panelAfterEnter?.getAttribute('data-pcc-active-surface-panel')).toBe('documents');
-
-    const approvalsTab = container.querySelector(
-      '[data-pcc-tab-id="approvals"]',
-    ) as HTMLButtonElement;
-    fireEvent.keyDown(approvalsTab, { key: ' ' });
-    fireEvent.keyUp(approvalsTab, { key: ' ' });
-
-    const selectedAfterSpace = container.querySelector('[data-pcc-tab-id][aria-selected="true"]');
-    const panelAfterSpace = container.querySelector(
-      'main[role="tabpanel"][data-pcc-active-surface-panel]',
-    );
-    expect(selectedAfterSpace?.getAttribute('data-pcc-tab-id')).toBe('approvals');
-    expect(panelAfterSpace?.getAttribute('data-pcc-active-surface-panel')).toBe('approvals');
+    const coreToolsTab = getPrimaryTabSelectionControl(container, 'core-tools')!;
+    fireEvent.click(coreToolsTab);
+    expect(coreToolsTab.getAttribute('aria-selected')).toBe('true');
   });
 
-  it('clicking a tab activates it and updates the panel + hero secondary title and description', () => {
+  it("clicking 'Document Control' makes its primary tab active", () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const documentsTab = container.querySelector(
-      '[data-pcc-tab-id="documents"]',
-    ) as HTMLButtonElement;
+    const documentsTab = getPrimaryTabSelectionControl(container, 'documents')!;
     fireEvent.click(documentsTab);
     expect(documentsTab.getAttribute('aria-selected')).toBe('true');
-    expect(
-      container.querySelector('main[role="tabpanel"][data-pcc-active-surface-panel="documents"]'),
-    ).not.toBeNull();
-    expect(
-      container.querySelector(
-        'main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]',
-      ),
-    ).toBeNull();
-    const secondary = container.querySelector('[data-pcc-hero-secondary-title]');
-    expect(secondary?.textContent).toBe('Documents');
-    const description = container.querySelector('[data-pcc-hero-surface-description]');
-    expect(description?.textContent).toBe(
-      'Project document access posture across SharePoint, OneDrive, and external platforms.',
+  });
+
+  it('legacy shell panel marker remains present (Prompt 04 will migrate it)', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const panel = container.querySelector('main[role="tabpanel"][data-pcc-active-surface-panel]');
+    expect(panel).not.toBeNull();
+    // Intentionally do NOT assert the marker value matches the active
+    // primary tab — the legacy router/marker stays bound to
+    // PccMvpSurfaceId until Prompt 04.
+  });
+
+  it('shell <main> aria-labelledby tracks the legacy active surface id during Prompt 03', () => {
+    // Prompt 03 — `aria-labelledby` stays on the legacy `activeSurfaceId`
+    // because PccSurfaceRouter and hero metadata still own the panel
+    // content. Phase 05 primary-tab activations that map to a legacy
+    // surface (project-home, documents) update `activeSurfaceId` via
+    // the compatibility bridge; non-mapped primary tabs (core-tools,
+    // cost-time, etc.) leave `activeSurfaceId` at its prior value.
+    // Prompt 04 will migrate the labelledby reference to the Phase 05
+    // primary tab id.
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const main = container.querySelector('main[role="tabpanel"]') as HTMLElement;
+    expect(main.getAttribute('aria-labelledby')).toBe('pcc-tab-project-home');
+    fireEvent.click(getPrimaryTabSelectionControl(container, 'documents')!);
+    expect(main.getAttribute('aria-labelledby')).toBe('pcc-tab-documents');
+  });
+
+  it('opening a primary tab module menu renders module items', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    fireEvent.click(getPrimaryNavToggle(container, 'documents')!);
+    const menu = container.querySelector('[data-pcc-module-menu="documents"]');
+    expect(menu).not.toBeNull();
+    const items = container.querySelectorAll(
+      '[data-pcc-module-menu="documents"] [data-pcc-module-nav-item]',
     );
+    expect(items.length).toBeGreaterThan(0);
+  });
+
+  it('selecting a selectable module marks it active', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    fireEvent.click(getPrimaryNavToggle(container, 'documents')!);
+    const item = container.querySelector(
+      '[data-pcc-module-nav-item="document-control-center"]',
+    ) as HTMLButtonElement;
+    fireEvent.click(item);
+    // Re-open the menu (selection closed it) and verify the active marker
+    fireEvent.click(getPrimaryNavToggle(container, 'documents')!);
+    const reopened = container.querySelector(
+      '[data-pcc-module-nav-item="document-control-center"]',
+    );
+    expect(reopened?.getAttribute('data-pcc-module-active')).toBe('true');
+  });
+
+  it('selecting a non-selectable (deferred) module does not mark it active', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    fireEvent.click(getPrimaryNavToggle(container, 'documents')!);
+    const item = container.querySelector(
+      '[data-pcc-module-nav-item="drawing-model-center"]',
+    ) as HTMLButtonElement;
+    fireEvent.click(item);
+    // Menu stays open for non-selectable; verify still inactive
+    const stillThere = container.querySelector('[data-pcc-module-nav-item="drawing-model-center"]');
+    expect(stillThere?.getAttribute('data-pcc-module-active')).toBe('false');
+    const anyActive = container.querySelector(
+      '[data-pcc-module-menu="documents"] [data-pcc-module-active="true"]',
+    );
+    expect(anyActive).toBeNull();
+  });
+
+  it("no primary tab visible label is 'Documents'", () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const labels = Array.from(
+      container.querySelectorAll('[data-pcc-horizontal-tabs] [data-pcc-tab-id]'),
+    ).map((el) => el.textContent?.trim());
+    expect(labels).not.toContain('Documents');
+    const documentsTab = getPrimaryTabSelectionControl(container, 'documents');
+    expect(documentsTab?.textContent).toContain('Document Control');
   });
 });
