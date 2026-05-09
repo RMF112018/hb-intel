@@ -23,10 +23,10 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
-    'identity command'
-    'summary  summary'
-    'cues     cues'
-    'facts    facts';
+    'identity   command'
+    'highlights highlights'
+    'microcopy  microcopy'
+    'facts      facts';
   align-items: start;
   gap: var(--pcc-space-md) var(--pcc-space-lg);
   padding: var(--pcc-space-lg) var(--pcc-space-xl);
@@ -44,8 +44,8 @@
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
     'identity'
-    'summary'
-    'cues'
+    'highlights'
+    'microcopy'
     'facts'
     'command';
   padding: var(--pcc-space-md) var(--pcc-space-md);
@@ -162,9 +162,94 @@
   border-bottom: 1px solid var(--pcc-color-border);
 }
 
-/* Wave 15A wave-b7 Prompt 02 — surface metadata seam zones.
- * Inert summary, cue, and read-only zones rendered between identity
- * and facts. No interactive descendants and no new color literals. */
+/* Wave 15A wave-b9 Prompt 4B-02 — production-visible hero highlights and
+ * subordinate governance microcopy zones. These replaced the legacy
+ * `.surfaceSummary` (MODE / SOURCE / AUTHORITY) and `.surfaceCueRow` /
+ * `.readOnlyCue` (FOCUS / BOUNDARY / HBI / long read-only cue) zones as
+ * the primary visible band. Highlight cells reuse the fact-cell shape
+ * but live in their own grid area so the project-facts row continues
+ * to render below. */
+
+.heroHighlights {
+  grid-area: highlights;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--pcc-space-md) var(--pcc-space-lg);
+  margin: 0;
+  padding: var(--pcc-space-sm) 0;
+  border-top: 1px solid var(--pcc-color-border);
+}
+
+.heroBand[data-pcc-hero-density='compact'] .heroHighlights {
+  gap: var(--pcc-space-sm) var(--pcc-space-md);
+}
+
+.heroBand[data-pcc-mode='phone'] .heroHighlights {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.heroHighlight {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.heroHighlightLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+}
+
+.heroHighlightValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.heroHighlight[data-pcc-hero-highlight-tone='attention'] .heroHighlightLabel {
+  color: var(--pcc-status-info);
+}
+
+.heroHighlight[data-pcc-hero-highlight-tone='success'] .heroHighlightLabel {
+  color: var(--pcc-status-success);
+}
+
+.heroHighlight[data-pcc-hero-highlight-tone='warning'] .heroHighlightLabel {
+  color: var(--pcc-status-warning);
+}
+
+.heroHighlight[data-pcc-hero-highlight-tone='risk'] .heroHighlightLabel {
+  color: var(--pcc-status-danger);
+}
+
+.governanceMicrocopy {
+  grid-area: microcopy;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--pcc-space-sm) var(--pcc-space-md);
+  margin: 0;
+}
+
+.governanceMicrocopyItem {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--pcc-color-text-muted);
+}
+
+/* Wave 15A wave-b7 Prompt 02 — legacy surface metadata seam zones.
+ * Retained as orphaned styles after Wave 15A wave-b9 Prompt 4B-02
+ * relocated the production-visible hero band to `.heroHighlights` /
+ * `.governanceMicrocopy`. The legacy classes are no longer rendered
+ * (no consumer in `PccProjectHeroBand.tsx`); a separate dead-CSS
+ * cleanup pass will remove them once nothing references the selectors.
+ * No interactive descendants and no new color literals. */
 
 .surfaceSummary {
   grid-area: summary;

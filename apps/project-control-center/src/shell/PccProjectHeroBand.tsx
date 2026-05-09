@@ -60,30 +60,31 @@ export const PccProjectHeroBand: FC<PccProjectHeroBandProps> = ({
           </p>
         </div>
 
-        <div className={styles.surfaceSummary} data-pcc-hero-surface-summary="">
-          {viewModel.surfaceSummaryItems.map((item) => (
+        <div className={styles.heroHighlights} data-pcc-hero-highlights="">
+          {viewModel.heroHighlights.map((highlight) => (
             <div
-              key={item.id}
-              className={styles.surfaceSummaryItem}
-              data-pcc-hero-summary-item={item.id}
-              data-pcc-hero-summary-tone={item.tone ?? 'neutral'}
+              key={highlight.id}
+              className={styles.heroHighlight}
+              data-pcc-hero-highlight={highlight.id}
+              data-pcc-hero-highlight-tone={highlight.tone ?? 'neutral'}
+              data-pcc-hero-highlight-kind={highlight.kind ?? 'summary'}
             >
-              <span className={styles.surfaceSummaryLabel}>{item.label}</span>
-              <span className={styles.surfaceSummaryValue}>{item.value}</span>
+              <span className={styles.heroHighlightLabel}>{highlight.label}</span>
+              <span className={styles.heroHighlightValue}>{highlight.value}</span>
             </div>
           ))}
         </div>
 
-        <div className={styles.surfaceCueRow} data-pcc-hero-surface-cues="">
-          {viewModel.surfaceCues.map((cue) => (
-            <span key={cue.id} className={styles.surfaceCue} data-pcc-hero-surface-cue={cue.id}>
-              <span className={styles.surfaceCueLabel}>{cue.label}</span>
-              <span className={styles.surfaceCueValue}>{cue.value}</span>
+        <div className={styles.governanceMicrocopy} data-pcc-hero-governance-microcopy="">
+          {viewModel.governanceMicrocopy.map((item) => (
+            <span
+              key={item.id}
+              className={styles.governanceMicrocopyItem}
+              data-pcc-hero-governance-microcopy-item={item.id}
+            >
+              {item.text}
             </span>
           ))}
-          <span className={styles.readOnlyCue} data-pcc-hero-read-only-cue="">
-            {viewModel.readOnlyCue}
-          </span>
         </div>
 
         <dl className={styles.facts} data-pcc-hero-facts="">

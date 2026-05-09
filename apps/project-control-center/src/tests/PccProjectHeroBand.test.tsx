@@ -230,9 +230,9 @@ describe('PccProjectHeroBand — responsive markers preserved', () => {
   });
 });
 
-describe('PccProjectHeroBand — wave-b7 Prompt 02 surface metadata zones', () => {
+describe('PccProjectHeroBand — wave-b9 Prompt 4B-02 production hero highlights and governance microcopy zones', () => {
   it.each(PCC_MVP_SURFACE_IDS)(
-    'renders the metadata summary, cues, and read-only cue for "%s"',
+    'renders the heroHighlights row and governanceMicrocopy row for "%s"',
     (surfaceId) => {
       cleanup();
       const { container } = renderHero({
@@ -240,55 +240,55 @@ describe('PccProjectHeroBand — wave-b7 Prompt 02 surface metadata zones', () =
       });
       const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
 
-      const summaryZones = container.querySelectorAll('[data-pcc-hero-surface-summary]');
-      expect(summaryZones).toHaveLength(1);
-      const summaryZone = summaryZones[0]!;
-      const summaryItems = summaryZone.querySelectorAll('[data-pcc-hero-summary-item]');
-      expect(summaryItems).toHaveLength(metadata.surfaceSummaryItems.length);
-      metadata.surfaceSummaryItems.forEach((expected, index) => {
-        const node = summaryItems[index]!;
-        expect(node.getAttribute('data-pcc-hero-summary-item')).toBe(expected.id);
-        expect(node.getAttribute('data-pcc-hero-summary-tone')).toBe(expected.tone ?? 'neutral');
+      const highlightZones = container.querySelectorAll('[data-pcc-hero-highlights]');
+      expect(highlightZones).toHaveLength(1);
+      const highlightZone = highlightZones[0]!;
+      const highlights = highlightZone.querySelectorAll('[data-pcc-hero-highlight]');
+      expect(highlights).toHaveLength(metadata.heroHighlights.length);
+      metadata.heroHighlights.forEach((expected, index) => {
+        const node = highlights[index]!;
+        expect(node.getAttribute('data-pcc-hero-highlight')).toBe(expected.id);
+        expect(node.getAttribute('data-pcc-hero-highlight-tone')).toBe(expected.tone ?? 'neutral');
+        expect(node.getAttribute('data-pcc-hero-highlight-kind')).toBe(expected.kind ?? 'summary');
         expect(node.textContent).toContain(expected.label);
         expect(node.textContent).toContain(expected.value);
       });
 
-      const cueZones = container.querySelectorAll('[data-pcc-hero-surface-cues]');
-      expect(cueZones).toHaveLength(1);
-      const cueZone = cueZones[0]!;
-      const cues = cueZone.querySelectorAll('[data-pcc-hero-surface-cue]');
-      expect(cues).toHaveLength(metadata.surfaceCues.length);
-      metadata.surfaceCues.forEach((expected, index) => {
-        const node = cues[index]!;
-        expect(node.getAttribute('data-pcc-hero-surface-cue')).toBe(expected.id);
-        expect(node.textContent).toContain(expected.label);
-        expect(node.textContent).toContain(expected.value);
+      const microcopyZones = container.querySelectorAll('[data-pcc-hero-governance-microcopy]');
+      expect(microcopyZones).toHaveLength(1);
+      const microcopyZone = microcopyZones[0]!;
+      const microcopyItems = microcopyZone.querySelectorAll(
+        '[data-pcc-hero-governance-microcopy-item]',
+      );
+      expect(microcopyItems).toHaveLength(metadata.governanceMicrocopy.length);
+      metadata.governanceMicrocopy.forEach((expected, index) => {
+        const node = microcopyItems[index]!;
+        expect(node.getAttribute('data-pcc-hero-governance-microcopy-item')).toBe(expected.id);
+        expect(node.textContent).toBe(expected.text);
       });
-
-      const readOnlyCues = container.querySelectorAll('[data-pcc-hero-read-only-cue]');
-      expect(readOnlyCues).toHaveLength(1);
-      expect(readOnlyCues[0]!.textContent).toBe(metadata.readOnlyCue);
     },
   );
 
-  it('defaults summary tone to "neutral" when the metadata entry omits tone', () => {
+  it('defaults highlight tone to "neutral" and kind to "summary" when the metadata entry omits them', () => {
     cleanup();
     const { container } = renderHero();
-    // SAMPLE_PROJECT_PROFILE on project-home renders source / authority items
-    // without a `tone`, so they must surface as the explicit "neutral" default.
-    const sourceItem = container.querySelector('[data-pcc-hero-summary-item="source"]');
-    const authorityItem = container.querySelector('[data-pcc-hero-summary-item="authority"]');
-    expect(sourceItem?.getAttribute('data-pcc-hero-summary-tone')).toBe('neutral');
-    expect(authorityItem?.getAttribute('data-pcc-hero-summary-tone')).toBe('neutral');
+    // SAMPLE_PROJECT_PROFILE on project-home renders highlights without
+    // explicit `tone`, so they must surface the "neutral" default
+    // (project-home highlights also omit `kind`-other-than-summary on
+    // priority-actions, so the default-marker contract is verifiable on
+    // that node).
+    const priorityActions = container.querySelector('[data-pcc-hero-highlight="priority-actions"]');
+    expect(priorityActions).not.toBeNull();
+    expect(priorityActions?.getAttribute('data-pcc-hero-highlight-tone')).toBe('neutral');
+    expect(priorityActions?.getAttribute('data-pcc-hero-highlight-kind')).toBe('summary');
   });
 
-  it('renders no interactive descendants inside the metadata, cue, and read-only zones', () => {
+  it('renders no interactive descendants inside the heroHighlights and governanceMicrocopy zones', () => {
     cleanup();
     const { container } = renderHero();
     const zones = [
-      container.querySelector('[data-pcc-hero-surface-summary]'),
-      container.querySelector('[data-pcc-hero-surface-cues]'),
-      container.querySelector('[data-pcc-hero-read-only-cue]'),
+      container.querySelector('[data-pcc-hero-highlights]'),
+      container.querySelector('[data-pcc-hero-governance-microcopy]'),
     ];
     for (const zone of zones) {
       expect(zone).not.toBeNull();
@@ -302,38 +302,106 @@ describe('PccProjectHeroBand — wave-b7 Prompt 02 surface metadata zones', () =
     }
   });
 
-  it('does not introduce forbidden source-confidence or pill markers in the new zones', () => {
+  it('does not introduce forbidden source-confidence or pill markers inside the heroHighlights / governanceMicrocopy zones', () => {
     cleanup();
     const { container } = renderHero();
-    const summaryZone = container.querySelector('[data-pcc-hero-surface-summary]');
-    const cueZone = container.querySelector('[data-pcc-hero-surface-cues]');
-    expect(summaryZone?.querySelector('[data-pcc-source-confidence]')).toBeNull();
-    expect(cueZone?.querySelector('[data-pcc-source-confidence]')).toBeNull();
-    expect(summaryZone?.querySelector('[data-pcc-pill]')).toBeNull();
-    expect(cueZone?.querySelector('[data-pcc-pill]')).toBeNull();
-    expect(summaryZone?.querySelector('[data-pcc-hero-pill]')).toBeNull();
-    expect(cueZone?.querySelector('[data-pcc-hero-pill-row]')).toBeNull();
+    const highlightZone = container.querySelector('[data-pcc-hero-highlights]');
+    const microcopyZone = container.querySelector('[data-pcc-hero-governance-microcopy]');
+    expect(highlightZone?.querySelector('[data-pcc-source-confidence]')).toBeNull();
+    expect(microcopyZone?.querySelector('[data-pcc-source-confidence]')).toBeNull();
+    expect(highlightZone?.querySelector('[data-pcc-pill]')).toBeNull();
+    expect(microcopyZone?.querySelector('[data-pcc-pill]')).toBeNull();
+    expect(highlightZone?.querySelector('[data-pcc-hero-pill]')).toBeNull();
+    expect(microcopyZone?.querySelector('[data-pcc-hero-pill-row]')).toBeNull();
   });
 
-  it('renders the no-execution cue marker for project-readiness (wave-b8 Prompt 02)', () => {
+  it('does not render legacy MODE / SOURCE / AUTHORITY / FOCUS / BOUNDARY / POSTURE / HBI scaffold labels as visible text inside the production hero band', () => {
+    // Wave 15A wave-b9 Prompt 4B-02 — the legacy uppercase scaffold labels
+    // and primary scaffold values are no longer rendered as primary visible
+    // hero content. They may still exist in metadata (asserted in
+    // projectShellViewModel.test.ts) and in subordinate microcopy where
+    // governance phrasing legitimately appears, but the production-visible
+    // highlight band must not surface them as labels or values. Per
+    // `feedback_word_blocklists_break_on_corrected_copy`, the scan is
+    // scoped to the production hero highlight zone — not the entire DOM —
+    // so legitimate metadata-backed governance text elsewhere is not a
+    // false positive.
+    const FORBIDDEN_LABELS = [
+      'MODE',
+      'SOURCE',
+      'AUTHORITY',
+      'FOCUS',
+      'BOUNDARY',
+      'POSTURE',
+      'HBI',
+    ] as const;
+    const FORBIDDEN_VALUES = [
+      'Command preview',
+      'Fixture / read-model preview',
+      'Advisory only',
+      'Grounded preview, no writeback',
+    ] as const;
+    cleanup();
+    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+      cleanup();
+      const { container } = renderHero({
+        viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId),
+      });
+      const highlightZone = container.querySelector('[data-pcc-hero-highlights]');
+      expect(
+        highlightZone,
+        `surface "${surfaceId}" must render the highlights zone`,
+      ).not.toBeNull();
+      const labelTexts = Array.from(
+        highlightZone!.querySelectorAll<HTMLElement>('[data-pcc-hero-highlight] :first-child'),
+      ).map((el) => el.textContent?.trim() ?? '');
+      const valueTexts = Array.from(
+        highlightZone!.querySelectorAll<HTMLElement>('[data-pcc-hero-highlight] :nth-child(2)'),
+      ).map((el) => el.textContent?.trim() ?? '');
+      for (const forbidden of FORBIDDEN_LABELS) {
+        expect(
+          labelTexts,
+          `surface "${surfaceId}" highlight labels must not contain legacy scaffold label "${forbidden}"`,
+        ).not.toContain(forbidden);
+      }
+      for (const forbidden of FORBIDDEN_VALUES) {
+        expect(
+          valueTexts,
+          `surface "${surfaceId}" highlight values must not contain legacy scaffold value "${forbidden}"`,
+        ).not.toContain(forbidden);
+      }
+    }
+  });
+
+  it('renders the no-checklist-completion governance microcopy item for project-readiness (wave-b9 Prompt 4B-02 — the no-execution / no-checklist-completion governance posture moved from `surfaceCues` rendering into the demoted governanceMicrocopy band; metadata still carries the original `surfaceCues` entry, asserted in projectShellViewModel.test.ts)', () => {
     cleanup();
     const { container } = renderHero({
       viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'project-readiness'),
     });
-    const node = container.querySelector('[data-pcc-hero-surface-cue="no-execution"]');
-    expect(node).not.toBeNull();
-    expect(node!.textContent).toContain('Posture');
-    expect(node!.textContent).toContain('No checklist completion');
+    const node = container.querySelector(
+      '[data-pcc-hero-governance-microcopy-item="no-checklist-completion"]',
+    );
+    expect(
+      node,
+      'project-readiness must render the no-checklist-completion microcopy',
+    ).not.toBeNull();
+    expect(node!.textContent).toContain('Checklist completion');
+    expect(node!.textContent).toContain('source module');
   });
 
-  it('renders the launch-context cue marker for external-systems (wave-b8 Prompt 02)', () => {
+  it('renders the launch-context-reminder governance microcopy item for external-systems (wave-b9 Prompt 4B-02 — the launch-context governance posture moved into the demoted governanceMicrocopy band; metadata still carries the original `surfaceCues` entry, asserted in projectShellViewModel.test.ts)', () => {
     cleanup();
     const { container } = renderHero({
       viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'external-systems'),
     });
-    const node = container.querySelector('[data-pcc-hero-surface-cue="launch-context"]');
-    expect(node).not.toBeNull();
-    expect(node!.textContent).toContain('Boundary');
+    const node = container.querySelector(
+      '[data-pcc-hero-governance-microcopy-item="launch-context-reminder"]',
+    );
+    expect(
+      node,
+      'external-systems must render the launch-context-reminder microcopy',
+    ).not.toBeNull();
     expect(node!.textContent).toContain('Launch links open');
+    expect(node!.textContent).toContain('source system');
   });
 });

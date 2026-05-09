@@ -161,25 +161,21 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
     expect(container.querySelector('[data-pcc-project-intel-region]')).toBeNull();
   });
 
-  // Wave 15A wave-b7 Prompt 02 — shell hero metadata zones (summary, cues,
-  // read-only cue) render at every responsive mode covered by the shell.
-  // Per-surface and inert-content coverage lives in
-  // PccProjectHeroBand.test.tsx; this is shell-composition presence-only
-  // coverage under <PccApp forceMode={mode}> at every breakpoint. Density
-  // and command-search variant are unit-covered in PccProjectHeroBand.test.tsx
-  // and intentionally not duplicated here. (wave-b8 Prompt 04 extended this
-  // to the full eight-mode loop.)
-  it.each(PCC_RESPONSIVE_MODES)(
-    'renders the shell hero surface metadata zones at "%s" mode',
-    (mode) => {
-      const { container, unmount } = render(<PccApp forceMode={mode} />);
-      expect(container.querySelectorAll('[data-pcc-hero-surface-summary]')).toHaveLength(1);
-      expect(container.querySelectorAll('[data-pcc-hero-surface-cues]')).toHaveLength(1);
-      expect(container.querySelectorAll('[data-pcc-hero-read-only-cue]')).toHaveLength(1);
-      expect(container.querySelectorAll('[data-pcc-hero-command-search]')).toHaveLength(1);
-      unmount();
-    },
-  );
+  // Wave 15A wave-b9 Prompt 4B-02 — production shell hero zones
+  // (heroHighlights row + governanceMicrocopy row) render at every
+  // responsive mode covered by the shell. Per-surface and inert-content
+  // coverage lives in PccProjectHeroBand.test.tsx; this is
+  // shell-composition presence-only coverage under
+  // <PccApp forceMode={mode}> at every breakpoint. Density and
+  // command-search variant are unit-covered in PccProjectHeroBand.test.tsx
+  // and intentionally not duplicated here.
+  it.each(PCC_RESPONSIVE_MODES)('renders the shell hero production zones at "%s" mode', (mode) => {
+    const { container, unmount } = render(<PccApp forceMode={mode} />);
+    expect(container.querySelectorAll('[data-pcc-hero-highlights]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-hero-governance-microcopy]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-pcc-hero-command-search]')).toHaveLength(1);
+    unmount();
+  });
 });
 
 describe('resolveResponsiveMode 8-mode boundary contract', () => {
@@ -233,15 +229,15 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
     cleanup();
   });
 
-  function expectShellHeroMetadata(
+  // Wave 15A wave-b9 Prompt 4B-02 — the production-visible hero band is
+  // `heroHighlights` + `governanceMicrocopy`. Helper resolves expected
+  // ids from canonical metadata so per-surface tests only declare the
+  // surface id and any extra assertions (e.g. project-facts row).
+  function expectShellHeroProductionBand(
     container: HTMLElement,
     expected: {
-      readonly surfaceId: string;
+      readonly surfaceId: keyof typeof PCC_SHELL_SURFACE_HEADER_METADATA;
       readonly secondaryTitle: string;
-      readonly modeValue: string;
-      readonly authorityValue: string;
-      readonly cueId: string;
-      readonly readOnlyCueIncludes: string;
     },
   ): void {
     expect(
@@ -253,31 +249,39 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
       expected.secondaryTitle,
     );
 
-    const mode = container.querySelector('[data-pcc-hero-summary-item="mode"]');
-    expect(mode?.textContent).toContain('Mode');
-    expect(mode?.textContent).toContain(expected.modeValue);
+    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[expected.surfaceId];
 
-    const authority = container.querySelector('[data-pcc-hero-summary-item="authority"]');
-    expect(authority?.textContent).toContain('Authority');
-    expect(authority?.textContent).toContain(expected.authorityValue);
+    const highlightZone = container.querySelector('[data-pcc-hero-highlights]');
+    expect(highlightZone).not.toBeNull();
+    const highlights = highlightZone!.querySelectorAll('[data-pcc-hero-highlight]');
+    expect(highlights).toHaveLength(metadata.heroHighlights.length);
+    metadata.heroHighlights.forEach((expectedHighlight, index) => {
+      const node = highlights[index]!;
+      expect(node.getAttribute('data-pcc-hero-highlight')).toBe(expectedHighlight.id);
+      expect(node.textContent).toContain(expectedHighlight.label);
+      expect(node.textContent).toContain(expectedHighlight.value);
+    });
 
-    expect(
-      container.querySelector(`[data-pcc-hero-surface-cue="${expected.cueId}"]`),
-    ).not.toBeNull();
-    expect(container.querySelector('[data-pcc-hero-read-only-cue]')?.textContent).toContain(
-      expected.readOnlyCueIncludes,
+    const microcopyZone = container.querySelector('[data-pcc-hero-governance-microcopy]');
+    expect(microcopyZone).not.toBeNull();
+    const microcopyItems = microcopyZone!.querySelectorAll(
+      '[data-pcc-hero-governance-microcopy-item]',
     );
+    expect(microcopyItems).toHaveLength(metadata.governanceMicrocopy.length);
+    metadata.governanceMicrocopy.forEach((expectedMicrocopy, index) => {
+      const node = microcopyItems[index]!;
+      expect(node.getAttribute('data-pcc-hero-governance-microcopy-item')).toBe(
+        expectedMicrocopy.id,
+      );
+      expect(node.textContent).toBe(expectedMicrocopy.text);
+    });
   }
 
-  it('default render shows Project Home metadata and surfaces the global Client fact', () => {
+  it('default render shows Project Home production hero band and surfaces the global Client fact', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
-    expectShellHeroMetadata(container, {
+    expectShellHeroProductionBand(container, {
       surfaceId: 'project-home',
       secondaryTitle: 'Project Home',
-      modeValue: 'Command preview',
-      authorityValue: 'Advisory only',
-      cueId: 'hbi-boundary',
-      readOnlyCueIncludes: 'no decisions, approvals, or writeback authority',
     });
     // Wave 15A wave-b9 Prompt 4B-01 — Client absorbed into the existing
     // global project-facts row after `PccProjectIntelligenceCard` was
@@ -289,7 +293,7 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
     expect(clientCell!.querySelector('dd')?.textContent).toBe('Sample Owner LLC');
   });
 
-  it('clicking Documents switches metadata to Document control preview and the global Client fact persists (proves Client is global, not project-home-scoped)', () => {
+  it('clicking Documents switches the production hero band to Documents and the global Client fact persists (proves Client is global, not project-home-scoped)', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
     const documentsTab = container.querySelector(
       '[data-pcc-tab-id="documents"]',
@@ -297,13 +301,9 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
     expect(documentsTab).not.toBeNull();
     fireEvent.click(documentsTab!);
 
-    expectShellHeroMetadata(container, {
+    expectShellHeroProductionBand(container, {
       surfaceId: 'documents',
       secondaryTitle: 'Documents',
-      modeValue: 'Document control preview',
-      authorityValue: 'Navigation context only',
-      cueId: 'external-files',
-      readOnlyCueIncludes: 'no uploads, moves, deletes, or external launches',
     });
     // Wave 15A wave-b9 Prompt 4B-01 — Client follows the same global
     // pattern as Location / Estimated value / Scheduled completion /
@@ -317,7 +317,7 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
     expect(clientCell!.querySelector('dd')?.textContent).toBe('Sample Owner LLC');
   });
 
-  it('clicking Site Health switches metadata to Site health preview', () => {
+  it('clicking Site Health switches the production hero band to Site Health', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
     const siteHealthTab = container.querySelector(
       '[data-pcc-tab-id="site-health"]',
@@ -325,17 +325,13 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
     expect(siteHealthTab).not.toBeNull();
     fireEvent.click(siteHealthTab!);
 
-    expectShellHeroMetadata(container, {
+    expectShellHeroProductionBand(container, {
       surfaceId: 'site-health',
       secondaryTitle: 'Site Health',
-      modeValue: 'Site health preview',
-      authorityValue: 'Repair context only',
-      cueId: 'repair-boundary',
-      readOnlyCueIncludes: 'repair acknowledgements require governed source workflows',
     });
   });
 
-  it('clicking Team & Access switches metadata to Team access preview', () => {
+  it('clicking Team & Access switches the production hero band to Team & Access', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
     const teamTab = container.querySelector(
       '[data-pcc-tab-id="team-and-access"]',
@@ -343,13 +339,9 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
     expect(teamTab).not.toBeNull();
     fireEvent.click(teamTab!);
 
-    expectShellHeroMetadata(container, {
+    expectShellHeroProductionBand(container, {
       surfaceId: 'team-and-access',
       secondaryTitle: 'Team & Access',
-      modeValue: 'Team access preview',
-      authorityValue: 'Request context only',
-      cueId: 'access-boundary',
-      readOnlyCueIncludes: 'access changes require governed workflows',
     });
   });
 });
@@ -376,22 +368,29 @@ describe('PccShell — all-eight-surface metadata switching (wave-b8 Prompt 02)'
       const secondaryTitle = container.querySelector('[data-pcc-hero-secondary-title]');
       expect(secondaryTitle?.textContent).toBe(surface.displayName);
 
-      const summaryItems = container.querySelectorAll('[data-pcc-hero-summary-item]');
-      expect(summaryItems).toHaveLength(metadata.surfaceSummaryItems.length);
+      // Wave 15A wave-b9 Prompt 4B-02 — production hero band assertions.
+      // The legacy `surfaceSummaryItems`, `surfaceCues`, and `readOnlyCue`
+      // metadata fields remain populated and are asserted at the
+      // metadata-object level in projectShellViewModel.test.ts; the
+      // shell-rendered switching contract now lives on the heroHighlights
+      // and governanceMicrocopy zones.
+      const highlights = container.querySelectorAll('[data-pcc-hero-highlight]');
+      expect(highlights).toHaveLength(metadata.heroHighlights.length);
 
-      const summaryItemIds = Array.from(summaryItems).map((n) =>
-        n.getAttribute('data-pcc-hero-summary-item'),
+      const highlightIds = Array.from(highlights).map((n) =>
+        n.getAttribute('data-pcc-hero-highlight'),
       );
-      expect(summaryItemIds).toEqual(metadata.surfaceSummaryItems.map((s) => s.id));
+      expect(highlightIds).toEqual(metadata.heroHighlights.map((h) => h.id));
 
-      const cues = container.querySelectorAll('[data-pcc-hero-surface-cue]');
-      expect(cues).toHaveLength(metadata.surfaceCues.length);
+      const microcopyItems = container.querySelectorAll(
+        '[data-pcc-hero-governance-microcopy-item]',
+      );
+      expect(microcopyItems).toHaveLength(metadata.governanceMicrocopy.length);
 
-      const cueIds = Array.from(cues).map((n) => n.getAttribute('data-pcc-hero-surface-cue'));
-      expect(cueIds).toEqual(metadata.surfaceCues.map((c) => c.id));
-
-      const readOnlyCue = container.querySelector('[data-pcc-hero-read-only-cue]');
-      expect(readOnlyCue?.textContent).toBe(metadata.readOnlyCue);
+      const microcopyIds = Array.from(microcopyItems).map((n) =>
+        n.getAttribute('data-pcc-hero-governance-microcopy-item'),
+      );
+      expect(microcopyIds).toEqual(metadata.governanceMicrocopy.map((m) => m.id));
     }
   });
 });

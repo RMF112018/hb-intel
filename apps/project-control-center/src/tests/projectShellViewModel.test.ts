@@ -123,11 +123,13 @@ describe('deriveShellHeroViewModel', () => {
 
 describe('deriveShellHeroViewModel — wave-b7 Prompt 02 surface header metadata', () => {
   for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-    it(`exposes non-empty surfaceSummaryItems / surfaceCues / readOnlyCue for "${surfaceId}"`, () => {
+    it(`exposes non-empty surfaceSummaryItems / surfaceCues / readOnlyCue / heroHighlights / governanceMicrocopy for "${surfaceId}"`, () => {
       const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId);
       expect(vm.surfaceSummaryItems.length).toBeGreaterThan(0);
       expect(vm.surfaceCues.length).toBeGreaterThan(0);
       expect(vm.readOnlyCue.trim().length).toBeGreaterThan(0);
+      expect(vm.heroHighlights.length).toBeGreaterThan(0);
+      expect(vm.governanceMicrocopy.length).toBeGreaterThan(0);
 
       for (const item of vm.surfaceSummaryItems) {
         expect(item.id.length).toBeGreaterThan(0);
@@ -139,6 +141,15 @@ describe('deriveShellHeroViewModel — wave-b7 Prompt 02 surface header metadata
         expect(cue.label.length).toBeGreaterThan(0);
         expect(cue.value.length).toBeGreaterThan(0);
       }
+      for (const highlight of vm.heroHighlights) {
+        expect(highlight.id.length).toBeGreaterThan(0);
+        expect(highlight.label.length).toBeGreaterThan(0);
+        expect(highlight.value.length).toBeGreaterThan(0);
+      }
+      for (const microcopy of vm.governanceMicrocopy) {
+        expect(microcopy.id.length).toBeGreaterThan(0);
+        expect(microcopy.text.trim().length).toBeGreaterThan(0);
+      }
     });
   }
 
@@ -149,6 +160,8 @@ describe('deriveShellHeroViewModel — wave-b7 Prompt 02 surface header metadata
       expect(vm.surfaceSummaryItems).toBe(metadata.surfaceSummaryItems);
       expect(vm.surfaceCues).toBe(metadata.surfaceCues);
       expect(vm.readOnlyCue).toBe(metadata.readOnlyCue);
+      expect(vm.heroHighlights).toBe(metadata.heroHighlights);
+      expect(vm.governanceMicrocopy).toBe(metadata.governanceMicrocopy);
     }
   });
 
@@ -269,6 +282,19 @@ describe('PCC_SHELL_SURFACE_HEADER_METADATA — wave-b7 Prompt 03 contract floor
           `cue "${cue.id}" on "${surfaceId}" must not use affirmative-action label "${cue.label}"`,
         ).toBe(false);
       }
+      // Wave 15A wave-b9 Prompt 4B-02 — heroHighlights labels are
+      // production-visible end-user labels and must follow the same
+      // affirmative-action guard as the legacy metadata fields. The scan
+      // applies to LABELS only (per
+      // `feedback_word_blocklists_break_on_corrected_copy`); microcopy
+      // text and highlight values may legitimately reference governed
+      // actions in negating phrases.
+      for (const highlight of metadata.heroHighlights) {
+        expect(
+          affirmativeSet.has(highlight.label),
+          `heroHighlight "${highlight.id}" on "${surfaceId}" must not use affirmative-action label "${highlight.label}"`,
+        ).toBe(false);
+      }
     }
   });
 
@@ -308,5 +334,86 @@ describe('PCC_SHELL_SURFACE_HEADER_METADATA — wave-b7 Prompt 03 contract floor
         `summary item ids on "${surfaceId}" must be unique (got [${summaryIds.join(', ')}])`,
       ).toBe(summaryIds.length);
     }
+  });
+
+  // Wave 15A wave-b9 Prompt 4B-02 — heroHighlights / governanceMicrocopy
+  // contract floor. heroHighlights ids and governanceMicrocopy ids must
+  // be unique per surface; every entry must have non-empty fields; every
+  // surface must define at least one of each.
+  it('every surface defines at least one heroHighlight and at least one governanceMicrocopy item with unique ids', () => {
+    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+      expect(
+        metadata.heroHighlights.length,
+        `surface "${surfaceId}" must define at least one heroHighlight`,
+      ).toBeGreaterThan(0);
+      expect(
+        metadata.governanceMicrocopy.length,
+        `surface "${surfaceId}" must define at least one governanceMicrocopy item`,
+      ).toBeGreaterThan(0);
+
+      const highlightIds = metadata.heroHighlights.map((h) => h.id);
+      expect(
+        new Set(highlightIds).size,
+        `heroHighlight ids on "${surfaceId}" must be unique (got [${highlightIds.join(', ')}])`,
+      ).toBe(highlightIds.length);
+
+      const microcopyIds = metadata.governanceMicrocopy.map((m) => m.id);
+      expect(
+        new Set(microcopyIds).size,
+        `governanceMicrocopy ids on "${surfaceId}" must be unique (got [${microcopyIds.join(', ')}])`,
+      ).toBe(microcopyIds.length);
+
+      for (const highlight of metadata.heroHighlights) {
+        expect(highlight.id.length).toBeGreaterThan(0);
+        expect(highlight.label.length).toBeGreaterThan(0);
+        expect(highlight.value.length).toBeGreaterThan(0);
+      }
+      for (const microcopy of metadata.governanceMicrocopy) {
+        expect(microcopy.id.length).toBeGreaterThan(0);
+        expect(microcopy.text.trim().length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('Project Home heroHighlights cover priority-actions / approvals / setup-gaps and microcopy includes a Read-only preview reminder', () => {
+    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['project-home'];
+    const highlightIds = metadata.heroHighlights.map((h) => h.id);
+    expect(highlightIds).toContain('priority-actions');
+    expect(highlightIds).toContain('approvals');
+    expect(highlightIds).toContain('setup-gaps');
+    const microcopyTexts = metadata.governanceMicrocopy.map((m) => m.text);
+    expect(microcopyTexts.some((t) => t === 'Read-only preview')).toBe(true);
+  });
+
+  it('Approvals heroHighlights cover approval-status / routing / escalations and microcopy preserves the governed-workflow reminder', () => {
+    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['approvals'];
+    const highlightIds = metadata.heroHighlights.map((h) => h.id);
+    expect(highlightIds).toContain('approval-status');
+    expect(highlightIds).toContain('routing');
+    expect(highlightIds).toContain('escalations');
+    const microcopyTexts = metadata.governanceMicrocopy.map((m) => m.text).join(' ');
+    expect(microcopyTexts).toContain('governed approval workflows');
+  });
+
+  it('Project Readiness governanceMicrocopy preserves the no-checklist-completion source-module reminder (governance posture from prior surfaceCues moved into demoted microcopy)', () => {
+    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['project-readiness'];
+    const noChecklistCompletion = metadata.governanceMicrocopy.find(
+      (m) => m.id === 'no-checklist-completion',
+    );
+    expect(noChecklistCompletion, 'no-checklist-completion microcopy must exist').toBeDefined();
+    expect(noChecklistCompletion!.text).toContain('Checklist completion');
+    expect(noChecklistCompletion!.text).toContain('source module');
+  });
+
+  it('External Systems governanceMicrocopy preserves the launch-context source-system-new-tab reminder (governance posture from prior surfaceCues moved into demoted microcopy)', () => {
+    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['external-systems'];
+    const launchContextReminder = metadata.governanceMicrocopy.find(
+      (m) => m.id === 'launch-context-reminder',
+    );
+    expect(launchContextReminder, 'launch-context-reminder microcopy must exist').toBeDefined();
+    expect(launchContextReminder!.text).toContain('Launch links open');
+    expect(launchContextReminder!.text).toContain('source system');
+    expect(launchContextReminder!.text).toContain('new tab');
   });
 });

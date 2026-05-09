@@ -3,9 +3,13 @@ import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
 import { PCC_SURFACE_HERO_DESCRIPTIONS } from '../shell/surfaceHeroCopy';
 import {
   PCC_SHELL_SURFACE_HEADER_METADATA,
+  type IPccShellHeroHighlight,
+  type IPccShellHeroMicrocopy,
   type IPccShellSurfaceCue,
   type IPccShellSurfaceHeaderMetadata,
   type IPccShellSurfaceSummaryItem,
+  type PccShellHeroHighlightKind,
+  type PccShellHeroHighlightTone,
   type PccShellSurfaceSummaryTone,
 } from '../shell/surfaceHeaderMetadata';
 
@@ -14,6 +18,10 @@ export type {
   IPccShellSurfaceSummaryItem,
   IPccShellSurfaceCue,
   IPccShellSurfaceHeaderMetadata,
+  PccShellHeroHighlightTone,
+  PccShellHeroHighlightKind,
+  IPccShellHeroHighlight,
+  IPccShellHeroMicrocopy,
 };
 
 /**
@@ -21,13 +29,17 @@ export type {
  * no status pills, no last-updated, no project number. Wave 15A wave-b7
  * Prompt 02 — extends the seam with typed shell surface metadata
  * (`surfaceSummaryItems`, `surfaceCues`, `readOnlyCue`) sourced from
- * `PCC_SHELL_SURFACE_HEADER_METADATA`. The metadata fields are inert at
- * render time and carry no live counts or writeback authority. Wave 15A
- * wave-b9 Prompt 4B-01 — `clientDisplay` is added as a global project-fact
- * after `PccProjectIntelligenceCard` was removed from Project Home; the
- * existing facts (location, estimated value, scheduled completion, project
- * stage) are already rendered globally across all PCC surfaces, so client
- * follows the same global pattern.
+ * `PCC_SHELL_SURFACE_HEADER_METADATA`. Wave 15A wave-b9 Prompt 4B-01 — adds
+ * `clientDisplay` as a global project fact after `PccProjectIntelligenceCard`
+ * was removed from Project Home; the existing facts (location, estimated
+ * value, scheduled completion, project stage) are already rendered globally
+ * across all PCC surfaces, so client follows the same global pattern. Wave
+ * 15A wave-b9 Prompt 4B-02 — adds `heroHighlights` (production-visible
+ * end-user posture row) and `governanceMicrocopy` (subordinate read-only /
+ * governed-workflow reminders). The legacy `surfaceSummaryItems` /
+ * `surfaceCues` / `readOnlyCue` fields remain on the VM so metadata-level
+ * governance assertions in tests still resolve, but the hero band no longer
+ * renders them as primary visible content.
  */
 export interface IPccShellHeroViewModel {
   readonly primaryTitle: 'Project Control Center';
@@ -42,6 +54,8 @@ export interface IPccShellHeroViewModel {
   readonly surfaceSummaryItems: readonly IPccShellSurfaceSummaryItem[];
   readonly surfaceCues: readonly IPccShellSurfaceCue[];
   readonly readOnlyCue: string;
+  readonly heroHighlights: readonly IPccShellHeroHighlight[];
+  readonly governanceMicrocopy: readonly IPccShellHeroMicrocopy[];
 }
 
 const NOT_LISTED = 'Not listed' as const;
@@ -109,5 +123,7 @@ export function deriveShellHeroViewModel(
     surfaceSummaryItems: headerMetadata.surfaceSummaryItems,
     surfaceCues: headerMetadata.surfaceCues,
     readOnlyCue: headerMetadata.readOnlyCue,
+    heroHighlights: headerMetadata.heroHighlights,
+    governanceMicrocopy: headerMetadata.governanceMicrocopy,
   };
 }
