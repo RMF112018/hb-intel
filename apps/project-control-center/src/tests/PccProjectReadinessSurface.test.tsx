@@ -45,15 +45,57 @@ describe('Project Readiness Center surface', () => {
     expect(readinessRegion(container, 'downstream-modules')).not.toBeNull();
   });
 
-  it('hero region exposes the project-readiness badge and no-execution caption', () => {
+  it('first bento card uses the operational "Readiness Gate & Blockers" title and "Readiness Signals" eyebrow, drops the duplicate page-title framing, and preserves the MVP stat grid + source-health badges (Wave 15A wave-b9 Prompt 4B-04)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const hero = readinessRegion(container, 'hero');
-    expect(hero).not.toBeNull();
-    expect(hero!.textContent).toContain('Project readiness');
-    expect(hero!.textContent).toContain(
-      'Workflow execution and approvals are managed by your PCC administrator.',
-    );
+    expect(hero, 'data-pcc-readiness-region="hero" must render').not.toBeNull();
+
+    // The hero region is the body of the first bento card. The card header
+    // (eyebrow + title) is rendered by PccDashboardCard as a sibling of
+    // the hero region; resolve via .closest('[data-pcc-card]') so the
+    // eyebrow / title assertions stay scoped to the FIRST card and do not
+    // false-positive on the shell hero (which legitimately renders
+    // 'Project Readiness' as the secondary title).
+    const card = hero!.closest('[data-pcc-card]');
+    expect(card, 'hero region must live inside a [data-pcc-card]').not.toBeNull();
+    const cardHeading = card!.querySelector('h2,h3,h4');
+    expect(cardHeading?.textContent).toBe('Readiness Gate & Blockers');
+    // Eyebrow text is rendered upper-case by CSS but stored mixed-case in
+    // the DOM; match the source-of-truth string passed to PccDashboardCard.
+    expect(card!.textContent).toContain('Readiness Signals');
+
+    // Negative assertions scoped to the first card body only — the shell
+    // hero outside this region legitimately carries 'Project Readiness' as
+    // the secondary title, so a surface-wide negative scan would
+    // false-positive (per `feedback_word_blocklists_break_on_corrected_copy`).
+    expect(
+      hero!.textContent,
+      'first card body must not render the dropped "Project readiness" badge',
+    ).not.toContain('Project readiness');
+    expect(
+      hero!.textContent,
+      'first card body must not render the dropped "Workflow execution and approvals…" caption',
+    ).not.toContain('Workflow execution and approvals are managed by your PCC administrator.');
+    expect(
+      hero!.textContent,
+      'first card body must not render the dropped Module Framework description',
+    ).not.toContain('Module Framework shell aggregating readiness posture');
+
+    // MVP stat grid is preserved.
+    expect(hero!.querySelector('[data-pcc-readiness-stat="active-gate"]')).not.toBeNull();
+    expect(hero!.querySelector('[data-pcc-readiness-stat="overall-posture"]')).not.toBeNull();
+    expect(hero!.querySelector('[data-pcc-readiness-stat="blocker-count"]')).not.toBeNull();
+    expect(hero!.querySelector('[data-pcc-readiness-stat="evidence-confidence"]')).not.toBeNull();
+
+    // Source-health badge row is preserved (count > 0; exact ids vary
+    // with fixture content and are covered by the adapter test).
+    const sourceHealthBadges = hero!.querySelectorAll('[data-pcc-readiness-source-health-badge]');
+    expect(sourceHealthBadges.length).toBeGreaterThan(0);
+
+    // Card-level compatibility marker preserved (project-readiness stays
+    // in SURFACES_WITH_COMPATIBILITY_CARD per the Wave 15A wave-b9 split).
+    expect(card!.getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
   });
 
   it('lifecycle gates region renders gate items from structural markers', () => {

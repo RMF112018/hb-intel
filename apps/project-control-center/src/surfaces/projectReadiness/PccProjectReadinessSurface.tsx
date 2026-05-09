@@ -22,7 +22,6 @@
 
 import { Fragment, useEffect, useState, type FC } from 'react';
 import {
-  PCC_MVP_SURFACES,
   PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE,
   SAMPLE_BUYOUT_LOG_READ_MODEL,
   SAMPLE_CONSTRAINTS_LOG_READ_MODEL,
@@ -429,6 +428,18 @@ const ReadinessRegions: FC<ReadinessRegionsProps> = ({ viewModel }) => (
 // loading / error / ready states. Rendered in both command mode and
 // detail mode (detail mode omits the native command cards but keeps
 // the hero so the active-surface marker remains unique).
+//
+// Wave 15A wave-b9 Prompt 4B-04 — operational eyebrow + title that
+// replace the prior duplicate "Project Readiness / Project readiness"
+// page-title framing on the first bento card. The shell hero already
+// carries the surface identity, posture, and governance microcopy; this
+// card now reads as operational readiness content (gate / blockers /
+// evidence / source health). All three ReadinessHeroSlot branches
+// (loading / error / ready) share these constants so the card title
+// stays consistent across degraded states.
+const READINESS_HERO_CARD_EYEBROW = 'Readiness Signals' as const;
+const READINESS_HERO_CARD_TITLE = 'Readiness Gate & Blockers' as const;
+
 const ReadinessHeroSlot: FC<ReadinessRegionsProps> = ({ viewModel }) => {
   if (viewModel.status === 'loading') {
     return (
@@ -437,8 +448,8 @@ const ReadinessHeroSlot: FC<ReadinessRegionsProps> = ({ viewModel }) => {
         tier="state"
         region="state"
         headingLevel={2}
-        eyebrow="Project Readiness Center"
-        title="Project readiness"
+        eyebrow={READINESS_HERO_CARD_EYEBROW}
+        title={READINESS_HERO_CARD_TITLE}
         dataActiveSurfacePanel="project-readiness"
       >
         <div data-pcc-readiness-region="hero" className={styles.heroBody}>
@@ -450,7 +461,7 @@ const ReadinessHeroSlot: FC<ReadinessRegionsProps> = ({ viewModel }) => {
             sourceConfidenceLabel={POSTURE_LOADING_READINESS.sourceConfidenceLabel}
             lastUpdatedLabel={POSTURE_LOADING_READINESS.lastUpdatedLabel}
           />
-          <PccPreviewState state="loading" title="Project readiness" />
+          <PccPreviewState state="loading" title={READINESS_HERO_CARD_TITLE} />
         </div>
       </PccDashboardCard>
     );
@@ -462,8 +473,8 @@ const ReadinessHeroSlot: FC<ReadinessRegionsProps> = ({ viewModel }) => {
         tier="state"
         region="state"
         headingLevel={2}
-        eyebrow="Project Readiness Center"
-        title="Project readiness"
+        eyebrow={READINESS_HERO_CARD_EYEBROW}
+        title={READINESS_HERO_CARD_TITLE}
         dataActiveSurfacePanel="project-readiness"
       >
         <div data-pcc-readiness-region="hero" className={styles.heroBody}>
@@ -475,7 +486,7 @@ const ReadinessHeroSlot: FC<ReadinessRegionsProps> = ({ viewModel }) => {
             sourceConfidenceLabel={POSTURE_ERROR_READINESS.sourceConfidenceLabel}
             lastUpdatedLabel={POSTURE_ERROR_READINESS.lastUpdatedLabel}
           />
-          <PccPreviewState state="error" title="Project readiness" />
+          <PccPreviewState state="error" title={READINESS_HERO_CARD_TITLE} />
         </div>
       </PccDashboardCard>
     );
@@ -523,15 +534,42 @@ const HeroCard: FC<HeroCardProps> = ({ hero }) => (
     tier="tier1"
     region="command"
     headingLevel={2}
-    eyebrow={PCC_MVP_SURFACES['project-readiness'].displayName}
-    title="Project readiness"
+    eyebrow={READINESS_HERO_CARD_EYEBROW}
+    title={READINESS_HERO_CARD_TITLE}
     dataActiveSurfacePanel="project-readiness"
   >
     <div data-pcc-readiness-region="hero" className={styles.heroBody}>
-      <p className={styles.heroLead}>{hero.readOnlyBadgeText}</p>
-      <p className={styles.heroCaption}>{hero.noExecutionCaption}</p>
-      <p className={styles.heroCaption}>{PCC_MVP_SURFACES['project-readiness'].description}</p>
+      {/*
+       * TODO(PCC-ProjectReadiness): This MVP card now keeps readiness data
+       * visible while avoiding duplicate page-title framing. Future
+       * implementation should split summary ownership so the shell hero
+       * can show selected-project readiness posture and the bento grid
+       * can begin with operational readiness work items, gates, blockers,
+       * evidence, or source modules. Do not remove the MVP readiness data
+       * until project-context-derived readiness signals are available.
+       *
+       * The unrendered `hero.readOnlyBadgeText` ("Project readiness") and
+       * `hero.noExecutionCaption` ("Workflow execution and approvals are
+       * managed by your PCC administrator.") VM fields stay shape-stable
+       * via `projectReadinessAdapter.ts` constants so the no-execution /
+       * no-writeback governance contract remains anchored at the adapter
+       * level (see projectReadinessAdapter.test.ts:131-137); the shell
+       * hero now carries the equivalent governance microcopy as primary
+       * visible content (see PCC_SHELL_SURFACE_HEADER_METADATA
+       * 'project-readiness'.governanceMicrocopy).
+       */}
       <div className={styles.heroStats}>
+        {/*
+         * TODO(PCC-ProjectReadiness): When project-context-derived
+         * readiness signals exist, render `Startup Checklist {n}%
+         * Complete` whenever the selected project has STARTED the Job
+         * Startup Checklist but it is NOT fully complete. `{n}` derives
+         * from completed checklist items / required checklist items for
+         * the current project ID. Do not compute from static fixture
+         * text; preserve read-only / no-writeback posture; gate the row
+         * on the checklist being started but incomplete (omit when not
+         * started or fully complete).
+         */}
         <span className={styles.heroStat} data-pcc-readiness-stat="active-gate">
           <span className={styles.heroStatLabel}>Active gate</span>
           <span className={styles.heroStatValue}>{hero.activeLifecycleGateLabel}</span>
@@ -542,10 +580,33 @@ const HeroCard: FC<HeroCardProps> = ({ hero }) => (
             {posturelabel(hero.overallPosture)}
           </PccStatusPill>
         </span>
+        {/*
+         * TODO(PCC-ProjectReadiness): When project-context-derived
+         * readiness signals exist, render `{n} Constraints Overdue` when
+         * the selected project has constraints whose due date is before
+         * the current business date AND status is not resolved/closed.
+         * Also render `{n} Constraints to be Resolved this week` when
+         * constraints are due on or before the current business-week end
+         * AND not resolved/closed. Define business-week calculation
+         * consistently with scheduling/lookahead standards once that
+         * model exists; do not add date / business-week logic in this
+         * MVP prompt.
+         */}
         <span className={styles.heroStat} data-pcc-readiness-stat="blocker-count">
           <span className={styles.heroStatLabel}>Blockers</span>
           <span className={styles.heroStatValue}>{hero.blockerCount}</span>
         </span>
+        {/*
+         * TODO(PCC-ProjectReadiness): When the readiness module consumes
+         * the source-health and approvals/checkpoints read models, expose
+         * richer signals here: `Evidence Confidence {Low|Medium|High}`,
+         * `{n} Source Modules Available`, `{n} Source Modules Stale`,
+         * `{n} Readiness Approvals Pending`, `{n} Checkpoints Blocking
+         * Startup`. Derive source-health from the readiness source
+         * registry; preserve unavailable / stale states instead of
+         * hiding them. Do not introduce approval execution or writeback
+         * from the Project Readiness card.
+         */}
         <span className={styles.heroStat} data-pcc-readiness-stat="evidence-confidence">
           <span className={styles.heroStatLabel}>Evidence confidence</span>
           <span className={styles.heroStatValue}>{capitalize(hero.evidenceConfidence)}</span>
