@@ -34,68 +34,54 @@ describe('Project Readiness Center surface', () => {
     expect(shellPanels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
   });
 
-  it('renders all six framework regions', () => {
+  it('renders all five framework regions on the ready path (Wave 15A wave-b9 Prompt 4B-10 — `HeroCard` deleted; the prior `data-pcc-readiness-region="hero"` marker lives only on loading/error state cards now)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
-    expect(readinessRegion(container, 'hero')).not.toBeNull();
+    // The five operational regions still render. The prior `'hero'`
+    // region is gone from the ready path; the absorbed summary lives
+    // inside `LifecycleGateMapCard` body marked with
+    // `[data-pcc-readiness-summary]`.
     expect(readinessRegion(container, 'lifecycle-gates')).not.toBeNull();
     expect(readinessRegion(container, 'domains')).not.toBeNull();
     expect(readinessRegion(container, 'blockers')).not.toBeNull();
     expect(readinessRegion(container, 'evidence-source-health')).not.toBeNull();
     expect(readinessRegion(container, 'downstream-modules')).not.toBeNull();
+    // Absorbed summary marker is present on the ready path.
+    expect(container.querySelector('[data-pcc-readiness-summary]')).not.toBeNull();
   });
 
-  it('first bento card uses the operational "Readiness Gate & Blockers" title and "Readiness Signals" eyebrow, drops the duplicate page-title framing, and preserves the MVP stat grid + source-health badges (Wave 15A wave-b9 Prompt 4B-04)', () => {
+  it('first bento card is the LifecycleGateMapCard with absorbed MVP stats + source-health badges + 4 TODO markers; HeroCard is deleted (Wave 15A wave-b9 Prompt 4B-10)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
-    const hero = readinessRegion(container, 'hero');
-    expect(hero, 'data-pcc-readiness-region="hero" must render').not.toBeNull();
+    // Locate LifecycleGateMapCard via its lifecycle-gates region marker.
+    const lifecycleGates = readinessRegion(container, 'lifecycle-gates');
+    expect(lifecycleGates, 'lifecycle-gates region must render').not.toBeNull();
+    const card = lifecycleGates!.closest('[data-pcc-card]');
+    expect(card, 'lifecycle-gates region must live inside a [data-pcc-card]').not.toBeNull();
 
-    // The hero region is the body of the first bento card. The card header
-    // (eyebrow + title) is rendered by PccDashboardCard as a sibling of
-    // the hero region; resolve via .closest('[data-pcc-card]') so the
-    // eyebrow / title assertions stay scoped to the FIRST card and do not
-    // false-positive on the shell hero (which legitimately renders
-    // 'Project Readiness' as the secondary title).
-    const card = hero!.closest('[data-pcc-card]');
-    expect(card, 'hero region must live inside a [data-pcc-card]').not.toBeNull();
-    const cardHeading = card!.querySelector('h2,h3,h4');
-    expect(cardHeading?.textContent).toBe('Readiness Gate & Blockers');
-    // Eyebrow text is rendered upper-case by CSS but stored mixed-case in
-    // the DOM; match the source-of-truth string passed to PccDashboardCard.
-    expect(card!.textContent).toContain('Readiness Signals');
-
-    // Negative assertions scoped to the first card body only — the shell
-    // hero outside this region legitimately carries 'Project Readiness' as
-    // the secondary title, so a surface-wide negative scan would
-    // false-positive (per `feedback_word_blocklists_break_on_corrected_copy`).
+    // Absorbed summary is the new home for the MVP metrics + source-health
+    // badges. Reuses the canonical `data-pcc-readiness-stat="…"` and
+    // `data-pcc-readiness-source-health-badge` markers so prior consumer
+    // queries continue to resolve.
+    const summary = card!.querySelector('[data-pcc-readiness-summary]');
+    expect(summary, 'absorbed summary must render inside LifecycleGateMapCard').not.toBeNull();
+    expect(summary!.querySelector('[data-pcc-readiness-stat="active-gate"]')).not.toBeNull();
+    expect(summary!.querySelector('[data-pcc-readiness-stat="overall-posture"]')).not.toBeNull();
+    expect(summary!.querySelector('[data-pcc-readiness-stat="blocker-count"]')).not.toBeNull();
     expect(
-      hero!.textContent,
-      'first card body must not render the dropped "Project readiness" badge',
-    ).not.toContain('Project readiness');
-    expect(
-      hero!.textContent,
-      'first card body must not render the dropped "Workflow execution and approvals…" caption',
-    ).not.toContain('Workflow execution and approvals are managed by your PCC administrator.');
-    expect(
-      hero!.textContent,
-      'first card body must not render the dropped Module Framework description',
-    ).not.toContain('Module Framework shell aggregating readiness posture');
-
-    // MVP stat grid is preserved.
-    expect(hero!.querySelector('[data-pcc-readiness-stat="active-gate"]')).not.toBeNull();
-    expect(hero!.querySelector('[data-pcc-readiness-stat="overall-posture"]')).not.toBeNull();
-    expect(hero!.querySelector('[data-pcc-readiness-stat="blocker-count"]')).not.toBeNull();
-    expect(hero!.querySelector('[data-pcc-readiness-stat="evidence-confidence"]')).not.toBeNull();
-
-    // Source-health badge row is preserved (count > 0; exact ids vary
-    // with fixture content and are covered by the adapter test).
-    const sourceHealthBadges = hero!.querySelectorAll('[data-pcc-readiness-source-health-badge]');
+      summary!.querySelector('[data-pcc-readiness-stat="evidence-confidence"]'),
+    ).not.toBeNull();
+    const sourceHealthBadges = summary!.querySelectorAll(
+      '[data-pcc-readiness-source-health-badge]',
+    );
     expect(sourceHealthBadges.length).toBeGreaterThan(0);
 
-    // Card-level compatibility marker preserved (project-readiness stays
-    // in SURFACES_WITH_COMPATIBILITY_CARD per the Wave 15A wave-b9 split).
-    expect(card!.getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
+    // The deleted HeroCard's tier1/command/active-panel-marker posture is
+    // gone. LifecycleGateMapCard remains tier2 / detail / footprint=full
+    // (its existing chrome is preserved).
+    expect(card!.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card!.getAttribute('data-pcc-card-region')).toBe('detail');
+    expect(card!.hasAttribute('data-pcc-active-surface-panel')).toBe(false);
   });
 
   it('lifecycle gates region renders gate items from structural markers', () => {
@@ -621,11 +607,16 @@ describe('Project Readiness Center surface — fixture-only fallback (command-fi
     expect(
       container.querySelector('[data-pcc-readiness-region="procore-source-confidence"]'),
     ).toBeNull();
-    // Hero (active-surface marker) and module-index region must still render.
+    // Wave 15A wave-b9 Prompt 4B-10 — `HeroCard` was deleted; the absorbed
+    // summary lives inside `LifecycleGateMapCard` body marked with
+    // `[data-pcc-readiness-summary]`. The card-level
+    // `data-pcc-active-surface-panel="project-readiness"` marker is no
+    // longer rendered (shell `<main>` is the sole semantic owner).
+    expect(container.querySelector('[data-pcc-readiness-summary]')).not.toBeNull();
+    expect(container.querySelector('[data-pcc-readiness-region="module-index"]')).not.toBeNull();
     expect(
       container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
-    ).not.toBeNull();
-    expect(container.querySelector('[data-pcc-readiness-region="module-index"]')).not.toBeNull();
+    ).toBeNull();
   });
 });
 
@@ -770,7 +761,10 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 default c
     const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
     const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
     expect(cards.length).toBeLessThanOrEqual(12);
-    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(1);
+    // Wave 15A wave-b9 Prompt 4B-10 — the card-level active-panel marker
+    // was dropped from all branches; in this `<PccBentoGrid>` isolated
+    // render there is no shell `<main>`, so the in-grid count is 0.
+    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(0);
     expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
     for (const card of cards) {
       expect(card.parentElement).toBe(bento);
@@ -789,10 +783,11 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 default c
 
     // Hero stays ready — primary readiness fetch is independent of approvals.
     await waitFor(() => expect(approvalsSpy).toHaveBeenCalledTimes(1));
+    // Wave 15A wave-b9 Prompt 4B-10 — wait on the absorbed summary
+    // marker (which renders only after the ready-state hook resolves)
+    // instead of the now-deleted card-level active-panel marker.
     await waitFor(() =>
-      expect(
-        container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
-      ).not.toBeNull(),
+      expect(container.querySelector('[data-pcc-readiness-summary]')).not.toBeNull(),
     );
 
     // Approvals-derived blocker rows degrade to zero (per
@@ -807,7 +802,10 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 default c
     const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
     const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
     expect(cards.length).toBeLessThanOrEqual(12);
-    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(1);
+    // Wave 15A wave-b9 Prompt 4B-10 — the card-level active-panel marker
+    // was dropped from all branches; in this `<PccBentoGrid>` isolated
+    // render there is no shell `<main>`, so the in-grid count is 0.
+    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(0);
     expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
     for (const card of cards) {
       expect(card.parentElement).toBe(bento);
@@ -834,7 +832,10 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 default c
     const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
     const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
     expect(cards.length).toBeLessThanOrEqual(12);
-    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(1);
+    // Wave 15A wave-b9 Prompt 4B-10 — the card-level active-panel marker
+    // was dropped from all branches; in this `<PccBentoGrid>` isolated
+    // render there is no shell `<main>`, so the in-grid count is 0.
+    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(0);
     expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
     for (const card of cards) {
       expect(card.parentElement).toBe(bento);
@@ -871,7 +872,10 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 selected 
     expect(container.querySelectorAll('[role="alert"]').length).toBeGreaterThanOrEqual(3);
 
     const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
-    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(1);
+    // Wave 15A wave-b9 Prompt 4B-10 — the card-level active-panel marker
+    // was dropped from all branches; in this `<PccBentoGrid>` isolated
+    // render there is no shell `<main>`, so the in-grid count is 0.
+    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(0);
     expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
     const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
     for (const card of cards) {
@@ -899,9 +903,12 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 selected 
       3,
     );
     // Hero/module-index unaffected.
-    expect(
-      container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
-    ).not.toBeNull();
+    // Wave 15A wave-b9 Prompt 4B-10 — the card-level active-panel marker
+    // was dropped from all branches; locate the loading/error state card
+    // via its `data-pcc-readiness-region="hero"` body marker (still
+    // emitted on the state cards) instead of via the deleted card-level
+    // active-panel selector.
+    expect(container.querySelector('[data-pcc-readiness-region="hero"]')).not.toBeNull();
     expect(container.querySelector('[data-pcc-readiness-region="module-index"]')).not.toBeNull();
     expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
   });
@@ -933,7 +940,10 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 03 selected 
     expect(container.querySelector('[data-pcc-related-records]')).not.toBeNull();
 
     const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
-    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(1);
+    // Wave 15A wave-b9 Prompt 4B-10 — the card-level active-panel marker
+    // was dropped from all branches; in this `<PccBentoGrid>` isolated
+    // render there is no shell `<main>`, so the in-grid count is 0.
+    expect(container.querySelectorAll('[data-pcc-active-surface-panel]')).toHaveLength(0);
     expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
     for (const marker of [
       'data-pcc-lifecycle-timeline',
@@ -1136,9 +1146,12 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 compact l
     expect(cards.length, 'compact loading must render exactly 2 cards').toBe(2);
 
     // Hero state card surfaces loading posture.
-    expect(
-      container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
-    ).not.toBeNull();
+    // Wave 15A wave-b9 Prompt 4B-10 — the card-level active-panel marker
+    // was dropped from all branches; locate the loading/error state card
+    // via its `data-pcc-readiness-region="hero"` body marker (still
+    // emitted on the state cards) instead of via the deleted card-level
+    // active-panel selector.
+    expect(container.querySelector('[data-pcc-readiness-region="hero"]')).not.toBeNull();
     expect(container.querySelector('[data-pcc-state="loading"]')).not.toBeNull();
     // Module-index renders.
     expect(container.querySelector('[data-pcc-readiness-region="module-index"]')).not.toBeNull();
@@ -1179,9 +1192,12 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 compact l
     const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
     expect(cards.length, 'compact error must render exactly 2 cards').toBe(2);
 
-    expect(
-      container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
-    ).not.toBeNull();
+    // Wave 15A wave-b9 Prompt 4B-10 — the card-level active-panel marker
+    // was dropped from all branches; locate the loading/error state card
+    // via its `data-pcc-readiness-region="hero"` body marker (still
+    // emitted on the state cards) instead of via the deleted card-level
+    // active-panel selector.
+    expect(container.querySelector('[data-pcc-readiness-region="hero"]')).not.toBeNull();
     expect(container.querySelector('[data-pcc-readiness-region="module-index"]')).not.toBeNull();
 
     // No fixture-scaffold framework markers; no embedded module markers.
@@ -1214,10 +1230,11 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 source-un
         <PccProjectReadinessSurface readModelClient={client} />
       </PccBentoGrid>,
     );
+    // Wave 15A wave-b9 Prompt 4B-10 — wait on the absorbed summary
+    // marker (which renders only after the ready-state hook resolves)
+    // instead of the now-deleted card-level active-panel marker.
     await waitFor(() =>
-      expect(
-        container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
-      ).not.toBeNull(),
+      expect(container.querySelector('[data-pcc-readiness-summary]')).not.toBeNull(),
     );
     // Source-unavailable adapter output is `preview` status, not `loading` or `error`.
     await waitFor(() =>
@@ -1226,9 +1243,15 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 source-un
       ).not.toBeNull(),
     );
 
-    // Seven framework markers all render.
+    // Seven framework markers all render. Wave 15A wave-b9 Prompt 4B-10 —
+    // the prior `'hero'` region marker lives only on loading/error state
+    // cards now (HeroCard was deleted from the ready path; the absorbed
+    // summary inside `LifecycleGateMapCard` is marked with
+    // `[data-pcc-readiness-summary]`). Asserting that marker instead
+    // here keeps the "first-card summary present on ready/preview"
+    // intent.
+    expect(container.querySelector('[data-pcc-readiness-summary]')).not.toBeNull();
     for (const region of [
-      'hero',
       'lifecycle-gates',
       'domains',
       'blockers',
@@ -1262,7 +1285,11 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 source-un
 
     const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
     const cards = Array.from(bento.querySelectorAll<HTMLElement>('[data-pcc-card]'));
-    expect(cards.length, 'source-unavailable preview retains the 9-card command layout').toBe(9);
+    // Wave 15A wave-b9 Prompt 4B-10 — `HeroCard` was deleted (MVP
+    // metrics absorbed into `LifecycleGateMapCard`); the source-
+    // unavailable preview command layout is now 8 cards (was 9
+    // including the hero).
+    expect(cards.length, 'source-unavailable preview retains the 8-card command layout').toBe(8);
   });
 });
 

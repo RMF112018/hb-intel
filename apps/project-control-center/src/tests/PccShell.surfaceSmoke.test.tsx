@@ -4,16 +4,19 @@ import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
-// Wave 15A wave-b9 Prompt 04 + Prompts 4B-01 / 4B-05 / 4B-08 / 4B-09 —
+// Wave 15A wave-b9 Prompts 04 / 4B-01 / 4B-05 / 4B-08 / 4B-09 / 4B-10 —
 // bifurcated surface sets. Project Home moved out after
 // `PccProjectIntelligenceCard` was removed; Approvals moved out after
 // `HomeCard` was removed (metric pills absorbed into `QueueCard`); Site
 // Health moved out after `PccSiteHealthOverviewCard` was removed
 // (overview metrics absorbed into `PccSiteHealthChecksCard`); Documents
 // moved out after `PccDocumentsHeaderCard` was deleted and replaced by
-// state-aware seam `PccDocumentControlStateCard`. Only project-readiness
-// remains in `SURFACES_WITH_COMPATIBILITY_CARD` after Prompt 4B-09.
-const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = ['project-readiness'];
+// state-aware seam `PccDocumentControlStateCard`; Project Readiness
+// moved out after `HeroCard` was deleted (MVP metrics absorbed into
+// `LifecycleGateMapCard`). After Prompt 4B-10,
+// `SURFACES_WITH_COMPATIBILITY_CARD` is empty — every PCC surface is
+// shell-only.
+const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [];
 
 function expectsCompatibilityCard(surfaceId: PccMvpSurfaceId): boolean {
   return SURFACES_WITH_COMPATIBILITY_CARD.includes(surfaceId);

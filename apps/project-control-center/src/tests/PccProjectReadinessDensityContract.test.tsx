@@ -105,10 +105,17 @@ function assertDensityInvariants(container: HTMLElement) {
     ).toBeNull();
   }
 
-  // 3. Active-surface uniqueness.
+  // 3. Active-surface uniqueness — Wave 15A wave-b9 Prompt 4B-10 inverted
+  //    this assertion: project-readiness joined SURFACES_WITH_SHELL_ONLY_PANEL
+  //    after `HeroCard` was deleted (MVP metrics absorbed into
+  //    `LifecycleGateMapCard`). The card-level
+  //    `data-pcc-active-surface-panel="project-readiness"` marker is now
+  //    dropped from all branches (ready / loading / error). The shell
+  //    `<main role="tabpanel">` is the sole semantic owner; in these
+  //    isolated `<PccBentoGrid forceMode="desktop">` renders there is no
+  //    shell `<main>`, so the in-grid count is 0.
   const surfaceMarkers = container.querySelectorAll('[data-pcc-active-surface-panel]');
-  expect(surfaceMarkers).toHaveLength(1);
-  expect(surfaceMarkers[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
+  expect(surfaceMarkers).toHaveLength(0);
 
   // 4. No card nesting.
   expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
@@ -198,10 +205,12 @@ describe('PccProjectReadinessSurface — density contract (read-model path)', ()
     // Wait for the read-model-driven hero card to settle before
     // asserting density. The hero swaps from preview/loading to ready
     // on the first hook microtask.
+    // Wave 15A wave-b9 Prompt 4B-10 — wait on the absorbed summary
+    // marker on `LifecycleGateMapCard` (which renders only after the
+    // ready-state hook resolves) instead of the now-deleted active-panel
+    // card-level marker.
     await waitFor(() =>
-      expect(
-        container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
-      ).not.toBeNull(),
+      expect(container.querySelector('[data-pcc-readiness-summary]')).not.toBeNull(),
     );
     assertDensityInvariants(container);
   });
@@ -237,10 +246,12 @@ describe('PccProjectReadinessSurface — density contract (Wave 15A B5 / Prompt 
       </PccBentoGrid>,
     );
     await waitFor(() => expect(ulSpy).toHaveBeenCalledTimes(1));
+    // Wave 15A wave-b9 Prompt 4B-10 — wait on the absorbed summary
+    // marker on `LifecycleGateMapCard` (which renders only after the
+    // ready-state hook resolves) instead of the now-deleted active-panel
+    // card-level marker.
     await waitFor(() =>
-      expect(
-        container.querySelector('[data-pcc-active-surface-panel="project-readiness"]'),
-      ).not.toBeNull(),
+      expect(container.querySelector('[data-pcc-readiness-summary]')).not.toBeNull(),
     );
     assertDensityInvariants(container);
   });

@@ -4,23 +4,24 @@ import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
-// Wave 15A wave-b9 Prompt 04 + Prompts 4B-01 / 4B-05 / 4B-08 / 4B-09 —
+// Wave 15A wave-b9 Prompts 04 / 4B-01 / 4B-05 / 4B-08 / 4B-09 / 4B-10 —
 // bifurcated surface sets after the runtime duplicate-header-card
 // removal passes. Compatibility-card surfaces still emit a card-level
 // `[data-pcc-card][data-pcc-active-surface-panel]` marker; shell-only
-// surfaces no longer do. Project Home moved to the shell-only set in
-// Prompt 4B-01; Approvals moved in Prompt 4B-05; Site Health moved in
-// Prompt 4B-08 (overview metrics absorbed into Checks card); Documents
-// moved in Prompt 4B-09 (header card replaced by state-aware seam
-// `PccDocumentControlStateCard`). After Prompt 4B-09,
-// `SURFACES_WITH_COMPATIBILITY_CARD` contains only project-readiness.
-const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = ['project-readiness'];
+// surfaces no longer do. Project Home moved in Prompt 4B-01; Approvals
+// moved in Prompt 4B-05; Site Health moved in Prompt 4B-08; Documents
+// moved in Prompt 4B-09; Project Readiness moved in Prompt 4B-10
+// (`HeroCard` deleted, MVP metrics absorbed into `LifecycleGateMapCard`).
+// After Prompt 4B-10, `SURFACES_WITH_COMPATIBILITY_CARD` is empty —
+// every PCC surface is now shell-only.
+const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
   'project-home',
   'approvals',
   'site-health',
   'documents',
+  'project-readiness',
   'team-and-access',
   'external-systems',
   'control-center-settings',

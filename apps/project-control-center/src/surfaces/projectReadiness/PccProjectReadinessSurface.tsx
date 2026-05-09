@@ -450,7 +450,6 @@ const ReadinessHeroSlot: FC<ReadinessRegionsProps> = ({ viewModel }) => {
         headingLevel={2}
         eyebrow={READINESS_HERO_CARD_EYEBROW}
         title={READINESS_HERO_CARD_TITLE}
-        dataActiveSurfacePanel="project-readiness"
       >
         <div data-pcc-readiness-region="hero" className={styles.heroBody}>
           <PccSurfaceContextHeader
@@ -475,7 +474,6 @@ const ReadinessHeroSlot: FC<ReadinessRegionsProps> = ({ viewModel }) => {
         headingLevel={2}
         eyebrow={READINESS_HERO_CARD_EYEBROW}
         title={READINESS_HERO_CARD_TITLE}
-        dataActiveSurfacePanel="project-readiness"
       >
         <div data-pcc-readiness-region="hero" className={styles.heroBody}>
           <PccSurfaceContextHeader
@@ -491,7 +489,19 @@ const ReadinessHeroSlot: FC<ReadinessRegionsProps> = ({ viewModel }) => {
       </PccDashboardCard>
     );
   }
-  return <HeroCard hero={viewModel.hero} />;
+  // Wave 15A wave-b9 Prompt 4B-10 — `HeroCard` was deleted because the
+  // shell hero already carries Project Readiness identity, posture, and
+  // governance microcopy after Prompt 4B-02. The four MVP stat metrics
+  // (Active Gate / Overall Posture / Blockers / Evidence Confidence)
+  // and source-health badges were absorbed into `LifecycleGateMapCard`
+  // (the first operational card returned by `ReadinessNativeCommandCards`)
+  // via a new `summary` prop, reusing the canonical
+  // `data-pcc-readiness-stat="…"` and `data-pcc-readiness-source-health-badge`
+  // markers. The four `TODO(PCC-ProjectReadiness)` markers from Prompt
+  // 4B-04 also moved with the metrics. Project Readiness joined
+  // `SURFACES_WITH_SHELL_ONLY_PANEL`; the shell `<main role="tabpanel">`
+  // is the sole semantic owner of `data-pcc-active-surface-panel="project-readiness"`.
+  return null;
 };
 
 // Wave 15A B5 / Prompt 02 — the seven non-hero command-critical
@@ -509,7 +519,7 @@ const ReadinessNativeCommandCards: FC<ReadinessRegionsProps> = ({ viewModel }) =
   }
   return (
     <Fragment>
-      <LifecycleGateMapCard gates={viewModel.lifecycleGates} />
+      <LifecycleGateMapCard gates={viewModel.lifecycleGates} summary={viewModel.hero} />
       <BlockersCard blockers={viewModel.blockers} />
       <DomainGridCard domains={viewModel.domains} />
       <OwnershipAccountabilityCard ownership={viewModel.ownershipAccountability} />
@@ -524,115 +534,38 @@ const ReadinessNativeCommandCards: FC<ReadinessRegionsProps> = ({ viewModel }) =
 // Region cards
 // ─────────────────────────────────────────────────────────────────────
 
-interface HeroCardProps {
-  readonly hero: IPccReadinessHeroViewModel;
-}
-
-const HeroCard: FC<HeroCardProps> = ({ hero }) => (
-  <PccDashboardCard
-    footprint="full"
-    tier="tier1"
-    region="command"
-    headingLevel={2}
-    eyebrow={READINESS_HERO_CARD_EYEBROW}
-    title={READINESS_HERO_CARD_TITLE}
-    dataActiveSurfacePanel="project-readiness"
-  >
-    <div data-pcc-readiness-region="hero" className={styles.heroBody}>
-      {/*
-       * TODO(PCC-ProjectReadiness): This MVP card now keeps readiness data
-       * visible while avoiding duplicate page-title framing. Future
-       * implementation should split summary ownership so the shell hero
-       * can show selected-project readiness posture and the bento grid
-       * can begin with operational readiness work items, gates, blockers,
-       * evidence, or source modules. Do not remove the MVP readiness data
-       * until project-context-derived readiness signals are available.
-       *
-       * The unrendered `hero.readOnlyBadgeText` ("Project readiness") and
-       * `hero.noExecutionCaption` ("Workflow execution and approvals are
-       * managed by your PCC administrator.") VM fields stay shape-stable
-       * via `projectReadinessAdapter.ts` constants so the no-execution /
-       * no-writeback governance contract remains anchored at the adapter
-       * level (see projectReadinessAdapter.test.ts:131-137); the shell
-       * hero now carries the equivalent governance microcopy as primary
-       * visible content (see PCC_SHELL_SURFACE_HEADER_METADATA
-       * 'project-readiness'.governanceMicrocopy).
-       */}
-      <div className={styles.heroStats}>
-        {/*
-         * TODO(PCC-ProjectReadiness): When project-context-derived
-         * readiness signals exist, render `Startup Checklist {n}%
-         * Complete` whenever the selected project has STARTED the Job
-         * Startup Checklist but it is NOT fully complete. `{n}` derives
-         * from completed checklist items / required checklist items for
-         * the current project ID. Do not compute from static fixture
-         * text; preserve read-only / no-writeback posture; gate the row
-         * on the checklist being started but incomplete (omit when not
-         * started or fully complete).
-         */}
-        <span className={styles.heroStat} data-pcc-readiness-stat="active-gate">
-          <span className={styles.heroStatLabel}>Active gate</span>
-          <span className={styles.heroStatValue}>{hero.activeLifecycleGateLabel}</span>
-        </span>
-        <span className={styles.heroStat} data-pcc-readiness-stat="overall-posture">
-          <span className={styles.heroStatLabel}>Overall posture</span>
-          <PccStatusPill tone={postureToTone(hero.overallPosture)}>
-            {posturelabel(hero.overallPosture)}
-          </PccStatusPill>
-        </span>
-        {/*
-         * TODO(PCC-ProjectReadiness): When project-context-derived
-         * readiness signals exist, render `{n} Constraints Overdue` when
-         * the selected project has constraints whose due date is before
-         * the current business date AND status is not resolved/closed.
-         * Also render `{n} Constraints to be Resolved this week` when
-         * constraints are due on or before the current business-week end
-         * AND not resolved/closed. Define business-week calculation
-         * consistently with scheduling/lookahead standards once that
-         * model exists; do not add date / business-week logic in this
-         * MVP prompt.
-         */}
-        <span className={styles.heroStat} data-pcc-readiness-stat="blocker-count">
-          <span className={styles.heroStatLabel}>Blockers</span>
-          <span className={styles.heroStatValue}>{hero.blockerCount}</span>
-        </span>
-        {/*
-         * TODO(PCC-ProjectReadiness): When the readiness module consumes
-         * the source-health and approvals/checkpoints read models, expose
-         * richer signals here: `Evidence Confidence {Low|Medium|High}`,
-         * `{n} Source Modules Available`, `{n} Source Modules Stale`,
-         * `{n} Readiness Approvals Pending`, `{n} Checkpoints Blocking
-         * Startup`. Derive source-health from the readiness source
-         * registry; preserve unavailable / stale states instead of
-         * hiding them. Do not introduce approval execution or writeback
-         * from the Project Readiness card.
-         */}
-        <span className={styles.heroStat} data-pcc-readiness-stat="evidence-confidence">
-          <span className={styles.heroStatLabel}>Evidence confidence</span>
-          <span className={styles.heroStatValue}>{capitalize(hero.evidenceConfidence)}</span>
-        </span>
-      </div>
-      <div className={styles.heroBadgeRow}>
-        {hero.sourceHealthBadges.map((b) => (
-          <span
-            key={b.sourceModuleId}
-            className={styles.inertChip}
-            data-pcc-readiness-source-health-badge={b.sourceModuleId}
-            aria-label={`${b.sourceModuleLabel} source health: ${b.sourceHealthStatus}`}
-          >
-            {b.sourceModuleLabel} · {b.sourceHealthStatus}
-          </span>
-        ))}
-      </div>
-    </div>
-  </PccDashboardCard>
-);
+// Wave 15A wave-b9 Prompt 4B-10 — `HeroCard` was deleted because the
+// shell hero already carries Project Readiness identity, posture, and
+// governance microcopy after Prompt 4B-02. The four MVP stat metrics
+// (Active Gate / Overall Posture / Blockers / Evidence Confidence) and
+// source-health badges were absorbed into `LifecycleGateMapCard` (the
+// first card returned by `ReadinessNativeCommandCards`) via a new
+// `summary` prop, reusing the canonical
+// `data-pcc-readiness-stat="…"` and `data-pcc-readiness-source-health-badge`
+// markers so prior consumer queries continue to resolve in the new
+// parent. The four `TODO(PCC-ProjectReadiness)` markers added in
+// Prompt 4B-04 also moved with the metrics. After this commit,
+// `'project-readiness'` joined `SURFACES_WITH_SHELL_ONLY_PANEL`;
+// `SURFACES_WITH_COMPATIBILITY_CARD` is now empty across all five
+// contract/smoke tests — every PCC surface is shell-only.
 
 interface LifecycleGateMapCardProps {
   readonly gates: readonly IPccReadinessGateViewModel[];
+  /**
+   * Wave 15A wave-b9 Prompt 4B-10 — absorbed Project Readiness summary
+   * from the deleted `HeroCard`. When supplied, renders a compact metric
+   * row (Active Gate / Overall Posture / Blockers / Evidence Confidence)
+   * + source-health badge row at the top of the card body, above the
+   * gate-map list. Reuses the existing `data-pcc-readiness-stat="…"` and
+   * `data-pcc-readiness-source-health-badge` markers so prior consumer
+   * queries continue to resolve in the new parent. The four
+   * `TODO(PCC-ProjectReadiness)` markers from Prompt 4B-04 also moved
+   * here alongside the absorbed metrics.
+   */
+  readonly summary?: IPccReadinessHeroViewModel;
 }
 
-const LifecycleGateMapCard: FC<LifecycleGateMapCardProps> = ({ gates }) => (
+const LifecycleGateMapCard: FC<LifecycleGateMapCardProps> = ({ gates, summary }) => (
   <PccDashboardCard
     footprint="full"
     tier="tier2"
@@ -640,6 +573,95 @@ const LifecycleGateMapCard: FC<LifecycleGateMapCardProps> = ({ gates }) => (
     eyebrow="Lifecycle gates"
     title="Project lifecycle map"
   >
+    {summary ? (
+      <div data-pcc-readiness-summary="" className={styles.heroBody}>
+        {/*
+         * TODO(PCC-ProjectReadiness): This MVP card now keeps readiness data
+         * visible while avoiding duplicate page-title framing. Future
+         * implementation should split summary ownership so the shell hero
+         * can show selected-project readiness posture and the bento grid
+         * can begin with operational readiness work items, gates, blockers,
+         * evidence, or source modules. Do not remove the MVP readiness data
+         * until project-context-derived readiness signals are available.
+         *
+         * The unrendered `summary.readOnlyBadgeText` ("Project readiness") and
+         * `summary.noExecutionCaption` ("Workflow execution and approvals are
+         * managed by your PCC administrator.") VM fields stay shape-stable
+         * via `projectReadinessAdapter.ts` constants so the no-execution /
+         * no-writeback governance contract remains anchored at the adapter
+         * level (see projectReadinessAdapter.test.ts:131-137); the shell
+         * hero now carries the equivalent governance microcopy as primary
+         * visible content (see PCC_SHELL_SURFACE_HEADER_METADATA
+         * 'project-readiness'.governanceMicrocopy).
+         */}
+        <div className={styles.heroStats}>
+          {/*
+           * TODO(PCC-ProjectReadiness): When project-context-derived
+           * readiness signals exist, render `Startup Checklist {n}%
+           * Complete` whenever the selected project has STARTED the Job
+           * Startup Checklist but it is NOT fully complete. `{n}` derives
+           * from completed checklist items / required checklist items for
+           * the current project ID. Do not compute from static fixture
+           * text; preserve read-only / no-writeback posture; gate the row
+           * on the checklist being started but incomplete (omit when not
+           * started or fully complete).
+           */}
+          <span className={styles.heroStat} data-pcc-readiness-stat="active-gate">
+            <span className={styles.heroStatLabel}>Active gate</span>
+            <span className={styles.heroStatValue}>{summary.activeLifecycleGateLabel}</span>
+          </span>
+          <span className={styles.heroStat} data-pcc-readiness-stat="overall-posture">
+            <span className={styles.heroStatLabel}>Overall posture</span>
+            <PccStatusPill tone={postureToTone(summary.overallPosture)}>
+              {posturelabel(summary.overallPosture)}
+            </PccStatusPill>
+          </span>
+          {/*
+           * TODO(PCC-ProjectReadiness): When project-context-derived
+           * readiness signals exist, render `{n} Constraints Overdue` when
+           * the selected project has constraints whose due date is before
+           * the current business date AND status is not resolved/closed.
+           * Also render `{n} Constraints to be Resolved this week` when
+           * constraints are due on or before the current business-week end
+           * AND not resolved/closed. Define business-week calculation
+           * consistently with scheduling/lookahead standards once that
+           * model exists; do not add date / business-week logic in this
+           * MVP prompt.
+           */}
+          <span className={styles.heroStat} data-pcc-readiness-stat="blocker-count">
+            <span className={styles.heroStatLabel}>Blockers</span>
+            <span className={styles.heroStatValue}>{summary.blockerCount}</span>
+          </span>
+          {/*
+           * TODO(PCC-ProjectReadiness): When the readiness module consumes
+           * the source-health and approvals/checkpoints read models, expose
+           * richer signals here: `Evidence Confidence {Low|Medium|High}`,
+           * `{n} Source Modules Available`, `{n} Source Modules Stale`,
+           * `{n} Readiness Approvals Pending`, `{n} Checkpoints Blocking
+           * Startup`. Derive source-health from the readiness source
+           * registry; preserve unavailable / stale states instead of
+           * hiding them. Do not introduce approval execution or writeback
+           * from the Project Readiness card.
+           */}
+          <span className={styles.heroStat} data-pcc-readiness-stat="evidence-confidence">
+            <span className={styles.heroStatLabel}>Evidence confidence</span>
+            <span className={styles.heroStatValue}>{capitalize(summary.evidenceConfidence)}</span>
+          </span>
+        </div>
+        <div className={styles.heroBadgeRow}>
+          {summary.sourceHealthBadges.map((b) => (
+            <span
+              key={b.sourceModuleId}
+              className={styles.inertChip}
+              data-pcc-readiness-source-health-badge={b.sourceModuleId}
+              aria-label={`${b.sourceModuleLabel} source health: ${b.sourceHealthStatus}`}
+            >
+              {b.sourceModuleLabel} · {b.sourceHealthStatus}
+            </span>
+          ))}
+        </div>
+      </div>
+    ) : null}
     <ol
       data-pcc-readiness-region="lifecycle-gates"
       className={styles.gateMapList}

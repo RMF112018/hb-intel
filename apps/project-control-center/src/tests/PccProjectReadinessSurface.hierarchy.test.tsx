@@ -117,17 +117,23 @@ describe('Project Readiness — Wave 9 lifecycle blocker posture', () => {
   });
 });
 
-describe('Project Readiness — active-panel ownership preserved', () => {
-  it('HeroCard remains the sole compatibility card owner of [data-pcc-active-surface-panel="project-readiness"] (Wave 15A wave-b7 Prompt 01 — shell <main> owns the semantic marker)', () => {
+describe('Project Readiness — active-panel ownership preserved (Wave 15A wave-b9 Prompt 4B-10)', () => {
+  it('zero in-grid card-level [data-pcc-active-surface-panel="project-readiness"] markers exist; project-readiness joined SURFACES_WITH_SHELL_ONLY_PANEL after `HeroCard` was deleted (MVP metrics absorbed into LifecycleGateMapCard), and the shell `<main role="tabpanel">` is the sole semantic owner of the marker', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     activateProjectReadiness(container);
     const compatibilityCards = container.querySelectorAll(
       '[data-pcc-card][data-pcc-active-surface-panel="project-readiness"]',
     );
-    expect(compatibilityCards).toHaveLength(1);
-    expect(compatibilityCards[0].getAttribute('data-pcc-active-surface-panel')).toBe(
-      'project-readiness',
+    expect(compatibilityCards).toHaveLength(0);
+    // Shell `<main>` continues to carry the marker as the sole semantic
+    // owner.
+    const shellPanel = container.querySelector(
+      'main[role="tabpanel"][data-pcc-active-surface-panel="project-readiness"]',
     );
+    expect(
+      shellPanel,
+      'shell <main role="tabpanel"> must carry the active-panel marker',
+    ).not.toBeNull();
   });
 });
 

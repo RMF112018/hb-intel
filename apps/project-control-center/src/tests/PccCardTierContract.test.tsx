@@ -89,16 +89,24 @@ const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
 // Documents moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-09:
 // `PccDocumentsHeaderCard` was deleted and replaced by
 // `PccDocumentControlStateCard` (tier=state / region=state, no
-// active-panel marker) for non-ready branches. After this commit
-// `SURFACES_WITH_COMPATIBILITY_CARD` contains only
-// `['project-readiness']`.
-const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = ['project-readiness'];
+// active-panel marker) for non-ready branches.
+//
+// Project Readiness moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt
+// 4B-10: `HeroCard` was deleted (its four MVP metrics + source-health
+// badges + the four TODO(PCC-ProjectReadiness) markers were absorbed
+// into `LifecycleGateMapCard`). After this commit,
+// `SURFACES_WITH_COMPATIBILITY_CARD` is empty — every PCC surface is
+// shell-only. The constant is preserved as a `readonly PccMvpSurfaceId[]`
+// for cross-test ergonomics; a future cleanup prompt may delete it
+// entirely.
+const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
   'project-home',
   'approvals',
   'site-health',
   'documents',
+  'project-readiness',
   'team-and-access',
   'external-systems',
   'control-center-settings',
@@ -295,6 +303,15 @@ describe('PCC card-tier contract — every in-scope surface card has explicit so
 });
 
 describe('PCC card-tier contract — active command card heading-level is "2" on every compatibility-card surface', () => {
+  // Wave 15A wave-b9 Prompt 4B-10 — `SURFACES_WITH_COMPATIBILITY_CARD`
+  // is now empty after Project Readiness joined the shell-only set
+  // (every PCC surface is shell-only). The for-loop below has no
+  // iterations; the milestone-anchor `it()` below documents the
+  // empty-set state so the describe block is not vacuously empty
+  // (vitest treats an empty describe as a failure).
+  it('SURFACES_WITH_COMPATIBILITY_CARD is empty — every PCC surface is shell-only after Wave 15A wave-b9 Prompt 4B-10 (heading-level loop has no iterations)', () => {
+    expect(SURFACES_WITH_COMPATIBILITY_CARD).toHaveLength(0);
+  });
   for (const surfaceId of SURFACES_WITH_COMPATIBILITY_CARD) {
     it(`'${surfaceId}' compatibility command card emits data-pcc-heading-level="2"`, () => {
       const container = renderPccAppOnSurface(surfaceId);

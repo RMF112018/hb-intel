@@ -67,21 +67,30 @@ const STUB_PROJECT_ID = 'fixture-pcc-project-001' as PccProjectId;
 // migrate from `getSoleActivePanel` → `getSoleStateCard`.
 //
 // Documents moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-09 —
-// the prior "Prompt 04 §3 BLOCKED gate" is now resolved.
+// the prior "Prompt 04 §3 BLOCKED gate" was resolved.
 // `PccDocumentsHeaderCard` was deleted and replaced by a state-aware
 // seam (`PccDocumentControlStateCard`, tier=state / region=state, no
-// active-panel marker) that carries the four preserved state copies
-// (loading / temporarily-unavailable / sources-unavailable). The ready
-// path begins with the first operational lane (project-record). After
-// this commit `SURFACES_WITH_COMPATIBILITY_CARD` contains only
-// `['project-readiness']`.
-const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = ['project-readiness'];
+// active-panel marker).
+//
+// Project Readiness moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt
+// 4B-10: `HeroCard` was deleted (its four MVP metrics + source-health
+// badges + the four TODO(PCC-ProjectReadiness) markers were absorbed
+// into `LifecycleGateMapCard`); the loading/error state cards dropped
+// their `dataActiveSurfacePanel="project-readiness"` markers for
+// shell-only consistency across all branches.
+//
+// After Prompt 4B-10, `SURFACES_WITH_COMPATIBILITY_CARD` is empty —
+// every PCC surface is now shell-only. The constant is preserved as a
+// `readonly PccMvpSurfaceId[]` for cross-test ergonomics; a future
+// cleanup prompt may delete it entirely.
+const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
   'project-home',
   'approvals',
   'site-health',
   'documents',
+  'project-readiness',
   'team-and-access',
   'external-systems',
   'control-center-settings',
@@ -169,6 +178,15 @@ function expectErrorA11y(card: Element, surfaceId: string): void {
 }
 
 describe('PCC route command card — ready (tier1 / command, explicit, h2) — surfaces with compatibility card', () => {
+  // Wave 15A wave-b9 Prompt 4B-10 — `SURFACES_WITH_COMPATIBILITY_CARD`
+  // is now empty after Project Readiness joined the shell-only set
+  // (every PCC surface is shell-only). The for-loop has no iterations;
+  // the milestone-anchor `it()` documents the empty-set state so the
+  // describe block is not vacuously empty (vitest treats an empty
+  // describe as a failure).
+  it('SURFACES_WITH_COMPATIBILITY_CARD is empty — every PCC surface is shell-only after Wave 15A wave-b9 Prompt 4B-10 (ready-path tier1/command compatibility loop has no iterations)', () => {
+    expect(SURFACES_WITH_COMPATIBILITY_CARD).toHaveLength(0);
+  });
   for (const surfaceId of SURFACES_WITH_COMPATIBILITY_CARD) {
     it(`'${surfaceId}' route renders one tier1 / command compatibility command card`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
@@ -244,13 +262,22 @@ describe('PCC route command card — loading branches (state / state, explicit, 
     expectLoadingA11y(card, 'external-systems');
   });
 
-  it('project-readiness loading branch carries state / state with explicit sources', () => {
+  it('project-readiness loading branch carries state / state with explicit sources (shell-only after Wave 15A wave-b9 Prompt 4B-10)', () => {
     // Inherit fixture defaults via prototype; override every readiness-client
     // method uniformly with a never-resolving promise so the readiness
     // hook stays in its loading envelope. Other intersection-client methods
     // (responsibility matrix, constraints log, buyout log, procore source)
     // continue to resolve via fixture so non-hero regions render normally
     // — they don't carry the active panel marker.
+    //
+    // Wave 15A wave-b9 Prompt 4B-10 — `dataActiveSurfacePanel="project-readiness"`
+    // was dropped from the loading state card; the shell `<main>` is the
+    // sole semantic owner. Locate the state card via its
+    // `[data-pcc-readiness-region="hero"]` body marker (still emitted on
+    // the loading state card) instead of via `getSoleActivePanel` /
+    // `getSoleStateCard`, since other surface-wide regions also render
+    // direct bento cards in the loading branch (so the bento has more
+    // than one direct-child card).
     const fixtureClient = createPccFixtureReadModelClient();
     const loadingClient = Object.create(fixtureClient) as typeof fixtureClient;
     const stubProjectReadiness = (): Promise<
@@ -269,9 +296,12 @@ describe('PCC route command card — loading branches (state / state, explicit, 
         <PccProjectReadinessSurface readModelClient={loadingClient} />
       </PccBentoGrid>,
     );
-    const card = getSoleActivePanel(container, 'project-readiness');
-    expectCommandCardPosture(card, 'project-readiness', { tier: 'state', region: 'state' });
-    expectLoadingA11y(card, 'project-readiness');
+    const heroBody = container.querySelector('[data-pcc-readiness-region="hero"]');
+    expect(heroBody, 'project-readiness loading state card body must render').not.toBeNull();
+    const card = heroBody!.closest('[data-pcc-card]');
+    expect(card, 'hero body must live inside a [data-pcc-card]').not.toBeNull();
+    expectStateCardPosture(card!);
+    expectLoadingA11y(card!, 'project-readiness');
   });
 });
 
@@ -308,7 +338,11 @@ describe('PCC route command card — error branches (state / state, explicit, h2
     });
   });
 
-  it('project-readiness error branch carries state / state with explicit sources', async () => {
+  it('project-readiness error branch carries state / state with explicit sources (shell-only after Wave 15A wave-b9 Prompt 4B-10)', async () => {
+    // Wave 15A wave-b9 Prompt 4B-10 — same pattern as the loading branch
+    // above: locate the error state card via its
+    // `[data-pcc-readiness-region="hero"]` body marker (still emitted)
+    // since other surface-wide regions also render in the error branch.
     const fixtureClient = createPccFixtureReadModelClient();
     const errorClient = Object.create(fixtureClient) as typeof fixtureClient;
     const stubProjectReadiness = (): Promise<
@@ -328,9 +362,12 @@ describe('PCC route command card — error branches (state / state, explicit, h2
       </PccBentoGrid>,
     );
     await waitFor(() => {
-      const card = getSoleActivePanel(container, 'project-readiness');
-      expectCommandCardPosture(card, 'project-readiness', { tier: 'state', region: 'state' });
-      expectErrorA11y(card, 'project-readiness');
+      const heroBody = container.querySelector('[data-pcc-readiness-region="hero"]');
+      expect(heroBody, 'project-readiness error state card body must render').not.toBeNull();
+      const card = heroBody!.closest('[data-pcc-card]');
+      expect(card, 'hero body must live inside a [data-pcc-card]').not.toBeNull();
+      expectStateCardPosture(card!);
+      expectErrorA11y(card!, 'project-readiness');
     });
   });
 });
