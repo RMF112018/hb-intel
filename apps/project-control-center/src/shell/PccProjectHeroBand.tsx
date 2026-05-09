@@ -60,6 +60,29 @@ export const PccProjectHeroBand: FC<PccProjectHeroBandProps> = ({
           </p>
         </div>
 
+        <dl className={styles.facts} data-pcc-hero-facts="">
+          <div className={styles.factCell} data-pcc-hero-fact-client="">
+            <dt className={styles.factLabel}>Client</dt>
+            <dd className={styles.factValue}>{viewModel.clientDisplay}</dd>
+          </div>
+          <div className={styles.factCell} data-pcc-hero-fact-location="">
+            <dt className={styles.factLabel}>Location</dt>
+            <dd className={styles.factValue}>{viewModel.location}</dd>
+          </div>
+          <div className={styles.factCell} data-pcc-hero-fact-estimated-value="">
+            <dt className={styles.factLabel}>Estimated value</dt>
+            <dd className={styles.factValue}>{viewModel.estimatedValueDisplay}</dd>
+          </div>
+          <div className={styles.factCell} data-pcc-hero-fact-scheduled-completion="">
+            <dt className={styles.factLabel}>Scheduled completion</dt>
+            <dd className={styles.factValue}>{viewModel.scheduledCompletionDisplay}</dd>
+          </div>
+          <div className={styles.factCell} data-pcc-hero-fact-project-stage="">
+            <dt className={styles.factLabel}>Project stage</dt>
+            <dd className={styles.factValue}>{viewModel.projectStageLabel}</dd>
+          </div>
+        </dl>
+
         <div className={styles.heroHighlights} data-pcc-hero-highlights="">
           {viewModel.heroHighlights.map((highlight) => (
             <div
@@ -86,29 +109,6 @@ export const PccProjectHeroBand: FC<PccProjectHeroBandProps> = ({
             </span>
           ))}
         </div>
-
-        <dl className={styles.facts} data-pcc-hero-facts="">
-          <div className={styles.factCell} data-pcc-hero-fact-client="">
-            <dt className={styles.factLabel}>Client</dt>
-            <dd className={styles.factValue}>{viewModel.clientDisplay}</dd>
-          </div>
-          <div className={styles.factCell} data-pcc-hero-fact-location="">
-            <dt className={styles.factLabel}>Location</dt>
-            <dd className={styles.factValue}>{viewModel.location}</dd>
-          </div>
-          <div className={styles.factCell} data-pcc-hero-fact-estimated-value="">
-            <dt className={styles.factLabel}>Estimated value</dt>
-            <dd className={styles.factValue}>{viewModel.estimatedValueDisplay}</dd>
-          </div>
-          <div className={styles.factCell} data-pcc-hero-fact-scheduled-completion="">
-            <dt className={styles.factLabel}>Scheduled completion</dt>
-            <dd className={styles.factValue}>{viewModel.scheduledCompletionDisplay}</dd>
-          </div>
-          <div className={styles.factCell} data-pcc-hero-fact-project-stage="">
-            <dt className={styles.factLabel}>Project stage</dt>
-            <dd className={styles.factValue}>{viewModel.projectStageLabel}</dd>
-          </div>
-        </dl>
 
         <div className={styles.commandSlot} data-pcc-hero-command-search="">
           <PccCommandSearch variant={searchVariant} />

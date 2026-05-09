@@ -102,13 +102,13 @@ export const PccShell: FC<PccShellProps> = ({
       data-pcc-shell="thin"
       data-pcc-shell-mode={shellMode}
     >
-      <PccProjectHeroBand mode={shellMode} viewModel={heroViewModel} />
       <PccHorizontalTabs
         mode={shellMode}
         activeSurfaceId={activeSurfaceId}
         onSelectSurface={(id) => onSelectSurface?.(id)}
         panelId={ACTIVE_PANEL_ID}
       />
+      <PccProjectHeroBand mode={shellMode} viewModel={heroViewModel} />
       <main
         id={ACTIVE_PANEL_ID}
         role="tabpanel"

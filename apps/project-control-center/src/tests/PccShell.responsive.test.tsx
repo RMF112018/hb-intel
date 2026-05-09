@@ -176,6 +176,36 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
     expect(container.querySelectorAll('[data-pcc-hero-command-search]')).toHaveLength(1);
     unmount();
   });
+
+  // Wave 15A wave-b9 Prompt 4B-03 — explicit shell composition order:
+  // tabs precede the hero band; the hero band precedes the active-surface
+  // tabpanel main. Asserted once at standardLaptop because per-mode
+  // presence is already covered by the it.each loops above; per the
+  // prompt's "If full eight-mode DOM-order testing is too noisy" guidance.
+  // Visual order on Grid containers depends on grid-template-areas, which
+  // jsdom does not reliably evaluate; the visual order is enforced by the
+  // CSS template-area edits in PccProjectHeroBand.module.css (default and
+  // phone modes). This test locks DOM/source order only, which is the
+  // accessibility-relevant order (focus / reading order).
+  it('renders shell components in tabs → hero → main DOM order (Wave 15A wave-b9 Prompt 4B-03)', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    const tabs = container.querySelector('[data-pcc-horizontal-tabs]');
+    const hero = container.querySelector('[data-pcc-project-hero-band]');
+    const main = container.querySelector('main[role="tabpanel"]#pcc-active-surface-panel');
+    expect(tabs, '[data-pcc-horizontal-tabs] tablist must render').not.toBeNull();
+    expect(hero, '[data-pcc-project-hero-band] hero must render').not.toBeNull();
+    expect(main, 'main[role="tabpanel"] active-surface panel must render').not.toBeNull();
+    // tabs precedes hero
+    expect(
+      tabs!.compareDocumentPosition(hero!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      'tablist must precede the hero band in DOM order',
+    ).toBeTruthy();
+    // hero precedes main
+    expect(
+      hero!.compareDocumentPosition(main!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      'hero band must precede the active-surface tabpanel main in DOM order',
+    ).toBeTruthy();
+  });
 });
 
 describe('resolveResponsiveMode 8-mode boundary contract', () => {

@@ -1,14 +1,23 @@
 /* PccProjectHeroBand — premium project-context surface (Wave 15A wave-b2)
  *
- * Visual contract:
+ * Visual contract (Wave 15A wave-b9 Prompt 4B-03 — section order
+ * identity → facts → highlights → microcopy; tabs now render BEFORE the
+ * hero in PccShell, so the `.tabSeam` element below the hero now divides
+ * the hero from the active-surface main rather than from a tab rail.
+ * Renaming `.tabSeam` / `data-pcc-hero-tab-seam` is deferred to a
+ * separate prompt to avoid test-marker churn):
  *  - Primary title (small, muted, uppercase eyebrow): "Project Control Center"
  *  - Secondary title (large, bold): active surface name
  *  - Surface description (single supporting line, clamped 1 line on
  *    desktop/laptop, 2 lines on compact)
- *  - Four locked facts (Location / Estimated value / Scheduled completion /
- *    Project stage) in a metadata grid
- *  - Disabled command-search affordance
- *  - Strong visual seam between hero and tab rail (data-pcc-hero-tab-seam)
+ *  - Project facts row (Client / Location / Estimated value / Scheduled
+ *    completion / Project stage) anchoring the hero immediately under
+ *    the identity row
+ *  - Production heroHighlights row (per-surface end-user posture) +
+ *    governanceMicrocopy row (subordinate read-only / governed-workflow
+ *    reminders) — see Wave 15A wave-b9 Prompt 4B-02
+ *  - Disabled command-search affordance (identity-row right slot)
+ *  - Visual seam below the hero (data-pcc-hero-tab-seam)
  *
  * Color discipline: only @hbc/ui-kit branded tokens, surfaced via PCC theme
  * vars set on the shell root (--pcc-color-*, --pcc-space-*, etc.).
@@ -24,9 +33,9 @@
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
     'identity   command'
+    'facts      facts'
     'highlights highlights'
-    'microcopy  microcopy'
-    'facts      facts';
+    'microcopy  microcopy';
   align-items: start;
   gap: var(--pcc-space-md) var(--pcc-space-lg);
   padding: var(--pcc-space-lg) var(--pcc-space-xl);
@@ -44,9 +53,9 @@
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
     'identity'
+    'facts'
     'highlights'
     'microcopy'
-    'facts'
     'command';
   padding: var(--pcc-space-md) var(--pcc-space-md);
 }

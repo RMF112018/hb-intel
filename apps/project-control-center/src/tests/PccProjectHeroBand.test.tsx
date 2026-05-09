@@ -120,6 +120,33 @@ describe('PccProjectHeroBand — locked content (Wave 15A wave-b2)', () => {
     const { container } = renderHero();
     expect(container.querySelector('[data-pcc-hero-facts]')).not.toBeNull();
   });
+
+  // Wave 15A wave-b9 Prompt 4B-03 — explicit hero internal section order:
+  // facts precede heroHighlights; heroHighlights precede
+  // governanceMicrocopy. Visual order on the Grid container depends on
+  // grid-template-areas, which jsdom does not reliably evaluate; this test
+  // locks DOM/source order only (the accessibility-relevant order). The
+  // visual order is enforced by the CSS template-area edits in
+  // PccProjectHeroBand.module.css (default and phone modes).
+  it('renders hero sections in identity → facts → highlights → microcopy DOM order (Wave 15A wave-b9 Prompt 4B-03)', () => {
+    const { container } = renderHero();
+    const facts = container.querySelector('[data-pcc-hero-facts]');
+    const highlights = container.querySelector('[data-pcc-hero-highlights]');
+    const microcopy = container.querySelector('[data-pcc-hero-governance-microcopy]');
+    expect(facts, '[data-pcc-hero-facts] must render').not.toBeNull();
+    expect(highlights, '[data-pcc-hero-highlights] must render').not.toBeNull();
+    expect(microcopy, '[data-pcc-hero-governance-microcopy] must render').not.toBeNull();
+    // facts precedes highlights
+    expect(
+      facts!.compareDocumentPosition(highlights!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      'facts row must precede the heroHighlights row in DOM order',
+    ).toBeTruthy();
+    // highlights precedes microcopy
+    expect(
+      highlights!.compareDocumentPosition(microcopy!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      'heroHighlights must precede the governanceMicrocopy in DOM order',
+    ).toBeTruthy();
+  });
 });
 
 describe('PccProjectHeroBand — accessible region semantics (wave-b8 Prompt 04)', () => {
