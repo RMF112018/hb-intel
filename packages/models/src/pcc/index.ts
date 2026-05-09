@@ -85,6 +85,30 @@ export {
   type IPccMvpSurface,
 } from './PccMvpSurfaces.js';
 
+// Phase 05 — Grouped primary tab / module navigation registry
+export {
+  PCC_PRIMARY_TAB_IDS,
+  PCC_MODULE_IDS,
+  PCC_MODULE_STATES,
+  PCC_MODULE_STATE_COPY,
+  PCC_PRIMARY_NAVIGATION_TABS,
+  PCC_NAVIGATION_MODULES,
+  getPrimaryNavigationTab,
+  getModule,
+  getModulesForPrimaryTab,
+  isSelectableModule,
+  getParentTabForModule,
+  normalizePrimaryTabId,
+  normalizeModuleId,
+  type PccPrimaryTabId,
+  type PccModuleId,
+  type PccModuleState,
+  type PccModuleStateCopy,
+  type PccModuleSourceSystem,
+  type PccNavigationModule,
+  type PccPrimaryNavigationTab,
+} from './PccPrimaryNavigation.js';
+
 // Priority actions
 export {
   PRIORITY_ACTION_CATEGORIES,
