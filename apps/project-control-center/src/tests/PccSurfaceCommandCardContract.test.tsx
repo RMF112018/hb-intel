@@ -20,11 +20,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import {
-  type PccMvpSurfaceId,
-  type PccProjectId,
-  type PccReadModelEnvelope,
-} from '@hbc/models/pcc';
+import { PCC_MVP_SURFACE_IDS, type PccProjectId, type PccReadModelEnvelope } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
@@ -40,103 +36,15 @@ const ALWAYS_REJECTS = <T,>(): Promise<T> => Promise.reject(new Error('test: for
 
 const STUB_PROJECT_ID = 'fixture-pcc-project-001' as PccProjectId;
 
-// Wave 15A wave-b9 Prompt 04 + Prompts 4B-01 / 4B-05 / 4B-08 / 4B-09 —
-// bifurcated surface sets after the runtime duplicate-header-card
-// removal passes. Surfaces that retain an operational/header-hybrid
-// card still emit the temporary card-level
-// `[data-pcc-card][data-pcc-active-surface-panel]` compatibility marker;
-// surfaces whose first card was removed are uniformly shell-only across
-// all render branches (ready / loading / error / source-unavailable).
-//
-// Project Home moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-01:
-// `PccProjectIntelligenceCard` was removed and `PccPriorityActionsCard`
-// is now the first bento card. The Project Home shell `<main>` continues
-// to carry the active-panel marker on its own.
-//
-// Approvals moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-05:
-// `HomeCard` was removed (its metric pills were absorbed into
-// `QueueCard`), and the loading/error state cards dropped their
-// `dataActiveSurfacePanel="approvals"` markers for cross-branch
-// shell-only consistency.
-//
-// Site Health moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-08:
-// `PccSiteHealthOverviewCard` was removed (its four metrics — Overall /
-// Failing / Warnings / Last run — were absorbed into
-// `PccSiteHealthChecksCard`). Site Health is fixture-only with no async
-// loading/error state machine, so no loading-error branch test had to
-// migrate from `getSoleActivePanel` → `getSoleStateCard`.
-//
-// Documents moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-09 —
-// the prior "Prompt 04 §3 BLOCKED gate" was resolved.
-// `PccDocumentsHeaderCard` was deleted and replaced by a state-aware
-// seam (`PccDocumentControlStateCard`, tier=state / region=state, no
-// active-panel marker).
-//
-// Project Readiness moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt
-// 4B-10: `HeroCard` was deleted (its four MVP metrics + source-health
-// badges + the four TODO(PCC-ProjectReadiness) markers were absorbed
-// into `LifecycleGateMapCard`); the loading/error state cards dropped
-// their `dataActiveSurfacePanel="project-readiness"` markers for
-// shell-only consistency across all branches.
-//
-// After Prompt 4B-10, `SURFACES_WITH_COMPATIBILITY_CARD` is empty —
-// every PCC surface is now shell-only. The constant is preserved as a
-// `readonly PccMvpSurfaceId[]` for cross-test ergonomics; a future
-// cleanup prompt may delete it entirely.
-const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [];
+// Wave 15A wave-b8 Prompt 05 — every PCC MVP surface is shell-only.
+// The shell `<main role="tabpanel">` is the sole carrier of
+// `data-pcc-active-surface-panel`; no bento-child card emits the marker
+// on any branch (ready / loading / error / source-unavailable). The
+// previous bifurcation between `SURFACES_WITH_COMPATIBILITY_CARD` and
+// `SURFACES_WITH_SHELL_ONLY_PANEL` was retired here; the canonical loop
+// iterates `PCC_MVP_SURFACE_IDS` directly.
 
-const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
-  'project-home',
-  'approvals',
-  'site-health',
-  'documents',
-  'project-readiness',
-  'team-and-access',
-  'external-systems',
-  'control-center-settings',
-];
-
-interface CommandCardExpectations {
-  readonly tier: 'tier1' | 'state';
-  readonly region: 'command' | 'state';
-}
-
-function expectCommandCardPosture(
-  card: Element,
-  surfaceId: string,
-  { tier, region }: CommandCardExpectations,
-): void {
-  expect(card.getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
-  expect(card.hasAttribute('data-pcc-card')).toBe(true);
-  expect(card.getAttribute('data-pcc-card-tier')).toBe(tier);
-  expect(card.getAttribute('data-pcc-card-region')).toBe(region);
-  expect(card.getAttribute('data-pcc-card-tier-source')).toBe('explicit');
-  expect(card.getAttribute('data-pcc-card-region-source')).toBe('explicit');
-  expect(card.getAttribute('data-pcc-heading-level')).toBe('2');
-}
-
-function getSoleActivePanel(container: HTMLElement, surfaceId: string): Element {
-  // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> owns the
-  // active-surface marker semantically; for SURFACES_WITH_COMPATIBILITY_CARD
-  // the surface still emits a `[data-pcc-card][data-pcc-active-surface-panel]`
-  // compatibility marker on its operational/header-hybrid first card. The
-  // card-level posture (tier, region, heading-level) lives on that card,
-  // so this helper resolves to it. SURFACES_WITH_SHELL_ONLY_PANEL no longer
-  // emit the marker on any branch — use `getSoleStateCard` for those.
-  const cards = container.querySelectorAll(
-    `[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`,
-  );
-  expect(
-    cards,
-    `surface '${surfaceId}' must render exactly one compatibility command card carrying the active-panel marker`,
-  ).toHaveLength(1);
-  const card = cards[0]!;
-  expect(card.getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
-  return card;
-}
-
-// Wave 15A wave-b9 Prompt 04 — for SURFACES_WITH_SHELL_ONLY_PANEL in
-// loading / error branches the surface renders exactly one direct-child
+// Loading / error state branches render exactly one direct-child
 // `[data-pcc-card]` and no card-level active-panel marker. Locating the
 // state card by direct-child + tier/region keeps tier/region/heading-level
 // posture under test without re-introducing the removed marker.
@@ -158,14 +66,13 @@ function expectStateCardPosture(card: Element): void {
   expect(card.hasAttribute('data-pcc-active-surface-panel')).toBe(false);
 }
 
-// Wave 15A wave-b3 Prompt 05 — accessibility helpers. PccPreviewState
-// already emits aria-busy="true" on loading and role="alert" on error;
-// these helpers lock that contract for the compatibility command card.
+// PccPreviewState emits aria-busy="true" on loading and role="alert" on
+// error; these helpers lock that contract for the shell-only state card.
 function expectLoadingA11y(card: Element, surfaceId: string): void {
   const busy = card.querySelector('[aria-busy="true"]');
   expect(
     busy,
-    `surface '${surfaceId}' loading branch must expose aria-busy="true" inside the compatibility command card`,
+    `surface '${surfaceId}' loading branch must expose aria-busy="true" inside the state card`,
   ).not.toBeNull();
 }
 
@@ -173,36 +80,13 @@ function expectErrorA11y(card: Element, surfaceId: string): void {
   const alert = card.querySelector('[role="alert"]');
   expect(
     alert,
-    `surface '${surfaceId}' error branch must expose role="alert" inside the compatibility command card`,
+    `surface '${surfaceId}' error branch must expose role="alert" inside the state card`,
   ).not.toBeNull();
 }
 
-describe('PCC route command card — ready (tier1 / command, explicit, h2) — surfaces with compatibility card', () => {
-  // Wave 15A wave-b9 Prompt 4B-10 — `SURFACES_WITH_COMPATIBILITY_CARD`
-  // is now empty after Project Readiness joined the shell-only set
-  // (every PCC surface is shell-only). The for-loop has no iterations;
-  // the milestone-anchor `it()` documents the empty-set state so the
-  // describe block is not vacuously empty (vitest treats an empty
-  // describe as a failure).
-  it('SURFACES_WITH_COMPATIBILITY_CARD is empty — every PCC surface is shell-only after Wave 15A wave-b9 Prompt 4B-10 (ready-path tier1/command compatibility loop has no iterations)', () => {
-    expect(SURFACES_WITH_COMPATIBILITY_CARD).toHaveLength(0);
-  });
-  for (const surfaceId of SURFACES_WITH_COMPATIBILITY_CARD) {
-    it(`'${surfaceId}' route renders one tier1 / command compatibility command card`, () => {
-      const { container } = render(<PccApp forceMode="desktop" />);
-      const tab = getSurfaceSelectionControl(container, surfaceId);
-      expect(tab, `tab for '${surfaceId}' must exist in shell`).not.toBeNull();
-      fireEvent.click(tab!);
-
-      const card = getSoleActivePanel(container, surfaceId);
-      expectCommandCardPosture(card, surfaceId, { tier: 'tier1', region: 'command' });
-    });
-  }
-});
-
-describe('PCC route command card — ready (shell-only ownership) — surfaces with no compatibility card', () => {
-  for (const surfaceId of SURFACES_WITH_SHELL_ONLY_PANEL) {
-    it(`'${surfaceId}' route shell <main> owns the active panel and the bento contains no direct-child compatibility card`, () => {
+describe('PCC route command card — ready (shell-owned active-panel ownership) — every PCC MVP surface', () => {
+  for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+    it(`'${surfaceId}' route shell <main> owns the active panel and the bento contains zero direct-child cards carrying [data-pcc-active-surface-panel]`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
       const tab = getSurfaceSelectionControl(container, surfaceId);
       expect(tab, `tab for '${surfaceId}' must exist in shell`).not.toBeNull();
@@ -270,11 +154,9 @@ describe('PCC route command card — loading branches (state / state, explicit, 
     // continue to resolve via fixture so non-hero regions render normally
     // — they don't carry the active panel marker.
     //
-    // Wave 15A wave-b9 Prompt 4B-10 — `dataActiveSurfacePanel="project-readiness"`
-    // was dropped from the loading state card; the shell `<main>` is the
-    // sole semantic owner. Locate the state card via its
-    // `[data-pcc-readiness-region="hero"]` body marker (still emitted on
-    // the loading state card) instead of via `getSoleActivePanel` /
+    // The shell `<main>` is the sole semantic active-panel owner. Locate
+    // the state card via its `[data-pcc-readiness-region="hero"]` body
+    // marker (still emitted on the loading state card) instead of via
     // `getSoleStateCard`, since other surface-wide regions also render
     // direct bento cards in the loading branch (so the bento has more
     // than one direct-child card).

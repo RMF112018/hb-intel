@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import {
@@ -82,6 +84,15 @@ describe('Project Readiness Center surface', () => {
     expect(card!.getAttribute('data-pcc-card-tier')).toBe('tier2');
     expect(card!.getAttribute('data-pcc-card-region')).toBe('detail');
     expect(card!.hasAttribute('data-pcc-active-surface-panel')).toBe(false);
+  });
+
+  it('source carries at least four TODO(PCC-ProjectReadiness) markers near the absorbed summary block (Wave 15A wave-b9 Prompt 4B-04 / 4B-10 — markers preserved through HeroCard absorption into LifecycleGateMapCard)', () => {
+    const source = readFileSync(
+      resolve(__dirname, '../surfaces/projectReadiness/PccProjectReadinessSurface.tsx'),
+      'utf8',
+    );
+    const matches = source.match(/TODO\(PCC-ProjectReadiness\)/g) ?? [];
+    expect(matches.length).toBeGreaterThanOrEqual(4);
   });
 
   it('lifecycle gates region renders gate items from structural markers', () => {

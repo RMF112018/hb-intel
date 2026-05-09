@@ -57,60 +57,13 @@ const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
   'project-readiness',
 ];
 
-// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 — bifurcated surface sets
-// after the runtime duplicate-header-card removal passes. The universal
-// explicit-sources / layout / aria / direct-child invariants iterate
-// `IN_SCOPE_SURFACES` (all eight surfaces). The compatibility-card-
-// specific heading-level assertion only iterates surfaces whose
-// operational/header-hybrid first card still emits the temporary
-// `[data-pcc-card][data-pcc-active-surface-panel]` marker.
-//
-// Documents stays in the compatibility-card set because its dynamic
-// loading / error / source-unavailable copy has no surviving home
-// post-removal; the header card is preserved until a state-aware seam
-// exists (Prompt 04 §3 BLOCKED gate).
-//
-// Project Home moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-01:
-// `PccProjectIntelligenceCard` was removed; the Project Home shell
-// `<main>` continues to carry the active-panel marker on its own.
-//
-// Approvals moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-05:
-// `HomeCard` was removed (its metric pills were absorbed into
-// `QueueCard`); the loading/error state cards dropped their
-// `dataActiveSurfacePanel="approvals"` markers for shell-only
-// consistency across all branches.
-//
-// Site Health moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-08:
-// `PccSiteHealthOverviewCard` was removed (its overview metrics —
-// Overall / Failing / Warnings / Last run — were absorbed into
-// `PccSiteHealthChecksCard`). Site Health is fixture-only so the
-// reclassification is uniform across the single render branch.
-//
-// Documents moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-09:
-// `PccDocumentsHeaderCard` was deleted and replaced by
-// `PccDocumentControlStateCard` (tier=state / region=state, no
-// active-panel marker) for non-ready branches.
-//
-// Project Readiness moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt
-// 4B-10: `HeroCard` was deleted (its four MVP metrics + source-health
-// badges + the four TODO(PCC-ProjectReadiness) markers were absorbed
-// into `LifecycleGateMapCard`). After this commit,
-// `SURFACES_WITH_COMPATIBILITY_CARD` is empty — every PCC surface is
-// shell-only. The constant is preserved as a `readonly PccMvpSurfaceId[]`
-// for cross-test ergonomics; a future cleanup prompt may delete it
-// entirely.
-const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [];
-
-const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
-  'project-home',
-  'approvals',
-  'site-health',
-  'documents',
-  'project-readiness',
-  'team-and-access',
-  'external-systems',
-  'control-center-settings',
-];
+// Wave 15A wave-b8 Prompt 05 — every PCC MVP surface is shell-only.
+// The universal explicit-sources / layout / aria / direct-child loop
+// iterates `IN_SCOPE_SURFACES` (all eight surfaces); a single trailing
+// loop verifies no direct-child bento card carries the
+// `[data-pcc-card][data-pcc-active-surface-panel]` marker. The previous
+// `SURFACES_WITH_COMPATIBILITY_CARD` / `SURFACES_WITH_SHELL_ONLY_PANEL`
+// bifurcation was retired here.
 
 function renderPccAppOnSurface(surfaceId: PccMvpSurfaceId): HTMLElement {
   const { container } = render(<PccApp forceMode="desktop" />);
@@ -140,26 +93,6 @@ function getActiveBento(container: HTMLElement, surfaceId: PccMvpSurfaceId): HTM
   ).not.toBeNull();
 
   return bento as HTMLElement;
-}
-
-function getActiveCompatibilityCard(bento: HTMLElement, surfaceId: PccMvpSurfaceId): HTMLElement {
-  // The compatibility command card is a direct child of the bento grid
-  // and still emits the temporary `data-pcc-active-surface-panel`
-  // marker. Scoping to direct children prevents false positives from
-  // descendant cards that share a marker namespace.
-  const matches = Array.from(bento.children).filter((child) =>
-    child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`),
-  );
-  expect(
-    matches,
-    `surface '${surfaceId}' must render one direct bento-child compatibility card`,
-  ).toHaveLength(1);
-  return matches[0] as HTMLElement;
-}
-
-function activePanelCards(container: HTMLElement, surfaceId: PccMvpSurfaceId): readonly Element[] {
-  const bento = getActiveBento(container, surfaceId);
-  return Array.from(bento.querySelectorAll('[data-pcc-card]'));
 }
 
 function cardTitle(card: Element): string {
@@ -302,31 +235,8 @@ describe('PCC card-tier contract — every in-scope surface card has explicit so
   }
 });
 
-describe('PCC card-tier contract — active command card heading-level is "2" on every compatibility-card surface', () => {
-  // Wave 15A wave-b9 Prompt 4B-10 — `SURFACES_WITH_COMPATIBILITY_CARD`
-  // is now empty after Project Readiness joined the shell-only set
-  // (every PCC surface is shell-only). The for-loop below has no
-  // iterations; the milestone-anchor `it()` below documents the
-  // empty-set state so the describe block is not vacuously empty
-  // (vitest treats an empty describe as a failure).
-  it('SURFACES_WITH_COMPATIBILITY_CARD is empty — every PCC surface is shell-only after Wave 15A wave-b9 Prompt 4B-10 (heading-level loop has no iterations)', () => {
-    expect(SURFACES_WITH_COMPATIBILITY_CARD).toHaveLength(0);
-  });
-  for (const surfaceId of SURFACES_WITH_COMPATIBILITY_CARD) {
-    it(`'${surfaceId}' compatibility command card emits data-pcc-heading-level="2"`, () => {
-      const container = renderPccAppOnSurface(surfaceId);
-      const bento = getActiveBento(container, surfaceId);
-      const compatibilityCard = getActiveCompatibilityCard(bento, surfaceId);
-      expect(
-        compatibilityCard.getAttribute('data-pcc-heading-level'),
-        `surface '${surfaceId}' compatibility command card must declare heading level 2`,
-      ).toBe('2');
-    });
-  }
-});
-
-describe('PCC card-tier contract — shell-only surfaces have no direct-child compatibility card', () => {
-  for (const surfaceId of SURFACES_WITH_SHELL_ONLY_PANEL) {
+describe('PCC card-tier contract — every PCC MVP surface has zero direct-child cards carrying [data-pcc-active-surface-panel]', () => {
+  for (const surfaceId of IN_SCOPE_SURFACES) {
     it(`'${surfaceId}' bento contains zero direct-child [data-pcc-card][data-pcc-active-surface-panel]`, () => {
       const container = renderPccAppOnSurface(surfaceId);
       const bento = getActiveBento(container, surfaceId);

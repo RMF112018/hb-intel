@@ -255,6 +255,38 @@ describe('PccDocumentsSurface — Wave 7 three-lane shell', () => {
     expect(panels.length).toBe(0);
   });
 
+  it('loading state card exposes aria-busy="true" with zero card-level [data-pcc-active-surface-panel] markers (Wave 15A wave-b8 Prompt 05 — Documents joined SURFACES_WITH_SHELL_ONLY_PANEL after Prompt 4B-09)', () => {
+    const pending: IPccDocumentsReadModelClient = {
+      getDocumentControl: () => new Promise(() => {}),
+    };
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccDocumentsSurface readModelClient={pending} />
+      </PccBentoGrid>,
+    );
+    const busy = container.querySelector('[aria-busy="true"]');
+    expect(busy, 'documents loading branch must expose aria-busy="true"').not.toBeNull();
+    const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
+    expect(panels.length).toBe(0);
+  });
+
+  it('error state card exposes role="alert" with zero card-level [data-pcc-active-surface-panel] markers (Wave 15A wave-b8 Prompt 05)', async () => {
+    const rejecting: IPccDocumentsReadModelClient = {
+      getDocumentControl: () => Promise.reject(new Error('test: forced rejection')),
+    };
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccDocumentsSurface readModelClient={rejecting} />
+      </PccBentoGrid>,
+    );
+    await waitFor(() => {
+      const alert = container.querySelector('[role="alert"]');
+      expect(alert, 'documents error branch must expose role="alert"').not.toBeNull();
+    });
+    const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
+    expect(panels.length).toBe(0);
+  });
+
   it('renders the same three-lane shell when no readModelClient is supplied (fallback path uses the new state-aware seam with sourceStatus="source-unavailable" instead of the deleted header)', async () => {
     const { container } = await renderWithClient(undefined);
     const lanes = container.querySelectorAll('[data-pcc-doc-lane]');

@@ -1,35 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
-import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
+import { PCC_MVP_SURFACE_IDS } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
-// Wave 15A wave-b9 Prompts 04 / 4B-01 / 4B-05 / 4B-08 / 4B-09 / 4B-10 —
-// bifurcated surface sets. Project Home moved out after
-// `PccProjectIntelligenceCard` was removed; Approvals moved out after
-// `HomeCard` was removed (metric pills absorbed into `QueueCard`); Site
-// Health moved out after `PccSiteHealthOverviewCard` was removed
-// (overview metrics absorbed into `PccSiteHealthChecksCard`); Documents
-// moved out after `PccDocumentsHeaderCard` was deleted and replaced by
-// state-aware seam `PccDocumentControlStateCard`; Project Readiness
-// moved out after `HeroCard` was deleted (MVP metrics absorbed into
-// `LifecycleGateMapCard`). After Prompt 4B-10,
-// `SURFACES_WITH_COMPATIBILITY_CARD` is empty — every PCC surface is
-// shell-only.
-const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [];
-
-function expectsCompatibilityCard(surfaceId: PccMvpSurfaceId): boolean {
-  return SURFACES_WITH_COMPATIBILITY_CARD.includes(surfaceId);
-}
+// Wave 15A wave-b8 Prompt 05 — every PCC MVP surface is shell-only.
+// The shell `<main role="tabpanel">` is the sole carrier of
+// `data-pcc-active-surface-panel`; no bento-child card emits the marker.
 
 describe('PccShell all-surface smoke (shell-level)', () => {
-  // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> is the
-  // semantic active-panel owner. Surface command/header cards still emit
-  // a card-level `data-pcc-active-surface-panel` compatibility marker, so
-  // a broad `[data-pcc-active-surface-panel]` count in a shell-rendered
-  // tree is legitimately >= 1. This smoke locks the shell-owner contract
-  // and the direct-bento-child compatibility-card invariant per surface.
-  it('activates each tab with shell-owned active panel and one direct bento-child compatibility card', () => {
+  // Shell `<main role="tabpanel">` is the sole semantic owner of
+  // `data-pcc-active-surface-panel` across every render branch.
+  it('activates each tab with shell-owned active panel and zero direct bento-child cards carrying [data-pcc-active-surface-panel]', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
 
     for (const id of PCC_MVP_SURFACE_IDS) {
@@ -57,13 +39,10 @@ describe('PccShell all-surface smoke (shell-level)', () => {
       const compatibilityCards = Array.from(bento!.children).filter((child) =>
         child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${id}"]`),
       );
-      const expectedCount = expectsCompatibilityCard(id) ? 1 : 0;
       expect(
         compatibilityCards,
-        expectedCount === 1
-          ? `surface '${id}' must render exactly one direct bento-child compatibility card`
-          : `surface '${id}' must NOT render a direct bento-child compatibility card after Phase 04`,
-      ).toHaveLength(expectedCount);
+        `surface '${id}' must NOT render a direct bento-child card carrying [data-pcc-active-surface-panel] (every PCC MVP surface is shell-owned)`,
+      ).toHaveLength(0);
       const directCards = Array.from(bento!.children).filter((child) =>
         child.matches('[data-pcc-card]'),
       );
