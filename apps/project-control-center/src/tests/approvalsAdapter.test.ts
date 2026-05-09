@@ -104,9 +104,7 @@ describe('buildPccApprovalsViewModel — lane row counts mirror envelope.data', 
 
   it('myApprovals.rows length equals data.myApprovals.entries length', () => {
     const vm = ready();
-    expect(vm.myApprovals.rows.length).toBe(
-      SAMPLE_APPROVALS_READ_MODEL.myApprovals.entries.length,
-    );
+    expect(vm.myApprovals.rows.length).toBe(SAMPLE_APPROVALS_READ_MODEL.myApprovals.entries.length);
   });
 
   it('myApprovals viewer fields mirror data', () => {
@@ -118,9 +116,7 @@ describe('buildPccApprovalsViewModel — lane row counts mirror envelope.data', 
 
   it('escalation.rows length equals data.escalation.entries length', () => {
     const vm = ready();
-    expect(vm.escalation.rows.length).toBe(
-      SAMPLE_APPROVALS_READ_MODEL.escalation.entries.length,
-    );
+    expect(vm.escalation.rows.length).toBe(SAMPLE_APPROVALS_READ_MODEL.escalation.entries.length);
   });
 
   it('adminVerification.rows length equals data.adminVerification.entries length', () => {
@@ -240,9 +236,8 @@ describe('buildPccApprovalsViewModel — disabled actions catalog', () => {
 });
 
 describe('PCC_APPROVALS_LANE_IDS — canonical lane tuple', () => {
-  it('exposes the eleven Wave 14 lane ids in canonical order', () => {
+  it('exposes the ten Wave 14 ready-path lane ids in canonical order (Wave 15A wave-b9 Prompt 4B-05 — `home` removed after `HomeCard` was absorbed into `QueueCard`)', () => {
     expect([...PCC_APPROVALS_LANE_IDS]).toEqual([
-      'home',
       'queue',
       'my-approvals',
       'registry',

@@ -129,7 +129,6 @@ const PccApprovalsSurfaceLanes: FC<PccApprovalsSurfaceLanesProps> = ({ viewModel
         headingLevel={2}
         eyebrow={SURFACE.displayName}
         title="Approvals & Checkpoints"
-        dataActiveSurfacePanel="approvals"
       >
         <div
           className={styles.body}
@@ -158,7 +157,6 @@ const PccApprovalsSurfaceLanes: FC<PccApprovalsSurfaceLanesProps> = ({ viewModel
         headingLevel={2}
         eyebrow={SURFACE.displayName}
         title="Approvals & Checkpoints"
-        dataActiveSurfacePanel="approvals"
       >
         <div
           className={styles.body}
@@ -193,12 +191,12 @@ const ReadyLanes: FC<ReadyLanesProps> = ({ viewModel }) => {
   const isAvailable = viewModel.cardState === 'preview';
   return (
     <Fragment>
-      <HomeCard home={viewModel.home} cardState={viewModel.cardState} isAvailable={isAvailable} />
       <QueueCard
         queue={viewModel.queue}
         cardState={viewModel.cardState}
         isAvailable={isAvailable}
         disabledActions={viewModel.disabledActions}
+        home={viewModel.home}
       />
       <MyApprovalsCard
         myApprovals={viewModel.myApprovals}
@@ -320,78 +318,45 @@ const DisabledActionsRow: FC<DisabledActionsRowProps> = ({ actions }) => (
 // Lane cards
 // ---------------------------------------------------------------------------
 
-interface HomeCardProps {
-  readonly home: IPccApprovalsHomeViewModel;
-  readonly cardState: PccPreviewStateKind;
-  readonly isAvailable: boolean;
-}
-
-const HomeCard: FC<HomeCardProps> = ({ home, cardState, isAvailable }) => (
-  <PccDashboardCard
-    footprint="full"
-    hierarchy="primary"
-    tier="tier1"
-    region="command"
-    headingLevel={2}
-    eyebrow={SURFACE.displayName}
-    title="Approvals home"
-    dataActiveSurfacePanel="approvals"
-  >
-    <div
-      className={styles.body}
-      data-pcc-readiness-section="approvals"
-      data-pcc-approvals-lane="home"
-    >
-      {isAvailable ? (
-        <Fragment>
-          <div className={styles.metricRow}>
-            <PccStatusPill tone="info">Total requests: {home.totalRequests}</PccStatusPill>
-            <PccStatusPill tone="warning">
-              Pending or active: {home.pendingActiveCount}
-            </PccStatusPill>
-            <PccStatusPill tone="neutral">Terminal: {home.terminalCount}</PccStatusPill>
-            <PccStatusPill tone="warning">Escalated: {home.escalatedCount}</PccStatusPill>
-          </div>
-          <div className={styles.subSection}>
-            <h4 className={styles.subSectionTitle}>States</h4>
-            <ul className={styles.pillRow} data-pcc-approvals-state-counts="">
-              {home.stateCounts.map((entry) => (
-                <li key={entry.state}>
-                  <PccStatusPill tone={stateToTone(entry.state)}>
-                    {entry.state}: {entry.count}
-                  </PccStatusPill>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className={styles.subSection}>
-            <h4 className={styles.subSectionTitle}>Modes</h4>
-            <ul className={styles.pillRow} data-pcc-approvals-mode-counts="">
-              {home.modeCounts.map((entry) => (
-                <li key={entry.mode}>
-                  <PccStatusPill tone="neutral">
-                    {entry.mode}: {entry.count}
-                  </PccStatusPill>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Fragment>
-      ) : (
-        <DegradedNotice cardState={cardState} />
-      )}
-    </div>
-  </PccDashboardCard>
-);
+// Wave 15A wave-b9 Prompt 4B-05 — `HomeCard` was removed because the
+// shell hero already carries selected-tab identity, posture, and
+// governance microcopy after Prompts 4B-01 / 4B-02 / 4B-03. Its
+// metric pills (`Total / Pending or active / Terminal / Escalated`)
+// were ABSORBED into `QueueCard` body via the `home` prop, gated on
+// `isAvailable === true`. The per-state and per-mode subsections that
+// HomeCard rendered (`home.stateCounts` / `home.modeCounts`) were
+// intentionally not absorbed into QueueCard at this pass — they were
+// secondary detail below operational density and were dominated by the
+// queue list itself which already orders rows by state and priority.
+// The source data (`home.stateCounts`, `home.modeCounts`) stays
+// populated in `IPccApprovalsHomeViewModel` and the adapter so a future
+// dedicated `Approval activity` summary card can reintroduce them
+// without an adapter change. (`approvalsAdapter.test.ts` continues to
+// assert the home-VM shape green and unchanged.)
 
 interface QueueCardProps {
   readonly queue: IPccApprovalsQueueViewModel;
   readonly cardState: PccPreviewStateKind;
   readonly isAvailable: boolean;
   readonly disabledActions: readonly IPccApprovalsDisabledAction[];
+  /**
+   * Wave 15A wave-b9 Prompt 4B-05 — Approvals home metric pills (Total /
+   * Pending or active / Terminal / Escalated) absorbed into Approval queue
+   * after the duplicate `Approvals home` first card was removed. Rendered
+   * as a compact summary row at the top of the queue body, gated on
+   * `isAvailable === true` so degraded source-unavailable / loading /
+   * error branches still show the canonical `DegradedNotice`.
+   */
+  readonly home: IPccApprovalsHomeViewModel;
 }
 
-const QueueCard: FC<QueueCardProps> = ({ queue, cardState, isAvailable, disabledActions }) => (
+const QueueCard: FC<QueueCardProps> = ({
+  queue,
+  cardState,
+  isAvailable,
+  disabledActions,
+  home,
+}) => (
   <PccDashboardCard
     footprint="wide"
     tier="tier2"
@@ -406,28 +371,54 @@ const QueueCard: FC<QueueCardProps> = ({ queue, cardState, isAvailable, disabled
     >
       {!isAvailable ? (
         <DegradedNotice cardState={cardState} />
-      ) : queue.rows.length === 0 ? (
-        <PccPreviewState state="empty" />
       ) : (
-        <ul className={styles.rowList} data-pcc-approvals-row-list="queue">
-          {queue.rows.map((row) => (
-            <li
-              key={row.approvalRequestId}
-              className={styles.row}
-              data-pcc-approvals-row={row.approvalRequestId}
-            >
-              <div className={styles.rowTitle}>{row.title}</div>
-              <div className={styles.rowMeta}>
-                <PccStatusPill tone={stateToTone(row.state)}>{row.state}</PccStatusPill>
-                <PccStatusPill tone={priorityToTone(row.priorityLabel)}>
-                  {row.priorityLabel}
-                </PccStatusPill>
-                <span className={styles.rowMetaItem}>{row.assignedRoleLabel}</span>
-                <span className={styles.rowMetaItem}>{row.createdAtDisplay}</span>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <Fragment>
+          {/* Wave 15A wave-b9 Prompt 4B-05 — absorbed Approvals home
+              metric pills. Compact summary above the queue list; uses the
+              same metricRow / PccStatusPill primitives the prior HomeCard
+              used so the visual posture is preserved. */}
+          <div className={styles.metricRow} data-pcc-approvals-queue-metrics="">
+            <PccStatusPill tone="info">
+              <span data-pcc-approvals-queue-metric="total">Total: {home.totalRequests}</span>
+            </PccStatusPill>
+            <PccStatusPill tone="warning">
+              <span data-pcc-approvals-queue-metric="pending">
+                Pending or active: {home.pendingActiveCount}
+              </span>
+            </PccStatusPill>
+            <PccStatusPill tone="neutral">
+              <span data-pcc-approvals-queue-metric="terminal">Terminal: {home.terminalCount}</span>
+            </PccStatusPill>
+            <PccStatusPill tone="warning">
+              <span data-pcc-approvals-queue-metric="escalated">
+                Escalated: {home.escalatedCount}
+              </span>
+            </PccStatusPill>
+          </div>
+          {queue.rows.length === 0 ? (
+            <PccPreviewState state="empty" />
+          ) : (
+            <ul className={styles.rowList} data-pcc-approvals-row-list="queue">
+              {queue.rows.map((row) => (
+                <li
+                  key={row.approvalRequestId}
+                  className={styles.row}
+                  data-pcc-approvals-row={row.approvalRequestId}
+                >
+                  <div className={styles.rowTitle}>{row.title}</div>
+                  <div className={styles.rowMeta}>
+                    <PccStatusPill tone={stateToTone(row.state)}>{row.state}</PccStatusPill>
+                    <PccStatusPill tone={priorityToTone(row.priorityLabel)}>
+                      {row.priorityLabel}
+                    </PccStatusPill>
+                    <span className={styles.rowMetaItem}>{row.assignedRoleLabel}</span>
+                    <span className={styles.rowMetaItem}>{row.createdAtDisplay}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Fragment>
       )}
       <DisabledActionsRow
         actions={disabledActions.filter((a) =>

@@ -40,12 +40,13 @@ const ALWAYS_REJECTS = <T,>(): Promise<T> => Promise.reject(new Error('test: for
 
 const STUB_PROJECT_ID = 'fixture-pcc-project-001' as PccProjectId;
 
-// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 — bifurcated surface sets
-// after the runtime duplicate-header-card removal passes. Surfaces that
-// retain an operational/header-hybrid card still emit the temporary
-// card-level `[data-pcc-card][data-pcc-active-surface-panel]` compatibility
-// marker; surfaces whose first card was removed are uniformly shell-only
-// across all render branches (ready / loading / error).
+// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 + Prompt 4B-05 — bifurcated
+// surface sets after the runtime duplicate-header-card removal passes.
+// Surfaces that retain an operational/header-hybrid card still emit the
+// temporary card-level `[data-pcc-card][data-pcc-active-surface-panel]`
+// compatibility marker; surfaces whose first card was removed are
+// uniformly shell-only across all render branches (ready / loading /
+// error).
 //
 // Documents stays in the compatibility-card set because the dynamic
 // loading / error / source-unavailable copy on `PccDocumentsHeaderCard`
@@ -56,15 +57,21 @@ const STUB_PROJECT_ID = 'fixture-pcc-project-001' as PccProjectId;
 // `PccProjectIntelligenceCard` was removed and `PccPriorityActionsCard`
 // is now the first bento card. The Project Home shell `<main>` continues
 // to carry the active-panel marker on its own.
+//
+// Approvals moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-05:
+// `HomeCard` was removed (its metric pills were absorbed into
+// `QueueCard`), and the loading/error state cards dropped their
+// `dataActiveSurfacePanel="approvals"` markers for cross-branch
+// shell-only consistency.
 const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
   'project-readiness',
-  'approvals',
   'site-health',
   'documents',
 ];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
   'project-home',
+  'approvals',
   'team-and-access',
   'external-systems',
   'control-center-settings',
@@ -199,7 +206,7 @@ describe('PCC route command card — ready (shell-only ownership) — surfaces w
 });
 
 describe('PCC route command card — loading branches (state / state, explicit, h2)', () => {
-  it('approvals loading branch carries state / state with explicit sources', () => {
+  it('approvals loading branch carries state / state with explicit sources (shell-only after Wave 15A wave-b9 Prompt 4B-05)', () => {
     const loadingClient: IPccApprovalsReadModelClient = {
       getApprovals: () => NEVER_RESOLVES(),
     };
@@ -208,8 +215,8 @@ describe('PCC route command card — loading branches (state / state, explicit, 
         <PccApprovalsSurface readModelClient={loadingClient} projectId={STUB_PROJECT_ID} />
       </PccBentoGrid>,
     );
-    const card = getSoleActivePanel(container, 'approvals');
-    expectCommandCardPosture(card, 'approvals', { tier: 'state', region: 'state' });
+    const card = getSoleStateCard(container);
+    expectStateCardPosture(card);
     expectLoadingA11y(card, 'approvals');
   });
 
@@ -259,7 +266,7 @@ describe('PCC route command card — loading branches (state / state, explicit, 
 });
 
 describe('PCC route command card — error branches (state / state, explicit, h2)', () => {
-  it('approvals error branch carries state / state with explicit sources', async () => {
+  it('approvals error branch carries state / state with explicit sources (shell-only after Wave 15A wave-b9 Prompt 4B-05)', async () => {
     const errorClient: IPccApprovalsReadModelClient = {
       getApprovals: () => ALWAYS_REJECTS(),
     };
@@ -269,8 +276,8 @@ describe('PCC route command card — error branches (state / state, explicit, h2
       </PccBentoGrid>,
     );
     await waitFor(() => {
-      const card = getSoleActivePanel(container, 'approvals');
-      expectCommandCardPosture(card, 'approvals', { tier: 'state', region: 'state' });
+      const card = getSoleStateCard(container);
+      expectStateCardPosture(card);
       expectErrorA11y(card, 'approvals');
     });
   });

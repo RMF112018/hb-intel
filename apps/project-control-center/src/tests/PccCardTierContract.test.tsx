@@ -73,15 +73,21 @@ const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
 // Project Home moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-01:
 // `PccProjectIntelligenceCard` was removed; the Project Home shell
 // `<main>` continues to carry the active-panel marker on its own.
+//
+// Approvals moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-05:
+// `HomeCard` was removed (its metric pills were absorbed into
+// `QueueCard`); the loading/error state cards dropped their
+// `dataActiveSurfacePanel="approvals"` markers for shell-only
+// consistency across all branches.
 const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
   'project-readiness',
-  'approvals',
   'site-health',
   'documents',
 ];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
   'project-home',
+  'approvals',
   'team-and-access',
   'external-systems',
   'control-center-settings',

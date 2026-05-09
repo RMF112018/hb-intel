@@ -100,7 +100,7 @@ describe('PccApprovalsSurface — synchronous fixture-fallback path', () => {
 // ---------------------------------------------------------------------------
 
 describe('PccApprovalsSurface — async client-driven path', () => {
-  it('renders all eleven lanes after the client resolves available envelope', async () => {
+  it('renders all ten ready-path lanes after the client resolves available envelope (Wave 15A wave-b9 Prompt 4B-05 — `home` removed; metric pills absorbed into Approval queue)', async () => {
     const container = renderSurface(fixtureClient('available'));
     await waitFor(() => {
       expect(container.querySelector('[data-pcc-approvals-lane="hbi-boundary"]')).not.toBeNull();
@@ -116,7 +116,11 @@ describe('PccApprovalsSurface — async client-driven path', () => {
     };
     const container = renderSurface(pending);
     expect(container.querySelector('[data-pcc-state="loading"]')).not.toBeNull();
-    // No other approvals lanes should render in the loading branch.
+    // No other approvals lanes should render in the loading branch. The
+    // single state card retains `data-pcc-approvals-lane="home"` as a
+    // stable test marker (Wave 15A wave-b9 Prompt 4B-05 dropped only the
+    // `dataActiveSurfacePanel="approvals"` marker for shell-only
+    // consistency; the lane id stays).
     const lanes = container.querySelectorAll('[data-pcc-approvals-lane]');
     expect(lanes.length).toBe(1);
     expect(lanes[0]?.getAttribute('data-pcc-approvals-lane')).toBe('home');
@@ -131,7 +135,7 @@ describe('PccApprovalsSurface — async client-driven path', () => {
     expect(lanes.length).toBe(1);
   });
 
-  it('renders all eleven lane shells with degraded source-unavailable envelope', async () => {
+  it('renders all ten ready-path lane shells with degraded source-unavailable envelope (per-card degraded shells preserve the source-unavailable posture across the surface after `HomeCard` removal)', async () => {
     const container = renderSurface(
       fixtureClient('source-unavailable', EMPTY_APPROVALS_READ_MODEL),
     );
@@ -144,6 +148,67 @@ describe('PccApprovalsSurface — async client-driven path', () => {
     // Degraded lanes other than the always-available HBI / decision-history /
     // lineage seam cards present the unavailable-fixture preview state.
     expect(container.querySelector('[data-pcc-state="unavailable-fixture"]')).not.toBeNull();
+    // Wave 15A wave-b9 Prompt 4B-05 — the metric absorption row in
+    // Approval queue is gated on `isAvailable === true`, so the
+    // source-unavailable branch must NOT render the queue metric pills.
+    expect(container.querySelector('[data-pcc-approvals-queue-metrics]')).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Wave 15A wave-b9 Prompt 4B-05 — Approval queue absorbs HomeCard metrics
+// ---------------------------------------------------------------------------
+
+describe('PccApprovalsSurface — Approval queue absorbed metric pills (Wave 15A wave-b9 Prompt 4B-05)', () => {
+  it('Approval queue is the first ready-path bento lane after `HomeCard` removal', async () => {
+    const container = renderSurface(fixtureClient('available'));
+    await waitFor(() => {
+      expect(container.querySelector('[data-pcc-approvals-lane="hbi-boundary"]')).not.toBeNull();
+    });
+    const lanes = Array.from(container.querySelectorAll<HTMLElement>('[data-pcc-approvals-lane]'));
+    expect(lanes.length).toBeGreaterThan(0);
+    expect(lanes[0]?.getAttribute('data-pcc-approvals-lane')).toBe('queue');
+  });
+
+  it('Approval queue renders the absorbed metric pills (Total / Pending / Terminal / Escalated) when the envelope is available, with values matching SAMPLE_APPROVALS_READ_MODEL', async () => {
+    const container = renderSurface(fixtureClient('available'));
+    await waitFor(() => {
+      expect(container.querySelector('[data-pcc-approvals-queue-metrics]')).not.toBeNull();
+    });
+    const total = container.querySelector('[data-pcc-approvals-queue-metric="total"]');
+    const pending = container.querySelector('[data-pcc-approvals-queue-metric="pending"]');
+    const terminal = container.querySelector('[data-pcc-approvals-queue-metric="terminal"]');
+    const escalated = container.querySelector('[data-pcc-approvals-queue-metric="escalated"]');
+    expect(total, 'queue metric `total` must render').not.toBeNull();
+    expect(pending, 'queue metric `pending` must render').not.toBeNull();
+    expect(terminal, 'queue metric `terminal` must render').not.toBeNull();
+    expect(escalated, 'queue metric `escalated` must render').not.toBeNull();
+    // Numeric format anchor — `home.totalRequests` etc. are derived by
+    // the adapter from `SAMPLE_APPROVALS_READ_MODEL` rows (not direct
+    // fixture fields), so the absolute count is owned by
+    // `approvalsAdapter.test.ts`. This test locks the rendering shape
+    // (label + integer numeric value) and proves the metrics are wired
+    // through the absorbed `home` prop without re-asserting the
+    // adapter's count math.
+    expect(total!.textContent).toMatch(/Total: \d+/);
+    expect(pending!.textContent).toMatch(/Pending or active: \d+/);
+    expect(terminal!.textContent).toMatch(/Terminal: \d+/);
+    expect(escalated!.textContent).toMatch(/Escalated: \d+/);
+  });
+
+  it('Approval queue does NOT render the metric pills when the envelope is degraded (source-unavailable / loading / error)', async () => {
+    // Source-unavailable: the metric absorption row is gated on
+    // `isAvailable === true` so the queue lane shows DegradedNotice
+    // instead of the metric row.
+    const container = renderSurface(
+      fixtureClient('source-unavailable', EMPTY_APPROVALS_READ_MODEL),
+    );
+    await waitFor(() => {
+      expect(container.querySelector('[data-pcc-approvals-lane="queue"]')).not.toBeNull();
+    });
+    const queueLane = container.querySelector('[data-pcc-approvals-lane="queue"]');
+    expect(queueLane).not.toBeNull();
+    expect(queueLane!.querySelector('[data-pcc-approvals-queue-metrics]')).toBeNull();
   });
 });
 
@@ -304,7 +369,7 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
     expect(spy.mock.calls.length).toBe(1);
   });
 
-  it('renders only one active-surface-panel marker for approvals when router-mounted', async () => {
+  it('renders zero card-level active-surface-panel markers for approvals when router-mounted in isolation (Wave 15A wave-b9 Prompt 4B-05 — `HomeCard` removed; loading/error state cards dropped the marker; the shell `<main>` is now the sole semantic owner, but this test renders the surface in isolation through PccSurfaceRouter without a shell)', async () => {
     const spy = vi.fn(async () => envelope('available'));
     // Router test stub: PccSurfaceRouter accepts the full router-level
     // narrow client interface but only exercises `getApprovals` for the
@@ -319,10 +384,10 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
       </PccBentoGrid>,
     );
     await waitFor(() => {
-      expect(container.querySelector('[data-pcc-active-surface-panel="approvals"]')).not.toBeNull();
+      expect(container.querySelector('[data-pcc-approvals-lane="hbi-boundary"]')).not.toBeNull();
     });
     const markers = container.querySelectorAll('[data-pcc-active-surface-panel="approvals"]');
-    expect(markers.length).toBe(1);
+    expect(markers.length).toBe(0);
   });
 
   it('preserves the bento direct-child invariant under router-wrapped render', async () => {
@@ -351,22 +416,14 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
     }
   });
 
-  it('home card emits data-pcc-card-hierarchy="primary" (Prompt 08 promotion)', async () => {
-    const spy = vi.fn(async () => envelope('available'));
-    const router = { getApprovals: spy } as unknown as Parameters<
-      typeof PccSurfaceRouter
-    >[0]['readModelClient'];
-    const { container } = render(
-      <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
-      </PccBentoGrid>,
-    );
-    await waitFor(() => {
-      expect(container.querySelector('[data-pcc-active-surface-panel="approvals"]')).not.toBeNull();
-    });
-    const homeCard = container.querySelector('[data-pcc-active-surface-panel="approvals"]');
-    expect(homeCard?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
-  });
+  // Wave 15A wave-b9 Prompt 4B-05 — the prior "home card emits
+  // data-pcc-card-hierarchy='primary'" assertion (Prompt 08 promotion
+  // flag) is removed because `HomeCard` was deleted. No remaining
+  // Approvals card carries `hierarchy="primary"`; the shell hero owns
+  // selected-tab identity and posture, and `QueueCard` is a tier2 /
+  // operational lane (no hierarchy=primary). The Project Home Prompt
+  // 4B-01 migration followed the same shape (HomeCard hierarchy=primary
+  // assertion was removed when `PccProjectIntelligenceCard` was deleted).
 
   it('renders the loading card before the spy resolves and the ready lanes after', async () => {
     let resolveFn: ((env: PccReadModelEnvelope<PccApprovalsReadModel>) => void) | undefined;

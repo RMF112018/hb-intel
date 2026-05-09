@@ -56,10 +56,16 @@ export interface IPccApprovalsReadModelClient {
 
 // ---------------------------------------------------------------------------
 // Lane IDs (tuple drives test scoping; one card per id in the ready path)
+//
+// Wave 15A wave-b9 Prompt 4B-05 — `home` was removed from the canonical
+// ready-path tuple after `HomeCard` was deleted (its metric pills were
+// absorbed into `QueueCard`). The `'home'` lane marker still appears on
+// the loading and error state cards as a stable test marker for the
+// single-card degraded state, but those cards are tested by hardcoded
+// assertions (not by iterating this tuple).
 // ---------------------------------------------------------------------------
 
 export const PCC_APPROVALS_LANE_IDS = [
-  'home',
   'queue',
   'my-approvals',
   'registry',
@@ -89,8 +95,7 @@ export const PCC_APPROVALS_DISABLED_ACTION_KEYS = [
   'escalate',
   'open-detail',
 ] as const;
-export type PccApprovalsDisabledActionKey =
-  (typeof PCC_APPROVALS_DISABLED_ACTION_KEYS)[number];
+export type PccApprovalsDisabledActionKey = (typeof PCC_APPROVALS_DISABLED_ACTION_KEYS)[number];
 
 export interface IPccApprovalsDisabledAction {
   readonly key: PccApprovalsDisabledActionKey;
