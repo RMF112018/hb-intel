@@ -79,15 +79,21 @@ const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
 // `QueueCard`); the loading/error state cards dropped their
 // `dataActiveSurfacePanel="approvals"` markers for shell-only
 // consistency across all branches.
+//
+// Site Health moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-08:
+// `PccSiteHealthOverviewCard` was removed (its overview metrics —
+// Overall / Failing / Warnings / Last run — were absorbed into
+// `PccSiteHealthChecksCard`). Site Health is fixture-only so the
+// reclassification is uniform across the single render branch.
 const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
   'project-readiness',
-  'site-health',
   'documents',
 ];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
   'project-home',
   'approvals',
+  'site-health',
   'team-and-access',
   'external-systems',
   'control-center-settings',

@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import {
-  PCC_MVP_SURFACES,
   SAMPLE_DRIFT_INDICATORS,
   SAMPLE_REPAIR_REQUESTS,
   SAMPLE_SITE_HEALTH_CHECKS,
@@ -19,37 +18,64 @@ function renderSurface() {
 }
 
 describe('PccSiteHealthSurface (Wave 2 / Prompt 06)', () => {
-  it('renders 5 cards as direct children of the bento grid (4 site-health + 1 Procore sync & repair posture, Wave 13 / Prompt 13E)', () => {
+  it('renders 4 cards as direct children of the bento grid (Wave 15A wave-b9 Prompt 4B-08 — `PccSiteHealthOverviewCard` removed; metrics absorbed into `PccSiteHealthChecksCard`; was 5 cards including overview)', () => {
     const { container } = renderSurface();
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards).toHaveLength(5);
+    expect(cards).toHaveLength(4);
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }
   });
 
-  it('exactly one [data-pcc-active-surface-panel="site-health"] exists, on the overview card', () => {
+  it('zero in-grid `[data-pcc-active-surface-panel="site-health"]` card-level markers exist (Wave 15A wave-b9 Prompt 4B-08 — site-health moved to SURFACES_WITH_SHELL_ONLY_PANEL; the shell `<main role="tabpanel">` is the sole carrier of the marker, asserted in PccShell.responsive.test.tsx and PccShell.surfaceSmoke.test.tsx)', () => {
     const { container } = renderSurface();
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('site-health');
-    expect(panels[0].textContent).toContain(PCC_MVP_SURFACES['site-health'].displayName);
-    // surface.description is shell-hero-owned (PccProjectHeroBand) post wave-b2
-    // Prompt 03; not asserted in the surface panel.
+    expect(panels).toHaveLength(0);
   });
 
-  it('overview card displays SAMPLE_SITE_HEALTH_SUMMARY values', () => {
+  it('Checks card body absorbs the four overview metrics (Overall severity / Failing / Warnings / Last run), preserving the existing `data-pcc-site-health-*` markers; the dropped body cue does not appear inside the bento (the SharePoint admin tooling reminder lives in the shell hero `repair-posture` heroHighlight after Prompt 4B-02)', () => {
     const { container } = renderSurface();
-    const overview = container.querySelector('[data-pcc-site-health-overview-body]');
-    expect(overview).not.toBeNull();
-    expect(overview!.textContent).toContain(SAMPLE_SITE_HEALTH_SUMMARY.overallSeverity);
-    expect(overview!.querySelector('[data-pcc-site-health-failing]')?.textContent).toContain(
+    const checksBody = container.querySelector('[data-pcc-site-health-checks-body]');
+    expect(checksBody, 'checks card body must render').not.toBeNull();
+
+    // The absorbed metric row lives inside the Checks card body and
+    // exposes a stable parent marker for scoped queries.
+    const metrics = checksBody!.querySelector('[data-pcc-site-health-checks-metrics]');
+    expect(metrics, 'absorbed metric row must render in Checks card body').not.toBeNull();
+
+    // Each metric reuses the canonical `data-pcc-site-health-*` markers
+    // from the deleted overview card so that prior consumer queries stay
+    // valid in the new parent.
+    expect(metrics!.querySelector('[data-pcc-site-health-overall]')?.textContent).toContain(
+      SAMPLE_SITE_HEALTH_SUMMARY.overallSeverity,
+    );
+    expect(metrics!.querySelector('[data-pcc-site-health-failing]')?.textContent).toContain(
       String(SAMPLE_SITE_HEALTH_SUMMARY.failingChecks),
     );
-    expect(overview!.querySelector('[data-pcc-site-health-warning]')?.textContent).toContain(
+    expect(metrics!.querySelector('[data-pcc-site-health-warning]')?.textContent).toContain(
       String(SAMPLE_SITE_HEALTH_SUMMARY.warningChecks),
+    );
+    // Last run preserves the prior overview format
+    // (`summary.lastRunUtc ?? 'Not listed'`) — no formatter change.
+    expect(metrics!.querySelector('[data-pcc-site-health-last-run]')?.textContent).toContain(
+      SAMPLE_SITE_HEALTH_SUMMARY.lastRunUtc ?? 'Not listed',
+    );
+
+    // Scoped negative — the dropped body cue does not appear inside the
+    // Site Health bento area. Per
+    // `feedback_word_blocklists_break_on_corrected_copy` the scan is
+    // scoped to the bento grid so an equivalent SharePoint admin tooling
+    // reminder rendered elsewhere (e.g. a sibling card or the shell hero)
+    // does not false-positive.
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    expect(
+      grid!.textContent ?? '',
+      'dropped body cue must not appear inside the Site Health bento grid',
+    ).not.toContain(
+      'Site health summary. Scans and repairs are managed in SharePoint admin tooling.',
     );
   });
 
@@ -90,12 +116,12 @@ describe('PccSiteHealthSurface (Wave 2 / Prompt 06)', () => {
     }
   });
 
-  it('overview card emits data-pcc-card-hierarchy="primary" (Prompt 08 promotion)', () => {
-    const { container } = renderSurface();
-    const overviewPanel = container.querySelector('[data-pcc-active-surface-panel="site-health"]');
-    expect(overviewPanel, 'overview card should render').not.toBeNull();
-    expect(overviewPanel?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
-  });
+  // Wave 15A wave-b9 Prompt 4B-08 — the prior "overview card emits
+  // data-pcc-card-hierarchy='primary'" and "overview card emits
+  // Tier 1 command markers" assertions are removed because
+  // `PccSiteHealthOverviewCard` was deleted and no remaining Site Health
+  // card carries `hierarchy="primary"` or tier1/command. Same shape as
+  // the Project Home Prompt 4B-01 and Approvals Prompt 4B-05 migrations.
 
   it('repair requests card emits data-pcc-footprint="wide" (Prompt 08 promotion)', () => {
     const { container } = renderSurface();
@@ -103,19 +129,6 @@ describe('PccSiteHealthSurface (Wave 2 / Prompt 06)', () => {
     expect(body, 'repair requests body should render').not.toBeNull();
     const card = body?.closest('[data-pcc-card]');
     expect(card?.getAttribute('data-pcc-footprint')).toBe('wide');
-  });
-
-  // Wave 15A wave-b3 Prompt 05 — tier/region contract assertions per
-  // 02_SURFACE_CARD_INVENTORY_MATRIX.md. Existing footprint and
-  // hierarchy assertions are preserved above.
-
-  it('overview card emits Tier 1 command markers and an h2 heading', () => {
-    const { container } = renderSurface();
-    const overviewPanel = container.querySelector('[data-pcc-active-surface-panel="site-health"]');
-    expect(overviewPanel, 'overview card should render').not.toBeNull();
-    expect(overviewPanel!.getAttribute('data-pcc-card-tier')).toBe('tier1');
-    expect(overviewPanel!.getAttribute('data-pcc-card-region')).toBe('command');
-    expect(overviewPanel!.querySelector('h2'), 'tier1 command card renders an h2').not.toBeNull();
   });
 
   it('checks card is Tier 2 operational', () => {

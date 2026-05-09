@@ -4,14 +4,15 @@ import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
-// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 + Prompt 4B-05 — bifurcated
-// surface sets. Project Home moved out of the compatibility-card set
-// after `PccProjectIntelligenceCard` was removed; Approvals moved out
-// after `HomeCard` was removed (its metric pills were absorbed into
-// `QueueCard`).
+// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 + Prompt 4B-05 + Prompt 4B-08
+// — bifurcated surface sets. Project Home moved out of the
+// compatibility-card set after `PccProjectIntelligenceCard` was removed;
+// Approvals moved out after `HomeCard` was removed (its metric pills
+// absorbed into `QueueCard`); Site Health moved out after
+// `PccSiteHealthOverviewCard` was removed (its overview metrics
+// absorbed into `PccSiteHealthChecksCard`).
 const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
   'project-readiness',
-  'site-health',
   'documents',
 ];
 

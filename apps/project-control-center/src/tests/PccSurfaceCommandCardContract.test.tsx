@@ -63,15 +63,22 @@ const STUB_PROJECT_ID = 'fixture-pcc-project-001' as PccProjectId;
 // `QueueCard`), and the loading/error state cards dropped their
 // `dataActiveSurfacePanel="approvals"` markers for cross-branch
 // shell-only consistency.
+//
+// Site Health moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-08:
+// `PccSiteHealthOverviewCard` was removed (its four metrics — Overall /
+// Failing / Warnings / Last run — were absorbed into
+// `PccSiteHealthChecksCard`). Site Health is fixture-only with no async
+// loading/error state machine, so no loading-error branch test had to
+// migrate from `getSoleActivePanel` → `getSoleStateCard`.
 const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
   'project-readiness',
-  'site-health',
   'documents',
 ];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
   'project-home',
   'approvals',
+  'site-health',
   'team-and-access',
   'external-systems',
   'control-center-settings',

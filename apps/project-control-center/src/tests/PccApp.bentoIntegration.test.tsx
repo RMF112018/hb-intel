@@ -4,21 +4,22 @@ import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
-// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 + Prompt 4B-05 — bifurcated
-// surface sets after the runtime duplicate-header-card removal passes.
-// Compatibility-card surfaces still emit a card-level
+// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 + Prompt 4B-05 + Prompt 4B-08
+// — bifurcated surface sets after the runtime duplicate-header-card
+// removal passes. Compatibility-card surfaces still emit a card-level
 // `[data-pcc-card][data-pcc-active-surface-panel]` marker; shell-only
 // surfaces no longer do. Project Home moved to the shell-only set in
-// Prompt 4B-01; Approvals moved to the shell-only set in Prompt 4B-05.
+// Prompt 4B-01; Approvals moved in Prompt 4B-05; Site Health moved in
+// Prompt 4B-08 (overview metrics absorbed into Checks card).
 const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
   'project-readiness',
-  'site-health',
   'documents',
 ];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
   'project-home',
   'approvals',
+  'site-health',
   'team-and-access',
   'external-systems',
   'control-center-settings',
