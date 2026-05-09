@@ -30,8 +30,9 @@ function readDirectCardTitlesInOrder(grid: Element): string[] {
     .map((card) => card.querySelector('h2,h3,h4')?.textContent?.trim() ?? '(untitled)');
 }
 
+// Wave 15A wave-b9 Prompt 4B-01 — `PccProjectIntelligenceCard` removed;
+// `PccPriorityActionsCard` is the first bento card on Project Home.
 const FIXTURE_EXPECTED_ORDER = [
-  'Project Intelligence',
   'Priority Actions',
   'Approvals & Checkpoints',
   'Project Readiness',
@@ -46,8 +47,9 @@ const FIXTURE_EXPECTED_ORDER = [
 // Wave 15A wave-b6 Prompt 05 — Lifecycle Timeline and Ask HBI promoted
 // above Procore / reference / history; lower-detail lifecycle cards
 // (Project Memory, Project Lens, Related Records) remain at the tail.
+// Wave 15A wave-b9 Prompt 4B-01 dropped Project Intelligence from the
+// head of this sequence.
 const READ_MODEL_EXPECTED_ORDER = [
-  'Project Intelligence',
   'Priority Actions',
   'Approvals & Checkpoints',
   'Project Readiness',
@@ -84,16 +86,20 @@ describe('Project Home — first-impression composition order', () => {
       expect(card?.getAttribute('data-pcc-footprint')).toBe('standard');
     });
 
-    it('exactly one [data-pcc-card][data-pcc-active-surface-panel="project-home"] compatibility command card exists, carried by the Project Intelligence card (Wave 15A wave-b7 Prompt 01 — shell <main> owns the semantic marker; the card retains a compatibility marker)', () => {
+    it('zero in-grid `[data-pcc-card][data-pcc-active-surface-panel="project-home"]` cards exist; shell `<main>` is the sole carrier of the marker (Wave 15A wave-b9 Prompt 4B-01 — `PccProjectIntelligenceCard` removed; project-home moved to SURFACES_WITH_SHELL_ONLY_PANEL)', () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const compatibilityCards = container.querySelectorAll(
+      const grid = container.querySelector('[data-pcc-bento-grid]');
+      expect(grid).not.toBeNull();
+      const inGridCompat = grid!.querySelectorAll(
         '[data-pcc-card][data-pcc-active-surface-panel="project-home"]',
       );
-      expect(compatibilityCards).toHaveLength(1);
-      expect(compatibilityCards[0].getAttribute('data-pcc-active-surface-panel')).toBe(
-        'project-home',
+      expect(inGridCompat).toHaveLength(0);
+      expect(grid!.textContent ?? '').not.toContain('Project Intelligence');
+
+      const shellMain = container.querySelector(
+        'main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]',
       );
-      expect(compatibilityCards[0].textContent).toContain('Project Intelligence');
+      expect(shellMain).not.toBeNull();
     });
   });
 

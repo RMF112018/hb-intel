@@ -82,9 +82,20 @@ describe('deriveShellHeroViewModel', () => {
     expect(vm.surfaceDescription).toBe(PCC_SURFACE_HERO_DESCRIPTIONS['project-home']);
     expect(vm.projectName).toBe(SAMPLE_PROJECT_PROFILE.projectName);
     expect(vm.location).toBe(SAMPLE_PROJECT_PROFILE.projectLocation);
+    expect(vm.clientDisplay).toBe(SAMPLE_PROJECT_PROFILE.clientName);
     expect(vm.estimatedValueDisplay).toBe('$25,000,000');
     expect(vm.scheduledCompletionDisplay).toBe('Sep 30, 2027');
     expect(vm.projectStageLabel).toBe('Active Construction');
+  });
+
+  // Wave 15A wave-b9 Prompt 4B-01 — `clientDisplay` is profile-derived
+  // and global (the existing facts row already renders globally across
+  // PCC surfaces), not surface-aware.
+  it('derives clientDisplay identically across every surface (proves global, not surface-scoped)', () => {
+    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId);
+      expect(vm.clientDisplay).toBe(SAMPLE_PROJECT_PROFILE.clientName);
+    }
   });
 
   for (const surfaceId of PCC_MVP_SURFACE_IDS) {
@@ -98,11 +109,13 @@ describe('deriveShellHeroViewModel', () => {
     const sparse: IProjectProfile = {
       ...SAMPLE_PROJECT_PROFILE,
       projectLocation: undefined,
+      clientName: undefined,
       estimatedValue: undefined,
       scheduledCompletionDate: undefined,
     };
     const vm = deriveShellHeroViewModel(sparse, 'project-home');
     expect(vm.location).toBe('Not listed');
+    expect(vm.clientDisplay).toBe('Not listed');
     expect(vm.estimatedValueDisplay).toBe('Not listed');
     expect(vm.scheduledCompletionDisplay).toBe('Not listed');
   });

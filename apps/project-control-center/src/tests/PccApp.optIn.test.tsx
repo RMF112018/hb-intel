@@ -144,10 +144,13 @@ afterEach(() => {
 });
 
 describe('PccApp default fixture path', () => {
-  it('renders all 10 cards without invoking fetch when no readModelClient is supplied', async () => {
+  it('renders the post-Prompt-4B-01 9-card baseline without invoking fetch when no readModelClient is supplied', async () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards).toHaveLength(10);
+    // Wave 15A wave-b9 Prompt 4B-01 — `PccProjectIntelligenceCard` was
+    // removed from Project Home; fixture-only fallback now renders 9
+    // cards (was 10).
+    expect(cards).toHaveLength(9);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
@@ -163,12 +166,13 @@ describe('mount(...) opt-in', () => {
     await waitFor(() => {
       const cards = host.querySelectorAll('[data-pcc-card]');
       // Wave 99 / Prompts 05B + 06C — read-model-driven Project Home
-      // renders 10 existing cards + 4 unified-lifecycle cards + 1
-      // Ask-HBI card = 15. Wave 13 / Prompt 13E — adds 1 Procore
-      // snapshot card (16 total). The Ask-HBI card mounts in idle
+      // renders 9 existing cards (Wave 15A wave-b9 Prompt 4B-01 removed
+      // `PccProjectIntelligenceCard`) + 4 unified-lifecycle cards + 1
+      // Ask-HBI card = 14. Wave 13 / Prompt 13E — adds 1 Procore
+      // snapshot card (15 total). The Ask-HBI card mounts in idle
       // posture (initialQuery={null}), so its presence does not
       // introduce a getUnifiedSearch fetch on initial mount.
-      expect(cards.length).toBe(16);
+      expect(cards.length).toBe(15);
     });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -229,12 +233,13 @@ describe('mount(...) opt-in', () => {
     }
 
     const cards = host.querySelectorAll('[data-pcc-card]');
-    // Wave 99 / Prompts 05B + 06C — 10 existing + 4 unified-lifecycle
-    // + 1 Ask-HBI = 15. Wave 13 / Prompt 13E — +1 Procore snapshot
-    // = 16. Ask-HBI mounts in idle posture, so the canonical
+    // Wave 99 / Prompts 05B + 06C + Wave 15A wave-b9 Prompt 4B-01 —
+    // 9 existing (post-Intelligence-removal) + 4 unified-lifecycle
+    // + 1 Ask-HBI = 14. Wave 13 / Prompt 13E — +1 Procore snapshot
+    // = 15. Ask-HBI mounts in idle posture, so the canonical
     // backend-mode URL set above is unchanged (no extra unified-search
     // request added until the user clicks a sample query).
-    expect(cards).toHaveLength(16);
+    expect(cards).toHaveLength(15);
     const grid = host.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     for (const card of cards) {
@@ -262,8 +267,10 @@ describe('mount(...) opt-in', () => {
       expect(errorMarkers.length).toBeGreaterThan(0);
     });
     expect(fetchSpy).not.toHaveBeenCalled();
-    // Wave 13 / Prompt 13E — Procore snapshot card adds 1 (15 → 16).
-    expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(16);
+    // Wave 13 / Prompt 13E — Procore snapshot card adds 1.
+    // Wave 15A wave-b9 Prompt 4B-01 — Project Intelligence removed
+    // from baseline (was 16 → 15).
+    expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(15);
   });
 
   it('mount(...) returns a thenable that resolves so the SPFx shell can chain .catch()', async () => {
@@ -282,12 +289,13 @@ describe('mount(...) opt-in', () => {
     await waitFor(() => {
       const cards = host.querySelectorAll('[data-pcc-card]');
       // Decisive assertion (primary): no-config mount must produce the same
-      // card count as the explicit fixture-mode mount above (line 171). The
-      // number itself is governed by that sibling test — this is intentionally
+      // card count as the explicit fixture-mode mount above. The number
+      // itself is governed by that sibling test — this is intentionally
       // mirroring the canonical fixture-mode contract, NOT an independent
       // magic number. If the canonical fixture-mode count changes, both
-      // tests move together.
-      expect(cards.length).toBe(16);
+      // tests move together. Wave 15A wave-b9 Prompt 4B-01 dropped the
+      // canonical from 16 → 15 (Project Intelligence removed).
+      expect(cards.length).toBe(15);
     });
     // Secondary guard: confirms the new path stays inside the no-runtime
     // posture (fixture client is synchronous/in-memory). Decisive proof of
@@ -298,15 +306,17 @@ describe('mount(...) opt-in', () => {
 
   it('mount(host) renders resolved Project Home fixture content (skeleton/busy markers cleared)', async () => {
     // Wave 99: this test closes the resolved-content gap — prior tests
-    // counted cards (`length === 16`) but never asserted that the cards
-    // had actually exited skeleton state with fixture data populated.
-    // A regression that left `useProjectHomeReadModel` stuck at
-    // `'loading'` would still produce 16 card containers (each rendering
+    // counted cards but never asserted that the cards had actually
+    // exited skeleton state with fixture data populated. A regression
+    // that left `useProjectHomeReadModel` stuck at `'loading'` would
+    // still produce card containers (each rendering
     // `viewModel?.* ?? 'preview'`) and pass the count test, while the
-    // tenant rendered placeholder content. This assertion anchors to
-    // canonical fixture text from `@hbc/models/pcc` (project name and
-    // number) so the check moves with the canonical sample, not invented
-    // strings.
+    // tenant rendered placeholder content. After Wave 15A wave-b9
+    // Prompt 4B-01 removed `PccProjectIntelligenceCard`, project name
+    // and project number are no longer visible on Project Home; this
+    // assertion now anchors to canonical priority-action titles from
+    // `@hbc/models/pcc` — those flow through `viewModel?.priorityActions
+    // .data` and are absent when the hook is stuck loading.
     fetchSpy.mockImplementation(() => {
       throw new Error('fetch must not be called when mount() defaults to the fixture client');
     });
@@ -315,12 +325,15 @@ describe('mount(...) opt-in', () => {
     });
     await waitFor(() => {
       const text = host.textContent ?? '';
-      // Decisive primary: canonical Project Home fixture identifiers are
-      // visible in the rendered DOM. If the hook is stuck at `'loading'`
-      // (the prior bug), `viewModel` is undefined, the intelligence card
-      // renders no profile data, and these strings are absent.
-      expect(text).toContain(SAMPLE_PROJECT_PROFILE.projectName);
-      expect(text).toContain(SAMPLE_PROJECT_PROFILE.projectNumber);
+      // Decisive primary: a canonical high-severity (Blocking) priority-
+      // action title is visible in the rendered DOM. The compact rail
+      // sorts by tone and shows the top items first, so a high-priority
+      // entry is reliably visible. If the hook is stuck at `'loading'`
+      // (the prior bug), `viewModel?.priorityActions.data` is undefined
+      // and the title is absent.
+      const blockingAction = SAMPLE_PRIORITY_ACTIONS.find((a) => a.severity === 'Blocking');
+      expect(blockingAction, 'fixture must include a Blocking priority action').toBeDefined();
+      expect(text).toContain(blockingAction!.title);
     });
     // Decisive secondary: no element is left in `aria-busy="true"`
     // posture. PccPreviewState renders `aria-busy` while in `'loading'`

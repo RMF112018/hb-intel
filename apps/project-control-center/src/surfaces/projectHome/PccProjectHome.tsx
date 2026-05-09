@@ -1,6 +1,4 @@
 import { Fragment, type FC } from 'react';
-import { SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS, SAMPLE_PRIORITY_ACTIONS } from '@hbc/models/pcc';
-import { PccProjectIntelligenceCard } from './PccProjectIntelligenceCard';
 import { PccPriorityActionsCard } from './PccPriorityActionsCard';
 import { PccSiteHealthSummaryCard } from './PccSiteHealthSummaryCard';
 import { PccDocumentControlCard } from './PccDocumentControlCard';
@@ -11,7 +9,6 @@ import { PccTeamSnapshotCard } from './PccTeamSnapshotCard';
 import { PccMissingConfigurationsCard } from './PccMissingConfigurationsCard';
 import { PccRecentActivityCard } from './PccRecentActivityCard';
 import { PccProjectHomeReadModelContent } from './PccProjectHomeReadModelContent';
-import { buildProjectCommandSummary } from './projectCommandSummary';
 import type { IPccProjectHomeReadModelClient } from './projectHomeViewModel';
 
 interface PccProjectHomeProps {
@@ -29,28 +26,25 @@ interface PccProjectHomeProps {
  * `<PccBentoGrid>` (provided by `PccShell`). Invariants preserved across
  * both render paths:
  *
- *   - exactly one `[data-pcc-active-surface-panel="project-home"]` exists,
- *     carried by the Project Intelligence card;
+ *   - shell `<main role="tabpanel">` carries the
+ *     `data-pcc-active-surface-panel="project-home"` marker; no in-grid
+ *     compatibility card is required (Wave 15A wave-b9 Prompt 4B-01 moved
+ *     project-home into SURFACES_WITH_SHELL_ONLY_PANEL after the duplicate
+ *     `PccProjectIntelligenceCard` header was removed);
  *   - every card is a direct child of `[data-pcc-bento-grid]`;
  *   - each card receives a non-zero `data-pcc-column-span` via the bento
  *     context.
  *
  * First-scan composition order surfaces the highest-frequency operational
- * signals (priority actions → setup gaps → operational health → pending
- * decisions → readiness) before reference and history content.
+ * signals (priority actions → pending decisions → readiness → documents →
+ * health → setup gaps) before reference and history content.
  */
 export const PccProjectHome: FC<PccProjectHomeProps> = ({ readModelClient }) => {
   if (readModelClient) {
     return <PccProjectHomeReadModelContent client={readModelClient} />;
   }
-  const fixtureCommandSummary = buildProjectCommandSummary({
-    priorityActions: SAMPLE_PRIORITY_ACTIONS,
-    missingConfigurations: SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
-    sourceMode: 'fixture',
-  });
   return (
     <Fragment>
-      <PccProjectIntelligenceCard commandSummary={fixtureCommandSummary} />
       <PccPriorityActionsCard />
       <PccApprovalsCheckpointsCard />
       <PccProjectReadinessCard />

@@ -3,12 +3,13 @@ import { cleanup, fireEvent, render } from '@testing-library/react';
 import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 
-// Wave 15A wave-b9 Prompt 04 — bifurcated surface sets after the first
-// runtime duplicate-header-card removal pass. Compatibility-card surfaces
-// still emit a card-level `[data-pcc-card][data-pcc-active-surface-panel]`
-// marker; shell-only surfaces no longer do.
+// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 — bifurcated surface sets
+// after the runtime duplicate-header-card removal passes. Compatibility-
+// card surfaces still emit a card-level
+// `[data-pcc-card][data-pcc-active-surface-panel]` marker; shell-only
+// surfaces no longer do. Project Home moved to the shell-only set after
+// `PccProjectIntelligenceCard` was removed.
 const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
-  'project-home',
   'project-readiness',
   'approvals',
   'site-health',
@@ -16,6 +17,7 @@ const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
 ];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
+  'project-home',
   'team-and-access',
   'external-systems',
   'control-center-settings',

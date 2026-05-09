@@ -3,9 +3,10 @@ import { fireEvent, render } from '@testing-library/react';
 import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 
-// Wave 15A wave-b9 Prompt 04 — bifurcated surface sets.
+// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 — bifurcated surface sets.
+// Project Home moved out of the compatibility-card set after
+// `PccProjectIntelligenceCard` was removed.
 const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
-  'project-home',
   'project-readiness',
   'approvals',
   'site-health',

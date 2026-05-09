@@ -5,7 +5,6 @@ import { PccDocumentControlCard } from '../surfaces/projectHome/PccDocumentContr
 import { PccExternalSystemsCard } from '../surfaces/projectHome/PccExternalSystemsCard';
 import { PccMissingConfigurationsCard } from '../surfaces/projectHome/PccMissingConfigurationsCard';
 import { PccPriorityActionsCard } from '../surfaces/projectHome/PccPriorityActionsCard';
-import { PccProjectIntelligenceCard } from '../surfaces/projectHome/PccProjectIntelligenceCard';
 import { PccProjectReadinessCard } from '../surfaces/projectHome/PccProjectReadinessCard';
 import { PccRecentActivityCard } from '../surfaces/projectHome/PccRecentActivityCard';
 import { PccSiteHealthSummaryCard } from '../surfaces/projectHome/PccSiteHealthSummaryCard';
@@ -13,8 +12,11 @@ import { PccTeamSnapshotCard } from '../surfaces/projectHome/PccTeamSnapshotCard
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import type { PccCardState } from '../surfaces/projectHome/shared';
 
+// Wave 15A wave-b9 Prompt 4B-01 — `PccProjectIntelligenceCard` was
+// removed from Project Home; state-branch coverage continues for the
+// remaining Project Home cards. Priority Actions (now the first bento
+// card) is exercised at the head of this list.
 const CARDS = [
-  ['PccProjectIntelligenceCard', PccProjectIntelligenceCard],
   ['PccPriorityActionsCard', PccPriorityActionsCard],
   ['PccSiteHealthSummaryCard', PccSiteHealthSummaryCard],
   ['PccDocumentControlCard', PccDocumentControlCard],

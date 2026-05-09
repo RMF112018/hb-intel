@@ -8,7 +8,6 @@ import {
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_PRIORITY_ACTIONS,
-  SAMPLE_PROJECT_PROFILE,
   SAMPLE_SITE_HEALTH_SUMMARY,
   SAMPLE_WORKFLOW_ITEMS,
   type IPriorityAction,
@@ -40,8 +39,13 @@ const SUPPRESSED_FIXTURES = SAMPLE_PRIORITY_ACTIONS.filter((a) =>
   ['documents', 'health', 'safety'].includes(a.category),
 );
 
+// Wave 15A wave-b9 Prompt 4B-01 — `PccProjectIntelligenceCard` was removed
+// and `PccPriorityActionsCard` is now the first bento card. Project Home
+// moved into SURFACES_WITH_SHELL_ONLY_PANEL across the contract/smoke
+// tests, so the card-level `[data-pcc-active-surface-panel="project-home"]`
+// compatibility marker is no longer rendered (the shell `<main>` carries
+// the marker on its own).
 const REQUIRED_CARD_TITLES = [
-  'Project Intelligence',
   'Priority Actions',
   'Site Health Summary',
   'Document Control Center',
@@ -55,7 +59,7 @@ const REQUIRED_CARD_TITLES = [
 
 // Wave 99 / Prompt 05B — unified lifecycle cards are appended to the
 // read-model-driven path only. `<PccApp forceMode="desktop" />`
-// without a `readModelClient` renders the fixture-only fallback (10
+// without a `readModelClient` renders the fixture-only fallback (9
 // cards); to render the read-model-driven path, supply a fixture
 // client via `readModelClient={createPccFixtureReadModelClient()}`.
 const UNIFIED_LIFECYCLE_CARD_TITLES = [
@@ -66,13 +70,13 @@ const UNIFIED_LIFECYCLE_CARD_TITLES = [
 ] as const;
 
 // Wave 99 / Prompt 06C — Ask HBI is integrated as one additional card on
-// the read-model-driven path only. Read-model-driven Project Home goes
-// 14 → 15; fixture-only path stays at 10.
+// the read-model-driven path only. Fixture-only path stays at the
+// REQUIRED_CARD_TITLES baseline.
 const ASK_HBI_CARD_TITLES = ['Ask HBI — Grounded Project Answers'] as const;
 
 // Wave 13 / Prompt 13E — Procore snapshot card is integrated as one
-// additional card on the read-model-driven path only (15 → 16). The
-// fixture-only path is unaffected and stays at 10.
+// additional card on the read-model-driven path only. The fixture-only
+// path is unaffected and stays at the REQUIRED_CARD_TITLES baseline.
 const PROCORE_CARD_TITLES = ['Procore snapshot'] as const;
 
 const READINESS_MODULES = new Set(['startup-tasks', 'permits', 'required-inspections']);
@@ -88,7 +92,7 @@ describe('Project Home bento dashboard', () => {
     cleanup();
   });
 
-  it('renders all 10 required Project Home card titles inside the active panel', () => {
+  it('renders all required Project Home card titles inside the active panel', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
@@ -126,68 +130,62 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
-  it('promotes Project Intelligence as Tier 1 command and assigns Priority Actions Tier 2 operational, with active panel ownership on Project Intelligence', () => {
-    // Wave 15A wave-b3 Prompt 04 — Project Intelligence is the Tier 1
-    // command card (legacy `hierarchy='primary'` is preserved alongside
-    // the new `tier='tier1'` / `region='command'` markers from
-    // 02_SURFACE_CARD_INVENTORY_MATRIX.md). Priority Actions drops
-    // `hierarchy='primary'` because the matrix locks it as Tier 2
-    // operational, so its hierarchy marker resolves to the default
-    // 'standard' — never preserve a stale legacy marker just to keep
-    // an old assertion green (per
-    // feedback_no_legacy_marker_preservation.md).
+  it('promotes Priority Actions to the first bento card as Tier 2 operational and renders no in-grid project-home compatibility marker (Wave 15A wave-b9 Prompt 4B-01)', () => {
+    // Prompt 4B-01 removed `PccProjectIntelligenceCard` — Project Home
+    // moved to SURFACES_WITH_SHELL_ONLY_PANEL across the contract/smoke
+    // tests. The shell `<main>` continues to carry the
+    // `data-pcc-active-surface-panel="project-home"` marker on its own;
+    // no in-grid card is required.
     const { container } = render(<PccApp forceMode="desktop" />);
-    const cards = Array.from(container.querySelectorAll('[data-pcc-card]')) as HTMLElement[];
-
-    const projectIntelligenceCard = cards.find((card) =>
-      card.textContent?.includes('Project Intelligence'),
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    const directCards = Array.from(grid!.children).filter(
+      (child): child is HTMLElement =>
+        child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
     );
-    expect(projectIntelligenceCard).toBeDefined();
-    expect(projectIntelligenceCard?.getAttribute('data-pcc-footprint')).toBe('hero');
-    expect(projectIntelligenceCard?.getAttribute('data-pcc-card-hierarchy')).toBe('primary');
-    expect(projectIntelligenceCard?.getAttribute('data-pcc-card-tier')).toBe('tier1');
-    expect(projectIntelligenceCard?.getAttribute('data-pcc-card-region')).toBe('command');
-    expect(projectIntelligenceCard?.getAttribute('data-pcc-active-surface-panel')).toBe(
-      'project-home',
-    );
+    expect(directCards.length).toBeGreaterThan(0);
 
-    const priorityActionsCard = cards.find((card) =>
-      card.textContent?.includes('Priority Actions'),
-    );
-    expect(priorityActionsCard).toBeDefined();
-    expect(priorityActionsCard?.getAttribute('data-pcc-footprint')).toBe('wide');
-    expect(priorityActionsCard?.getAttribute('data-pcc-card-hierarchy')).toBe('standard');
-    expect(priorityActionsCard?.getAttribute('data-pcc-card-tier')).toBe('tier2');
-    expect(priorityActionsCard?.getAttribute('data-pcc-card-region')).toBe('operational');
-    expect(priorityActionsCard?.hasAttribute('data-pcc-active-surface-panel')).toBe(false);
+    // Priority Actions is now first.
+    const firstCard = directCards[0]!;
+    const firstHeading = firstCard.querySelector('h2,h3,h4')?.textContent?.trim();
+    expect(firstHeading).toBe('Priority Actions');
+    expect(firstCard.getAttribute('data-pcc-footprint')).toBe('wide');
+    expect(firstCard.getAttribute('data-pcc-card-hierarchy')).toBe('standard');
+    expect(firstCard.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(firstCard.getAttribute('data-pcc-card-region')).toBe('operational');
+    expect(firstCard.hasAttribute('data-pcc-active-surface-panel')).toBe(false);
 
-    // Wave 15A wave-b7 Prompt 01 — shell <main> now owns the semantic
-    // active-panel marker; the Project Intelligence card retains it as a
-    // compatibility marker. Lock card-level uniqueness via the bento-card
-    // compatibility selector.
-    const compatibilityCards = container.querySelectorAll(
+    // Project Intelligence is gone from both render paths.
+    expect(grid!.textContent ?? '').not.toContain('Project Intelligence');
+
+    // Shell <main> remains the sole carrier of the project-home marker;
+    // the bento grid contains zero direct-child compatibility cards.
+    const inGridCompat = grid!.querySelectorAll(
       '[data-pcc-card][data-pcc-active-surface-panel="project-home"]',
     );
-    expect(compatibilityCards).toHaveLength(1);
-    expect(compatibilityCards[0].getAttribute('data-pcc-active-surface-panel')).toBe(
-      'project-home',
+    expect(inGridCompat).toHaveLength(0);
+
+    const shellMain = container.querySelector(
+      'main[role="tabpanel"][data-pcc-active-surface-panel="project-home"]',
     );
+    expect(shellMain).not.toBeNull();
   });
 
-  it('exactly one Project Intelligence card carries the compatibility [data-pcc-active-surface-panel="project-home"] marker (Wave 15A wave-b7 Prompt 01 — shell <main> owns the semantic marker)', () => {
+  // Replacement coverage for the deprecated Project Intelligence command-summary
+  // row (Wave 15A wave-b9 Prompt 4B-01): the operational counts that used to
+  // render in a single summary row now live in their dedicated cards. This
+  // assertion proves those operational destinations are still mounted as
+  // headed cards on Project Home so the removal cannot silently regress.
+  it('renders Priority Actions, Approvals & Checkpoints, and Missing Configurations as headed cards (operational destinations for the deprecated Intelligence command-summary row)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const compatibilityCards = container.querySelectorAll(
-      '[data-pcc-card][data-pcc-active-surface-panel="project-home"]',
-    );
-    expect(compatibilityCards).toHaveLength(1);
-    expect(compatibilityCards[0].getAttribute('data-pcc-active-surface-panel')).toBe(
-      'project-home',
-    );
-    expect(compatibilityCards[0].textContent).toContain('Project Intelligence');
-    // Wave 15A wave-b6 Prompt 02 — the legacy "Header" suffix was an
-    // internal-feeling label; the operator-facing title drops it. Defend
-    // against accidental regression to the pre-rename string.
-    expect(compatibilityCards[0].textContent).not.toContain('Project Intelligence Header');
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    const headingTexts = Array.from(
+      grid!.querySelectorAll<HTMLElement>('[data-pcc-card] :is(h2,h3,h4)'),
+    ).map((el) => el.textContent?.trim() ?? '');
+    expect(headingTexts).toContain('Priority Actions');
+    expect(headingTexts).toContain('Approvals & Checkpoints');
+    expect(headingTexts).toContain('Missing Configurations');
   });
 
   it('the bento grid does not use grid-auto-flow: dense', () => {
@@ -476,16 +474,6 @@ describe('Project Home bento dashboard', () => {
     expect(rows).toHaveLength(SAMPLE_BUSINESS_AUDIT_EVENTS.length);
   });
 
-  // ── Project Intelligence ─────────────────────────────────────────────
-
-  it('Project Intelligence card displays SAMPLE_PROJECT_PROFILE fields', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    const body = container.querySelector('[data-pcc-project-intelligence-body]');
-    expect(body).not.toBeNull();
-    expect(body!.textContent).toContain(SAMPLE_PROJECT_PROFILE.projectName);
-    expect(body!.textContent).toContain(SAMPLE_PROJECT_PROFILE.projectNumber);
-  });
-
   // ── Wave 15A wave-b6 Prompt 04 — core operational cluster order ──────
 
   // Wave 15A wave-b6 Prompt 05 — Lifecycle / HBI promotion on the read-model path.
@@ -503,7 +491,10 @@ describe('Project Home bento dashboard', () => {
             child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
         )
         .map((card) => card.querySelector('h2,h3,h4')?.textContent?.trim() ?? '(untitled)');
-      expect(titles).toHaveLength(16);
+      // Wave 15A wave-b9 Prompt 4B-01 — Project Intelligence removed; the
+      // read-model path now renders 15 cards (10 base − 1 Intelligence + 4
+      // unified-lifecycle + 1 Ask HBI + 1 Procore snapshot).
+      expect(titles).toHaveLength(15);
       const idx = (t: string): number => {
         const i = titles.indexOf(t);
         expect(i, `card '${t}' should appear`).toBeGreaterThanOrEqual(0);
@@ -523,18 +514,17 @@ describe('Project Home bento dashboard', () => {
       expect(idx('Related Records')).toBeGreaterThan(idx('Recent Activity'));
     });
 
-    // Bento direct-child invariant + active-panel marker stay correct on the
-    // promoted layout. Active-panel is exactly one and stays on Project
-    // Intelligence — never assert "zero active-panel markers in the grid"
-    // (Project Intelligence legitimately carries one).
+    // Bento direct-child invariant. After Wave 15A wave-b9 Prompt 4B-01 the
+    // grid carries zero `[data-pcc-active-surface-panel="project-home"]`
+    // cards; the shell `<main>` is the sole semantic carrier of the
+    // marker.
     const grid = container.querySelector('[data-pcc-bento-grid]')!;
     for (const card of Array.from(grid.querySelectorAll('[data-pcc-card]'))) {
       expect(card.parentElement === grid).toBe(true);
     }
     const panels = grid.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-home');
-    expect(panels[0].textContent).toContain('Project Intelligence');
+    expect(panels).toHaveLength(0);
+    expect(grid.textContent ?? '').not.toContain('Project Intelligence');
 
     // Promoted lifecycle/HBI children must NOT register routing/tab/workspace
     // ownership: scope the no-marker check to the routing taxonomy.
@@ -677,80 +667,6 @@ describe('Project Home bento dashboard', () => {
     expect(idx('Missing Configurations')).toBeLessThan(idx('External Platforms'));
   });
 
-  // ── Wave 15A wave-b6 Prompt 02 — Project Command Summary posture row ──
-
-  it('Project Intelligence card renders the first-fold command summary row with source and HBI advisory cues (fixture path)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    const summary = container.querySelector('[data-pcc-command-summary]');
-    expect(summary, 'command summary row should render on the fixture path').not.toBeNull();
-    const sourceCue = summary!.querySelector('[data-pcc-command-summary-source]');
-    expect(sourceCue, 'source cue must render').not.toBeNull();
-    expect(sourceCue!.textContent ?? '').toContain('Source:');
-    expect(sourceCue!.textContent ?? '').toContain('fixture preview');
-    const hbiCue = summary!.querySelector('[data-pcc-command-summary-hbi]');
-    expect(hbiCue, 'HBI advisory cue must render').not.toBeNull();
-    expect(hbiCue!.textContent ?? '').toContain('HBI advisory');
-    // Wave 15A wave-b6 Prompt 06 — bounded HBI cue: negates both decisions and writeback.
-    expect(hbiCue!.textContent ?? '').toContain('no decisions');
-    expect(hbiCue!.textContent ?? '').toContain('writeback');
-  });
-
-  it('Project Intelligence command summary row renders inert spans only — no anchors, no buttons, no http hrefs (fixture path)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    const summary = container.querySelector<HTMLElement>('[data-pcc-command-summary]');
-    expect(summary).not.toBeNull();
-    expect(summary!.querySelectorAll('a').length).toBe(0);
-    expect(summary!.querySelectorAll('button').length).toBe(0);
-    expect(summary!.querySelectorAll('[href]').length).toBe(0);
-    const anchors = summary!.querySelectorAll('a[href]');
-    for (const a of Array.from(anchors)) {
-      expect(a.getAttribute('href') ?? '').not.toMatch(/^https?:\/\//);
-    }
-  });
-
-  it('Project Intelligence command summary row renders the high-priority and blocking-setup chips with numeric values (fixture path)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    const summary = container.querySelector<HTMLElement>('[data-pcc-command-summary]');
-    expect(summary).not.toBeNull();
-    const highPriorityChip = summary!.querySelector(
-      '[data-pcc-command-summary-chip="high-priority-actions"]',
-    );
-    expect(highPriorityChip, 'high-priority chip should render on the fixture path').not.toBeNull();
-    const highPriorityValue = Number(highPriorityChip!.textContent?.match(/\d+/)?.[0] ?? 'NaN');
-    expect(highPriorityValue).toBeGreaterThanOrEqual(0);
-    const blockingChip = summary!.querySelector(
-      '[data-pcc-command-summary-chip="blocking-missing-configs"]',
-    );
-    expect(
-      blockingChip,
-      'blocking-missing-configs chip should render on the fixture path',
-    ).not.toBeNull();
-    const blockingValue = Number(blockingChip!.textContent?.match(/\d+/)?.[0] ?? 'NaN');
-    expect(blockingValue).toBeGreaterThanOrEqual(0);
-    // Pending-approvals chip is read-model-only; the fixture path supplies
-    // no approvalsCard, so the helper returns undefined and the chip is omitted.
-    const pendingChip = summary!.querySelector(
-      '[data-pcc-command-summary-chip="pending-approvals"]',
-    );
-    expect(pendingChip, 'pending-approvals chip must NOT render on the fixture path').toBeNull();
-  });
-
-  it('Project Intelligence card renders an operator-facing source cue on the read-model path (not the fixture-preview label)', async () => {
-    const { container, findByText } = render(
-      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
-    );
-    await findByText('Lifecycle Timeline');
-    const summary = container.querySelector<HTMLElement>('[data-pcc-command-summary]');
-    expect(summary).not.toBeNull();
-    const sourceCue = summary!.querySelector('[data-pcc-command-summary-source]');
-    expect(sourceCue).not.toBeNull();
-    const sourceText = sourceCue!.textContent ?? '';
-    expect(sourceText.startsWith('Source:')).toBe(true);
-    expect(sourceText, 'read-model path must not render the fixture-preview label').not.toContain(
-      'fixture preview',
-    );
-  });
-
   // ── Card-state contract sanity ───────────────────────────────────────
 
   it('PCC_CARD_STATES exposes preview / empty / missing-config / unavailable-fixture / error / unauthorized-persona', () => {
@@ -767,12 +683,13 @@ describe('Project Home bento dashboard', () => {
   // ── Wave 99 / Prompt 05B — unified lifecycle integration ─────────────
   //
   // Project Home has two render paths: fixture-only (no readModelClient,
-  // 10 cards) and read-model-driven (readModelClient supplied, 10
-  // existing cards + 4 unified-lifecycle cards from the new section).
-  // Each test below names which path it exercises and asserts the
-  // path-specific cardinality / content invariants.
+  // 9 cards after Wave 15A wave-b9 Prompt 4B-01 removed Project
+  // Intelligence) and read-model-driven (readModelClient supplied,
+  // 9 existing cards + 4 unified-lifecycle cards + Ask HBI + Procore =
+  // 15 cards). Each test below names which path it exercises and asserts
+  // the path-specific cardinality / content invariants.
 
-  it('fixture-only fallback (no readModelClient) preserves the original 10-card baseline and renders no unified-lifecycle titles', () => {
+  it('fixture-only fallback (no readModelClient) preserves the post-Prompt-4B-01 9-card baseline and renders no unified-lifecycle titles', () => {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectHome />
@@ -783,7 +700,7 @@ describe('Project Home bento dashboard', () => {
     const cards = container.querySelectorAll('[data-pcc-card]');
     expect(
       cards.length,
-      'fixture-only fallback must render exactly the original 10 cards (no unified-lifecycle section)',
+      'fixture-only fallback must render exactly REQUIRED_CARD_TITLES.length cards (no unified-lifecycle section)',
     ).toBe(REQUIRED_CARD_TITLES.length);
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
@@ -805,7 +722,7 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
-  it('read-model-driven path renders 16 cards (10 existing + 4 unified lifecycle + 1 Ask HBI + 1 Procore snapshot) and exposes each unified-lifecycle body marker as a direct child of the bento grid', async () => {
+  it('read-model-driven path renders 15 cards (9 existing + 4 unified lifecycle + 1 Ask HBI + 1 Procore snapshot) and exposes each unified-lifecycle body marker as a direct child of the bento grid', async () => {
     const { container, findByText } = render(
       <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );

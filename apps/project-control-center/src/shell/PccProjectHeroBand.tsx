@@ -87,6 +87,10 @@ export const PccProjectHeroBand: FC<PccProjectHeroBandProps> = ({
         </div>
 
         <dl className={styles.facts} data-pcc-hero-facts="">
+          <div className={styles.factCell} data-pcc-hero-fact-client="">
+            <dt className={styles.factLabel}>Client</dt>
+            <dd className={styles.factValue}>{viewModel.clientDisplay}</dd>
+          </div>
           <div className={styles.factCell} data-pcc-hero-fact-location="">
             <dt className={styles.factLabel}>Location</dt>
             <dd className={styles.factValue}>{viewModel.location}</dd>

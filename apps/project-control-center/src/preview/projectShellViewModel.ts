@@ -18,11 +18,16 @@ export type {
 
 /**
  * Hero view-model the PCC shell renders. Profile-derived; no source-confidence,
- * no client name, no status pills, no last-updated, no project number. Wave 15A
- * wave-b7 Prompt 02 — extends the seam with typed shell surface metadata
+ * no status pills, no last-updated, no project number. Wave 15A wave-b7
+ * Prompt 02 — extends the seam with typed shell surface metadata
  * (`surfaceSummaryItems`, `surfaceCues`, `readOnlyCue`) sourced from
- * `PCC_SHELL_SURFACE_HEADER_METADATA`. The new fields are inert at render
- * time and carry no live counts or writeback authority.
+ * `PCC_SHELL_SURFACE_HEADER_METADATA`. The metadata fields are inert at
+ * render time and carry no live counts or writeback authority. Wave 15A
+ * wave-b9 Prompt 4B-01 — `clientDisplay` is added as a global project-fact
+ * after `PccProjectIntelligenceCard` was removed from Project Home; the
+ * existing facts (location, estimated value, scheduled completion, project
+ * stage) are already rendered globally across all PCC surfaces, so client
+ * follows the same global pattern.
  */
 export interface IPccShellHeroViewModel {
   readonly primaryTitle: 'Project Control Center';
@@ -30,6 +35,7 @@ export interface IPccShellHeroViewModel {
   readonly surfaceDescription: string;
   readonly projectName: string;
   readonly location: string;
+  readonly clientDisplay: string;
   readonly estimatedValueDisplay: string;
   readonly scheduledCompletionDisplay: string;
   readonly projectStageLabel: string;
@@ -96,6 +102,7 @@ export function deriveShellHeroViewModel(
     surfaceDescription: PCC_SURFACE_HERO_DESCRIPTIONS[activeSurfaceId],
     projectName: profile.projectName,
     location: profile.projectLocation ?? NOT_LISTED,
+    clientDisplay: profile.clientName ?? NOT_LISTED,
     estimatedValueDisplay: formatEstimatedValue(profile.estimatedValue),
     scheduledCompletionDisplay: formatScheduledCompletion(profile.scheduledCompletionDate),
     projectStageLabel: formatProjectStage(profile.projectStage),

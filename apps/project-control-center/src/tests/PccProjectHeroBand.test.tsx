@@ -53,16 +53,35 @@ describe('PccProjectHeroBand — locked content (Wave 15A wave-b2)', () => {
     },
   );
 
-  it('renders the four locked-in facts with formatter output for SAMPLE_PROJECT_PROFILE', () => {
+  it('renders the locked-in facts with formatter output for SAMPLE_PROJECT_PROFILE', () => {
     const { container } = renderHero();
+    const client = container.querySelector('[data-pcc-hero-fact-client] dd');
     const location = container.querySelector('[data-pcc-hero-fact-location] dd');
     const value = container.querySelector('[data-pcc-hero-fact-estimated-value] dd');
     const completion = container.querySelector('[data-pcc-hero-fact-scheduled-completion] dd');
     const stage = container.querySelector('[data-pcc-hero-fact-project-stage] dd');
+    // Wave 15A wave-b9 Prompt 4B-01 — Client added to the existing global
+    // project-facts row because Location, Estimated value, Scheduled
+    // completion, and Project stage are already rendered globally across
+    // PCC surfaces; Client follows the same global pattern. Resolved
+    // value is whatever `deriveShellHeroViewModel` returns for the
+    // current SAMPLE_PROJECT_PROFILE so the test stays resilient if the
+    // fixture's `clientName` changes.
+    expect(client?.textContent).toBe('Sample Owner LLC');
     expect(location?.textContent).toBe('Sample City, ST');
     expect(value?.textContent).toBe('$25,000,000');
     expect(completion?.textContent).toBe('Sep 30, 2027');
     expect(stage?.textContent).toBe('Active Construction');
+  });
+
+  it('renders the Client fact label "Client" with `viewModel.clientDisplay` as the value (Wave 15A wave-b9 Prompt 4B-01)', () => {
+    const { container } = renderHero();
+    const cell = container.querySelector('[data-pcc-hero-fact-client]');
+    expect(cell).not.toBeNull();
+    expect(cell!.querySelector('dt')?.textContent).toBe('Client');
+    const dd = cell!.querySelector('dd');
+    expect(dd).not.toBeNull();
+    expect(dd!.textContent?.trim().length ?? 0).toBeGreaterThan(0);
   });
 
   it('renders a non-interactive command-search preview affordance inside the hero', () => {
@@ -123,10 +142,11 @@ describe('PccProjectHeroBand — locked-out content (negative marker assertions)
     expect(container.querySelector('[data-pcc-source-confidence-dot]')).toBeNull();
   });
 
-  it('does not render a client fact marker', () => {
-    const { container } = renderHero();
-    expect(container.querySelector('[data-pcc-hero-fact-client]')).toBeNull();
-  });
+  // Wave 15A wave-b9 Prompt 4B-01 — Client was previously locked out of
+  // the hero. After `PccProjectIntelligenceCard` removed the duplicate
+  // Project Home header card, Client was added back to the existing
+  // global project-facts row (positive coverage in the locked-content
+  // describe block above).
 
   it('does not render project-status, project-number, or last-updated fact markers', () => {
     const { container } = renderHero();

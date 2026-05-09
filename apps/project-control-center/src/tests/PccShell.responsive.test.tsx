@@ -269,7 +269,7 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
     );
   }
 
-  it('default render shows Project Home metadata', () => {
+  it('default render shows Project Home metadata and surfaces the global Client fact', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
     expectShellHeroMetadata(container, {
       surfaceId: 'project-home',
@@ -279,9 +279,17 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
       cueId: 'hbi-boundary',
       readOnlyCueIncludes: 'no decisions, approvals, or writeback authority',
     });
+    // Wave 15A wave-b9 Prompt 4B-01 — Client absorbed into the existing
+    // global project-facts row after `PccProjectIntelligenceCard` was
+    // removed. The Project Home hero must surface a `<dt>Client</dt>`
+    // pulled from `viewModel.clientDisplay` (SAMPLE_PROJECT_PROFILE).
+    const clientCell = container.querySelector('[data-pcc-hero-fact-client]');
+    expect(clientCell, 'Project Home hero must render the Client fact').not.toBeNull();
+    expect(clientCell!.querySelector('dt')?.textContent).toBe('Client');
+    expect(clientCell!.querySelector('dd')?.textContent).toBe('Sample Owner LLC');
   });
 
-  it('clicking Documents switches metadata to Document control preview', () => {
+  it('clicking Documents switches metadata to Document control preview and the global Client fact persists (proves Client is global, not project-home-scoped)', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
     const documentsTab = container.querySelector(
       '[data-pcc-tab-id="documents"]',
@@ -297,6 +305,16 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
       cueId: 'external-files',
       readOnlyCueIncludes: 'no uploads, moves, deletes, or external launches',
     });
+    // Wave 15A wave-b9 Prompt 4B-01 — Client follows the same global
+    // pattern as Location / Estimated value / Scheduled completion /
+    // Project stage. After switching tabs the Client fact must still
+    // render in the hero with the same value.
+    const clientCell = container.querySelector('[data-pcc-hero-fact-client]');
+    expect(
+      clientCell,
+      'Client fact must persist on non-project-home surfaces (global by design)',
+    ).not.toBeNull();
+    expect(clientCell!.querySelector('dd')?.textContent).toBe('Sample Owner LLC');
   });
 
   it('clicking Site Health switches metadata to Site health preview', () => {

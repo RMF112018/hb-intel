@@ -39,19 +39,23 @@ const ALWAYS_REJECTS = <T,>(): Promise<T> => Promise.reject(new Error('test: for
 
 const STUB_PROJECT_ID = 'fixture-pcc-project-001' as PccProjectId;
 
-// Wave 15A wave-b9 Prompt 04 — bifurcated surface sets after the first
-// runtime duplicate-header-card removal pass. Surfaces that retain an
-// operational/header-hybrid card still emit the temporary card-level
-// `[data-pcc-card][data-pcc-active-surface-panel]` compatibility marker;
-// surfaces whose first card was removed are now uniformly shell-only
+// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 — bifurcated surface sets
+// after the runtime duplicate-header-card removal passes. Surfaces that
+// retain an operational/header-hybrid card still emit the temporary
+// card-level `[data-pcc-card][data-pcc-active-surface-panel]` compatibility
+// marker; surfaces whose first card was removed are uniformly shell-only
 // across all render branches (ready / loading / error).
 //
 // Documents stays in the compatibility-card set because the dynamic
 // loading / error / source-unavailable copy on `PccDocumentsHeaderCard`
 // has no surviving renderable home post-removal (Prompt 04 §3 BLOCKED
 // gate); Documents removal is deferred until a state-aware seam exists.
+//
+// Project Home moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-01:
+// `PccProjectIntelligenceCard` was removed and `PccPriorityActionsCard`
+// is now the first bento card. The Project Home shell `<main>` continues
+// to carry the active-panel marker on its own.
 const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
-  'project-home',
   'project-readiness',
   'approvals',
   'site-health',
@@ -59,6 +63,7 @@ const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
 ];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
+  'project-home',
   'team-and-access',
   'external-systems',
   'control-center-settings',

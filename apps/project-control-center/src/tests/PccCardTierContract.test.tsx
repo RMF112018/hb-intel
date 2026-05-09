@@ -56,9 +56,9 @@ const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
   'project-readiness',
 ];
 
-// Wave 15A wave-b9 Prompt 04 — bifurcated surface sets after the first
-// runtime duplicate-header-card removal pass. The universal explicit-
-// sources / layout / aria / direct-child invariants iterate
+// Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 — bifurcated surface sets
+// after the runtime duplicate-header-card removal passes. The universal
+// explicit-sources / layout / aria / direct-child invariants iterate
 // `IN_SCOPE_SURFACES` (all eight surfaces). The compatibility-card-
 // specific heading-level assertion only iterates surfaces whose
 // operational/header-hybrid first card still emits the temporary
@@ -68,8 +68,11 @@ const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
 // loading / error / source-unavailable copy has no surviving home
 // post-removal; the header card is preserved until a state-aware seam
 // exists (Prompt 04 §3 BLOCKED gate).
+//
+// Project Home moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-01:
+// `PccProjectIntelligenceCard` was removed; the Project Home shell
+// `<main>` continues to carry the active-panel marker on its own.
 const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
-  'project-home',
   'project-readiness',
   'approvals',
   'site-health',
@@ -77,6 +80,7 @@ const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
 ];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
+  'project-home',
   'team-and-access',
   'external-systems',
   'control-center-settings',

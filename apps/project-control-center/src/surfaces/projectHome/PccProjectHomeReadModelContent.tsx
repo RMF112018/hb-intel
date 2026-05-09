@@ -19,7 +19,6 @@ import { PccDocumentControlCard } from './PccDocumentControlCard';
 import { PccExternalSystemsCard } from './PccExternalSystemsCard';
 import { PccMissingConfigurationsCard } from './PccMissingConfigurationsCard';
 import { PccPriorityActionsCard } from './PccPriorityActionsCard';
-import { PccProjectIntelligenceCard } from './PccProjectIntelligenceCard';
 import { PccProjectReadinessCard } from './PccProjectReadinessCard';
 import { PccProjectHomeAskHbiSection } from './PccProjectHomeAskHbiSection';
 import { PccProjectHomeProcoreSnapshotCard } from './PccProjectHomeProcoreSnapshotCard';
@@ -28,7 +27,6 @@ import { PccRecentActivityCard } from './PccRecentActivityCard';
 import { PccSiteHealthSummaryCard } from './PccSiteHealthSummaryCard';
 import { PccTeamSnapshotCard } from './PccTeamSnapshotCard';
 import { useProjectHomeReadModel } from './useProjectHomeReadModel';
-import { buildProjectCommandSummary } from './projectCommandSummary';
 import type { IPccProjectHomeReadModelClient } from './projectHomeViewModel';
 
 interface PccProjectHomeReadModelContentProps {
@@ -40,21 +38,8 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
 }) => {
   const { viewModel } = useProjectHomeReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
 
-  const commandSummary = buildProjectCommandSummary({
-    priorityActions: viewModel?.priorityActions.data,
-    approvalsCard: viewModel?.approvalsCard,
-    missingConfigurations: viewModel?.missingConfigurations.data,
-    sourceMode: 'read-model',
-    sourceStatus: viewModel?.intelligence.sourceStatus,
-  });
-
   return (
     <>
-      <PccProjectIntelligenceCard
-        state={viewModel?.intelligence.state ?? 'preview'}
-        profile={viewModel?.intelligence.data}
-        commandSummary={commandSummary}
-      />
       <PccPriorityActionsCard
         state={viewModel?.priorityActions.state ?? 'preview'}
         actions={viewModel?.priorityActions.data}
