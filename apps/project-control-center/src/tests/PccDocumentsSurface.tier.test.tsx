@@ -119,11 +119,10 @@ describe('Documents — lane eyebrow short-form copy', () => {
   });
 });
 
-describe('Documents — active-panel ownership preserved', () => {
-  it('exactly one [data-pcc-active-surface-panel="documents"] exists, on the header card', async () => {
+describe('Documents — active-panel ownership preserved (Wave 15A wave-b9 Prompt 4B-09)', () => {
+  it('zero in-grid card-level `[data-pcc-active-surface-panel="documents"]` markers exist on the ready path; documents joined SURFACES_WITH_SHELL_ONLY_PANEL after `PccDocumentsHeaderCard` was deleted, and the shell `<main role="tabpanel">` is the sole semantic owner of the marker (asserted in PccShell.responsive.test.tsx)', async () => {
     const { container } = await renderDocuments();
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels).toHaveLength(1);
-    expect(panels[0].getAttribute('data-pcc-active-surface-panel')).toBe('documents');
+    expect(panels).toHaveLength(0);
   });
 });

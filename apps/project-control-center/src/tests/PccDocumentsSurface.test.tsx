@@ -72,9 +72,11 @@ describe('PccDocumentsSurface — Wave 7 three-lane shell', () => {
     vi.unstubAllGlobals();
   });
 
-  it('renders the HB Document Control Center header title', async () => {
+  it('does NOT render the HB Document Control Center header title in the ready bento path (Wave 15A wave-b9 Prompt 4B-09 — `PccDocumentsHeaderCard` deleted; the constant is preserved in `documentControlViewModel.ts` for VM stability only)', async () => {
     const { container } = await renderWithClient(fixtureClient());
-    expect(container.textContent).toContain(HB_DOCUMENT_CONTROL_CENTER_TITLE);
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    expect(grid!.textContent ?? '').not.toContain(HB_DOCUMENT_CONTROL_CENTER_TITLE);
   });
 
   it('renders exactly three lane cards: project-record, my-project-files, external-systems', async () => {
@@ -89,11 +91,13 @@ describe('PccDocumentsSurface — Wave 7 three-lane shell', () => {
     expect(all.length).toBe(3);
   });
 
-  it('header card does NOT emit any data-pcc-doc-lane marker (only lane cards do)', async () => {
+  it('first ready bento card is the project-record lane (Wave 15A wave-b9 Prompt 4B-09 — duplicate header removed; ready path begins with the first operational lane)', async () => {
     const { container } = await renderWithClient(fixtureClient());
-    const headerPanel = container.querySelector('[data-pcc-active-surface-panel="documents"]');
-    expect(headerPanel).not.toBeNull();
-    expect(headerPanel!.querySelector('[data-pcc-doc-lane]')).toBeNull();
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    const firstCard = grid!.querySelector('[data-pcc-card]');
+    expect(firstCard, 'ready path must begin with at least one bento card').not.toBeNull();
+    expect(firstCard!.querySelector('[data-pcc-doc-lane="project-record"]')).not.toBeNull();
   });
 
   it('Project Record lane renders the SharePoint project record source displayName', async () => {
@@ -234,42 +238,71 @@ describe('PccDocumentsSurface — Wave 7 three-lane shell', () => {
     }
   });
 
-  it('preserves bento direct-child invariant (every card is a direct child of the bento grid)', async () => {
+  it('preserves bento direct-child invariant (every card is a direct child of the bento grid; Wave 15A wave-b9 Prompt 4B-09 — ready path renders 5 cards = 3 lanes + permissions + reviews; header card was deleted)', async () => {
     const { container } = await renderWithClient(fixtureClient());
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    // Wave 7 / Prompt 06: 6 cards = header + 3 lanes + permissions + reviews.
-    expect(cards.length).toBe(6);
+    expect(cards.length).toBe(5);
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }
   });
 
-  it('emits exactly one [data-pcc-active-surface-panel="documents"] (on the header card)', async () => {
+  it('zero in-grid `[data-pcc-active-surface-panel="documents"]` card-level markers exist on the ready path (Wave 15A wave-b9 Prompt 4B-09 — documents moved to SURFACES_WITH_SHELL_ONLY_PANEL; the shell `<main role="tabpanel">` is the sole carrier of the marker, asserted in PccShell.responsive.test.tsx and PccShell.navigation.test.tsx)', async () => {
     const { container } = await renderWithClient(fixtureClient());
     const panels = container.querySelectorAll('[data-pcc-active-surface-panel]');
-    expect(panels.length).toBe(1);
-    expect(panels[0]!.getAttribute('data-pcc-active-surface-panel')).toBe('documents');
+    expect(panels.length).toBe(0);
   });
 
-  it('renders the same three-lane shell when no readModelClient is supplied (fallback path)', async () => {
+  it('renders the same three-lane shell when no readModelClient is supplied (fallback path uses the new state-aware seam with sourceStatus="source-unavailable" instead of the deleted header)', async () => {
     const { container } = await renderWithClient(undefined);
     const lanes = container.querySelectorAll('[data-pcc-doc-lane]');
     expect(lanes.length).toBe(3);
     const empty = container.querySelectorAll('[data-pcc-doc-lane-empty="true"]');
     expect(empty.length).toBe(3);
-    expect(container.textContent).toContain(HB_DOCUMENT_CONTROL_CENTER_TITLE);
+    // Wave 15A wave-b9 Prompt 4B-09 — the fallback path now renders the
+    // state card (sources-unavailable kind) instead of the deleted
+    // header card. The state card body carries the canonical
+    // "No document control sources are available for this project."
+    // posture text.
+    const stateCard = container.querySelector(
+      '[data-pcc-doc-state][data-pcc-doc-state-kind="sources-unavailable"]',
+    );
+    expect(
+      stateCard,
+      'fallback path must render the sources-unavailable state card',
+    ).not.toBeNull();
+    expect(stateCard!.textContent ?? '').toContain(
+      'No document control sources are available for this project.',
+    );
+    // The deleted header title must not appear inside the bento.
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    expect(grid!.textContent ?? '').not.toContain(HB_DOCUMENT_CONTROL_CENTER_TITLE);
   });
 
-  it('renders safely when the envelope is backend-unavailable (header + three empty lanes, no crash)', async () => {
+  it('renders safely when the envelope is backend-unavailable (state card prepended + three empty lanes; Wave 15A wave-b9 Prompt 4B-09 — header replaced by state-aware seam)', async () => {
     const { container } = await renderWithClient(unavailableClient());
-    expect(container.textContent).toContain(HB_DOCUMENT_CONTROL_CENTER_TITLE);
     const lanes = container.querySelectorAll('[data-pcc-doc-lane]');
     expect(lanes.length).toBe(3);
     for (const lane of lanes) {
       expect(lane.querySelectorAll('[data-pcc-document-source-id]').length).toBe(0);
     }
+    const stateCard = container.querySelector(
+      '[data-pcc-doc-state][data-pcc-doc-state-kind="temporarily-unavailable"]',
+    );
+    expect(
+      stateCard,
+      'backend-unavailable branch must render the temporarily-unavailable state card',
+    ).not.toBeNull();
+    expect(stateCard!.textContent ?? '').toContain(
+      'Document control is temporarily unavailable. Try again later.',
+    );
+    // The deleted header title must not appear inside the bento.
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid).not.toBeNull();
+    expect(grid!.textContent ?? '').not.toContain(HB_DOCUMENT_CONTROL_CENTER_TITLE);
   });
 
   it('renders safely when the envelope is source-unavailable (unknown project, MPF lane stays empty)', async () => {
@@ -1186,14 +1219,14 @@ describe('PccDocumentsSurface — Wave 7 / Prompt 06 reviews summary', () => {
   // are not lane cards (lanes are covered by
   // `PccDocumentsSurface.tier.test.tsx`).
 
-  it('header card emits Tier 1 command markers and an h2 heading', async () => {
-    const { container } = await renderWithClient(fixtureClient());
-    const headerPanel = container.querySelector('[data-pcc-active-surface-panel="documents"]');
-    expect(headerPanel, 'header card should render').not.toBeNull();
-    expect(headerPanel!.getAttribute('data-pcc-card-tier')).toBe('tier1');
-    expect(headerPanel!.getAttribute('data-pcc-card-region')).toBe('command');
-    expect(headerPanel!.querySelector('h2'), 'tier1 command card renders an h2').not.toBeNull();
-  });
+  // Wave 15A wave-b9 Prompt 4B-09 — the prior "header card emits Tier 1
+  // command markers and an h2 heading" assertion is removed because
+  // `PccDocumentsHeaderCard` was deleted. No remaining Documents card
+  // carries `tier="tier1"` / `region="command"` on the ready path. The
+  // non-ready state branches use the new `PccDocumentControlStateCard`
+  // (tier="state" / region="state"), asserted in the dedicated state-card
+  // assertions above. Same shape as the Project Home (4B-01) / Approvals
+  // (4B-05) / Site Health (4B-08) migrations.
 
   it('permissions & guardrails card is Tier 3 detail with footprint="detail"', async () => {
     const { container } = await renderWithClient(fixtureClient());

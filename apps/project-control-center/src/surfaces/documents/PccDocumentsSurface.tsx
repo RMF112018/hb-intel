@@ -1,5 +1,5 @@
 import { Fragment, type FC } from 'react';
-import { PccDocumentsHeaderCard } from './PccDocumentsHeaderCard';
+import { PccDocumentControlStateCard } from './PccDocumentControlStateCard';
 import { PccDocumentControlLaneCard } from './PccDocumentControlLaneCard';
 import { PccDocumentControlPermissionsCard } from './PccDocumentControlPermissionsCard';
 import { PccDocumentControlReviewsCard } from './PccDocumentControlReviewsCard';
@@ -29,6 +29,18 @@ import {
  * builds a filtered view model. When omitted, the surface renders the
  * same three-lane shell with safe-empty content. Returns a Fragment so
  * each card stays a direct DOM child of `[data-pcc-bento-grid]`.
+ *
+ * Wave 15A wave-b9 Prompt 4B-09 — `PccDocumentsHeaderCard` was removed
+ * (it was the duplicate page-title first card carrying the only
+ * branch-spanning `dataActiveSurfacePanel="documents"` marker). The
+ * non-ready state copies are now carried by `PccDocumentControlStateCard`
+ * (state-aware seam, tier=state / region=state, no active-panel
+ * marker). The no-client fallback path uses the state card with
+ * `sourceStatus="source-unavailable"` to preserve the prior visible
+ * "No document control sources are available for this project."
+ * posture. Documents joined `SURFACES_WITH_SHELL_ONLY_PANEL`; the shell
+ * `<main role="tabpanel">` is the sole semantic owner of the
+ * active-panel marker.
  */
 export interface PccDocumentsSurfaceProps {
   readonly readModelClient?: IPccDocumentsReadModelClient;
@@ -51,12 +63,9 @@ export const PccDocumentsSurface: FC<PccDocumentsSurfaceProps> = ({ readModelCli
   }
   return (
     <Fragment>
-      <PccDocumentsHeaderCard sourceStatus="source-unavailable" />
+      <PccDocumentControlStateCard readModelStatus="preview" sourceStatus="source-unavailable" />
       {WAVE7_LANE_ORDER.map((laneId) => (
-        <PccDocumentControlLaneCard
-          key={laneId}
-          laneViewModel={safeEmptyLane(laneId)}
-        />
+        <PccDocumentControlLaneCard key={laneId} laneViewModel={safeEmptyLane(laneId)} />
       ))}
       <PccDocumentControlPermissionsCard />
       <PccDocumentControlReviewsCard viewModel={undefined} />

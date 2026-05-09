@@ -85,15 +85,20 @@ const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
 // Overall / Failing / Warnings / Last run — were absorbed into
 // `PccSiteHealthChecksCard`). Site Health is fixture-only so the
 // reclassification is uniform across the single render branch.
-const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = [
-  'project-readiness',
-  'documents',
-];
+//
+// Documents moved to SURFACES_WITH_SHELL_ONLY_PANEL in Prompt 4B-09:
+// `PccDocumentsHeaderCard` was deleted and replaced by
+// `PccDocumentControlStateCard` (tier=state / region=state, no
+// active-panel marker) for non-ready branches. After this commit
+// `SURFACES_WITH_COMPATIBILITY_CARD` contains only
+// `['project-readiness']`.
+const SURFACES_WITH_COMPATIBILITY_CARD: readonly PccMvpSurfaceId[] = ['project-readiness'];
 
 const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
   'project-home',
   'approvals',
   'site-health',
+  'documents',
   'team-and-access',
   'external-systems',
   'control-center-settings',
