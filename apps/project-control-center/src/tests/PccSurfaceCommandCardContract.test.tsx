@@ -33,6 +33,7 @@ import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExtern
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 import type { IPccApprovalsReadModelClient } from '../surfaces/approvals/approvalsViewModel';
 import type { IPccLaunchPadReadModelClient } from '../surfaces/externalSystems/launchPadViewModel';
+import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
 const NEVER_RESOLVES = <T,>(): Promise<T> => new Promise<T>(() => {});
 const ALWAYS_REJECTS = <T,>(): Promise<T> => Promise.reject(new Error('test: forced rejection'));
@@ -154,7 +155,7 @@ describe('PCC route command card — ready (tier1 / command, explicit, h2) — s
   for (const surfaceId of SURFACES_WITH_COMPATIBILITY_CARD) {
     it(`'${surfaceId}' route renders one tier1 / command compatibility command card`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
+      const tab = getSurfaceSelectionControl(container, surfaceId);
       expect(tab, `tab for '${surfaceId}' must exist in shell`).not.toBeNull();
       fireEvent.click(tab!);
 
@@ -168,7 +169,7 @@ describe('PCC route command card — ready (shell-only ownership) — surfaces w
   for (const surfaceId of SURFACES_WITH_SHELL_ONLY_PANEL) {
     it(`'${surfaceId}' route shell <main> owns the active panel and the bento contains no direct-child compatibility card`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
+      const tab = getSurfaceSelectionControl(container, surfaceId);
       expect(tab, `tab for '${surfaceId}' must exist in shell`).not.toBeNull();
       fireEvent.click(tab!);
 

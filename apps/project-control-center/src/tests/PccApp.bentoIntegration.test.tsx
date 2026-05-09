@@ -2,6 +2,7 @@ import { afterEach, describe, it, expect } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
+import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
 // Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 — bifurcated surface sets
 // after the runtime duplicate-header-card removal passes. Compatibility-
@@ -78,7 +79,7 @@ describe('PccApp bento integration — all active surfaces direct-child guardrai
 
   function renderAppOnSurface(surfaceId: PccMvpSurfaceId): HTMLElement {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
+    const tab = getSurfaceSelectionControl(container, surfaceId);
     expect(tab, `tab for '${surfaceId}' must exist`).not.toBeNull();
     fireEvent.click(tab!);
     return container;

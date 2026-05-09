@@ -8,6 +8,7 @@ import {
   type PccResponsiveMode,
 } from '../layout/footprints';
 import { PCC_SHELL_SURFACE_HEADER_METADATA } from '../shell/surfaceHeaderMetadata';
+import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
 const COMPACT_MODES = new Set<PccResponsiveMode>([
   'phone',
@@ -123,9 +124,7 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
 
   it('updates <main> aria-labelledby and shell active-panel marker after a Site Health tab click', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
-    const siteHealthTab = container.querySelector(
-      '[data-pcc-tab-id="site-health"]',
-    ) as HTMLButtonElement | null;
+    const siteHealthTab = getSurfaceSelectionControl(container, 'site-health');
     expect(siteHealthTab).not.toBeNull();
     fireEvent.click(siteHealthTab!);
 
@@ -349,9 +348,7 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
 
   it('clicking Site Health switches the production hero band to Site Health', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
-    const siteHealthTab = container.querySelector(
-      '[data-pcc-tab-id="site-health"]',
-    ) as HTMLButtonElement | null;
+    const siteHealthTab = getSurfaceSelectionControl(container, 'site-health');
     expect(siteHealthTab).not.toBeNull();
     fireEvent.click(siteHealthTab!);
 
@@ -363,9 +360,7 @@ describe('PccShell hero metadata switches with the active tab (wave-b7 Prompt 03
 
   it('clicking Team & Access switches the production hero band to Team & Access', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
-    const teamTab = container.querySelector(
-      '[data-pcc-tab-id="team-and-access"]',
-    ) as HTMLButtonElement | null;
+    const teamTab = getSurfaceSelectionControl(container, 'team-and-access');
     expect(teamTab).not.toBeNull();
     fireEvent.click(teamTab!);
 
@@ -381,9 +376,7 @@ describe('PccShell — all-eight-surface metadata switching (wave-b8 Prompt 02)'
     const { container } = render(<PccApp forceMode="standardLaptop" />);
 
     for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = container.querySelector(
-        `[data-pcc-horizontal-tabs] [data-pcc-tab-id="${id}"]`,
-      ) as HTMLButtonElement | null;
+      const tab = getSurfaceSelectionControl(container, id);
       expect(tab, `tab '${id}' should render`).not.toBeNull();
       fireEvent.click(tab!);
 

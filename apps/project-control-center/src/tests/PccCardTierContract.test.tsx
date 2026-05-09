@@ -33,6 +33,7 @@ import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
 import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExternalSystemsSurface';
 import { PccDocumentsSurface } from '../surfaces/documents/PccDocumentsSurface';
 import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
+import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
 // Wave 15A wave-b3 Prompt 05 — explicit cleanup between cases keeps each
 // surface render isolated. PCC SPFx workspace runs vitest with
@@ -88,7 +89,7 @@ const SURFACES_WITH_SHELL_ONLY_PANEL: readonly PccMvpSurfaceId[] = [
 
 function renderPccAppOnSurface(surfaceId: PccMvpSurfaceId): HTMLElement {
   const { container } = render(<PccApp forceMode="desktop" />);
-  const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
+  const tab = getSurfaceSelectionControl(container, surfaceId);
   expect(tab, `tab for '${surfaceId}' must exist in shell`).not.toBeNull();
   fireEvent.click(tab!);
   return container;

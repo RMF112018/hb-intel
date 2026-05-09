@@ -26,6 +26,7 @@ import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
 import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 import type { IPccApprovalsReadModelClient } from '../surfaces/approvals/approvalsViewModel';
+import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
 const NEVER_RESOLVES = <T,>(): Promise<T> => new Promise<T>(() => {});
 const ALWAYS_REJECTS = <T,>(): Promise<T> => Promise.reject(new Error('test: forced rejection'));
@@ -46,7 +47,7 @@ describe('PccSurfaceContextHeader contract — happy-path negative invariant', (
   for (const surfaceId of PCC_MVP_SURFACE_IDS) {
     it(`does NOT render PccSurfaceContextHeader on the '${surfaceId}' happy-path tab`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
+      const tab = getSurfaceSelectionControl(container, surfaceId);
       expect(tab).not.toBeNull();
       fireEvent.click(tab!);
 

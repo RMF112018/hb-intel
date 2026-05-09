@@ -24,6 +24,99 @@
   scrollbar-width: thin;
 }
 
+.projectHomeNav {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.projectHomeNav[data-pcc-parent-active='true'] .tab {
+  color: var(--pcc-color-rail-accent);
+  font-weight: 700;
+  background-color: var(--pcc-color-rail-hover);
+  border-bottom: 3px solid var(--pcc-color-rail-accent);
+}
+
+.projectHomeToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 40px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--pcc-color-rail-muted);
+  cursor: pointer;
+  transition:
+    color 180ms ease-out,
+    background-color 180ms ease-out,
+    border-color 200ms ease-out;
+}
+
+.projectHomeToggle:hover {
+  color: var(--pcc-color-rail-text);
+  background-color: var(--pcc-color-rail-hover);
+}
+
+.projectHomeToggle:focus-visible {
+  outline: 2px solid var(--pcc-color-rail-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.projectHomeNav[data-pcc-project-home-menu-open='true'] .projectHomeToggle {
+  color: var(--pcc-color-rail-accent);
+  border-bottom: 3px solid var(--pcc-color-rail-accent);
+}
+
+.projectHomeMenu {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  min-width: 220px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  background: var(--pcc-color-card);
+  border: 1px solid var(--pcc-color-border);
+  border-radius: 6px;
+  box-shadow: var(--pcc-elevation-card);
+}
+
+.menuTab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--pcc-color-rail-text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menuTab:hover {
+  background: var(--pcc-color-rail-hover);
+}
+
+.menuTab:focus-visible {
+  outline: 2px solid var(--pcc-color-rail-accent);
+  outline-offset: 2px;
+}
+
+.menuTab[data-pcc-nav-child-active='true'] {
+  color: var(--pcc-color-rail-accent);
+  background: var(--pcc-color-rail-hover);
+}
+
 .tablist[data-pcc-tabs-density='compact'] {
   gap: 8px;
   padding: 0 8px;
@@ -54,6 +147,11 @@
 .tablist[data-pcc-tabs-density='compact'] .tab {
   height: 36px;
   padding: 0 8px;
+}
+
+.tablist[data-pcc-tabs-density='compact'] .projectHomeToggle {
+  height: 36px;
+  width: 24px;
 }
 
 .tab:hover {
@@ -100,6 +198,20 @@
 
 .label {
   display: inline-block;
+}
+
+.srOnlyTabLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

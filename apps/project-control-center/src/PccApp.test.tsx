@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { PCC_MVP_SURFACES, PCC_MVP_SURFACE_IDS } from '@hbc/models/pcc';
+import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
 import { PccApp } from './PccApp';
 
 describe('PccApp shell', () => {
@@ -21,11 +21,11 @@ describe('PccApp shell', () => {
     expect(secondary?.textContent).toBe('Project Home');
   });
 
-  it('renders horizontal tabs with every PCC MVP surface from @hbc/models/pcc', () => {
+  it('renders top-level horizontal tabs for the nested navigation model', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const tablist = container.querySelector('[data-pcc-horizontal-tabs]');
     expect(tablist, 'tablist should render').not.toBeNull();
-    for (const id of PCC_MVP_SURFACE_IDS) {
+    for (const id of ['project-home', 'documents', 'project-readiness', 'approvals'] as const) {
       const tab = tablist?.querySelector(`[data-pcc-tab-id="${id}"]`);
       expect(tab, `tab for ${id} should render`).not.toBeNull();
       // Tab labels are PCC-local overrides (not PCC_MVP_SURFACES.displayName).

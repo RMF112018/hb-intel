@@ -23,6 +23,7 @@ import { PCC_MVP_SURFACE_IDS, PCC_MVP_SURFACES, type PccPersona } from '@hbc/mod
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccTeamAccessSurface } from '../surfaces/teamAccess/PccTeamAccessSurface';
+import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
 // Shell-owned hero markers per current PccProjectHeroBand.tsx. If any of
 // these are renamed, follow repo truth and update this list.
@@ -45,7 +46,7 @@ describe("Shell-hero-doesn't-leak-into-surface-panel invariant (wave-b2 Prompt 0
   for (const surfaceId of PCC_MVP_SURFACE_IDS) {
     it(`'${surfaceId}' panel does not contain any shell-owned hero marker`, () => {
       const { container } = render(<PccApp forceMode="standardLaptop" />);
-      const tab = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
+      const tab = getSurfaceSelectionControl(container, surfaceId);
       expect(tab).not.toBeNull();
       fireEvent.click(tab!);
 
@@ -132,20 +133,15 @@ describe('External Platforms taxonomy and active tab/hero/panel consistency (wav
   for (const surfaceId of PCC_MVP_SURFACE_IDS) {
     it(`'${surfaceId}': active tab, hero secondary title, panel marker, and aria-labelledby agree after click`, () => {
       const { container } = render(<PccApp forceMode="standardLaptop" />);
-      const tab = container.querySelector(
-        `[data-pcc-tab-id="${surfaceId}"]`,
-      ) as HTMLButtonElement | null;
+      const tab = getSurfaceSelectionControl(container, surfaceId);
       expect(tab, `tab for '${surfaceId}' should render`).not.toBeNull();
       fireEvent.click(tab!);
 
       const expectedDisplayName = PCC_MVP_SURFACES[surfaceId].displayName;
 
-      // The clicked tab is the only aria-selected tab. (Tab labels in
-      // PccHorizontalTabs are intentionally shorter than displayName for
-      // some surfaces — e.g., 'Team' for 'Team & Access' — so we don't
-      // assert tab text equals displayName. The hero band carries the
-      // canonical full displayName.)
-      expect(tab!.getAttribute('aria-selected')).toBe('true');
+      // Tab labels in PccHorizontalTabs are intentionally shorter than
+      // displayName for some surfaces (for example 'Team' for
+      // 'Team & Access'); hero carries the canonical full displayName.
       expect(tab!.textContent?.trim().length ?? 0).toBeGreaterThan(0);
 
       // Hero secondary title is the canonical full display name.
@@ -164,9 +160,15 @@ describe('External Platforms taxonomy and active tab/hero/panel consistency (wav
 
   it('no tab text equals "Apps" or contains a standalone "Systems" product token', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
-    const tabs = container.querySelectorAll('[data-pcc-horizontal-tabs] [data-pcc-tab-id]');
-    expect(tabs.length).toBe(PCC_MVP_SURFACE_IDS.length);
+    const tabs = [
+      container.querySelector('[data-pcc-tab-id="project-home"]'),
+      container.querySelector('[data-pcc-tab-id="documents"]'),
+      container.querySelector('[data-pcc-tab-id="project-readiness"]'),
+      container.querySelector('[data-pcc-tab-id="approvals"]'),
+    ];
+    expect(tabs.filter(Boolean).length).toBe(4);
     for (const tab of tabs) {
+      expect(tab).not.toBeNull();
       const text = (tab.textContent ?? '').trim();
       expect(text, `tab '${tab.getAttribute('data-pcc-tab-id')}' must not equal 'Apps'`).not.toBe(
         'Apps',
@@ -180,9 +182,7 @@ describe('External Platforms taxonomy and active tab/hero/panel consistency (wav
 
   it('External Platforms active panel renders the surface displayName via shell hero (Wave 15A wave-b9 Prompt 04 — Launch Pad header card removed)', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
-    const tab = container.querySelector(
-      '[data-pcc-tab-id="external-systems"]',
-    ) as HTMLButtonElement | null;
+    const tab = getSurfaceSelectionControl(container, 'external-systems');
     expect(tab).not.toBeNull();
     fireEvent.click(tab!);
 

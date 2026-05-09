@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
 import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
+import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
 // Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 — bifurcated surface sets.
 // Project Home moved out of the compatibility-card set after
@@ -28,9 +29,7 @@ describe('PccShell all-surface smoke (shell-level)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
 
     for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = container.querySelector(
-        `[data-pcc-horizontal-tabs] [data-pcc-tab-id="${id}"]`,
-      ) as HTMLButtonElement | null;
+      const tab = getSurfaceSelectionControl(container, id);
       expect(tab, `tab '${id}' should render`).not.toBeNull();
 
       fireEvent.click(tab!);

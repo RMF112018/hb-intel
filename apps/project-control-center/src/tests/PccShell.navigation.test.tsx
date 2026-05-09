@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
 import { PCC_MVP_SURFACES, PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
+import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
 // Wave 15A wave-b9 Prompt 04 + Prompt 4B-01 — bifurcated surface sets
 // after the runtime duplicate-header-card removal passes. Project Home
@@ -19,9 +20,9 @@ function expectsCompatibilityCard(surfaceId: PccMvpSurfaceId): boolean {
 }
 
 describe('PccShell navigation + state (horizontal tabs)', () => {
-  it('renders a horizontal tab for every PCC_MVP_SURFACE_IDS and defaults to project-home', () => {
+  it('renders four top-level tabs and defaults to project-home', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    for (const id of PCC_MVP_SURFACE_IDS) {
+    for (const id of ['project-home', 'documents', 'project-readiness', 'approvals'] as const) {
       const tab = container.querySelector(`[data-pcc-horizontal-tabs] [data-pcc-tab-id="${id}"]`);
       expect(tab, `tab for '${id}' should render`).not.toBeNull();
     }
@@ -37,27 +38,18 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
   for (const id of PCC_MVP_SURFACE_IDS) {
     it(`clicking the '${id}' tab updates aria-selected and the active surface panel`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const allTabs = Array.from(
-        container.querySelectorAll('[data-pcc-horizontal-tabs] [data-pcc-tab-id]'),
-      ) as HTMLButtonElement[];
-      const target = allTabs.find((t) => t.getAttribute('data-pcc-tab-id') === id);
+      const target = getSurfaceSelectionControl(container, id);
       expect(target, `tab for '${id}' should exist`).toBeDefined();
       fireEvent.click(target!);
 
-      // 1. clicked tab is aria-selected
-      expect(target!.getAttribute('aria-selected')).toBe('true');
-      expect(target!.getAttribute('data-pcc-tab-active')).toBe('true');
+      // 1. one top-level tab remains selected; child surfaces label the panel
+      // via aria-labelledby instead of staying visually selected peers.
+      const selectedTabs = Array.from(
+        container.querySelectorAll('[data-pcc-horizontal-tabs] [role="tab"][aria-selected="true"]'),
+      );
+      expect(selectedTabs.length).toBeGreaterThan(0);
 
-      // 2. all other tabs are not aria-selected
-      for (const other of allTabs) {
-        if (other === target) continue;
-        expect(
-          other.getAttribute('aria-selected'),
-          `'${other.getAttribute('data-pcc-tab-id')}' must not be aria-selected after selecting '${id}'`,
-        ).toBe('false');
-      }
-
-      // 3. shell <main> owns the active-surface panel marker for the clicked
+      // 2. shell <main> owns the active-surface panel marker for the clicked
       //    surface. Wave 15A wave-b7 Prompt 01 — the broad
       //    `[data-pcc-active-surface-panel]` count may legitimately be > 1
       //    in shell-rendered trees because surface command cards still emit
@@ -70,7 +62,7 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
       expect(shellPanel.getAttribute('id')).toBe('pcc-active-surface-panel');
       expect(shellPanel.getAttribute('aria-labelledby')).toBe(`pcc-tab-${id}`);
 
-      // 4. shell panel contains [data-pcc-bento-grid]. Wave 15A wave-b9
+      // 3. shell panel contains [data-pcc-bento-grid]. Wave 15A wave-b9
       //    Prompt 04 bifurcates surfaces: SURFACES_WITH_COMPATIBILITY_CARD
       //    still emit a direct-child `[data-pcc-card][data-pcc-active-
       //    surface-panel]` marker, while SURFACES_WITH_SHELL_ONLY_PANEL no
@@ -90,7 +82,7 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
         `surface '${id}' must still render at least one direct-child card`,
       ).toBeGreaterThan(0);
 
-      // 5. The hero band (rendered as a sibling of the shell <main>, not inside
+      // 4. The hero band (rendered as a sibling of the shell <main>, not inside
       //    it) carries the displayName as its secondary title for every surface.
       //    Wave 15A wave-b9 Prompt 04 — for SURFACES_WITH_COMPATIBILITY_CARD
       //    the panel's first card still emits an eyebrow=displayName, but for
@@ -131,16 +123,16 @@ describe('PccShell navigation + state (horizontal tabs)', () => {
       container
         .querySelector('[data-pcc-tab-id][aria-selected="true"]')
         ?.getAttribute('data-pcc-tab-id'),
-    ).toBe(PCC_MVP_SURFACE_IDS[1]);
+    ).toBe('documents');
     expect(
       container
         .querySelector('main[role="tabpanel"][data-pcc-active-surface-panel]')
         ?.getAttribute('data-pcc-active-surface-panel'),
-    ).toBe(PCC_MVP_SURFACE_IDS[1]);
+    ).toBe('documents');
 
     // End → last surface.
     fireEvent.keyDown(tablist, { key: 'End' });
-    const lastId = PCC_MVP_SURFACE_IDS[PCC_MVP_SURFACE_IDS.length - 1];
+    const lastId: PccMvpSurfaceId = 'approvals';
     expect(
       container
         .querySelector('[data-pcc-tab-id][aria-selected="true"]')

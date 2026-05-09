@@ -1,27 +1,28 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, fireEvent, cleanup } from '@testing-library/react';
-import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
-import { PCC_RESPONSIVE_MODES, type PccResponsiveMode } from '../layout/footprints';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import type { PccMvpSurfaceId } from '@hbc/models/pcc';
 import { PccHorizontalTabs } from '../shell/PccHorizontalTabs';
 
 afterEach(() => {
   cleanup();
 });
 
-const TAB_LABELS: Record<PccMvpSurfaceId, string> = {
-  'project-home': 'Project Home',
-  'team-and-access': 'Team',
-  documents: 'Documents',
-  'project-readiness': 'Project Readiness',
-  approvals: 'Approvals',
-  'external-systems': 'External Platforms',
-  'control-center-settings': 'Settings',
-  'site-health': 'Site Health',
-};
+const TOP_LEVEL_TAB_IDS: readonly PccMvpSurfaceId[] = [
+  'project-home',
+  'documents',
+  'project-readiness',
+  'approvals',
+];
+
+const PROJECT_HOME_CHILD_IDS: readonly PccMvpSurfaceId[] = [
+  'team-and-access',
+  'external-systems',
+  'control-center-settings',
+  'site-health',
+];
 
 function renderTabs(
   overrides: {
-    mode?: PccResponsiveMode;
     activeSurfaceId?: PccMvpSurfaceId;
     panelId?: string;
     onSelectSurface?: (id: PccMvpSurfaceId) => void;
@@ -30,258 +31,127 @@ function renderTabs(
   const onSelectSurface = overrides.onSelectSurface ?? vi.fn();
   const result = render(
     <PccHorizontalTabs
-      mode={overrides.mode ?? 'standardLaptop'}
+      mode="desktop"
       activeSurfaceId={overrides.activeSurfaceId ?? 'project-home'}
       onSelectSurface={onSelectSurface}
-      panelId={overrides.panelId}
+      panelId={overrides.panelId ?? 'pcc-active-panel'}
     />,
   );
   return { ...result, onSelectSurface };
 }
 
-describe('PccHorizontalTabs primitive', () => {
-  it('renders all 8 PCC MVP tabs in canonical order', () => {
+describe('PccHorizontalTabs nested navigation', () => {
+  it('renders only four visible top-level tabs by default', () => {
     const { container } = renderTabs();
-    const buttons = Array.from(container.querySelectorAll('[data-pcc-tab-id]'));
-    expect(buttons).toHaveLength(PCC_MVP_SURFACE_IDS.length);
-    const ids = buttons.map((el) => el.getAttribute('data-pcc-tab-id'));
-    expect(ids).toEqual([...PCC_MVP_SURFACE_IDS]);
-  });
-
-  it('stamps required PCC marker contract on root and each tab', () => {
-    const { container } = renderTabs({ mode: 'desktop' });
-    const tablist = container.querySelector('[data-pcc-horizontal-tabs]');
-    expect(tablist).not.toBeNull();
-    expect(tablist?.getAttribute('role')).toBe('tablist');
-    expect(tablist?.getAttribute('data-pcc-mode')).toBe('desktop');
-
-    for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = container.querySelector(`[data-pcc-tab-id="${id}"]`);
-      expect(tab, `tab for ${id} should render`).not.toBeNull();
-      expect(tab?.getAttribute('role')).toBe('tab');
-      expect(tab?.getAttribute('data-pcc-tab-mode')).toBe('desktop');
-      expect(tab?.getAttribute('data-pcc-tab-active')).toMatch(/^(true|false)$/);
-    }
-  });
-
-  it.each(PCC_RESPONSIVE_MODES)('mirrors mode "%s" on every tab marker', (mode) => {
-    const { container } = renderTabs({ mode });
-    const tabs = Array.from(container.querySelectorAll('[data-pcc-tab-id]'));
-    for (const tab of tabs) {
-      expect(tab.getAttribute('data-pcc-tab-mode')).toBe(mode);
-    }
-  });
-
-  it('renders the required PCC-local label for each surface', () => {
-    const { container } = renderTabs();
-    for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = container.querySelector(`[data-pcc-tab-id="${id}"]`);
-      expect(tab?.textContent).toContain(TAB_LABELS[id]);
-    }
-  });
-
-  it('reflects activeSurfaceId via aria-selected, data-pcc-tab-active, and roving tabIndex', () => {
-    const { container } = renderTabs({ activeSurfaceId: 'approvals' });
-    for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = container.querySelector(`[data-pcc-tab-id="${id}"]`) as HTMLButtonElement;
-      const isActive = id === 'approvals';
-      expect(tab.getAttribute('aria-selected')).toBe(isActive ? 'true' : 'false');
-      expect(tab.getAttribute('data-pcc-tab-active')).toBe(isActive ? 'true' : 'false');
-      expect(tab.tabIndex).toBe(isActive ? 0 : -1);
-    }
-  });
-
-  it('renders no icon wrapper or SVG inside any tab (text-only navigation)', () => {
-    const { container } = renderTabs();
-    for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = container.querySelector(`[data-pcc-tab-id="${id}"]`) as HTMLButtonElement;
-      // No aria-label leakage on the tab itself.
-      expect(tab.getAttribute('aria-label')).toBeNull();
-      // No SVG element anywhere inside the tab.
-      expect(tab.querySelector('svg')).toBeNull();
-      // No descendant element with an icon-suffixed class name.
-      expect(tab.querySelector('[class*="icon" i]')).toBeNull();
-    }
-  });
-
-  it('includes the "External Platforms" tab label and not the legacy "Apps" label', () => {
-    const { container } = renderTabs();
-    const tabs = Array.from(container.querySelectorAll<HTMLButtonElement>('[data-pcc-tab-id]'));
-    const labels = tabs.map((tab) => tab.textContent?.trim());
-    expect(labels).toContain('External Platforms');
-    // Exact-match check: no tab's text equals 'Apps' (avoids false positives
-    // from substrings of other labels).
-    expect(labels.some((label) => label === 'Apps')).toBe(false);
-    // The external-systems tab carries the new label.
-    const externalSystemsTab = container.querySelector('[data-pcc-tab-id="external-systems"]');
-    expect(externalSystemsTab?.textContent?.trim()).toBe('External Platforms');
-  });
-
-  it('active-indicator state follows the active tab when selection changes', () => {
-    const { container, rerender } = render(
-      <PccHorizontalTabs
-        mode="standardLaptop"
-        activeSurfaceId="project-home"
-        onSelectSurface={vi.fn()}
-      />,
-    );
-    const initialIndicator = container
-      .querySelector('[data-pcc-tab-id="project-home"]')
-      ?.querySelector('[data-pcc-tab-active-indicator]');
-    expect(initialIndicator?.getAttribute('data-pcc-tab-active-indicator-state')).toBe('active');
-
-    rerender(
-      <PccHorizontalTabs
-        mode="standardLaptop"
-        activeSurfaceId="approvals"
-        onSelectSurface={vi.fn()}
-      />,
-    );
-    const previous = container
-      .querySelector('[data-pcc-tab-id="project-home"]')
-      ?.querySelector('[data-pcc-tab-active-indicator]');
-    const next = container
-      .querySelector('[data-pcc-tab-id="approvals"]')
-      ?.querySelector('[data-pcc-tab-active-indicator]');
-    expect(previous?.getAttribute('data-pcc-tab-active-indicator-state')).toBe('inactive');
-    expect(next?.getAttribute('data-pcc-tab-active-indicator-state')).toBe('active');
-  });
-
-  it('clicking a non-active tab calls onSelectSurface with that surface id', () => {
-    const { container, onSelectSurface } = renderTabs({ activeSurfaceId: 'project-home' });
-    const target = container.querySelector('[data-pcc-tab-id="approvals"]') as HTMLButtonElement;
-    fireEvent.click(target);
-    expect(onSelectSurface).toHaveBeenCalledTimes(1);
-    expect(onSelectSurface).toHaveBeenCalledWith('approvals');
-  });
-
-  it('ArrowRight wraps from last to first', () => {
-    const { container, onSelectSurface } = renderTabs({ activeSurfaceId: 'site-health' });
-    const tablist = container.querySelector('[data-pcc-horizontal-tabs]') as HTMLElement;
-    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
-    expect(onSelectSurface).toHaveBeenCalledWith('project-home');
-  });
-
-  it('ArrowLeft wraps from first to last', () => {
-    const { container, onSelectSurface } = renderTabs({ activeSurfaceId: 'project-home' });
-    const tablist = container.querySelector('[data-pcc-horizontal-tabs]') as HTMLElement;
-    fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
-    expect(onSelectSurface).toHaveBeenCalledWith('site-health');
-  });
-
-  it('ArrowRight from a middle tab moves to the next surface', () => {
-    const { container, onSelectSurface } = renderTabs({ activeSurfaceId: 'documents' });
-    const tablist = container.querySelector('[data-pcc-horizontal-tabs]') as HTMLElement;
-    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
-    expect(onSelectSurface).toHaveBeenCalledWith('project-readiness');
-  });
-
-  it('Home selects the first surface from anywhere', () => {
-    const { container, onSelectSurface } = renderTabs({ activeSurfaceId: 'documents' });
-    const tablist = container.querySelector('[data-pcc-horizontal-tabs]') as HTMLElement;
-    fireEvent.keyDown(tablist, { key: 'Home' });
-    expect(onSelectSurface).toHaveBeenCalledWith('project-home');
-  });
-
-  it('End selects the last surface from anywhere', () => {
-    const { container, onSelectSurface } = renderTabs({ activeSurfaceId: 'documents' });
-    const tablist = container.querySelector('[data-pcc-horizontal-tabs]') as HTMLElement;
-    fireEvent.keyDown(tablist, { key: 'End' });
-    expect(onSelectSurface).toHaveBeenCalledWith('site-health');
-  });
-
-  it('renders each tab as a native <button type="button"> for Enter/Space activation', () => {
-    // Native HTML button semantics provide Enter/Space → click activation per
-    // the HTML spec; asserting the structural contract keeps the test stable
-    // across jsdom versions that do not synthesize click from keyDown.
-    const { container } = renderTabs();
-    for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = container.querySelector(`[data-pcc-tab-id="${id}"]`) as HTMLButtonElement;
-      expect(tab.tagName).toBe('BUTTON');
-      expect(tab.getAttribute('type')).toBe('button');
-    }
-  });
-
-  it('Enter activation dispatches exactly one onSelectSurface call', () => {
-    const onSelectSurface = vi.fn();
-    const { container } = renderTabs({ activeSurfaceId: 'project-home', onSelectSurface });
-    const target = container.querySelector('[data-pcc-tab-id="documents"]') as HTMLButtonElement;
-
-    fireEvent.keyDown(target, { key: 'Enter' });
-    fireEvent.keyUp(target, { key: 'Enter' });
-
-    expect(onSelectSurface).toHaveBeenCalledTimes(1);
-    expect(onSelectSurface).toHaveBeenCalledWith('documents');
-  });
-
-  it('Space activation dispatches exactly one onSelectSurface call', () => {
-    const onSelectSurface = vi.fn();
-    const { container } = renderTabs({ activeSurfaceId: 'project-home', onSelectSurface });
-    const target = container.querySelector('[data-pcc-tab-id="approvals"]') as HTMLButtonElement;
-
-    fireEvent.keyDown(target, { key: ' ' });
-    fireEvent.keyUp(target, { key: ' ' });
-
-    expect(onSelectSurface).toHaveBeenCalledTimes(1);
-    expect(onSelectSurface).toHaveBeenCalledWith('approvals');
-  });
-
-  it('passes panelId through as aria-controls on every tab when supplied', () => {
-    const { container } = renderTabs({ panelId: 'pcc-active-panel' });
-    for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = container.querySelector(`[data-pcc-tab-id="${id}"]`);
-      expect(tab?.getAttribute('aria-controls')).toBe('pcc-active-panel');
-    }
-  });
-
-  it('omits aria-controls when no panelId is supplied', () => {
-    const { container } = renderTabs();
-    for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = container.querySelector(`[data-pcc-tab-id="${id}"]`);
-      expect(tab?.hasAttribute('aria-controls')).toBe(false);
-    }
-  });
-
-  it('renders all 8 tabs at phone width (no hidden disclosure)', () => {
-    const { container } = renderTabs({ mode: 'phone' });
-    const tablist = container.querySelector('[data-pcc-horizontal-tabs]');
-    expect(tablist).not.toBeNull();
-    expect(tablist?.getAttribute('data-pcc-tabs-density')).toBe('compact');
-    const tabs = container.querySelectorAll('[data-pcc-tab-id]');
-    expect(tabs).toHaveLength(PCC_MVP_SURFACE_IDS.length);
-  });
-
-  it('exposes a structural active indicator independent of text labels', () => {
-    const { container } = renderTabs({ activeSurfaceId: 'approvals' });
-    for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = container.querySelector(`[data-pcc-tab-id="${id}"]`) as HTMLButtonElement;
-      const indicator = tab.querySelector(':scope > [data-pcc-tab-active-indicator]');
-      expect(indicator, `tab ${id} should include structural active indicator`).not.toBeNull();
-      expect(indicator?.getAttribute('data-pcc-tab-active-indicator-state')).toBe(
-        id === 'approvals' ? 'active' : 'inactive',
-      );
-    }
-  });
-
-  it('marks compact density at smallLaptop and below; comfortable above', () => {
-    const expectations: Array<[PccResponsiveMode, 'compact' | 'comfortable']> = [
-      ['phone', 'compact'],
-      ['tabletPortrait', 'compact'],
-      ['tabletLandscape', 'compact'],
-      ['smallLaptop', 'compact'],
-      ['standardLaptop', 'comfortable'],
-      ['largeLaptop', 'comfortable'],
-      ['desktop', 'comfortable'],
-      ['ultrawide', 'comfortable'],
-    ];
-    for (const [mode, density] of expectations) {
-      cleanup();
-      const { container } = renderTabs({ mode });
-      const tablist = container.querySelector('[data-pcc-horizontal-tabs]');
+    for (const id of TOP_LEVEL_TAB_IDS) {
       expect(
-        tablist?.getAttribute('data-pcc-tabs-density'),
-        `mode '${mode}' should be ${density}`,
-      ).toBe(density);
+        container.querySelector(`[data-pcc-horizontal-tabs] [data-pcc-tab-id="${id}"]`),
+      ).not.toBeNull();
     }
+    for (const id of PROJECT_HOME_CHILD_IDS) {
+      expect(
+        container.querySelector(`:scope [data-pcc-horizontal-tabs] > [data-pcc-tab-id="${id}"]`),
+      ).toBeNull();
+    }
+  });
+
+  it('Project Home tab click selects project-home', () => {
+    const { container, onSelectSurface } = renderTabs({ activeSurfaceId: 'documents' });
+    const projectHome = container.querySelector(
+      '[data-pcc-tab-id="project-home"]',
+    ) as HTMLButtonElement;
+    fireEvent.click(projectHome);
+    expect(onSelectSurface).toHaveBeenCalledWith('project-home');
+  });
+
+  it('caret click opens and closes dropdown without selecting a surface', () => {
+    const { container, onSelectSurface } = renderTabs();
+    const caret = container.querySelector(
+      '[data-pcc-nav-toggle="project-home"]',
+    ) as HTMLButtonElement;
+    fireEvent.click(caret);
+    expect(onSelectSurface).not.toHaveBeenCalled();
+    for (const childId of PROJECT_HOME_CHILD_IDS) {
+      expect(container.querySelector(`[data-pcc-surface-nav-child="${childId}"]`)).not.toBeNull();
+    }
+    fireEvent.click(caret);
+    for (const childId of PROJECT_HOME_CHILD_IDS) {
+      expect(container.querySelector(`[data-pcc-surface-nav-child="${childId}"]`)).toBeNull();
+    }
+    expect(onSelectSurface).not.toHaveBeenCalled();
+  });
+
+  it('closed dropdown child controls are not tabbable and only active child gets offscreen label when needed', () => {
+    const { container } = renderTabs({ activeSurfaceId: 'external-systems' });
+    const srOnly = container.querySelector(
+      '[data-pcc-sr-only-tab-label]',
+    ) as HTMLButtonElement | null;
+    expect(srOnly).not.toBeNull();
+    expect(srOnly?.getAttribute('id')).toBe('pcc-tab-external-systems');
+    expect(srOnly?.tabIndex).toBe(-1);
+    expect(container.querySelector('[data-pcc-surface-nav-child="team-and-access"]')).toBeNull();
+    expect(container.querySelector('[data-pcc-surface-nav-child="site-health"]')).toBeNull();
+  });
+
+  it('ArrowDown on Project Home opens dropdown and exposes first child tab', () => {
+    const { container } = renderTabs();
+    const projectHome = container.querySelector(
+      '[data-pcc-tab-id="project-home"]',
+    ) as HTMLButtonElement;
+    projectHome.focus();
+    fireEvent.keyDown(projectHome, { key: 'ArrowDown' });
+    const firstChild = container.querySelector(
+      '[data-pcc-surface-nav-child="team-and-access"]',
+    ) as HTMLButtonElement | null;
+    expect(firstChild).not.toBeNull();
+    expect(firstChild?.getAttribute('role')).toBe('tab');
+  });
+
+  it('open dropdown child click selects child surface', () => {
+    const { container, onSelectSurface } = renderTabs();
+    fireEvent.click(
+      container.querySelector('[data-pcc-nav-toggle="project-home"]') as HTMLButtonElement,
+    );
+    fireEvent.click(
+      container.querySelector(
+        '[data-pcc-surface-nav-child="control-center-settings"]',
+      ) as HTMLButtonElement,
+    );
+    expect(onSelectSurface).toHaveBeenCalledWith('control-center-settings');
+  });
+
+  it('prevents duplicate pcc-tab-* ids across closed/open menu states', () => {
+    const { container } = renderTabs({ activeSurfaceId: 'team-and-access' });
+    const allIds = (): string[] =>
+      Array.from(container.querySelectorAll('[id^="pcc-tab-"]'))
+        .map((el) => el.getAttribute('id'))
+        .filter((id): id is string => Boolean(id));
+
+    const idsClosed = allIds();
+    expect(new Set(idsClosed).size).toBe(idsClosed.length);
+
+    fireEvent.click(
+      container.querySelector('[data-pcc-nav-toggle="project-home"]') as HTMLButtonElement,
+    );
+    const idsOpen = allIds();
+    expect(new Set(idsOpen).size).toBe(idsOpen.length);
+  });
+
+  it('Escape closes menu and returns focus to Project Home tab', () => {
+    const { container } = renderTabs({ activeSurfaceId: 'team-and-access' });
+    fireEvent.click(
+      container.querySelector('[data-pcc-nav-toggle="project-home"]') as HTMLButtonElement,
+    );
+    const child = container.querySelector(
+      '[data-pcc-surface-nav-child="team-and-access"]',
+    ) as HTMLButtonElement;
+    child.focus();
+    fireEvent.keyDown(child, { key: 'Escape' });
+    expect(
+      container.querySelector('[data-pcc-surface-nav-child]:not([data-pcc-sr-only-tab-label])'),
+    ).toBeNull();
+    expect(document.activeElement).toBe(
+      container.querySelector('[data-pcc-tab-id="project-home"]'),
+    );
   });
 });

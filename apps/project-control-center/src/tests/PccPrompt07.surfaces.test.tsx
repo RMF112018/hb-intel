@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
 import { PccApp } from '../PccApp';
+import { getSurfaceSelectionControl } from './shellSurfaceSelection';
 
 const PROMPT_07_SURFACES = [
   'team-and-access',
@@ -32,7 +33,7 @@ describe('Prompt 07 routed surface invariants', () => {
   for (const surfaceId of PROMPT_07_SURFACES) {
     it(`renders '${surfaceId}' with the shell-owned active-surface panel and surface preview copy`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const button = container.querySelector(`[data-pcc-tab-id="${surfaceId}"]`);
+      const button = getSurfaceSelectionControl(container, surfaceId);
       expect(button).not.toBeNull();
       fireEvent.click(button!);
 
