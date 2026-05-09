@@ -167,8 +167,8 @@ describe('External Platforms taxonomy and active tab/hero/panel consistency (wav
       container.querySelector('[data-pcc-tab-id="approvals"]'),
     ];
     expect(tabs.filter(Boolean).length).toBe(4);
-    for (const tab of tabs) {
-      expect(tab).not.toBeNull();
+    const resolvedTabs = tabs.filter((tab): tab is Element => tab !== null);
+    for (const tab of resolvedTabs) {
       const text = (tab.textContent ?? '').trim();
       expect(text, `tab '${tab.getAttribute('data-pcc-tab-id')}' must not equal 'Apps'`).not.toBe(
         'Apps',
