@@ -15,13 +15,14 @@
  */
 
 .tablist {
+  position: relative;
+  z-index: 10;
   display: flex;
   align-items: stretch;
   gap: 16px;
   padding: 0 12px;
   border-bottom: 1px solid var(--pcc-color-border);
-  overflow-x: auto;
-  scrollbar-width: thin;
+  overflow: visible;
 }
 
 .projectHomeNav {
@@ -75,7 +76,7 @@
   top: calc(100% + 2px);
   left: 0;
   min-width: 220px;
-  z-index: 2;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   gap: 2px;

@@ -137,6 +137,18 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
     expect(siteHealthShellPanels.length).toBe(1);
   });
 
+  it('keeps child-surface aria-labelledby resolvable when dropdown is closed', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    const siteHealthTab = getSurfaceSelectionControl(container, 'site-health');
+    expect(siteHealthTab).not.toBeNull();
+    fireEvent.click(siteHealthTab!);
+
+    const main = container.querySelector('[data-pcc-canvas]') as HTMLElement | null;
+    expect(main?.getAttribute('aria-labelledby')).toBe('pcc-tab-site-health');
+    const labelNode = container.querySelector('#pcc-tab-site-health');
+    expect(labelNode, 'active child label id should exist while menu is closed').not.toBeNull();
+  });
+
   // Wave-b2 Prompt 04: command-search affordance is purely informational.
   it('renders no <input type="search"> anywhere in the shell', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);

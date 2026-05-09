@@ -6,7 +6,6 @@ import {
   type FC,
   type FocusEvent,
   type KeyboardEvent,
-  type MouseEvent,
 } from 'react';
 import type { PccMvpSurfaceId } from '@hbc/models/pcc';
 import type { PccResponsiveMode } from '../layout/footprints';
@@ -214,14 +213,6 @@ export const PccHorizontalTabs: FC<PccHorizontalTabsProps> = ({
     closeProjectHomeMenu();
   };
 
-  const handleProjectHomePointerLeave = (event: MouseEvent<HTMLDivElement>) => {
-    const nextTarget = event.relatedTarget;
-    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) {
-      return;
-    }
-    closeProjectHomeMenu();
-  };
-
   const renderTopLevelTab = (surfaceId: PccMvpSurfaceId) => {
     const isSelectedTopLevel = surfaceId === activeSurfaceId;
     const label = TAB_LABELS[surfaceId];
@@ -275,8 +266,6 @@ export const PccHorizontalTabs: FC<PccHorizontalTabsProps> = ({
         data-pcc-surface-nav-parent="project-home"
         data-pcc-parent-active={PROJECT_HOME_CHILD_SET.has(activeSurfaceId) ? 'true' : 'false'}
         data-pcc-project-home-menu-open={isProjectHomeMenuOpen ? 'true' : 'false'}
-        onMouseEnter={openProjectHomeMenu}
-        onMouseLeave={handleProjectHomePointerLeave}
       >
         {renderTopLevelTab('project-home')}
         <button

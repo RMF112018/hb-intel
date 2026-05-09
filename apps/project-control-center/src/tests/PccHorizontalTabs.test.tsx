@@ -81,6 +81,17 @@ describe('PccHorizontalTabs nested navigation', () => {
     expect(onSelectSurface).not.toHaveBeenCalled();
   });
 
+  it('mouseEnter alone does not open the menu', () => {
+    const { container } = renderTabs();
+    const wrapper = container.querySelector(
+      '[data-pcc-surface-nav-parent="project-home"]',
+    ) as HTMLElement;
+    fireEvent.mouseEnter(wrapper);
+    for (const childId of PROJECT_HOME_CHILD_IDS) {
+      expect(container.querySelector(`[data-pcc-surface-nav-child="${childId}"]`)).toBeNull();
+    }
+  });
+
   it('closed dropdown child controls are not tabbable and only active child gets offscreen label when needed', () => {
     const { container } = renderTabs({ activeSurfaceId: 'external-systems' });
     const srOnly = container.querySelector(
