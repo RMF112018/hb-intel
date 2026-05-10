@@ -25,7 +25,7 @@
 
 import { afterEach, describe, it, expect } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import type { PccMvpSurfaceId } from '@hbc/models/pcc';
+import { PCC_PRIMARY_TAB_IDS, type PccPrimaryTabId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccTeamAccessSurface } from '../surfaces/teamAccess/PccTeamAccessSurface';
@@ -33,63 +33,45 @@ import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
 import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExternalSystemsSurface';
 import { PccDocumentsSurface } from '../surfaces/documents/PccDocumentsSurface';
 import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
-import { getSurfaceSelectionControl } from './shellSurfaceSelection';
+import { PccControlCenterSettingsSurface } from '../surfaces/controlCenterSettings/PccControlCenterSettingsSurface';
+import { PccSiteHealthSurface } from '../surfaces/siteHealth/PccSiteHealthSurface';
+import { getPrimaryTabSelectionControl } from './shellSurfaceSelection';
 
-// Wave 15A wave-b3 Prompt 05 — explicit cleanup between cases keeps each
-// surface render isolated. PCC SPFx workspace runs vitest with
+// Phase 05 wave-b10 Prompt 04 — explicit cleanup between cases keeps
+// each render isolated. PCC SPFx workspace runs vitest with
 // `globals: false`, so DOM does not auto-clear between `it()` blocks.
 afterEach(() => {
   cleanup();
 });
 
-const IN_SCOPE_SURFACES: readonly PccMvpSurfaceId[] = [
-  'project-home',
-  'team-and-access',
-  'documents',
-  'approvals',
-  'external-systems',
-  'control-center-settings',
-  'site-health',
-  // Wave 15A wave-b3 Prompt 04 — Project Readiness embedded subregions are
-  // now classified explicitly; the surface joins the generic explicit-source
-  // loop here. Targeted Project Readiness assertions live in their own block
-  // below.
-  'project-readiness',
-];
+// Phase 05 wave-b10 Prompt 04 — the universal explicit-sources /
+// layout / aria / direct-child loop iterates the eight Phase 05
+// primary tabs. Per-surface tier/region/state tests below render the
+// legacy surfaces directly inside `<PccBentoGrid>` (those tests
+// were never coupled to navigation and continue to lock surface-
+// specific contracts).
+const IN_SCOPE_PRIMARY_TABS: readonly PccPrimaryTabId[] = PCC_PRIMARY_TAB_IDS;
 
-// Wave 15A wave-b8 Prompt 05 — every PCC MVP surface is shell-only.
-// The universal explicit-sources / layout / aria / direct-child loop
-// iterates `IN_SCOPE_SURFACES` (all eight surfaces); a single trailing
-// loop verifies no direct-child bento card carries the
-// `[data-pcc-card][data-pcc-active-surface-panel]` marker. The previous
-// `SURFACES_WITH_COMPATIBILITY_CARD` / `SURFACES_WITH_SHELL_ONLY_PANEL`
-// bifurcation was retired here.
-
-function renderPccAppOnSurface(surfaceId: PccMvpSurfaceId): HTMLElement {
+function renderPccAppOnPrimaryTab(tabId: PccPrimaryTabId): HTMLElement {
   const { container } = render(<PccApp forceMode="desktop" />);
-  const tab = getSurfaceSelectionControl(container, surfaceId);
-  expect(tab, `tab for '${surfaceId}' must exist in shell`).not.toBeNull();
+  const tab = getPrimaryTabSelectionControl(container, tabId);
+  expect(tab, `primary tab for '${tabId}' must exist in shell`).not.toBeNull();
   fireEvent.click(tab!);
   return container;
 }
 
-function getActiveBento(container: HTMLElement, surfaceId: PccMvpSurfaceId): HTMLElement {
-  // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> is the
-  // semantic active-panel owner. Resolve the bento grid through the shell
-  // panel rather than via a card `parentElement` lookup, since surface
-  // command cards still emit a card-level `data-pcc-active-surface-panel`
-  // compatibility marker and broad selectors are now ambiguous.
+function getActiveBento(container: HTMLElement, tabId: PccPrimaryTabId): HTMLElement {
   const shellPanel = container.querySelector(
-    `main[role="tabpanel"][data-pcc-active-surface-panel="${surfaceId}"]`,
+    `main[role="tabpanel"][data-pcc-active-surface-panel="${tabId}"]`,
   );
-  expect(shellPanel, `surface '${surfaceId}' must mount its shell active panel`).not.toBeNull();
+  expect(shellPanel, `primary tab '${tabId}' must mount its shell active panel`).not.toBeNull();
   expect(shellPanel!.getAttribute('id')).toBe('pcc-active-surface-panel');
-  expect(shellPanel!.getAttribute('aria-labelledby')).toBe(`pcc-tab-${surfaceId}`);
+  expect(shellPanel!.getAttribute('aria-labelledby')).toBe(`pcc-tab-${tabId}`);
 
   const bento = shellPanel!.querySelector('[data-pcc-bento-grid]');
   expect(
     bento,
-    `surface '${surfaceId}' shell panel must contain [data-pcc-bento-grid]`,
+    `primary tab '${tabId}' shell panel must contain [data-pcc-bento-grid]`,
   ).not.toBeNull();
 
   return bento as HTMLElement;
@@ -99,75 +81,69 @@ function cardTitle(card: Element): string {
   return card.querySelector('h2, h3, h4')?.textContent?.trim() ?? '(untitled)';
 }
 
-function expectAllCardsExplicit(cards: readonly Element[], surfaceId: PccMvpSurfaceId): void {
-  expect(cards.length, `surface '${surfaceId}' must render at least one card`).toBeGreaterThan(0);
+function expectAllCardsExplicit(cards: readonly Element[], tabId: PccPrimaryTabId): void {
+  expect(cards.length, `primary tab '${tabId}' must render at least one card`).toBeGreaterThan(0);
   for (const card of cards) {
     const title = cardTitle(card);
     expect(
       card.getAttribute('data-pcc-card-tier-source'),
-      `surface '${surfaceId}' card '${title}' tier-source must be explicit`,
+      `primary tab '${tabId}' card '${title}' tier-source must be explicit`,
     ).toBe('explicit');
     expect(
       card.getAttribute('data-pcc-card-region-source'),
-      `surface '${surfaceId}' card '${title}' region-source must be explicit`,
+      `primary tab '${tabId}' card '${title}' region-source must be explicit`,
     ).toBe('explicit');
-    // Negative form of the same constraint — locks the absence of fallback
-    // resolution explicitly so a regression to default/resolved fails on a
-    // different assertion line and is easier to attribute.
     expect(
       card.getAttribute('data-pcc-card-tier-source'),
-      `surface '${surfaceId}' card '${title}' tier-source must not be 'default'`,
+      `primary tab '${tabId}' card '${title}' tier-source must not be 'default'`,
     ).not.toBe('default');
     expect(
       card.getAttribute('data-pcc-card-region-source'),
-      `surface '${surfaceId}' card '${title}' region-source must not be 'resolved'`,
+      `primary tab '${tabId}' card '${title}' region-source must not be 'resolved'`,
     ).not.toBe('resolved');
   }
 }
 
-function expectAllCardsHaveLayoutMarkers(
-  cards: readonly Element[],
-  surfaceId: PccMvpSurfaceId,
-): void {
+function expectAllCardsHaveLayoutMarkers(cards: readonly Element[], tabId: PccPrimaryTabId): void {
   for (const card of cards) {
     const title = cardTitle(card);
     const footprint = card.getAttribute('data-pcc-footprint');
     expect(
       footprint,
-      `surface '${surfaceId}' card '${title}' missing data-pcc-footprint`,
+      `primary tab '${tabId}' card '${title}' missing data-pcc-footprint`,
     ).toBeTruthy();
     expect(
       (footprint ?? '').length,
-      `surface '${surfaceId}' card '${title}' has empty data-pcc-footprint`,
+      `primary tab '${tabId}' card '${title}' has empty data-pcc-footprint`,
     ).toBeGreaterThan(0);
 
     const columnSpanRaw = card.getAttribute('data-pcc-column-span');
     expect(
       columnSpanRaw,
-      `surface '${surfaceId}' card '${title}' missing data-pcc-column-span`,
+      `primary tab '${tabId}' card '${title}' missing data-pcc-column-span`,
     ).toBeTruthy();
     const columnSpan = Number(columnSpanRaw);
     expect(
       Number.isFinite(columnSpan) && columnSpan > 0,
-      `surface '${surfaceId}' card '${title}' data-pcc-column-span must be numeric > 0 (got '${columnSpanRaw}')`,
+      `primary tab '${tabId}' card '${title}' data-pcc-column-span must be numeric > 0 (got '${columnSpanRaw}')`,
     ).toBe(true);
 
     const rowSpanRaw = card.getAttribute('data-pcc-row-span');
     expect(
       rowSpanRaw,
-      `surface '${surfaceId}' card '${title}' missing data-pcc-row-span`,
+      `primary tab '${tabId}' card '${title}' missing data-pcc-row-span`,
     ).toBeTruthy();
     const rowSpan = Number(rowSpanRaw);
     expect(
       Number.isFinite(rowSpan) && rowSpan > 0,
-      `surface '${surfaceId}' card '${title}' data-pcc-row-span must be numeric > 0 (got '${rowSpanRaw}')`,
+      `primary tab '${tabId}' card '${title}' data-pcc-row-span must be numeric > 0 (got '${rowSpanRaw}')`,
     ).toBe(true);
   }
 }
 
 function expectTitledCardsHaveAriaLabelledBy(
   cards: readonly Element[],
-  surfaceId: PccMvpSurfaceId,
+  tabId: PccPrimaryTabId,
 ): void {
   for (const card of cards) {
     const heading = card.querySelector('h2, h3, h4');
@@ -177,12 +153,12 @@ function expectTitledCardsHaveAriaLabelledBy(
     const headingId = heading.getAttribute('id');
     expect(
       headingId,
-      `surface '${surfaceId}' card '${headingText}' heading must have an id for aria-labelledby`,
+      `primary tab '${tabId}' card '${headingText}' heading must have an id for aria-labelledby`,
     ).toBeTruthy();
     const ariaLabelledBy = card.getAttribute('aria-labelledby');
     expect(
       ariaLabelledBy,
-      `surface '${surfaceId}' card '${headingText}' must have aria-labelledby pointing at heading id`,
+      `primary tab '${tabId}' card '${headingText}' must have aria-labelledby pointing at heading id`,
     ).toBe(headingId);
   }
 }
@@ -190,13 +166,13 @@ function expectTitledCardsHaveAriaLabelledBy(
 function expectCardsAreDirectChildrenOfBento(
   bento: HTMLElement,
   cards: readonly Element[],
-  surfaceId: PccMvpSurfaceId,
+  tabId: PccPrimaryTabId,
 ): void {
   for (const card of cards) {
     const title = cardTitle(card);
     expect(
       card.parentElement,
-      `surface '${surfaceId}' card '${title}' must be a direct child of [data-pcc-bento-grid]`,
+      `primary tab '${tabId}' card '${title}' must be a direct child of [data-pcc-bento-grid]`,
     ).toBe(bento);
   }
 }
@@ -218,86 +194,81 @@ function findCardByHeading(container: HTMLElement, headingText: string): Element
   return card!;
 }
 
-describe('PCC card-tier contract — every in-scope surface card has explicit sources, layout markers, aria-labelledby, and is a direct bento child', () => {
-  for (const surfaceId of IN_SCOPE_SURFACES) {
-    it(`'${surfaceId}' surface — explicit sources, layout markers, aria-labelledby, direct bento children`, () => {
-      const container = renderPccAppOnSurface(surfaceId);
-      const bento = getActiveBento(container, surfaceId);
+describe('PCC card-tier contract — every Phase 05 primary tab card has explicit sources, layout markers, aria-labelledby, and is a direct bento child', () => {
+  for (const tabId of IN_SCOPE_PRIMARY_TABS) {
+    it(`'${tabId}' primary tab — explicit sources, layout markers, aria-labelledby, direct bento children`, () => {
+      const container = renderPccAppOnPrimaryTab(tabId);
+      const bento = getActiveBento(container, tabId);
       const cards = Array.from(bento.querySelectorAll('[data-pcc-card]'));
-      expect(cards.length, `surface '${surfaceId}' must render at least one card`).toBeGreaterThan(
+      expect(cards.length, `primary tab '${tabId}' must render at least one card`).toBeGreaterThan(
         0,
       );
-      expectAllCardsExplicit(cards, surfaceId);
-      expectAllCardsHaveLayoutMarkers(cards, surfaceId);
-      expectTitledCardsHaveAriaLabelledBy(cards, surfaceId);
-      expectCardsAreDirectChildrenOfBento(bento, cards, surfaceId);
+      expectAllCardsExplicit(cards, tabId);
+      expectAllCardsHaveLayoutMarkers(cards, tabId);
+      expectTitledCardsHaveAriaLabelledBy(cards, tabId);
+      expectCardsAreDirectChildrenOfBento(bento, cards, tabId);
     });
   }
 });
 
-describe('PCC card-tier contract — every PCC MVP surface has zero direct-child cards carrying [data-pcc-active-surface-panel]', () => {
-  for (const surfaceId of IN_SCOPE_SURFACES) {
-    it(`'${surfaceId}' bento contains zero direct-child [data-pcc-card][data-pcc-active-surface-panel]`, () => {
-      const container = renderPccAppOnSurface(surfaceId);
-      const bento = getActiveBento(container, surfaceId);
+describe('PCC card-tier contract — every Phase 05 primary tab has zero direct-child cards carrying [data-pcc-active-surface-panel]', () => {
+  for (const tabId of IN_SCOPE_PRIMARY_TABS) {
+    it(`'${tabId}' bento contains zero direct-child [data-pcc-card][data-pcc-active-surface-panel]`, () => {
+      const container = renderPccAppOnPrimaryTab(tabId);
+      const bento = getActiveBento(container, tabId);
       const matches = Array.from(bento.children).filter((child) =>
-        child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`),
+        child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${tabId}"]`),
       );
       expect(
         matches,
-        `surface '${surfaceId}' must NOT render a direct bento-child compatibility card after Phase 04`,
+        `primary tab '${tabId}' must NOT render a direct bento-child compatibility card after Phase 05`,
       ).toHaveLength(0);
       const cards = Array.from(bento.querySelectorAll('[data-pcc-card]'));
       expect(
         cards.length,
-        `surface '${surfaceId}' must still render at least one direct-child card`,
+        `primary tab '${tabId}' must still render at least one direct-child card`,
       ).toBeGreaterThan(0);
     });
   }
 });
 
-describe('PCC card-tier contract — no live http(s) anchors inside the bento grid on any surface', () => {
-  for (const surfaceId of IN_SCOPE_SURFACES) {
-    it(`'${surfaceId}' surface bento grid contains zero <a href^="http(s)"> anchors`, () => {
-      const container = renderPccAppOnSurface(surfaceId);
-      const bento = getActiveBento(container, surfaceId);
-      // Scope to the bento grid; shell-level links (help, feedback, etc.)
-      // live outside the grid and are intentionally not in scope here.
+describe('PCC card-tier contract — no live http(s) anchors inside the bento grid on any primary tab', () => {
+  for (const tabId of IN_SCOPE_PRIMARY_TABS) {
+    it(`'${tabId}' bento grid contains zero <a href^="http(s)"> anchors`, () => {
+      const container = renderPccAppOnPrimaryTab(tabId);
+      const bento = getActiveBento(container, tabId);
       const anchors = bento.querySelectorAll('a[href^="http"]');
       expect(
         anchors.length,
-        `surface '${surfaceId}' bento grid must not render live http(s) anchors`,
+        `primary tab '${tabId}' bento grid must not render live http(s) anchors`,
       ).toBe(0);
     });
   }
 });
 
-describe('PCC card-tier contract — disabled-affordance reason linkage is intact on every surface', () => {
-  for (const surfaceId of IN_SCOPE_SURFACES) {
-    it(`'${surfaceId}' disabled affordances resolve aria-describedby to a reason node`, () => {
-      const container = renderPccAppOnSurface(surfaceId);
-      const bento = getActiveBento(container, surfaceId);
+describe('PCC card-tier contract — disabled-affordance reason linkage is intact on every primary tab', () => {
+  for (const tabId of IN_SCOPE_PRIMARY_TABS) {
+    it(`'${tabId}' disabled affordances resolve aria-describedby to a reason node`, () => {
+      const container = renderPccAppOnPrimaryTab(tabId);
+      const bento = getActiveBento(container, tabId);
       const affordances = bento.querySelectorAll('[data-pcc-disabled-affordance-variant]');
-      // Surfaces without disabled affordances pass trivially. The point of
-      // this loop is to lock the linkage WHEN affordances are present, not
-      // to require their presence on every surface.
       for (const affordance of Array.from(affordances)) {
         const describedBy = affordance.getAttribute('aria-describedby');
         expect(
           describedBy,
-          `surface '${surfaceId}' disabled affordance must declare aria-describedby`,
+          `primary tab '${tabId}' disabled affordance must declare aria-describedby`,
         ).toBeTruthy();
         const ids = (describedBy ?? '').split(/\s+/).filter((id) => id.length > 0);
         expect(
           ids.length,
-          `surface '${surfaceId}' disabled affordance aria-describedby must list at least one id`,
+          `primary tab '${tabId}' disabled affordance aria-describedby must list at least one id`,
         ).toBeGreaterThan(0);
         const linkedNodes = ids
           .map((id) => container.ownerDocument.getElementById(id))
           .filter((node): node is HTMLElement => node !== null);
         expect(
           linkedNodes.length,
-          `surface '${surfaceId}' disabled affordance describedby ids must resolve to live nodes`,
+          `primary tab '${tabId}' disabled affordance describedby ids must resolve to live nodes`,
         ).toBeGreaterThan(0);
         const hasReason = linkedNodes.some(
           (node) =>
@@ -306,7 +277,7 @@ describe('PCC card-tier contract — disabled-affordance reason linkage is intac
         );
         expect(
           hasReason,
-          `surface '${surfaceId}' disabled affordance must link to a [data-pcc-disabled-affordance-reason] node or a non-empty reason`,
+          `primary tab '${tabId}' disabled affordance must link to a [data-pcc-disabled-affordance-reason] node or a non-empty reason`,
         ).toBe(true);
       }
     });
@@ -431,21 +402,34 @@ describe('PCC card-tier contract — Documents external-systems lane is deferred
 
 describe('PCC card-tier contract — locked state cards', () => {
   it('Project Home Missing Configurations card is state / state', () => {
-    const container = renderPccAppOnSurface('project-home');
+    const container = renderPccAppOnPrimaryTab('project-home');
     const card = findCardByHeading(container, 'Missing Configurations');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('state');
     expect(card.getAttribute('data-pcc-card-region')).toBe('state');
   });
 
   it('Control Center Settings "Items needing setup" card is state / state', () => {
-    const container = renderPccAppOnSurface('control-center-settings');
+    // Phase 05: control-center-settings is now a module under
+    // systems-administration. Render the legacy surface directly inside
+    // the bento grid to lock the card-tier invariant in isolation.
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccControlCenterSettingsSurface />
+      </PccBentoGrid>,
+    );
     const card = findCardByHeading(container, 'Items needing setup');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('state');
     expect(card.getAttribute('data-pcc-card-region')).toBe('state');
   });
 
   it('Site Health "Repair Requests" card is tier3 / deferred', () => {
-    const container = renderPccAppOnSurface('site-health');
+    // Phase 05: site-health is now a module under systems-administration.
+    // Render the legacy surface directly inside the bento grid.
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccSiteHealthSurface />
+      </PccBentoGrid>,
+    );
     const card = findCardByHeading(container, 'Repair Requests');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
     expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');

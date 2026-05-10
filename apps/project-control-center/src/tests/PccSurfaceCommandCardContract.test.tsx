@@ -20,7 +20,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { PCC_MVP_SURFACE_IDS, type PccProjectId, type PccReadModelEnvelope } from '@hbc/models/pcc';
+import { PCC_PRIMARY_TAB_IDS, type PccProjectId, type PccReadModelEnvelope } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
@@ -29,7 +29,7 @@ import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExtern
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 import type { IPccApprovalsReadModelClient } from '../surfaces/approvals/approvalsViewModel';
 import type { IPccLaunchPadReadModelClient } from '../surfaces/externalSystems/launchPadViewModel';
-import { getSurfaceSelectionControl } from './shellSurfaceSelection';
+import { getPrimaryTabSelectionControl } from './shellSurfaceSelection';
 
 const NEVER_RESOLVES = <T,>(): Promise<T> => new Promise<T>(() => {});
 const ALWAYS_REJECTS = <T,>(): Promise<T> => Promise.reject(new Error('test: forced rejection'));
@@ -84,34 +84,34 @@ function expectErrorA11y(card: Element, surfaceId: string): void {
   ).not.toBeNull();
 }
 
-describe('PCC route command card — ready (shell-owned active-panel ownership) — every PCC MVP surface', () => {
-  for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-    it(`'${surfaceId}' route shell <main> owns the active panel and the bento contains zero direct-child cards carrying [data-pcc-active-surface-panel]`, () => {
+describe('PCC route command card — ready (shell-owned active-panel ownership) — every Phase 05 primary tab', () => {
+  for (const tabId of PCC_PRIMARY_TAB_IDS) {
+    it(`'${tabId}' route shell <main> owns the active panel and the bento contains zero direct-child cards carrying [data-pcc-active-surface-panel]`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const tab = getSurfaceSelectionControl(container, surfaceId);
-      expect(tab, `tab for '${surfaceId}' must exist in shell`).not.toBeNull();
+      const tab = getPrimaryTabSelectionControl(container, tabId);
+      expect(tab, `primary tab for '${tabId}' must exist in shell`).not.toBeNull();
       fireEvent.click(tab!);
 
       const shellPanel = container.querySelector(
-        `main[role="tabpanel"][data-pcc-active-surface-panel="${surfaceId}"]`,
+        `main[role="tabpanel"][data-pcc-active-surface-panel="${tabId}"]`,
       );
-      expect(shellPanel, `surface '${surfaceId}' shell active panel must mount`).not.toBeNull();
+      expect(shellPanel, `primary tab '${tabId}' shell active panel must mount`).not.toBeNull();
 
       const bento = shellPanel!.querySelector('[data-pcc-bento-grid]');
-      expect(bento, `surface '${surfaceId}' bento grid must render`).not.toBeNull();
+      expect(bento, `primary tab '${tabId}' bento grid must render`).not.toBeNull();
 
       const compatibilityCards = Array.from(bento!.children).filter((child) =>
-        child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`),
+        child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${tabId}"]`),
       );
       expect(
         compatibilityCards,
-        `surface '${surfaceId}' must NOT render a direct bento-child compatibility card after Phase 04`,
+        `primary tab '${tabId}' must NOT render a direct bento-child compatibility card after Phase 05`,
       ).toHaveLength(0);
 
       const cards = bento!.querySelectorAll('[data-pcc-card]');
       expect(
         cards.length,
-        `surface '${surfaceId}' must still render at least one direct-child card`,
+        `primary tab '${tabId}' must still render at least one direct-child card`,
       ).toBeGreaterThan(0);
     });
   }

@@ -1,13 +1,8 @@
 import type { FC } from 'react';
-import { type PccMvpSurfaceId } from '@hbc/models/pcc';
+import { normalizePrimaryTabId, type PccModuleId, type PccPrimaryTabId } from '@hbc/models/pcc';
 import { PccProjectHome } from '../surfaces/projectHome/PccProjectHome';
 import { PccDocumentsSurface } from '../surfaces/documents/PccDocumentsSurface';
-import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExternalSystemsSurface';
-import { PccSiteHealthSurface } from '../surfaces/siteHealth/PccSiteHealthSurface';
-import { PccTeamAccessSurface } from '../surfaces/teamAccess/PccTeamAccessSurface';
-import { PccControlCenterSettingsSurface } from '../surfaces/controlCenterSettings/PccControlCenterSettingsSurface';
-import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
-import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
+import { PccPrimaryDashboardSurface } from '../surfaces/phase05Dashboard/PccPrimaryDashboardSurface';
 import type { IPccProjectHomeReadModelClient } from '../surfaces/projectHome/projectHomeViewModel';
 import type { IPccTeamAccessReadModelClient } from '../surfaces/teamAccess/useTeamAccessReadModel';
 import type { IPccDocumentsReadModelClient } from '../surfaces/documents/documentControlViewModel';
@@ -22,13 +17,9 @@ import type { IPccLaunchPadReadModelClient } from '../surfaces/externalSystems/l
 /**
  * Combined narrow read-model client surface for the router. Lists the
  * methods consumed by surfaces that opt into the read-model seam (Project
- * Home, Team & Access, Documents, Project Readiness — the latter also
- * hosts Wave 9 Lifecycle, Wave 10 Permit & Inspection, Wave 11
- * Responsibility Matrix, Wave 12 Constraints Log, and Wave 13 Buyout Log
- * regions — the Wave 14 Approvals / Checkpoints surface, and the Wave 15
- * External Systems Launch Pad surface). The full `IPccReadModelClient`
- * returned by `createPccReadModelClient` flows in via TypeScript
- * structural typing.
+ * Home, Team & Access, Documents, Project Readiness, Approvals, External
+ * Systems Launch Pad). The full `IPccReadModelClient` returned by
+ * `createPccReadModelClient` flows in via TypeScript structural typing.
  */
 export interface IPccSurfaceRouterReadModelClient
   extends
@@ -44,7 +35,8 @@ export interface IPccSurfaceRouterReadModelClient
     IPccLaunchPadReadModelClient {}
 
 export interface PccSurfaceRouterProps {
-  activeSurfaceId: PccMvpSurfaceId;
+  activePrimaryTabId: PccPrimaryTabId;
+  activeModuleId?: PccModuleId;
   /**
    * Opt-in read-model client. Threaded to surfaces that consume
    * envelope-driven read-models. Other surfaces remain fixture/preview
@@ -54,51 +46,44 @@ export interface PccSurfaceRouterProps {
 }
 
 /**
- * Renders the active surface inside `<PccBentoGrid>`.
+ * Renders the active Phase 05 primary-tab dashboard inside `<PccBentoGrid>`.
  *
- * - `project-home` → full Project Home bento dashboard (10 cards as direct
- *   children of the bento grid via a React fragment).
- * - `team-and-access` → Team & Access surface; receives the read-model
- *   client when provided so the seam round-trip is exercised.
- * - All eight MVP surfaces route to their dedicated fragment surface.
- * - Wave-b2 Prompt 05 — any unknown active surface id falls back to
- *   Project Home rather than throwing or rendering an unavailable card.
- *   The state hook (`usePccShellState`) canonicalizes invalid ids on
- *   init and on setter; this `default:` is the defense-in-depth backstop
- *   for callers that bypass the hook.
+ * - `project-home` → existing `PccProjectHome` (10-card preview / read-model
+ *   bento dashboard).
+ * - `documents` → existing `PccDocumentsSurface` (Document Control lane
+ *   bento dashboard).
+ * - `core-tools`, `estimating-preconstruction`, `startup-closeout`,
+ *   `project-controls`, `cost-time`, `systems-administration` → reusable
+ *   `PccPrimaryDashboardSurface` (overview + module status + selected
+ *   module context).
+ * - Defensive fallback: any unknown primary tab id normalizes to
+ *   `project-home` (`normalizePrimaryTabId`).
  *
- * The Prompt 03 corrective bento direct-child invariant continues to
- * hold. After Wave 15A wave-b7 Prompt 01, semantic ownership of the
- * active-surface panel marker moved up to shell `<main role="tabpanel">`
- * (`apps/project-control-center/src/shell/PccShell.tsx`). Surface
- * command/header cards may continue to emit a card-level
- * `data-pcc-active-surface-panel` attribute as a temporary
- * compatibility marker, so the broad count of marker-bearing elements
- * in shell-rendered trees is legitimately `>= 1`. Tests must scope to
- * shell ownership (`main[role="tabpanel"][data-pcc-active-surface-panel]`)
- * rather than infer ownership from a card marker.
+ * Bento direct-child invariant: every routed surface returns a
+ * `Fragment` of `PccDashboardCard` children so they become direct DOM
+ * children of `[data-pcc-bento-grid]`. The shell `<main role="tabpanel">`
+ * remains the sole semantic owner of `data-pcc-active-surface-panel`.
  */
 export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
-  activeSurfaceId,
+  activePrimaryTabId,
+  activeModuleId,
   readModelClient,
 }) => {
-  switch (activeSurfaceId) {
+  const tabId = normalizePrimaryTabId(activePrimaryTabId);
+  switch (tabId) {
     case 'project-home':
       return <PccProjectHome readModelClient={readModelClient} />;
-    case 'team-and-access':
-      return <PccTeamAccessSurface readModelClient={readModelClient} />;
     case 'documents':
       return <PccDocumentsSurface readModelClient={readModelClient} />;
-    case 'project-readiness':
-      return <PccProjectReadinessSurface readModelClient={readModelClient} />;
-    case 'approvals':
-      return <PccApprovalsSurface readModelClient={readModelClient} />;
-    case 'external-systems':
-      return <PccExternalSystemsSurface readModelClient={readModelClient} />;
-    case 'control-center-settings':
-      return <PccControlCenterSettingsSurface />;
-    case 'site-health':
-      return <PccSiteHealthSurface />;
+    case 'core-tools':
+    case 'estimating-preconstruction':
+    case 'startup-closeout':
+    case 'project-controls':
+    case 'cost-time':
+    case 'systems-administration':
+      return (
+        <PccPrimaryDashboardSurface activePrimaryTabId={tabId} activeModuleId={activeModuleId} />
+      );
     default:
       return <PccProjectHome readModelClient={readModelClient} />;
   }

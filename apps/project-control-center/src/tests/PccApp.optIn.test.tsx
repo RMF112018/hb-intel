@@ -16,6 +16,8 @@ import { mount as mountPcc, unmount as unmountPcc } from '../mount';
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccSurfaceRouter } from '../shell/PccSurfaceRouter';
+import { PccSiteHealthSurface } from '../surfaces/siteHealth/PccSiteHealthSurface';
+import { PccTeamAccessSurface } from '../surfaces/teamAccess/PccTeamAccessSurface';
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 
 const ENCODED_ID = encodeURIComponent(SAMPLE_PROJECT_PROFILE.projectId);
@@ -350,11 +352,15 @@ describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client',
     const docSpy = vi.spyOn(client, 'getDocumentControl');
     const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
 
+    // Phase 05: site-health is no longer a primary tab; render the legacy
+    // surface directly inside the bento grid to preserve the
+    // non-opted-surface read-model-client invariant.
     render(
       <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="site-health" readModelClient={client} />
+        <PccSiteHealthSurface />
       </PccBentoGrid>,
     );
+    void client;
 
     await new Promise((r) => setTimeout(r, 0));
     expect(homeSpy).not.toHaveBeenCalled();
@@ -372,7 +378,7 @@ describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client',
 
     render(
       <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="documents" readModelClient={client} />
+        <PccSurfaceRouter activePrimaryTabId="documents" readModelClient={client} />
       </PccBentoGrid>,
     );
 
@@ -385,13 +391,13 @@ describe('PccSurfaceRouter — non-opted surfaces ignore the read-model client',
 });
 
 describe('PccSurfaceRouter — Team & Access opt-in (Wave 6 / Prompt 06)', () => {
-  it('does not invoke getTeamAccess when activeSurfaceId is project-home', async () => {
+  it('does not invoke getTeamAccess when active primary tab is project-home', async () => {
     const client = createPccFixtureReadModelClient();
     const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
 
     render(
       <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="project-home" readModelClient={client} />
+        <PccSurfaceRouter activePrimaryTabId="project-home" readModelClient={client} />
       </PccBentoGrid>,
     );
 
@@ -399,16 +405,19 @@ describe('PccSurfaceRouter — Team & Access opt-in (Wave 6 / Prompt 06)', () =>
     expect(teamAccessSpy).not.toHaveBeenCalled();
   });
 
-  it('invokes getTeamAccess exactly once when activeSurfaceId is team-and-access (no Project Home calls)', async () => {
+  it('invokes getTeamAccess exactly once when PccTeamAccessSurface mounts with the read-model client (no Project Home calls)', async () => {
     const client = createPccFixtureReadModelClient();
     const homeSpy = vi.spyOn(client, 'getProjectHome');
     const prioritySpy = vi.spyOn(client, 'getPriorityActions');
     const docSpy = vi.spyOn(client, 'getDocumentControl');
     const teamAccessSpy = vi.spyOn(client, 'getTeamAccess');
 
+    // Phase 05: team-and-access is no longer a primary tab. Render the
+    // legacy surface directly inside the bento grid to preserve the
+    // read-model client opt-in invariant under test.
     render(
       <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="team-and-access" readModelClient={client} />
+        <PccTeamAccessSurface readModelClient={client} />
       </PccBentoGrid>,
     );
 
@@ -420,12 +429,14 @@ describe('PccSurfaceRouter — Team & Access opt-in (Wave 6 / Prompt 06)', () =>
     expect(docSpy).not.toHaveBeenCalled();
   });
 
-  it('renders safe error state for team-and-access when the read-model client is backend-unavailable (Wave 6 / Prompt 07)', async () => {
+  it('renders safe error state for PccTeamAccessSurface when the read-model client is backend-unavailable (Wave 6 / Prompt 07)', async () => {
     const client = createPccFixtureReadModelClient({ simulateBackendUnavailable: true });
 
+    // Phase 05: team-and-access is no longer a primary tab — render the
+    // legacy surface directly to preserve the error-state invariant.
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="team-and-access" readModelClient={client} />
+        <PccTeamAccessSurface readModelClient={client} />
       </PccBentoGrid>,
     );
 

@@ -1,13 +1,13 @@
 import { afterEach, describe, it, expect } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { PCC_MVP_SURFACE_IDS, type PccMvpSurfaceId } from '@hbc/models/pcc';
+import { PCC_PRIMARY_TAB_IDS } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
-import { getSurfaceSelectionControl } from './shellSurfaceSelection';
+import { getPrimaryTabSelectionControl } from './shellSurfaceSelection';
 
-// Wave 15A wave-b8 Prompt 05 — every PCC MVP surface is shell-only.
+// Phase 05 wave-b10 Prompt 04 — every PCC primary tab is shell-only.
 // The shell `<main role="tabpanel">` is the sole carrier of
 // `data-pcc-active-surface-panel`; no bento-child card emits the marker
-// on any branch.
+// on any primary tab.
 
 describe('PccApp bento integration (regression)', () => {
   it('every dashboard card is a direct child of the bento grid', () => {
@@ -47,100 +47,100 @@ describe('PccApp bento integration (regression)', () => {
   });
 });
 
-describe('PccApp bento integration — all active surfaces direct-child guardrail (wave-b7 Prompt 04)', () => {
+describe('PccApp bento integration — every Phase 05 primary tab keeps the direct-child invariant', () => {
   // PCC SPFx vitest runs with `globals: false`, so jsdom does not auto
-  // tear down between tests. The per-surface tests below all render
+  // tear down between tests. The per-primary-tab tests below all render
   // <PccApp> and click a tab; without explicit cleanup, prior-test DOM
-  // would satisfy queries in the next test and mask regressions. Scope
-  // the cleanup to this describe block so the legacy default-render
-  // tests above keep their existing per-test container scoping.
+  // would satisfy queries in the next test and mask regressions.
   afterEach(() => {
     cleanup();
   });
 
-  function renderAppOnSurface(surfaceId: PccMvpSurfaceId): HTMLElement {
+  function renderAppOnPrimaryTab(tabId: (typeof PCC_PRIMARY_TAB_IDS)[number]): HTMLElement {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const tab = getSurfaceSelectionControl(container, surfaceId);
-    expect(tab, `tab for '${surfaceId}' must exist`).not.toBeNull();
+    const tab = getPrimaryTabSelectionControl(container, tabId);
+    expect(tab, `primary tab for '${tabId}' must exist`).not.toBeNull();
     fireEvent.click(tab!);
     return container;
   }
 
-  function getShellPanel(container: HTMLElement, surfaceId: PccMvpSurfaceId): HTMLElement {
-    // Use querySelectorAll + toHaveLength(1) so the helper proves
-    // EXACTLY one shell active panel exists for the active surface.
-    // querySelector would silently accept a duplicate render and only
-    // surface the marker on the first match.
+  function getShellPanel(
+    container: HTMLElement,
+    tabId: (typeof PCC_PRIMARY_TAB_IDS)[number],
+  ): HTMLElement {
     const panels = container.querySelectorAll(
-      `main[role="tabpanel"][data-pcc-active-surface-panel="${surfaceId}"]`,
+      `main[role="tabpanel"][data-pcc-active-surface-panel="${tabId}"]`,
     );
-    expect(panels, `surface '${surfaceId}' must mount exactly one shell active panel`).toHaveLength(
+    expect(panels, `primary tab '${tabId}' must mount exactly one shell active panel`).toHaveLength(
       1,
     );
     const panel = panels[0]!;
     expect(panel.tagName).toBe('MAIN');
     expect(panel.getAttribute('role')).toBe('tabpanel');
-    expect(panel.getAttribute('aria-labelledby')).toBe(`pcc-tab-${surfaceId}`);
+    expect(panel.getAttribute('aria-labelledby')).toBe(`pcc-tab-${tabId}`);
     return panel as HTMLElement;
   }
 
-  function getBentoFromShellPanel(panel: HTMLElement, surfaceId: PccMvpSurfaceId): HTMLElement {
+  function getBentoFromShellPanel(
+    panel: HTMLElement,
+    tabId: (typeof PCC_PRIMARY_TAB_IDS)[number],
+  ): HTMLElement {
     const bento = panel.querySelector('[data-pcc-bento-grid]');
-    expect(bento, `surface '${surfaceId}' shell panel must contain bento grid`).not.toBeNull();
+    expect(bento, `primary tab '${tabId}' shell panel must contain bento grid`).not.toBeNull();
     return bento as HTMLElement;
   }
 
-  for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-    it(`'${surfaceId}' renders cards as direct bento children with no nested card trees`, () => {
-      const container = renderAppOnSurface(surfaceId);
-      const panel = getShellPanel(container, surfaceId);
-      const bento = getBentoFromShellPanel(panel, surfaceId);
+  for (const tabId of PCC_PRIMARY_TAB_IDS) {
+    it(`'${tabId}' renders cards as direct bento children with no nested card trees`, () => {
+      const container = renderAppOnPrimaryTab(tabId);
+      const panel = getShellPanel(container, tabId);
+      const bento = getBentoFromShellPanel(panel, tabId);
 
       const cards = Array.from(bento.querySelectorAll('[data-pcc-card]'));
-      expect(cards.length, `surface '${surfaceId}' must render at least one card`).toBeGreaterThan(
+      expect(cards.length, `primary tab '${tabId}' must render at least one card`).toBeGreaterThan(
         0,
       );
 
       const nestedCards = bento.querySelectorAll('[data-pcc-card] [data-pcc-card]');
       expect(
         nestedCards.length,
-        `surface '${surfaceId}' must not render nested [data-pcc-card] descendants`,
+        `primary tab '${tabId}' must not render nested [data-pcc-card] descendants`,
       ).toBe(0);
 
       for (const card of cards) {
         const title = card.querySelector('h2, h3, h4')?.textContent?.trim() ?? '(untitled)';
         expect(
           card.parentElement,
-          `surface '${surfaceId}' card '${title}' must be a direct child of [data-pcc-bento-grid]`,
+          `primary tab '${tabId}' card '${title}' must be a direct child of [data-pcc-bento-grid]`,
         ).toBe(bento);
         expect(
           card.getAttribute('data-pcc-card-tier'),
-          `surface '${surfaceId}' card '${title}' tier`,
+          `primary tab '${tabId}' card '${title}' tier`,
         ).toBeTruthy();
         expect(
           card.getAttribute('data-pcc-card-region'),
-          `surface '${surfaceId}' card '${title}' region`,
+          `primary tab '${tabId}' card '${title}' region`,
         ).toBeTruthy();
         expect(
           card.getAttribute('data-pcc-footprint'),
-          `surface '${surfaceId}' card '${title}' footprint`,
+          `primary tab '${tabId}' card '${title}' footprint`,
         ).toBeTruthy();
         expect(
           Number(card.getAttribute('data-pcc-column-span')),
-          `surface '${surfaceId}' card '${title}' column-span must be positive`,
+          `primary tab '${tabId}' card '${title}' column-span must be positive`,
         ).toBeGreaterThan(0);
         expect(
           Number(card.getAttribute('data-pcc-row-span')),
-          `surface '${surfaceId}' card '${title}' row-span must be positive`,
+          `primary tab '${tabId}' card '${title}' row-span must be positive`,
         ).toBeGreaterThan(0);
       }
 
       const compatibilityCards = Array.from(bento.children).filter((child) =>
-        child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${surfaceId}"]`),
+        child.matches(`[data-pcc-card][data-pcc-active-surface-panel="${tabId}"]`),
       );
       expect(
         compatibilityCards,
-        `surface '${surfaceId}' must NOT render a direct bento-child card carrying [data-pcc-active-surface-panel] (every PCC MVP surface is shell-owned)`,
+        `primary tab '${tabId}' must NOT render a direct bento-child card carrying [data-pcc-active-surface-panel] (every Phase 05 primary tab is shell-owned)`,
       ).toHaveLength(0);
     });
   }

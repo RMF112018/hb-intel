@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
 import { PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE } from '@hbc/models/pcc';
-import { PccApp } from '../PccApp';
+import { PccBentoGrid } from '../layout/PccBentoGrid';
+import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
 
 const SECTION_MARKER = 'permit-inspection-control-center';
 
@@ -21,20 +22,19 @@ const REQUIRED_REGIONS: readonly string[] = [
   'approval-signals',
 ];
 
-function activateProjectReadiness(container: HTMLElement): HTMLElement {
-  const button = container.querySelector('[data-pcc-tab-id="project-readiness"]');
-  expect(button).not.toBeNull();
-  fireEvent.click(button!);
-  const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');
-  expect(panel).not.toBeNull();
-  // Wave 15A B5 / Prompt 02 — Permit/Inspection renders only when the
-  // 'permits-inspections' detail section is selected via the module-index card.
+function activateProjectReadiness(): HTMLElement {
+  // Phase 05 wave-b10 Prompt 04 — render the legacy surface directly.
+  const { container } = render(
+    <PccBentoGrid forceMode="desktop">
+      <PccProjectReadinessSurface />
+    </PccBentoGrid>,
+  );
   const drilldown = container.querySelector(
     '[data-pcc-readiness-drilldown-control="permits-inspections"]',
   );
   expect(drilldown, 'expected permits-inspections drilldown control').not.toBeNull();
   fireEvent.click(drilldown!);
-  return panel as HTMLElement;
+  return container;
 }
 
 function permitRegion(container: HTMLElement, region: string): HTMLElement | null {
@@ -49,8 +49,7 @@ function openAllDetails(container: HTMLElement): void {
 
 describe('Wave 10 Permit & Inspection Control Center surface — bento direct-child invariant', () => {
   it('every Wave 10 section marker resolves to a card whose parent is the bento grid', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const markers = container.querySelectorAll(`[data-pcc-readiness-section="${SECTION_MARKER}"]`);
     expect(markers.length).toBeGreaterThanOrEqual(REQUIRED_REGIONS.length);
     for (const marker of Array.from(markers)) {
@@ -63,8 +62,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — bento direct-ch
 
 describe('Wave 10 Permit & Inspection Control Center surface — required lanes', () => {
   it('renders every required Wave 10 region', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     for (const region of REQUIRED_REGIONS) {
       expect(permitRegion(container, region), `missing region ${region}`).not.toBeNull();
     }
@@ -73,8 +71,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — required lanes'
 
 describe('Wave 10 Permit & Inspection Control Center surface — target-added fields', () => {
   it('record-detail surfaces permit revision, applicationValue, and permitFee', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     openAllDetails(container);
     const region = permitRegion(container, 'record-detail');
     expect(region).not.toBeNull();
@@ -87,8 +84,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — target-added fi
   });
 
   it('failed-reinspection-queue surfaces inspection reInspectionFee in lineage', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     openAllDetails(container);
     const region = permitRegion(container, 'failed-reinspection-queue');
     expect(region).not.toBeNull();
@@ -98,8 +94,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — target-added fi
 
 describe('Wave 10 Permit & Inspection Control Center surface — failed/reinspection lineage', () => {
   it('renders a lineage details element with the failed item summary', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     openAllDetails(container);
     const region = permitRegion(container, 'failed-reinspection-queue');
     expect(region).not.toBeNull();
@@ -113,8 +108,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — failed/reinspec
 
 describe('Wave 10 Permit & Inspection Control Center surface — AHJ launcher-only posture', () => {
   it('renders only launcher-only AHJ profiles and never an external href', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = permitRegion(container, 'ahj-launcher-panel');
     expect(region).not.toBeNull();
     const profiles = region!.querySelectorAll('[data-pcc-ahj-launcher-only]');
@@ -131,8 +125,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — AHJ launcher-on
 
 describe('Wave 10 Permit & Inspection Control Center surface — evidence reference-only posture', () => {
   it('evidence-missing region has no upload affordance and labels Document Control ownership', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = permitRegion(container, 'evidence-missing');
     expect(region).not.toBeNull();
     expect(region!.querySelectorAll('input[type="file"]').length).toBe(0);
@@ -147,8 +140,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — evidence refere
 
 describe('Wave 10 Permit & Inspection Control Center surface — inert posture', () => {
   it('every Wave 10 button is disabled and no external anchor is rendered', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const sectioned = container.querySelectorAll(
       `[data-pcc-readiness-section="${SECTION_MARKER}"]`,
     );
@@ -167,8 +159,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — inert posture',
 
 describe('Wave 10 Permit & Inspection Control Center surface — source traceability', () => {
   it('record-detail rows expose the workbook source-traceability chip', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     openAllDetails(container);
     const region = permitRegion(container, 'record-detail');
     expect(region).not.toBeNull();
@@ -181,8 +172,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — source traceabi
 
 describe('Wave 10 Permit & Inspection Control Center surface — hero counts', () => {
   it('hero summary renders fixture-derived counts', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const hero = permitRegion(container, 'permit-hero');
     expect(hero).not.toBeNull();
     const s = PERMIT_INSPECTION_CONTROL_CENTER_FIXTURE.summary;
@@ -197,8 +187,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — hero counts', (
 
 describe('Wave 10 Permit & Inspection Control Center surface — Prompt 06 integrated signal lanes', () => {
   it('priority-action-signals lane renders Wave 10 expired-permit signal', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = permitRegion(container, 'priority-action-signals');
     expect(region).not.toBeNull();
     expect(region!.textContent).toContain('Plumbing permit expired');
@@ -207,8 +196,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — Prompt 06 integ
   });
 
   it('readiness-signals lane preserves the locked permit-log source-module identifier', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = permitRegion(container, 'readiness-signals');
     expect(region).not.toBeNull();
     const sourceModuleMarkers = region!.querySelectorAll(
@@ -219,8 +207,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — Prompt 06 integ
   });
 
   it('approval-signals lane renders all four required checkpoint trigger concepts', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = permitRegion(container, 'approval-signals');
     expect(region).not.toBeNull();
     const kindMarkers = Array.from(
@@ -234,8 +221,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — Prompt 06 integ
   });
 
   it('approval-signals lane is metadata-only — no buttons, no forms', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = permitRegion(container, 'approval-signals');
     expect(region).not.toBeNull();
     expect(region!.querySelectorAll('button').length).toBe(0);
@@ -258,8 +244,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — Procore / exter
     /^(launch|sync|write\s*back|writeback|upload|submit|approve|schedule|request)$/i;
 
   it('Wave 10 surface renders no anchors at all (AHJ portal URLs are spans)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const sectioned = container.querySelectorAll(
       `[data-pcc-readiness-section="${SECTION_MARKER}"]`,
     );
@@ -270,8 +255,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — Procore / exter
   });
 
   it('Wave 10 surface renders no forms, no file inputs, no enabled buttons', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const sectioned = container.querySelectorAll(
       `[data-pcc-readiness-section="${SECTION_MARKER}"]`,
     );
@@ -287,8 +271,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — Procore / exter
   });
 
   it('Wave 10 rendered DOM does not contain forbidden runtime tokens (Procore/Graph/SharePoint)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const sectioned = container.querySelectorAll(
       `[data-pcc-readiness-section="${SECTION_MARKER}"]`,
     );
@@ -301,8 +284,7 @@ describe('Wave 10 Permit & Inspection Control Center surface — Procore / exter
   });
 
   it('Wave 10 surface has no buttons labeled with executable verbs', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const sectioned = container.querySelectorAll(
       `[data-pcc-readiness-section="${SECTION_MARKER}"]`,
     );

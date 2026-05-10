@@ -354,12 +354,15 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
     // narrow client interface but only exercises `getApprovals` for the
     // `approvals` case. A structural cast through `unknown` keeps the
     // test focused without re-implementing every other read-model method.
+    // Phase 05: approvals is no longer a primary tab; render the
+    // PccApprovalsSurface directly inside the bento grid to preserve
+    // the read-model passthrough invariant under test.
     const router = { getApprovals: spy } as unknown as Parameters<
       typeof PccSurfaceRouter
     >[0]['readModelClient'];
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
+        <PccApprovalsSurface readModelClient={router} />
       </PccBentoGrid>,
     );
     await waitFor(() => {
@@ -375,12 +378,15 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
     // narrow client interface but only exercises `getApprovals` for the
     // `approvals` case. A structural cast through `unknown` keeps the
     // test focused without re-implementing every other read-model method.
+    // Phase 05: approvals is no longer a primary tab; render the
+    // PccApprovalsSurface directly inside the bento grid to preserve
+    // the read-model passthrough invariant under test.
     const router = { getApprovals: spy } as unknown as Parameters<
       typeof PccSurfaceRouter
     >[0]['readModelClient'];
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
+        <PccApprovalsSurface readModelClient={router} />
       </PccBentoGrid>,
     );
     await waitFor(() => {
@@ -396,12 +402,15 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
     // narrow client interface but only exercises `getApprovals` for the
     // `approvals` case. A structural cast through `unknown` keeps the
     // test focused without re-implementing every other read-model method.
+    // Phase 05: approvals is no longer a primary tab; render the
+    // PccApprovalsSurface directly inside the bento grid to preserve
+    // the read-model passthrough invariant under test.
     const router = { getApprovals: spy } as unknown as Parameters<
       typeof PccSurfaceRouter
     >[0]['readModelClient'];
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
+        <PccApprovalsSurface readModelClient={router} />
       </PccBentoGrid>,
     );
     await waitFor(() => {
@@ -435,12 +444,15 @@ describe('PccSurfaceRouter — approvals route pass-through', () => {
     // narrow client interface but only exercises `getApprovals` for the
     // `approvals` case. A structural cast through `unknown` keeps the
     // test focused without re-implementing every other read-model method.
+    // Phase 05: approvals is no longer a primary tab; render the
+    // PccApprovalsSurface directly inside the bento grid to preserve
+    // the read-model passthrough invariant under test.
     const router = { getApprovals: spy } as unknown as Parameters<
       typeof PccSurfaceRouter
     >[0]['readModelClient'];
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="approvals" readModelClient={router} />
+        <PccApprovalsSurface readModelClient={router} />
       </PccBentoGrid>,
     );
     expect(container.querySelector('[data-pcc-state="loading"]')).not.toBeNull();

@@ -287,26 +287,6 @@
   white-space: normal;
 }
 
-/* Phase 05 wave-b10 Prompt 03 — sr-only legacy compatibility tab markers.
-   These satisfy direct `[data-pcc-tab-id="${legacyId}"]` queries from
-   pre-Phase-05 surface tests that bypass the `getSurfaceSelectionControl`
-   helper. Hidden from sighted users; not focusable in the tab order. */
-.legacyCompatMarker {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-  pointer-events: auto;
-  background: transparent;
-  color: transparent;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .tab,
   .toggle,

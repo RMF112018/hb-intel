@@ -10,8 +10,8 @@ import type {
   PccReadModelSourceStatus,
   PccResponsibilityMatrixReadModel,
 } from '@hbc/models/pcc';
-import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
+import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
 import { PccResponsibilityMatrixRegions } from '../surfaces/responsibilityMatrix/PccResponsibilityMatrixRegions';
 import { buildPccResponsibilityMatrixViewModel } from '../surfaces/responsibilityMatrix/responsibilityMatrixAdapter';
 
@@ -25,20 +25,19 @@ const REQUIRED_INTEGRATION_REGIONS: readonly string[] = [
   'document-control-references',
 ];
 
-function activateProjectReadiness(container: HTMLElement): HTMLElement {
-  const button = container.querySelector('[data-pcc-tab-id="project-readiness"]');
-  expect(button).not.toBeNull();
-  fireEvent.click(button!);
-  const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');
-  expect(panel).not.toBeNull();
-  // Wave 15A B5 / Prompt 02 — RM Integration renders only when the
-  // 'responsibility-matrix' detail section is selected via the module-index card.
+function activateProjectReadiness(): HTMLElement {
+  // Phase 05 wave-b10 Prompt 04 — render the legacy surface directly.
+  const { container } = render(
+    <PccBentoGrid forceMode="desktop">
+      <PccProjectReadinessSurface />
+    </PccBentoGrid>,
+  );
   const drilldown = container.querySelector(
     '[data-pcc-readiness-drilldown-control="responsibility-matrix"]',
   );
   expect(drilldown, 'expected responsibility-matrix drilldown control').not.toBeNull();
   fireEvent.click(drilldown!);
-  return panel as HTMLElement;
+  return container;
 }
 
 function integrationRegion(container: HTMLElement, region: string): HTMLElement | null {
@@ -99,8 +98,7 @@ const EMPTY_READ_MODEL: PccResponsibilityMatrixReadModel = {
 
 describe('Wave 11 Responsibility Matrix — integration card under project-readiness surface', () => {
   it('renders all 5 integration sub-region markers', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     for (const region of REQUIRED_INTEGRATION_REGIONS) {
       expect(
         integrationRegion(container, region),
@@ -110,8 +108,7 @@ describe('Wave 11 Responsibility Matrix — integration card under project-readi
   });
 
   it('integration card preserves the bento direct-child invariant', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = integrationRegion(container, 'priority-actions');
     expect(region).not.toBeNull();
     const card = region!.closest('[data-pcc-card]');
@@ -127,8 +124,7 @@ describe('Wave 11 Responsibility Matrix — integration card under project-readi
   });
 
   it('integration card has no anchors, no forms, no file inputs, and no enabled buttons', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = integrationRegion(container, 'priority-actions');
     expect(region).not.toBeNull();
     const card = region!.closest('[data-pcc-card]') as HTMLElement;
@@ -144,39 +140,34 @@ describe('Wave 11 Responsibility Matrix — integration card under project-readi
 
 describe('Wave 11 Responsibility Matrix — ownership boundary captions', () => {
   it('Priority Actions sub-region preserves Priority-Actions surface ownership', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = integrationRegion(container, 'priority-actions');
     expect(region!.textContent).toContain('Priority Actions remains');
     expect(region!.textContent).toContain('candidate signals only');
   });
 
   it('Project Readiness sub-region preserves scoring-doctrine ownership', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = integrationRegion(container, 'readiness-signals');
     expect(region!.textContent).toContain('Project Readiness retains its scoring doctrine');
   });
 
   it('Approvals sub-region defers execution to Wave 14', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = integrationRegion(container, 'approvals-references');
     expect(region!.textContent).toContain('Wave 14');
     expect(region!.textContent).toContain('no approval is requested or executed');
   });
 
   it('Team & Access sub-region preserves roster ownership', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = integrationRegion(container, 'team-access-references');
     expect(region!.textContent).toContain('Team & Access remains the roster and access owner');
     expect(region!.textContent).toContain('no roster, permission');
   });
 
   it('Document Control sub-region preserves evidence-binary ownership', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = integrationRegion(container, 'document-control-references');
     expect(region!.textContent).toContain(
       'HB Document Control Center retains evidence-binary ownership',
@@ -187,8 +178,7 @@ describe('Wave 11 Responsibility Matrix — ownership boundary captions', () => 
 
 describe('Wave 11 Responsibility Matrix — required UI conditions visible across lanes + integration', () => {
   it('all 10 required UI conditions are visible (with "missing responsible" derived as missing current action owner / responsible unresolved)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
 
     // Priority Actions candidates carry markers per exception code.
     const pa = integrationRegion(container, 'priority-actions');

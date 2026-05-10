@@ -105,14 +105,8 @@ describe('PccHorizontalTabs — Phase 05 grouped primary tab + module dropdowns'
 
   it('renders primary tabs in the locked registry order', () => {
     const { container } = renderTabs();
-    // Filter to actual Phase 05 primary-tab buttons; the tablist also
-    // contains sr-only legacy compatibility markers (also role="tab"
-    // for legacy a11y, but tagged data-pcc-legacy-compat) which are
-    // intentionally excluded from the order assertion.
     const renderedOrder = Array.from(
-      container.querySelectorAll(
-        '[data-pcc-horizontal-tabs] [role="tab"]:not([data-pcc-legacy-compat])',
-      ),
+      container.querySelectorAll('[data-pcc-horizontal-tabs] [role="tab"]'),
     ).map((el) => el.getAttribute('data-pcc-tab-id'));
     expect(renderedOrder).toEqual([...PCC_PRIMARY_TAB_IDS]);
   });
@@ -397,16 +391,11 @@ describe('PccHorizontalTabs — Phase 05 grouped primary tab + module dropdowns'
 
   it('guard: role boundaries — only primary tabs are role="tab"; module items are role="menuitem"; toggles are neither', () => {
     const { container } = renderTabs();
-    // Phase 05 primary tabs always render. Filter out the sr-only
-    // legacy compatibility tab markers (role="tab" + data-pcc-legacy-compat)
-    // that the Prompt 03 bridge renders for tests that bypass the
-    // shellSurfaceSelection helper.
-    const tabs = Array.from(
-      container.querySelectorAll(
-        '[data-pcc-horizontal-tabs] [role="tab"]:not([data-pcc-legacy-compat])',
-      ),
-    );
+    // Phase 05 primary tabs are the sole role="tab" elements (the
+    // Prompt 03 sr-only compat markers were removed in Prompt 04).
+    const tabs = Array.from(container.querySelectorAll('[data-pcc-horizontal-tabs] [role="tab"]'));
     expect(tabs.length).toBe(PCC_PRIMARY_TAB_IDS.length);
+    expect(container.querySelector('[data-pcc-legacy-compat]')).toBeNull();
     const tabTabIds = tabs
       .map((el) => el.getAttribute('data-pcc-tab-id'))
       .filter((id): id is string => Boolean(id));

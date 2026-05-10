@@ -1,27 +1,25 @@
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
-import { PCC_MVP_SURFACE_IDS } from '@hbc/models/pcc';
+import { PCC_PRIMARY_TAB_IDS } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
-import { getSurfaceSelectionControl } from './shellSurfaceSelection';
+import { getPrimaryTabSelectionControl } from './shellSurfaceSelection';
 
-// Wave 15A wave-b8 Prompt 05 — every PCC MVP surface is shell-only.
+// Phase 05 wave-b10 Prompt 04 — every Phase 05 primary tab is shell-only.
 // The shell `<main role="tabpanel">` is the sole carrier of
 // `data-pcc-active-surface-panel`; no bento-child card emits the marker.
 
-describe('PccShell all-surface smoke (shell-level)', () => {
-  // Shell `<main role="tabpanel">` is the sole semantic owner of
-  // `data-pcc-active-surface-panel` across every render branch.
-  it('activates each tab with shell-owned active panel and zero direct bento-child cards carrying [data-pcc-active-surface-panel]', () => {
+describe('PccShell all-primary-tab smoke (shell-level)', () => {
+  it('activates each primary tab with shell-owned active panel and zero direct bento-child cards carrying [data-pcc-active-surface-panel]', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
 
-    for (const id of PCC_MVP_SURFACE_IDS) {
-      const tab = getSurfaceSelectionControl(container, id);
-      expect(tab, `tab '${id}' should render`).not.toBeNull();
+    for (const id of PCC_PRIMARY_TAB_IDS) {
+      const tab = getPrimaryTabSelectionControl(container, id);
+      expect(tab, `primary tab '${id}' should render`).not.toBeNull();
 
       fireEvent.click(tab!);
 
       const selectedTabs = container.querySelectorAll(
-        '[data-pcc-horizontal-tabs] [data-pcc-tab-id][aria-selected="true"]',
+        '[data-pcc-horizontal-tabs] [role="tab"][aria-selected="true"]',
       );
       expect(selectedTabs).toHaveLength(1);
       expect(selectedTabs[0]?.getAttribute('data-pcc-tab-id')).toBe(id);
@@ -29,7 +27,7 @@ describe('PccShell all-surface smoke (shell-level)', () => {
       const shellPanels = container.querySelectorAll(
         `main[role="tabpanel"][data-pcc-active-surface-panel="${id}"]`,
       );
-      expect(shellPanels, `shell panel must own active surface '${id}'`).toHaveLength(1);
+      expect(shellPanels, `shell panel must own active primary tab '${id}'`).toHaveLength(1);
       const shellPanel = shellPanels[0]!;
       expect(shellPanel.getAttribute('id')).toBe('pcc-active-surface-panel');
       expect(shellPanel.getAttribute('aria-labelledby')).toBe(`pcc-tab-${id}`);
@@ -41,14 +39,14 @@ describe('PccShell all-surface smoke (shell-level)', () => {
       );
       expect(
         compatibilityCards,
-        `surface '${id}' must NOT render a direct bento-child card carrying [data-pcc-active-surface-panel] (every PCC MVP surface is shell-owned)`,
+        `primary tab '${id}' must NOT render a direct bento-child card carrying [data-pcc-active-surface-panel] (Phase 05 is shell-owned)`,
       ).toHaveLength(0);
       const directCards = Array.from(bento!.children).filter((child) =>
         child.matches('[data-pcc-card]'),
       );
       expect(
         directCards.length,
-        `surface '${id}' must still render at least one direct-child card`,
+        `primary tab '${id}' must still render at least one direct-child card`,
       ).toBeGreaterThan(0);
     }
   });

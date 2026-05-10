@@ -19,14 +19,14 @@
 
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { PCC_MVP_SURFACE_IDS, type PccProjectId } from '@hbc/models/pcc';
+import { PCC_PRIMARY_TAB_IDS, type PccProjectId } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccApprovalsSurface } from '../surfaces/approvals/PccApprovalsSurface';
 import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 import type { IPccApprovalsReadModelClient } from '../surfaces/approvals/approvalsViewModel';
-import { getSurfaceSelectionControl } from './shellSurfaceSelection';
+import { getPrimaryTabSelectionControl } from './shellSurfaceSelection';
 
 const NEVER_RESOLVES = <T,>(): Promise<T> => new Promise<T>(() => {});
 const ALWAYS_REJECTS = <T,>(): Promise<T> => Promise.reject(new Error('test: forced rejection'));
@@ -44,29 +44,25 @@ function expectStandardContextFields(context: Element): void {
 }
 
 describe('PccSurfaceContextHeader contract — happy-path negative invariant', () => {
-  for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-    it(`does NOT render PccSurfaceContextHeader on the '${surfaceId}' happy-path tab`, () => {
+  for (const tabId of PCC_PRIMARY_TAB_IDS) {
+    it(`does NOT render PccSurfaceContextHeader on the '${tabId}' happy-path primary tab`, () => {
       const { container } = render(<PccApp forceMode="desktop" />);
-      const tab = getSurfaceSelectionControl(container, surfaceId);
+      const tab = getPrimaryTabSelectionControl(container, tabId);
       expect(tab).not.toBeNull();
       fireEvent.click(tab!);
 
-      // Wave 15A wave-b7 Prompt 01 — shell <main role="tabpanel"> is the
-      // semantic active-panel owner; surface command cards may retain a
-      // card-level compatibility marker. Scope ownership assertion to the
-      // shell panel.
+      // Phase 05 wave-b10 Prompt 04 — shell <main role="tabpanel"> is the
+      // semantic active-panel owner.
       const shellPanels = container.querySelectorAll(
-        `main[role="tabpanel"][data-pcc-active-surface-panel="${surfaceId}"]`,
+        `main[role="tabpanel"][data-pcc-active-surface-panel="${tabId}"]`,
       );
       expect(shellPanels).toHaveLength(1);
-      expect(shellPanels[0]?.getAttribute('data-pcc-active-surface-panel')).toBe(surfaceId);
+      expect(shellPanels[0]?.getAttribute('data-pcc-active-surface-panel')).toBe(tabId);
 
       // Wave-b2 Prompt 03: PccSurfaceContextHeader is removed from happy-path.
-      const context = container.querySelector(`[data-pcc-surface-context-id="${surfaceId}"]`);
-      expect(
-        context,
-        `surface context header must not render on '${surfaceId}' happy-path`,
-      ).toBeNull();
+      // Phase 05 inherits this invariant for every primary-tab happy-path.
+      const context = container.querySelector(`[data-pcc-surface-context-id]`);
+      expect(context, `surface context header must not render on '${tabId}' happy-path`).toBeNull();
     });
   }
 });

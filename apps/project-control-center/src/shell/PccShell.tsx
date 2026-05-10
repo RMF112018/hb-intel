@@ -31,7 +31,7 @@ import type { IPccShellHeroViewModel } from '../preview/projectShellViewModel';
 import { PccHorizontalTabs } from './PccHorizontalTabs';
 import { PccProjectHeroBand } from './PccProjectHeroBand';
 import styles from './PccShell.module.css';
-import type { PccModuleId, PccMvpSurfaceId, PccPrimaryTabId } from '@hbc/models/pcc';
+import type { PccModuleId, PccPrimaryTabId } from '@hbc/models/pcc';
 
 const PCC_THEME_VARS: CSSProperties = {
   ['--pcc-color-header' as string]: HBC_DARK_HEADER,
@@ -74,12 +74,6 @@ const ACTIVE_PANEL_ID = 'pcc-active-surface-panel';
 export interface PccShellProps {
   /** Hero view-model derived from an `IProjectProfile` plus active surface. */
   heroViewModel: IPccShellHeroViewModel;
-  /**
-   * Legacy compat — feeds the shell `<main>` `data-pcc-active-surface-panel`
-   * marker and the hero band. Stays a `PccMvpSurfaceId` until Prompt 04
-   * migrates the router and dashboard surfaces to the Phase 05 primary tab id.
-   */
-  activeSurfaceId: PccMvpSurfaceId;
   /** Phase 05 selected primary dashboard tab. */
   activePrimaryTabId: PccPrimaryTabId;
   /** Phase 05 selected module under the active primary tab. */
@@ -88,15 +82,6 @@ export interface PccShellProps {
   onSelectPrimarySurface?: (id: PccPrimaryTabId) => void;
   /** Phase 05 module selection callback (Prompt 02 `selectModule`). */
   onSelectModule?: (id: PccModuleId) => void;
-  /**
-   * Phase 05 wave-b10 Prompt 03 — temporary compatibility bridge.
-   * Forwarded to `PccHorizontalTabs` so primary-tab / module activations
-   * that map to a legacy `PccMvpSurfaceId` can keep the legacy
-   * `PccSurfaceRouter` and hero metadata in sync via
-   * `usePccShellState.setActiveSurface`. Removed once Prompt 04 retires
-   * the legacy surface id from the runtime path.
-   */
-  onSelectLegacySurface?: (id: PccMvpSurfaceId) => void;
   /** Test override for the responsive mode. */
   forceMode?: PccResponsiveMode;
   /** Bento grid content (cards). */
@@ -105,12 +90,10 @@ export interface PccShellProps {
 
 export const PccShell: FC<PccShellProps> = ({
   heroViewModel,
-  activeSurfaceId,
   activePrimaryTabId,
   activeModuleId,
   onSelectPrimarySurface,
   onSelectModule,
-  onSelectLegacySurface,
   forceMode,
   children,
 }) => {
@@ -129,25 +112,18 @@ export const PccShell: FC<PccShellProps> = ({
         mode={shellMode}
         activePrimaryTabId={activePrimaryTabId}
         activeModuleId={activeModuleId}
-        activeSurfaceId={activeSurfaceId}
         onSelectPrimarySurface={(id) => onSelectPrimarySurface?.(id)}
         onSelectModule={(id) => onSelectModule?.(id)}
-        onSelectLegacySurface={onSelectLegacySurface}
         panelId={ACTIVE_PANEL_ID}
       />
       <PccProjectHeroBand mode={shellMode} viewModel={heroViewModel} />
-      {/* `activeSurfaceId` and `aria-labelledby` both remain on the
-          legacy `PccMvpSurfaceId` axis during Prompt 03 because the
-          surface router and hero metadata still consume it. Prompt 04
-          migrates the router/hero/labelledby to the Phase 05 primary
-          tab id. */}
       <main
         id={ACTIVE_PANEL_ID}
         role="tabpanel"
-        aria-labelledby={`pcc-tab-${activeSurfaceId}`}
+        aria-labelledby={`pcc-tab-${activePrimaryTabId}`}
         className={styles.canvas}
         data-pcc-canvas=""
-        data-pcc-active-surface-panel={activeSurfaceId}
+        data-pcc-active-surface-panel={activePrimaryTabId}
       >
         <PccBentoGrid forceMode={forceMode}>{children}</PccBentoGrid>
       </main>

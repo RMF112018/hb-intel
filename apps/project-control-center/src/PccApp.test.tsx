@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
+import { PCC_PRIMARY_TAB_IDS } from '@hbc/models/pcc';
 import { PccApp } from './PccApp';
 
 describe('PccApp shell', () => {
@@ -12,7 +12,10 @@ describe('PccApp shell', () => {
     expect(primary?.textContent).toBe('Project Control Center');
   });
 
-  it('renders the hero band with active-surface secondary title and mode marker', () => {
+  it('renders the hero band with the default Project Home secondary title and mode marker', () => {
+    // Phase 05 wave-b10 Prompt 04 intentionally keeps the hero stable on
+    // the legacy Project Home view-model until Prompt 06 migrates
+    // hero/header metadata to the Phase 05 primary-tab axis.
     const { container } = render(<PccApp forceMode="desktop" />);
     const hero = container.querySelector('[data-pcc-project-hero-band]');
     expect(hero, 'hero band should render').not.toBeNull();
@@ -21,21 +24,17 @@ describe('PccApp shell', () => {
     expect(secondary?.textContent).toBe('Project Home');
   });
 
-  it('renders top-level horizontal tabs for the nested navigation model', () => {
+  it('renders all eight Phase 05 primary tabs inside the registry-driven horizontal tablist', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const tablist = container.querySelector('[data-pcc-horizontal-tabs]');
     expect(tablist, 'tablist should render').not.toBeNull();
-    for (const id of ['project-home', 'documents', 'project-readiness', 'approvals'] as const) {
+    for (const id of PCC_PRIMARY_TAB_IDS) {
       const tab = tablist?.querySelector(`[data-pcc-tab-id="${id}"]`);
-      expect(tab, `tab for ${id} should render`).not.toBeNull();
-      // Tab labels are PCC-local overrides (not PCC_MVP_SURFACES.displayName).
-      // Just confirm the tab renders for the surface id; surface display name
-      // appears inside the active panel, not on the tab.
-      void PCC_MVP_SURFACES;
+      expect(tab, `primary tab for ${id} should render`).not.toBeNull();
     }
   });
 
-  it('marks project-home as the active tab by default', () => {
+  it('marks project-home as the active primary tab by default', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const active = container.querySelector('[data-pcc-tab-id="project-home"]');
     expect(active?.getAttribute('data-pcc-tab-active')).toBe('true');

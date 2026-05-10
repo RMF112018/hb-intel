@@ -30,6 +30,8 @@ import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { PccApp } from '../PccApp';
+import { PccBentoGrid } from '../layout/PccBentoGrid';
+import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 
 const SRC_ROOT = resolve(__dirname, '..');
@@ -80,15 +82,21 @@ function stripCommentsAndStrings(src: string): string {
     .replace(/`(?:[^`\\]|\\.)*`/g, '``');
 }
 
+// Phase 05 wave-b10 Prompt 04 — the router migrated from the legacy
+// PccMvpSurfaceId switch (8 surface ids) to the Phase 05
+// PccPrimaryTabId switch. Only `project-home` and `documents` retain
+// dedicated cases; the other six primary tabs share the reusable
+// `PccPrimaryDashboardSurface` (rendered via shared switch fallthroughs)
+// so their `case` lines are present per Phase 05 primary tab id.
 const APPROVED_ROUTED_SURFACE_IDS = [
   'project-home',
-  'team-and-access',
+  'core-tools',
   'documents',
-  'project-readiness',
-  'approvals',
-  'external-systems',
-  'control-center-settings',
-  'site-health',
+  'estimating-preconstruction',
+  'startup-closeout',
+  'project-controls',
+  'cost-time',
+  'systems-administration',
 ] as const;
 
 const FORBIDDEN_ROUTE_IDS = [
@@ -175,14 +183,14 @@ describe('Cross-surface no-nested-dashboard-card invariant (Wave 99 / Prompt 05D
   });
 
   it('Project Readiness read-model-driven path: every [data-pcc-card] has no descendant [data-pcc-card]', async () => {
+    // Phase 05 wave-b10 Prompt 04 — project-readiness is no longer a
+    // primary tab; render the legacy surface directly with a fixture
+    // read-model client to preserve the no-nested-cards invariant.
     const { container } = render(
-      <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface readModelClient={createPccFixtureReadModelClient()} />
+      </PccBentoGrid>,
     );
-    const projectReadinessButton = container.querySelector('[data-pcc-tab-id="project-readiness"]');
-    expect(projectReadinessButton).not.toBeNull();
-    fireEvent.click(projectReadinessButton!);
-    // Wave 15A B5 / Prompt 02 — unified-lifecycle cards render only
-    // when the 'unified-lifecycle' detail section is selected.
     const unifiedLifecycleDrilldown = container.querySelector(
       '[data-pcc-readiness-drilldown-control="unified-lifecycle"]',
     );
@@ -292,12 +300,12 @@ describe('Constraints Log surface integration — read-only / no-execution postu
     // Local-state UI (filters, <details>/<summary> toggles, etc.)
     // is intentionally NOT asserted disabled here — those are
     // legitimate read-model-driven non-mutating affordances.
-    const { container } = render(<PccApp forceMode="desktop" />);
-    const projectReadinessButton = container.querySelector('[data-pcc-tab-id="project-readiness"]');
-    expect(projectReadinessButton).not.toBeNull();
-    fireEvent.click(projectReadinessButton!);
-    // Wave 15A B5 / Prompt 02 — constraints-log renders only when the
-    // 'constraints' detail section is selected via the module-index card.
+    // Phase 05 wave-b10 Prompt 04 — render the legacy surface directly.
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectReadinessSurface />
+      </PccBentoGrid>,
+    );
     const constraintsDrilldown = container.querySelector(
       '[data-pcc-readiness-drilldown-control="constraints"]',
     );

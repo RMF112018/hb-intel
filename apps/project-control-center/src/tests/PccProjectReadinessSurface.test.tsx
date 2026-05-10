@@ -7,18 +7,18 @@ import {
   type PccReadModelEnvelope,
   type PccUnifiedLifecycleReadModel,
 } from '@hbc/models/pcc';
-import { PccApp } from '../PccApp';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
 import { createPccFixtureReadModelClient } from '../api/pccFixtureReadModelClient';
 
-function activateProjectReadiness(container: HTMLElement): HTMLElement {
-  const button = container.querySelector('[data-pcc-tab-id="project-readiness"]');
-  expect(button).not.toBeNull();
-  fireEvent.click(button!);
-  const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');
-  expect(panel).not.toBeNull();
-  return panel as HTMLElement;
+function activateProjectReadiness(): HTMLElement {
+  // Phase 05 wave-b10 Prompt 04 — render the legacy surface directly.
+  const { container } = render(
+    <PccBentoGrid forceMode="desktop">
+      <PccProjectReadinessSurface />
+    </PccBentoGrid>,
+  );
+  return container;
 }
 
 function readinessRegion(container: HTMLElement, region: string): HTMLElement | null {
@@ -26,19 +26,16 @@ function readinessRegion(container: HTMLElement, region: string): HTMLElement | 
 }
 
 describe('Project Readiness Center surface', () => {
-  it('renders exactly one shell-owned active-surface panel for project-readiness (Wave 15A wave-b7 Prompt 01 — shell <main> owns the semantic marker)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
-    const shellPanels = container.querySelectorAll(
-      'main[role="tabpanel"][data-pcc-active-surface-panel="project-readiness"]',
-    );
-    expect(shellPanels).toHaveLength(1);
-    expect(shellPanels[0].getAttribute('data-pcc-active-surface-panel')).toBe('project-readiness');
+  it('renders inside a single bento grid as Phase 05 isolated surface render (project-readiness is a module under startup-closeout in Phase 05; the shell-owned panel ownership invariant lives on the routed primary tabs in PccShell.surfaceSmoke.test.tsx)', () => {
+    const container = activateProjectReadiness();
+    const grids = container.querySelectorAll('[data-pcc-bento-grid]');
+    expect(grids).toHaveLength(1);
+    const cards = grids[0].querySelectorAll('[data-pcc-card]');
+    expect(cards.length).toBeGreaterThan(0);
   });
 
   it('renders all five framework regions on the ready path (Wave 15A wave-b9 Prompt 4B-10 — `HeroCard` deleted; the prior `data-pcc-readiness-region="hero"` marker lives only on loading/error state cards now)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     // The five operational regions still render. The prior `'hero'`
     // region is gone from the ready path; the absorbed summary lives
     // inside `LifecycleGateMapCard` body marked with
@@ -53,8 +50,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('first bento card is the LifecycleGateMapCard with absorbed MVP stats + source-health badges + 4 TODO markers; HeroCard is deleted (Wave 15A wave-b9 Prompt 4B-10)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     // Locate LifecycleGateMapCard via its lifecycle-gates region marker.
     const lifecycleGates = readinessRegion(container, 'lifecycle-gates');
     expect(lifecycleGates, 'lifecycle-gates region must render').not.toBeNull();
@@ -96,22 +92,19 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('lifecycle gates region renders gate items from structural markers', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const gates = container.querySelectorAll('[data-pcc-readiness-gate-id]');
     expect(gates.length).toBeGreaterThanOrEqual(1);
   });
 
   it('domain grid region renders multiple domains from structural markers', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const domains = container.querySelectorAll('[data-pcc-readiness-domain-id]');
     expect(domains.length).toBeGreaterThanOrEqual(2);
   });
 
   it('blockers region renders the escalated fixture blocker', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const blocker = container.querySelector(
       '[data-pcc-readiness-blocker-id="fixture-pcc-readiness-003"]',
     );
@@ -119,8 +112,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('evidence and source-health region renders evidence and source-health entries', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = readinessRegion(container, 'evidence-source-health');
     expect(region).not.toBeNull();
     const evidenceBuckets = region!.querySelectorAll('[data-pcc-readiness-evidence-state]');
@@ -130,8 +122,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('downstream modules region marks Wave 9 as preview-deferred and Wave 11 RACI as implemented', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const wave9 = container.querySelector(
       '[data-pcc-readiness-downstream-source="project-lifecycle-readiness"]',
     );
@@ -148,8 +139,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('downstream modules region marks Wave 12 / Wave 14 as preview-deferred', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const downstreamModuleIds = ['constraints-log', 'approvals-checkpoints'] as const;
     for (const id of downstreamModuleIds) {
       const node = container.querySelector(`[data-pcc-readiness-downstream-source="${id}"]`);
@@ -159,8 +149,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('downstream modules region marks Wave 10 (permit-log) as implemented', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const node = container.querySelector('[data-pcc-readiness-downstream-source="permit-log"]');
     expect(node).not.toBeNull();
     expect(node!.getAttribute('data-pcc-readiness-downstream-status')).toBe('implemented');
@@ -169,8 +158,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('downstream modules region marks Wave 13 (buyout-log) as implemented', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const node = container.querySelector('[data-pcc-readiness-downstream-source="buyout-log"]');
     expect(node).not.toBeNull();
     expect(node!.getAttribute('data-pcc-readiness-downstream-status')).toBe('implemented');
@@ -179,8 +167,7 @@ describe('Project Readiness Center surface', () => {
   });
 
   it('readiness surface tree exposes only local view-selection drilldown controls as enabled buttons (Wave 15A B5 / Prompt 03 — replaces the legacy "all buttons disabled" assertion now that the module-index card intentionally enables drilldown controls)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
     expect(bento, '[data-pcc-bento-grid] must mount').not.toBeNull();
     const enabledButtons = Array.from(bento.querySelectorAll<HTMLButtonElement>('button')).filter(
@@ -209,8 +196,7 @@ function readinessRegionsAll(container: HTMLElement): readonly HTMLElement[] {
 
 describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () => {
   it('renders the ownership-accountability region with per-persona entries', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const ownership = readinessRegion(container, 'ownership-accountability');
     expect(ownership).not.toBeNull();
     const entries = ownership!.querySelectorAll('[data-pcc-readiness-ownership-persona]');
@@ -218,8 +204,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('flags unassigned-gap items in the ownership region', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const unassignedEntries = container.querySelectorAll(
       '[data-pcc-readiness-ownership-unassigned="true"]',
     );
@@ -227,16 +212,14 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('flags safety-qaqc as having an unassigned-gap signal (item 004)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const safety = container.querySelector('[data-pcc-readiness-ownership-persona="safety-qaqc"]');
     expect(safety).not.toBeNull();
     expect(safety!.getAttribute('data-pcc-readiness-ownership-unassigned')).toBe('true');
   });
 
   it('renders escalation chips that include project-executive and manager-of-operational-excellence', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const escalations = Array.from(
       container.querySelectorAll('[data-pcc-readiness-ownership-escalation]'),
     ).map((el) => el.getAttribute('data-pcc-readiness-ownership-escalation'));
@@ -245,8 +228,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('renders the priority-actions-preview region with the eligible item', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const preview = readinessRegion(container, 'priority-actions-preview');
     expect(preview).not.toBeNull();
     const entry = preview!.querySelector(
@@ -256,8 +238,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('priority-actions-preview region exposes no enabled actions', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const preview = readinessRegion(container, 'priority-actions-preview');
     expect(preview).not.toBeNull();
     const buttons = preview!.querySelectorAll('button');
@@ -269,8 +250,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('renders a risk-tag chip on blocker item 003 as open-blocker', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const blocker = container.querySelector(
       '[data-pcc-readiness-blocker-id="fixture-pcc-readiness-003"]',
     );
@@ -281,8 +261,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('evidence-source-health region has no upload controls', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const region = readinessRegion(container, 'evidence-source-health');
     expect(region).not.toBeNull();
     const fileInputs = region!.querySelectorAll('input[type="file"]');
@@ -294,17 +273,15 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   });
 
   it('readiness panel has no enabled Upload button', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    const panel = activateProjectReadiness(container);
-    const enabledUpload = Array.from(panel.querySelectorAll('button')).filter(
+    const container = activateProjectReadiness();
+    const enabledUpload = Array.from(container.querySelectorAll('button')).filter(
       (btn) => /^upload$/i.test((btn.textContent ?? '').trim()) && !btn.hasAttribute('disabled'),
     );
     expect(enabledUpload.length).toBe(0);
   });
 
   it('renders degraded source-health entries for permit-log (stale), buyout-log and external-systems (source-unavailable)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const permit = container.querySelector('[data-pcc-readiness-source-health="permit-log"]');
     const buyout = container.querySelector('[data-pcc-readiness-source-health="buyout-log"]');
     const external = container.querySelector(
@@ -318,8 +295,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
   it('readiness regions expose no executable-label buttons', () => {
     const forbiddenLabel =
       /^(submit|approve|upload|run|execute|sync|write\s*back|writeback|complete\s*checklist|run\s*workflow)$/i;
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const regions = readinessRegionsAll(container);
     expect(regions.length).toBeGreaterThan(0);
     const offenders: string[] = [];
@@ -350,8 +326,7 @@ describe('Project Readiness Center surface — Wave 8 Prompt 06 hardening', () =
 
 describe('Project Readiness Center surface — Wave 15A B5 default command-first absence', () => {
   it('default render contains no lifecycle-readiness-center section markers', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     expect(
       container.querySelectorAll('[data-pcc-readiness-section="lifecycle-readiness-center"]')
         .length,
@@ -359,8 +334,7 @@ describe('Project Readiness Center surface — Wave 15A B5 default command-first
   });
 
   it('default render contains no permit-inspection-control-center section markers', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     expect(
       container.querySelectorAll('[data-pcc-readiness-section="permit-inspection-control-center"]')
         .length,
@@ -368,46 +342,40 @@ describe('Project Readiness Center surface — Wave 15A B5 default command-first
   });
 
   it('default render contains no responsibility-matrix section markers', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     expect(
       container.querySelectorAll('[data-pcc-readiness-section="responsibility-matrix"]').length,
     ).toBe(0);
   });
 
   it('default render contains no constraints-log section markers', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     expect(
       container.querySelectorAll('[data-pcc-readiness-section="constraints-log"]').length,
     ).toBe(0);
   });
 
   it('default render contains no buyout-log section markers', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     expect(container.querySelectorAll('[data-pcc-readiness-section="buyout-log"]').length).toBe(0);
   });
 
   it('default render contains no procore-source-confidence region marker', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     expect(
       container.querySelectorAll('[data-pcc-readiness-region="procore-source-confidence"]').length,
     ).toBe(0);
   });
 
   it('default render contains no unified-lifecycle body markers (timeline / project-memory / related-records)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     expect(container.querySelector('[data-pcc-lifecycle-timeline]')).toBeNull();
     expect(container.querySelector('[data-pcc-project-memory]')).toBeNull();
     expect(container.querySelector('[data-pcc-related-records]')).toBeNull();
   });
 
   it('default render exposes a module-index region with strictly local view-selection controls', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const moduleIndex = container.querySelector('[data-pcc-readiness-region="module-index"]');
     expect(moduleIndex).not.toBeNull();
     const controls = moduleIndex!.querySelectorAll('[data-pcc-readiness-drilldown-control]');
@@ -498,10 +466,13 @@ describe('Project Readiness Center surface — Wave 15A B5 selected-section view
 
   for (const testCase of SECTION_CASES) {
     it(`click drilldown "${testCase.drilldownId}" renders only the selected detail group; non-selected section markers absent`, async () => {
+      // Phase 05 wave-b10 Prompt 04 — render the legacy surface
+      // directly with a fixture read-model client.
       const { container } = render(
-        <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
+        <PccBentoGrid forceMode="desktop">
+          <PccProjectReadinessSurface readModelClient={createPccFixtureReadModelClient()} />
+        </PccBentoGrid>,
       );
-      activateProjectReadiness(container);
       selectProjectReadinessSection(container, testCase.drilldownId);
 
       // Wait for the selected detail group to render. For sections with
@@ -532,17 +503,9 @@ describe('Project Readiness Center surface — Wave 15A B5 selected-section view
         ).toBe(0);
       }
 
-      // Hero/active-surface marker remains unique on the shell semantic
-      // owner. Wave 15A wave-b7 Prompt 01 — shell <main> owns the
-      // semantic marker; the HeroCard still emits a card-level
-      // compatibility marker, so the broad count would be > 1.
-      const shellPanels = container.querySelectorAll(
-        'main[role="tabpanel"][data-pcc-active-surface-panel="project-readiness"]',
-      );
-      expect(shellPanels).toHaveLength(1);
-      expect(shellPanels[0].getAttribute('data-pcc-active-surface-panel')).toBe(
-        'project-readiness',
-      );
+      // Phase 05 wave-b10 Prompt 04 — surface is rendered in isolation
+      // (no shell wrapper). Shell `<main>` panel-ownership is asserted
+      // by PccShell.surfaceSmoke.test.tsx for routed primary tabs.
 
       // No card-in-card nesting.
       expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
@@ -563,8 +526,7 @@ describe('Project Readiness Center surface — Wave 15A B5 selected-section view
   }
 
   it('selecting a detail section then returning to command restores the seven native command-critical cards', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     // Default: native command cards present.
     expect(
       container.querySelector('[data-pcc-readiness-region="lifecycle-gates"]'),
@@ -1310,8 +1272,7 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 false-aff
   });
 
   it('no enabled button anywhere in the active surface bento has an exact-match executable-verb label', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
     const enabledButtons = Array.from(bento.querySelectorAll<HTMLButtonElement>('button')).filter(
       (b) => !b.disabled && b.getAttribute('aria-disabled') !== 'true',
@@ -1326,8 +1287,7 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 false-aff
   });
 
   it('every enabled button in the active surface bento is a drilldown control; non-drilldown buttons are disabled or aria-disabled="true"', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const bento = container.querySelector('[data-pcc-bento-grid]') as HTMLElement;
     const allButtons = Array.from(bento.querySelectorAll<HTMLButtonElement>('button'));
     for (const button of allButtons) {
@@ -1354,8 +1314,7 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 drilldown
   });
 
   it('every drilldown control is a button[type="button"] with a non-empty accessible name; exactly one is aria-pressed=true and carries data-pcc-readiness-drilldown-state="selected"', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const drilldowns = Array.from(
       container.querySelectorAll<HTMLButtonElement>('[data-pcc-readiness-drilldown-control]'),
     );
@@ -1389,8 +1348,7 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 drilldown
   });
 
   it('clicking each detail drilldown produces exclusive aria-pressed="true" and selected-state markers on that control', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     for (const drilldownId of ALL_DETAIL_SECTION_DRILLDOWN_IDS) {
       const target = container.querySelector(
         `[data-pcc-readiness-drilldown-control="${drilldownId}"]`,
@@ -1418,10 +1376,13 @@ describe('Project Readiness Center surface — Wave 15A B5 / Prompt 04 selected-
   it.each(ALL_DETAIL_SECTION_DRILLDOWN_IDS)(
     'every card rendered after selecting "%s" carries explicit tier-source, region-source, and a non-empty footprint',
     async (drilldownId) => {
+      // Phase 05 wave-b10 Prompt 04 — render the legacy surface directly
+      // with a fixture read-model client.
       const { container } = render(
-        <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
+        <PccBentoGrid forceMode="desktop">
+          <PccProjectReadinessSurface readModelClient={createPccFixtureReadModelClient()} />
+        </PccBentoGrid>,
       );
-      activateProjectReadiness(container);
       const drilldown = container.querySelector(
         `[data-pcc-readiness-drilldown-control="${drilldownId}"]`,
       ) as HTMLButtonElement;

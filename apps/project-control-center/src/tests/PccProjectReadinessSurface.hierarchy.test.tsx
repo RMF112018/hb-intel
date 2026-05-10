@@ -8,19 +8,21 @@
 
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { PccApp } from '../PccApp';
+import { PccBentoGrid } from '../layout/PccBentoGrid';
+import { PccProjectReadinessSurface } from '../surfaces/projectReadiness/PccProjectReadinessSurface';
 
 afterEach(() => {
   cleanup();
 });
 
-function activateProjectReadiness(container: HTMLElement): HTMLElement {
-  const button = container.querySelector('[data-pcc-tab-id="project-readiness"]');
-  expect(button).not.toBeNull();
-  fireEvent.click(button!);
-  const panel = container.querySelector('[data-pcc-active-surface-panel="project-readiness"]');
-  expect(panel).not.toBeNull();
-  return panel as HTMLElement;
+function activateProjectReadiness(): HTMLElement {
+  // Phase 05 wave-b10 Prompt 04 — render the legacy surface directly.
+  const { container } = render(
+    <PccBentoGrid forceMode="desktop">
+      <PccProjectReadinessSurface />
+    </PccBentoGrid>,
+  );
+  return container;
 }
 
 function selectProjectReadinessSection(container: HTMLElement, sectionId: string): void {
@@ -47,8 +49,7 @@ function lifecycleSectionRegion(container: HTMLElement, regionId: string): HTMLE
 
 describe('Project Readiness — Wave 8 blocker posture', () => {
   it('BlockersCard adopts tier=tier2/region=operational and footprint="full" (Wave 15A wave-b3 Prompt 04 removed the legacy hierarchy="primary" marker; the route command is the readiness Hero, not Blockers)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
 
     const card = regionCard(container, 'blockers');
     expect(card.getAttribute('data-pcc-card-tier')).toBe('tier2');
@@ -58,8 +59,7 @@ describe('Project Readiness — Wave 8 blocker posture', () => {
   });
 
   it('Wave 8 BlockersCard appears before DomainGridCard in DOM order', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
 
     const blockersCard = regionCard(container, 'blockers');
     const domainsCard = regionCard(container, 'domains');
@@ -71,8 +71,7 @@ describe('Project Readiness — Wave 8 blocker posture', () => {
   });
 
   it('EvidenceSourceHealthCard footprint is "full" so the row stays visually clean', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     const card = regionCard(container, 'evidence-source-health');
     expect(card.getAttribute('data-pcc-footprint')).toBe('full');
   });
@@ -84,8 +83,7 @@ describe('Project Readiness — Wave 8 blocker posture', () => {
 // lifecycle region markers.
 describe('Project Readiness — Wave 9 lifecycle blocker posture', () => {
   it('LifecycleBlockersCard adopts tier=tier2/region=operational and footprint="full" (Wave 15A wave-b3 Prompt 04 removed the legacy hierarchy="primary" marker; the route command is the readiness Hero, not the lifecycle Blockers card)', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     selectProjectReadinessSection(container, 'lifecycle-readiness');
 
     // The lifecycle blocker region is keyed by data-pcc-readiness-region
@@ -103,8 +101,7 @@ describe('Project Readiness — Wave 9 lifecycle blocker posture', () => {
   });
 
   it('LifecycleBlockersCard appears before LifecycleFamilyDomainsCard in DOM order', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
     selectProjectReadinessSection(container, 'lifecycle-readiness');
 
     const blockersRegion = lifecycleSectionRegion(container, 'lifecycle-blockers-exceptions');
@@ -117,30 +114,19 @@ describe('Project Readiness — Wave 9 lifecycle blocker posture', () => {
   });
 });
 
-describe('Project Readiness — active-panel ownership preserved (Wave 15A wave-b9 Prompt 4B-10)', () => {
-  it('zero in-grid card-level [data-pcc-active-surface-panel="project-readiness"] markers exist; project-readiness joined SURFACES_WITH_SHELL_ONLY_PANEL after `HeroCard` was deleted (MVP metrics absorbed into LifecycleGateMapCard), and the shell `<main role="tabpanel">` is the sole semantic owner of the marker', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+describe('Project Readiness — no card-level active-panel marker leakage (Phase 05 wave-b10 Prompt 04 — surface rendered in isolation; shell-owned panel ownership lives on routed primary tabs)', () => {
+  it('zero card-level [data-pcc-active-surface-panel="project-readiness"] markers exist on any rendered card', () => {
+    const container = activateProjectReadiness();
     const compatibilityCards = container.querySelectorAll(
       '[data-pcc-card][data-pcc-active-surface-panel="project-readiness"]',
     );
     expect(compatibilityCards).toHaveLength(0);
-    // Shell `<main>` continues to carry the marker as the sole semantic
-    // owner.
-    const shellPanel = container.querySelector(
-      'main[role="tabpanel"][data-pcc-active-surface-panel="project-readiness"]',
-    );
-    expect(
-      shellPanel,
-      'shell <main role="tabpanel"> must carry the active-panel marker',
-    ).not.toBeNull();
   });
 });
 
 describe('Project Readiness — Ownership escalation disabled-affordance contract', () => {
   it('every escalation chip is routed through PccDisabledAffordance with a paired reason', () => {
-    const { container } = render(<PccApp forceMode="desktop" />);
-    activateProjectReadiness(container);
+    const container = activateProjectReadiness();
 
     const ownershipRegion = container.querySelector(
       '[data-pcc-readiness-region="ownership-accountability"]',

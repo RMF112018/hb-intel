@@ -1,0 +1,139 @@
+/* PccPrimaryDashboardSurface — Phase 05 wave-b10 Prompt 04.
+ *
+ * One reusable dashboard surface used by the six Phase 05 primary tabs
+ * that do not reuse the existing Project Home or Document Control
+ * surfaces. Renders three direct-child PccDashboardCard children: an
+ * overview / posture card, a module-status list, and an
+ * active-module-context card. All colors / spacing / radii come from
+ * the existing PCC token palette wired by PccShell.
+ */
+
+.overviewBody {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--pcc-color-text-primary);
+}
+
+.overviewPosture {
+  margin: var(--pcc-space-sm) 0 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--pcc-color-text-muted);
+  line-height: 1.4;
+}
+
+.moduleStatusList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--pcc-space-sm);
+  margin: 0;
+  padding: 0;
+}
+
+.moduleStatusRow {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) 2fr;
+  align-items: start;
+  gap: var(--pcc-space-md);
+  padding-block: var(--pcc-space-xs);
+  border-block-end: 1px solid var(--pcc-color-border);
+}
+
+.moduleStatusRow:last-child {
+  border-block-end: none;
+}
+
+.moduleStatusLabel {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pcc-color-text-primary);
+  line-height: 1.3;
+}
+
+.moduleStatusValue {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.moduleStatusChip {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 1px 6px;
+  border-radius: var(--pcc-radius-sm);
+  background: var(--pcc-status-neutral);
+  color: var(--pcc-color-on-status);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.moduleStatusChip[data-pcc-dashboard-module-state='available'] {
+  background: var(--pcc-status-success);
+}
+
+.moduleStatusChip[data-pcc-dashboard-module-state='configuration-required'],
+.moduleStatusChip[data-pcc-dashboard-module-state='source-unavailable'] {
+  background: var(--pcc-status-warning);
+}
+
+.moduleStatusChip[data-pcc-dashboard-module-state='launch-only'] {
+  background: var(--pcc-status-info);
+}
+
+.moduleStatusSummary {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  line-height: 1.4;
+}
+
+.activeModuleBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+}
+
+.activeModuleStateLine {
+  margin: 0;
+}
+
+.activeModuleSummary {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pcc-color-text-primary);
+  line-height: 1.5;
+}
+
+.activeModuleAuthority {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--pcc-color-text-muted);
+  line-height: 1.4;
+}
+
+.activeModuleDisabledReason {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--pcc-color-text-muted);
+  line-height: 1.4;
+}
+
+.activeModuleStatePosture {
+  margin: 0;
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+  line-height: 1.4;
+}
+
+.activeModuleEmptyHint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pcc-color-text-muted);
+  line-height: 1.5;
+}

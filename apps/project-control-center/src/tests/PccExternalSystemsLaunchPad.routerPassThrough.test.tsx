@@ -23,7 +23,8 @@ import {
   type PccReadModelEnvelope,
 } from '@hbc/models/pcc';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
-import { PccSurfaceRouter, type IPccSurfaceRouterReadModelClient } from '../shell/PccSurfaceRouter';
+import { type IPccSurfaceRouterReadModelClient } from '../shell/PccSurfaceRouter';
+import { PccExternalSystemsSurface } from '../surfaces/externalSystems/PccExternalSystemsSurface';
 
 const PROJECT_ID: PccProjectId = SAMPLE_PROJECT_PROFILE.projectId;
 
@@ -73,9 +74,12 @@ describe('PccSurfaceRouter — external-systems pass-through (Wave 15 / Prompt 0
   it('routes the launch-pad client through the surface and renders inert/disabled launch affordances', async () => {
     const spy = vi.fn().mockResolvedValue(buildKnownEnvelope());
     const client = buildRouterClient(spy);
+    // Phase 05: external-systems is no longer a primary tab; render the
+    // PccExternalSystemsSurface directly inside the bento grid to
+    // preserve the read-model passthrough invariant under test.
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
-        <PccSurfaceRouter activeSurfaceId="external-systems" readModelClient={client} />
+        <PccExternalSystemsSurface readModelClient={client} />
       </PccBentoGrid>,
     );
 
