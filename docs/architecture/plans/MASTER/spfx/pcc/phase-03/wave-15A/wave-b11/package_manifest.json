@@ -1,0 +1,24 @@
+{
+  "package": "PCC Phase 06 \u2014 Span Overrides, Intentional Dashboard Choreography, and Project-Specific Analytics Preview System",
+  "generated": "2026-05-10T08:40:49.696467",
+  "dependency_user_owned": "echarts",
+  "dependency_not_allowed_mvp": "echarts-for-react",
+  "target_version": "1.0.0.216",
+  "prompts": [
+    "Prompt_00_Pre_Edit_Repo_Truth_Gate.md",
+    "Prompt_01_Span_Override_Foundation.md",
+    "Prompt_02_Project_Home_Choreography_And_Gateways.md",
+    "Prompt_03_ECharts_Wrapper_And_Analytics_Foundation.md",
+    "Prompt_04_Project_Home_Analytics_Cards.md",
+    "Prompt_05_Documents_Analytics_Cards.md",
+    "Prompt_06_Core_Tools_Analytics_Cards.md",
+    "Prompt_07_Estimating_Preconstruction_Analytics_Cards.md",
+    "Prompt_08_Startup_Closeout_Analytics_Cards.md",
+    "Prompt_09_Project_Controls_Analytics_Cards.md",
+    "Prompt_10_Cost_Time_Analytics_Cards.md",
+    "Prompt_11_Systems_Administration_Analytics_Cards.md",
+    "Prompt_12_Post_MVP_Stage_Lifecycle_TODO_Documentation.md",
+    "Prompt_13_Test_Suite_Accessibility_And_Regression_Coverage.md",
+    "Prompt_14_Playwright_Evidence_And_Closeout.md"
+  ]
+}
