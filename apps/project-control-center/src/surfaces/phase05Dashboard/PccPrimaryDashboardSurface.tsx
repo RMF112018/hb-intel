@@ -1,4 +1,4 @@
-import { Fragment, type FC } from 'react';
+import { Fragment, type FC, type ReactElement } from 'react';
 import {
   PCC_MODULE_STATE_COPY,
   getModule,
@@ -14,6 +14,10 @@ import {
   ESTIMATING_PRECONSTRUCTION_ANALYTICS_SPAN_OVERRIDES,
   ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS,
 } from './estimatingPreconstructionAnalytics';
+import {
+  STARTUP_CLOSEOUT_ANALYTICS_SPAN_OVERRIDES,
+  STARTUP_CLOSEOUT_ANALYTICS_VIEW_MODELS,
+} from './startupCloseoutAnalytics';
 import styles from './PccPrimaryDashboardSurface.module.css';
 
 export interface PccPrimaryDashboardSurfaceProps {
@@ -44,6 +48,74 @@ function resolveContextModule(
   }
   const mod = getModule(activeModuleId);
   return mod.parentTabId === activePrimaryTabId ? mod : undefined;
+}
+
+/**
+ * Phase 06 Prompts 07 + 08 — preview analytics insertion for the shared
+ * primary dashboard surface. Routes:
+ *   - `estimating-preconstruction` → 2 Estimating cards (Prompt 07);
+ *   - `startup-closeout` → 3 Startup & Closeout cards (Prompt 08);
+ *   - all other primary tabs → null.
+ *
+ * Renders between `Module status` and the selected-module card so analytics
+ * cards remain direct children of the bento grid via `PccDashboardCard`
+ * inside `PccAnalyticsCard`.
+ */
+function renderPrimaryDashboardAnalytics(activePrimaryTabId: PccPrimaryTabId): ReactElement | null {
+  if (activePrimaryTabId === 'estimating-preconstruction') {
+    return (
+      <>
+        <PccAnalyticsCard
+          viewModel={ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS.handoffContinuityPreview}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={
+            ESTIMATING_PRECONSTRUCTION_ANALYTICS_SPAN_OVERRIDES.handoffContinuityPreview
+          }
+        />
+        <PccAnalyticsCard
+          viewModel={ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS.estimateExposurePreview}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={
+            ESTIMATING_PRECONSTRUCTION_ANALYTICS_SPAN_OVERRIDES.estimateExposurePreview
+          }
+        />
+      </>
+    );
+  }
+
+  if (activePrimaryTabId === 'startup-closeout') {
+    return (
+      <>
+        <PccAnalyticsCard
+          viewModel={STARTUP_CLOSEOUT_ANALYTICS_VIEW_MODELS.startupReadinessCompletion}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={STARTUP_CLOSEOUT_ANALYTICS_SPAN_OVERRIDES.startupReadinessCompletion}
+        />
+        <PccAnalyticsCard
+          viewModel={STARTUP_CLOSEOUT_ANALYTICS_VIEW_MODELS.responsibilityCoverage}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={STARTUP_CLOSEOUT_ANALYTICS_SPAN_OVERRIDES.responsibilityCoverage}
+        />
+        <PccAnalyticsCard
+          viewModel={STARTUP_CLOSEOUT_ANALYTICS_VIEW_MODELS.closeoutWarrantyReadiness}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={STARTUP_CLOSEOUT_ANALYTICS_SPAN_OVERRIDES.closeoutWarrantyReadiness}
+        />
+      </>
+    );
+  }
+
+  return null;
 }
 
 export const PccPrimaryDashboardSurface: FC<PccPrimaryDashboardSurfaceProps> = ({
@@ -109,28 +181,7 @@ export const PccPrimaryDashboardSurface: FC<PccPrimaryDashboardSurfaceProps> = (
         </dl>
       </PccDashboardCard>
 
-      {activePrimaryTabId === 'estimating-preconstruction' ? (
-        <>
-          <PccAnalyticsCard
-            viewModel={ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS.handoffContinuityPreview}
-            footprint="standard"
-            tier="tier2"
-            region="operational"
-            spanOverrides={
-              ESTIMATING_PRECONSTRUCTION_ANALYTICS_SPAN_OVERRIDES.handoffContinuityPreview
-            }
-          />
-          <PccAnalyticsCard
-            viewModel={ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS.estimateExposurePreview}
-            footprint="standard"
-            tier="tier2"
-            region="operational"
-            spanOverrides={
-              ESTIMATING_PRECONSTRUCTION_ANALYTICS_SPAN_OVERRIDES.estimateExposurePreview
-            }
-          />
-        </>
-      ) : null}
+      {renderPrimaryDashboardAnalytics(activePrimaryTabId)}
 
       <PccDashboardCard
         footprint="standard"

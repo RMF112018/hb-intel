@@ -90,22 +90,42 @@ describe('PccSurfaceRouter — Phase 05 primary-tab routing', () => {
 });
 
 describe('PccSurfaceRouter — Phase 05 reusable PccPrimaryDashboardSurface', () => {
-  // Phase 06 Prompt 07 — `estimating-preconstruction` is the sole exception:
-  // the surface inserts two preview analytics cards (Handoff Continuity
-  // Preview + Estimate Exposure Preview) between Module status and the
-  // selected-module card, so estimating renders 5 direct cards (hero +
-  // Module status + 2 analytics + Selected module). All other primary
-  // dashboards continue to render exactly 3 direct cards.
+  // Phase 06 Prompts 07 + 08 — two primary tabs insert preview analytics
+  // cards into the shared PccPrimaryDashboardSurface:
+  //   - `estimating-preconstruction` (Prompt 07): hero + Module status +
+  //     2 analytics + Selected module = 5 direct cards;
+  //   - `startup-closeout` (Prompt 08): hero + Module status + 3 analytics
+  //     + Selected module = 6 direct cards.
+  // All other primary dashboards (core-tools, project-controls, cost-time,
+  // systems-administration) continue to render exactly 3 direct cards.
+  const EXPECTED_DIRECT_CARD_COUNT_BY_TAB: Readonly<Record<PccPrimaryTabId, number>> = {
+    'project-home': 3, // not iterated below; PccPrimaryDashboardSurface is not used for project-home
+    'core-tools': 3,
+    documents: 3, // not iterated below; PccDocumentsSurface is used for documents
+    'estimating-preconstruction': 5,
+    'startup-closeout': 6,
+    'project-controls': 3,
+    'cost-time': 3,
+    'systems-administration': 3,
+  };
+  const CARD_SUMMARY_BY_TAB: Readonly<Record<PccPrimaryTabId, string>> = {
+    'project-home': 'three direct bento children (hero + Module status + Selected module)',
+    'core-tools': 'three direct bento children (hero + Module status + Selected module)',
+    documents: 'three direct bento children (hero + Module status + Selected module)',
+    'estimating-preconstruction':
+      'five direct bento children (hero + Module status + 2 analytics + Selected module)',
+    'startup-closeout':
+      'six direct bento children (hero + Module status + 3 analytics + Selected module)',
+    'project-controls': 'three direct bento children (hero + Module status + Selected module)',
+    'cost-time': 'three direct bento children (hero + Module status + Selected module)',
+    'systems-administration':
+      'three direct bento children (hero + Module status + Selected module)',
+  };
   for (const tabId of NEW_DASHBOARD_PRIMARY_TABS) {
-    const expectedCount = tabId === 'estimating-preconstruction' ? 5 : 3;
-    const cardSummary =
-      tabId === 'estimating-preconstruction'
-        ? 'five direct bento children (hero + Module status + 2 analytics + Selected module)'
-        : 'three direct bento children (hero + Module status + Selected module)';
-    it(`'${tabId}' renders ${cardSummary}`, () => {
+    it(`'${tabId}' renders ${CARD_SUMMARY_BY_TAB[tabId]}`, () => {
       const { container } = renderRouter(tabId);
       const cards = getDirectChildCards(container);
-      expect(cards.length).toBe(expectedCount);
+      expect(cards.length).toBe(EXPECTED_DIRECT_CARD_COUNT_BY_TAB[tabId]);
       // No nested cards — every card is at the top level.
       expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
     });
