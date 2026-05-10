@@ -434,4 +434,67 @@ describe('PccHorizontalTabs — Phase 05 grouped primary tab + module dropdowns'
     }
     expect(totalModuleCount).toBe(PCC_NAVIGATION_MODULES.length);
   });
+
+  // Phase 05 wave-b10 Prompt 05 — authority / boundary copy hardening.
+  // The Phase 05 registry (PccPrimaryNavigation.ts) already carries the
+  // canonical authority cues; these tests lock that cue rendering as
+  // visible end-user copy in the dropdown menus.
+
+  it('HBI Assistant module item authority cue communicates advisory + no decisions + no approvals + no writeback', () => {
+    const { container } = renderTabs();
+    fireEvent.click(getToggle(container, 'core-tools'));
+    const item = getModuleItem(container, 'hbi-assistant');
+    expect(item).not.toBeNull();
+    const text = (item!.textContent ?? '').toLowerCase();
+    expect(text).toContain('advisory');
+    expect(text).toContain('no decision');
+    expect(text).toContain('no approval');
+    expect(/no writeback|does not write back/.test(text)).toBe(true);
+  });
+
+  it('Launch-only module items carry source-system + no-writeback authority cues', () => {
+    const { container } = renderTabs();
+    const launchOnlyByParent: ReadonlyArray<{
+      parent: 'core-tools' | 'documents';
+      moduleId: string;
+    }> = [
+      { parent: 'core-tools', moduleId: 'external-platforms' },
+      { parent: 'documents', moduleId: 'procore-documents' },
+      { parent: 'documents', moduleId: 'document-crunch' },
+      { parent: 'documents', moduleId: 'adobe-sign' },
+    ];
+    for (const { parent, moduleId } of launchOnlyByParent) {
+      // Single-menu invariant: only one menu can be open at a time. If
+      // the parent menu is already open from a prior iteration, do NOT
+      // re-click the toggle (that would close it). Otherwise open it.
+      const menuAlreadyOpen = container.querySelector(`[data-pcc-module-menu="${parent}"]`);
+      if (!menuAlreadyOpen) {
+        fireEvent.click(getToggle(container, parent));
+      }
+      const item = container.querySelector(
+        `[data-pcc-module-nav-item="${moduleId}"]`,
+      ) as HTMLButtonElement | null;
+      expect(item, `launch-only item '${moduleId}' must render under '${parent}'`).not.toBeNull();
+      const text = (item!.textContent ?? '').toLowerCase();
+      expect(
+        /does not write back|no writeback/.test(text),
+        `launch-only '${moduleId}' must communicate no-writeback in its rendered authority cue`,
+      ).toBe(true);
+    }
+  });
+
+  it('Approvals & Checkpoints module item does not render approve / reject / waive / override action verbs in any rendered text', () => {
+    const { container } = renderTabs();
+    fireEvent.click(getToggle(container, 'core-tools'));
+    const item = getModuleItem(container, 'approvals-checkpoints');
+    expect(item).not.toBeNull();
+    const text = item!.textContent ?? '';
+    for (const verb of ['approve', 'reject', 'waive', 'override']) {
+      const re = new RegExp(`\\b${verb}\\b`, 'i');
+      expect(
+        re.test(text),
+        `'approvals-checkpoints' rendered text must not contain action verb '${verb}'`,
+      ).toBe(false);
+    }
+  });
 });

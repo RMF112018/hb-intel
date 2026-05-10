@@ -21,6 +21,15 @@ const NO_WRITEBACK_POSTURE =
 
 const SELECT_MODULE_HINT = 'Open the menu on this tab to review a project module in context.';
 
+// Phase 05 wave-b10 Prompt 05 — per-primary-tab governance / book-of-record
+// posture line. Currently only `cost-time` carries an additional
+// posture cue (Sage book-of-record) per the Prompt 05 financial-copy
+// requirement. Adding more entries is a copy-only change.
+const PRIMARY_TAB_POSTURE_NOTE: Partial<Record<PccPrimaryTabId, string>> = {
+  'cost-time':
+    'Sage remains the accounting book of record for cost, commitment, and exposure data; PCC does not write back to Sage.',
+};
+
 function resolveContextModule(
   activePrimaryTabId: PccPrimaryTabId,
   activeModuleId: PccModuleId | undefined,
@@ -39,6 +48,7 @@ export const PccPrimaryDashboardSurface: FC<PccPrimaryDashboardSurfaceProps> = (
   const tab = getPrimaryNavigationTab(activePrimaryTabId);
   const modules = getModulesForPrimaryTab(activePrimaryTabId);
   const contextModule = resolveContextModule(activePrimaryTabId, activeModuleId);
+  const postureNote = PRIMARY_TAB_POSTURE_NOTE[activePrimaryTabId];
 
   return (
     <Fragment>
@@ -52,6 +62,14 @@ export const PccPrimaryDashboardSurface: FC<PccPrimaryDashboardSurfaceProps> = (
       >
         <p className={styles.overviewBody}>{tab.dashboardDescription}</p>
         <p className={styles.overviewPosture}>{NO_WRITEBACK_POSTURE}</p>
+        {postureNote ? (
+          <p
+            className={styles.overviewBookOfRecord}
+            data-pcc-dashboard-book-of-record={activePrimaryTabId}
+          >
+            {postureNote}
+          </p>
+        ) : null}
       </PccDashboardCard>
 
       <PccDashboardCard
@@ -64,7 +82,13 @@ export const PccPrimaryDashboardSurface: FC<PccPrimaryDashboardSurfaceProps> = (
       >
         <dl className={styles.moduleStatusList}>
           {modules.map((module) => (
-            <div key={module.id} className={styles.moduleStatusRow}>
+            <div
+              key={module.id}
+              className={styles.moduleStatusRow}
+              data-pcc-dashboard-module-row={module.id}
+              data-pcc-dashboard-module-selectable={module.selectable ? 'true' : 'false'}
+              data-pcc-dashboard-module-state={module.state}
+            >
               <dt className={styles.moduleStatusLabel}>{module.label}</dt>
               <dd className={styles.moduleStatusValue}>
                 <span
@@ -88,28 +112,37 @@ export const PccPrimaryDashboardSurface: FC<PccPrimaryDashboardSurfaceProps> = (
         eyebrow="Selected module"
         title={contextModule ? contextModule.label : 'Select a module'}
       >
-        {contextModule ? (
-          <div className={styles.activeModuleBody}>
-            <p className={styles.activeModuleStateLine}>
-              <span
-                className={styles.moduleStatusChip}
-                data-pcc-dashboard-module-state={contextModule.state}
-              >
-                {contextModule.stateLabel}
-              </span>
-            </p>
-            <p className={styles.activeModuleSummary}>{contextModule.summary}</p>
-            <p className={styles.activeModuleAuthority}>{contextModule.authorityCue}</p>
-            {!contextModule.selectable && contextModule.disabledReason ? (
-              <p className={styles.activeModuleDisabledReason}>{contextModule.disabledReason}</p>
-            ) : null}
-            <p className={styles.activeModuleStatePosture}>
-              {PCC_MODULE_STATE_COPY[contextModule.state].reason}
-            </p>
-          </div>
-        ) : (
-          <p className={styles.activeModuleEmptyHint}>{SELECT_MODULE_HINT}</p>
-        )}
+        <div
+          className={styles.selectedModuleBody}
+          data-pcc-selected-module-card=""
+          data-pcc-selected-module-id={contextModule?.id ?? ''}
+          data-pcc-selected-module-state={contextModule?.state ?? ''}
+          data-pcc-selected-module-parent-tab={contextModule?.parentTabId ?? ''}
+          data-pcc-selected-module-empty={contextModule ? undefined : 'true'}
+        >
+          {contextModule ? (
+            <div className={styles.activeModuleBody}>
+              <p className={styles.activeModuleStateLine}>
+                <span
+                  className={styles.moduleStatusChip}
+                  data-pcc-dashboard-module-state={contextModule.state}
+                >
+                  {contextModule.stateLabel}
+                </span>
+              </p>
+              <p className={styles.activeModuleSummary}>{contextModule.summary}</p>
+              <p className={styles.activeModuleAuthority}>{contextModule.authorityCue}</p>
+              {!contextModule.selectable && contextModule.disabledReason ? (
+                <p className={styles.activeModuleDisabledReason}>{contextModule.disabledReason}</p>
+              ) : null}
+              <p className={styles.activeModuleStatePosture}>
+                {PCC_MODULE_STATE_COPY[contextModule.state].reason}
+              </p>
+            </div>
+          ) : (
+            <p className={styles.activeModuleEmptyHint}>{SELECT_MODULE_HINT}</p>
+          )}
+        </div>
       </PccDashboardCard>
     </Fragment>
   );

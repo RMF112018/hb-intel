@@ -23,6 +23,14 @@
   line-height: 1.4;
 }
 
+.overviewBookOfRecord {
+  margin: var(--pcc-space-xs) 0 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--pcc-color-text-muted);
+  line-height: 1.4;
+}
+
 .moduleStatusList {
   display: grid;
   grid-template-columns: 1fr;
@@ -42,6 +50,18 @@
 
 .moduleStatusRow:last-child {
   border-block-end: none;
+}
+
+.moduleStatusRow[data-pcc-dashboard-module-selectable='false'] .moduleStatusLabel {
+  color: var(--pcc-color-text-muted);
+}
+
+.moduleStatusRow[data-pcc-dashboard-module-selectable='false'] {
+  cursor: default;
+}
+
+.selectedModuleBody {
+  display: contents;
 }
 
 .moduleStatusLabel {

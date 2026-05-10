@@ -227,4 +227,18 @@ describe('usePccShellState contract — Phase 05 grouped tab + module model', ()
     expect(result.current.activePrimaryTabId).toBe('core-tools');
     expect(result.current.activeSurfaceId).toBe('documents');
   });
+
+  // Phase 05 wave-b10 Prompt 05 — explicit re-statement of the
+  // navigation-axis contract. After Prompt 04 the runtime router /
+  // shell panel run on the Phase 05 axis (`activePrimaryTabId` /
+  // `activeModuleId`); `activeSurfaceId` is hook-internal hero
+  // compatibility state only, untouched by `selectModule`.
+  it('selectModule does not mutate activeSurfaceId (Phase 05 navigation axis is activePrimaryTabId / activeModuleId)', () => {
+    const { result } = renderHook(() => usePccShellState());
+    const before = result.current.activeSurfaceId;
+    act(() => result.current.selectModule('team-access'));
+    expect(result.current.activeSurfaceId).toBe(before);
+    expect(result.current.activePrimaryTabId).toBe('core-tools');
+    expect(result.current.activeModuleId).toBe('team-access');
+  });
 });

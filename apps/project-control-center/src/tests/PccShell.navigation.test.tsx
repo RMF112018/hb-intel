@@ -93,4 +93,31 @@ describe('PccShell navigation — Phase 05 grouped primary tabs', () => {
     const documentsTab = getPrimaryTabSelectionControl(container, 'documents');
     expect(documentsTab?.textContent).toContain('Document Control');
   });
+
+  // Phase 05 wave-b10 Prompt 05 — runtime guard: PCC navigation must
+  // not mutate the URL, push history entries, or write to web storage
+  // when the user clicks primary tabs or selects modules.
+  it('navigating across primary tabs and selecting a module does not mutate URL, history, or storage', () => {
+    const initialPathname = window.location.pathname;
+    const initialSearch = window.location.search;
+    const initialHistoryLength = window.history.length;
+    const localStorageSnapshot = window.localStorage.length;
+    const sessionStorageSnapshot = window.sessionStorage.length;
+
+    const { container } = render(<PccApp forceMode="desktop" />);
+    fireEvent.click(getPrimaryTabSelectionControl(container, 'core-tools')!);
+    fireEvent.click(getPrimaryTabSelectionControl(container, 'documents')!);
+    fireEvent.click(getPrimaryNavToggle(container, 'documents')!);
+    const moduleItem = container.querySelector(
+      '[data-pcc-module-nav-item="document-control-center"]',
+    ) as HTMLButtonElement;
+    fireEvent.click(moduleItem);
+    fireEvent.click(getPrimaryTabSelectionControl(container, 'cost-time')!);
+
+    expect(window.location.pathname).toBe(initialPathname);
+    expect(window.location.search).toBe(initialSearch);
+    expect(window.history.length).toBe(initialHistoryLength);
+    expect(window.localStorage.length).toBe(localStorageSnapshot);
+    expect(window.sessionStorage.length).toBe(sessionStorageSnapshot);
+  });
 });

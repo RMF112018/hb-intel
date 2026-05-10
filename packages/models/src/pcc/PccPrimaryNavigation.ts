@@ -366,7 +366,7 @@ export const PCC_NAVIGATION_MODULES: readonly PccNavigationModule[] = [
     stateLabel: PCC_MODULE_STATE_COPY.preview.stateLabel,
     summary: 'Checkpoint context across active project workflows.',
     authorityCue:
-      'Checkpoint context only. PCC does not provide decision, return, defer, escalate, or override controls in this phase.',
+      'Checkpoint context only. Approval decisions remain in governed workflows; PCC does not perform them here.',
     sourceSystem: 'PCC',
     selectable: true,
   },
