@@ -126,4 +126,20 @@ describe('PccShell navigation — Phase 05 grouped primary tabs', () => {
     expect(window.localStorage.length).toBe(localStorageSnapshot);
     expect(window.sessionStorage.length).toBe(sessionStorageSnapshot);
   });
+
+  // Phase 05 wave-b10 Prompt 07 — every primary tab must carry the
+  // canonical id (`pcc-tab-${tabId}`) and aria-controls reference
+  // (`pcc-active-surface-panel`) so the tablist/tabpanel relationship
+  // is unambiguous for assistive technology and the panel id is unique.
+  it('every primary tab carries id="pcc-tab-{tabId}", aria-controls="pcc-active-surface-panel", and role="tab"', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const tab = getPrimaryTabSelectionControl(container, tabId);
+      expect(tab, `primary tab ${tabId} should render`).not.toBeNull();
+      expect(tab!.getAttribute('id')).toBe(`pcc-tab-${tabId}`);
+      expect(tab!.getAttribute('aria-controls')).toBe('pcc-active-surface-panel');
+      expect(tab!.getAttribute('role')).toBe('tab');
+    }
+    expect(container.querySelectorAll('#pcc-active-surface-panel')).toHaveLength(1);
+  });
 });

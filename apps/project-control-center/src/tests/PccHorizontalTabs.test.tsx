@@ -3,6 +3,7 @@ import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import {
   PCC_NAVIGATION_MODULES,
   PCC_PRIMARY_TAB_IDS,
+  getModulesForPrimaryTab,
   type PccModuleId,
   type PccPrimaryTabId,
 } from '@hbc/models/pcc';
@@ -496,5 +497,218 @@ describe('PccHorizontalTabs — Phase 05 grouped primary tab + module dropdowns'
         `'approvals-checkpoints' rendered text must not contain action verb '${verb}'`,
       ).toBe(false);
     }
+  });
+
+  // Phase 05 wave-b10 Prompt 07 — locks the dropdown toggle's ARIA
+  // contract so assistive tech can find the menu before and after open.
+  it('every dropdown toggle exposes aria-haspopup="menu" and a closed→open→closed aria-expanded + aria-controls target lifecycle', () => {
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const { container, unmount } = renderTabs();
+      const toggle = getToggle(container, tabId);
+      expect(toggle, `toggle for ${tabId}`).not.toBeNull();
+      expect(toggle.getAttribute('aria-haspopup')).toBe('menu');
+      expect(toggle.getAttribute('aria-expanded')).toBe('false');
+
+      const controlsId = toggle.getAttribute('aria-controls');
+      expect(controlsId, `toggle ${tabId} must have a non-empty aria-controls`).toBeTruthy();
+      expect(controlsId!.length).toBeGreaterThan(0);
+      // Closed: target id is not mounted in the document yet.
+      expect(document.getElementById(controlsId!)).toBeNull();
+
+      fireEvent.click(toggle);
+      expect(toggle.getAttribute('aria-expanded')).toBe('true');
+      const mounted = document.getElementById(controlsId!);
+      expect(mounted, `aria-controls target for ${tabId} must mount when expanded`).not.toBeNull();
+      expect(mounted!.getAttribute('role')).toBe('menu');
+      expect(mounted!.getAttribute('data-pcc-module-menu')).toBe(tabId);
+
+      fireEvent.click(toggle);
+      expect(toggle.getAttribute('aria-expanded')).toBe('false');
+      expect(document.getElementById(controlsId!)).toBeNull();
+
+      unmount();
+      cleanup();
+    }
+  });
+
+  // Phase 05 wave-b10 Prompt 07 — locks the production blur handler at
+  // PccHorizontalTabs.tsx. The handler reads `document.activeElement`
+  // inside a queueMicrotask, so the test must move focus naturally so
+  // `document.activeElement` reflects reality before the microtask
+  // runs. fireEvent.blur with a synthetic relatedTarget does not move
+  // focus in jsdom; element.focus() does.
+  it('focus moving outside the nav root closes the open menu after a microtask', async () => {
+    const outsideButton = document.createElement('button');
+    outsideButton.textContent = 'outside';
+    document.body.appendChild(outsideButton);
+    try {
+      const { container } = renderTabs();
+      fireEvent.click(getToggle(container, 'core-tools'));
+      expect(getMenu(container, 'core-tools')).not.toBeNull();
+      const firstMenuItem = container.querySelector(
+        '[data-pcc-module-menu="core-tools"] [role="menuitem"]',
+      ) as HTMLButtonElement | null;
+      expect(firstMenuItem).not.toBeNull();
+      firstMenuItem!.focus();
+      expect(document.activeElement).toBe(firstMenuItem);
+
+      // Natural focus shift outside the nav root.
+      outsideButton.focus();
+      expect(document.activeElement).toBe(outsideButton);
+
+      // Production handler defers the close via queueMicrotask.
+      await new Promise<void>((resolve) => queueMicrotask(resolve));
+
+      expect(getMenu(container, 'core-tools')).toBeNull();
+    } finally {
+      outsideButton.remove();
+    }
+  });
+
+  it('focus moving within the nav root (toggle ↔ menu item) leaves the menu mounted (sanity countercheck)', async () => {
+    const { container } = renderTabs();
+    const toggle = getToggle(container, 'core-tools');
+    fireEvent.click(toggle);
+    expect(getMenu(container, 'core-tools')).not.toBeNull();
+    const firstMenuItem = container.querySelector(
+      '[data-pcc-module-menu="core-tools"] [role="menuitem"]',
+    ) as HTMLButtonElement | null;
+    expect(firstMenuItem).not.toBeNull();
+    firstMenuItem!.focus();
+    // Move focus to another node inside the root.
+    toggle.focus();
+    expect(document.activeElement).toBe(toggle);
+    await new Promise<void>((resolve) => queueMicrotask(resolve));
+    expect(getMenu(container, 'core-tools')).not.toBeNull();
+  });
+
+  // Phase 05 wave-b10 Prompt 07 — false-affordance sweep across every
+  // primary tab. Per `feedback_split_sweep_for_all_one_side_iteration`,
+  // selectable + non-selectable assertions are split into two tests so
+  // primary tabs that contain only one side (e.g. `estimating-pre-
+  // construction` is registry-deferred) cannot silently skip half the
+  // contract. A sentinel counter fails fast if the registry is mutated
+  // to all-one-side.
+  it('every non-selectable module across every primary tab is button + aria-disabled + non-callable on click/Enter/Space; menu remains open', () => {
+    let nonSelectableTested = 0;
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const { container, onSelectModule, unmount } = renderTabs({
+        activePrimaryTabId: tabId,
+      });
+      fireEvent.click(getToggle(container, tabId));
+      const menu = getMenu(container, tabId);
+      expect(menu, `menu for ${tabId} must mount`).not.toBeNull();
+      const nonSelectableItems = Array.from(
+        menu!.querySelectorAll<HTMLElement>(
+          '[data-pcc-module-nav-item][data-pcc-module-selectable="false"]',
+        ),
+      );
+      const registryModules = getModulesForPrimaryTab(tabId);
+      const expectedNonSelectableIds = registryModules
+        .filter((m) => !m.selectable)
+        .map((m) => m.id);
+      expect(
+        nonSelectableItems.map((n) => n.getAttribute('data-pcc-module-nav-item')).sort(),
+        `rendered non-selectable items for ${tabId} must match the registry`,
+      ).toEqual([...expectedNonSelectableIds].sort());
+
+      for (const item of nonSelectableItems) {
+        nonSelectableTested += 1;
+        const moduleId = item.getAttribute('data-pcc-module-nav-item') as PccModuleId;
+        const registryEntry = registryModules.find((m) => m.id === moduleId);
+        expect(registryEntry, `module ${moduleId} must exist in registry`).toBeDefined();
+        expect(item.tagName, `non-selectable ${moduleId} must be a <button>`).toBe('BUTTON');
+        expect(item.getAttribute('aria-disabled')).toBe('true');
+        if (registryEntry!.disabledReason) {
+          expect(
+            item.textContent ?? '',
+            `non-selectable ${moduleId} must render its registry disabledReason copy`,
+          ).toContain(registryEntry!.disabledReason);
+        }
+
+        fireEvent.click(item);
+        expect(
+          onSelectModule,
+          `click on non-selectable ${moduleId} must not dispatch`,
+        ).not.toHaveBeenCalled();
+        expect(
+          getMenu(container, tabId),
+          `menu for ${tabId} must stay open after click on ${moduleId}`,
+        ).not.toBeNull();
+
+        fireEvent.keyDown(item, { key: 'Enter' });
+        expect(
+          onSelectModule,
+          `Enter on non-selectable ${moduleId} must not dispatch`,
+        ).not.toHaveBeenCalled();
+        expect(getMenu(container, tabId)).not.toBeNull();
+
+        fireEvent.keyDown(item, { key: ' ' });
+        expect(
+          onSelectModule,
+          `Space on non-selectable ${moduleId} must not dispatch`,
+        ).not.toHaveBeenCalled();
+        expect(getMenu(container, tabId)).not.toBeNull();
+      }
+
+      unmount();
+      cleanup();
+      vi.clearAllMocks();
+    }
+    expect(
+      nonSelectableTested,
+      'at least one non-selectable module must exist across the Phase 05 registry; a registry mutation to all-selectable would silently void this guard',
+    ).toBeGreaterThan(0);
+  });
+
+  it('every selectable module across every primary tab dispatches onSelectModule exactly once on click/Enter/Space and closes the menu', () => {
+    let selectableTested = 0;
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const registrySelectable = getModulesForPrimaryTab(tabId).filter((m) => m.selectable);
+      if (registrySelectable.length === 0) {
+        // Registry-legitimate (e.g. estimating-preconstruction is all
+        // deferred today). Skip selectable assertions for this tab.
+        continue;
+      }
+      for (const moduleEntry of registrySelectable) {
+        for (const activation of ['click', 'enter', 'space'] as const) {
+          const { container, onSelectModule, unmount } = renderTabs({
+            activePrimaryTabId: tabId,
+          });
+          fireEvent.click(getToggle(container, tabId));
+          const item = getModuleItem(container, moduleEntry.id);
+          expect(item, `selectable ${moduleEntry.id} must render in ${tabId} menu`).not.toBeNull();
+          expect(item!.tagName).toBe('BUTTON');
+          expect(item!.getAttribute('aria-disabled')).not.toBe('true');
+          expect(item!.getAttribute('data-pcc-module-selectable')).toBe('true');
+
+          if (activation === 'click') {
+            fireEvent.click(item!);
+          } else if (activation === 'enter') {
+            fireEvent.keyDown(item!, { key: 'Enter' });
+          } else {
+            fireEvent.keyDown(item!, { key: ' ' });
+          }
+          expect(
+            onSelectModule,
+            `${activation} on selectable ${moduleEntry.id} (${tabId}) must dispatch exactly once`,
+          ).toHaveBeenCalledTimes(1);
+          expect(onSelectModule).toHaveBeenCalledWith(moduleEntry.id);
+          expect(
+            getMenu(container, tabId),
+            `menu for ${tabId} must close after selectable ${moduleEntry.id} ${activation}`,
+          ).toBeNull();
+
+          selectableTested += 1;
+          unmount();
+          cleanup();
+          vi.clearAllMocks();
+        }
+      }
+    }
+    expect(
+      selectableTested,
+      'at least one selectable module must exist across the Phase 05 registry; a registry mutation to all-deferred would silently void this guard',
+    ).toBeGreaterThan(0);
   });
 });
