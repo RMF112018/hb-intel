@@ -1156,6 +1156,9 @@ importers:
       '@hbc/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit
+      echarts:
+        specifier: ^5.6.0
+        version: 5.6.0
       react:
         specifier: ^18.3.1
         version: 18.3.1
