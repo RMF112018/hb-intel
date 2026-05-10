@@ -8,7 +8,12 @@ import {
   type PccNavigationModule,
   type PccPrimaryTabId,
 } from '@hbc/models/pcc';
+import { PccAnalyticsCard } from '../../analytics';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
+import {
+  ESTIMATING_PRECONSTRUCTION_ANALYTICS_SPAN_OVERRIDES,
+  ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS,
+} from './estimatingPreconstructionAnalytics';
 import styles from './PccPrimaryDashboardSurface.module.css';
 
 export interface PccPrimaryDashboardSurfaceProps {
@@ -103,6 +108,29 @@ export const PccPrimaryDashboardSurface: FC<PccPrimaryDashboardSurfaceProps> = (
           ))}
         </dl>
       </PccDashboardCard>
+
+      {activePrimaryTabId === 'estimating-preconstruction' ? (
+        <>
+          <PccAnalyticsCard
+            viewModel={ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS.handoffContinuityPreview}
+            footprint="standard"
+            tier="tier2"
+            region="operational"
+            spanOverrides={
+              ESTIMATING_PRECONSTRUCTION_ANALYTICS_SPAN_OVERRIDES.handoffContinuityPreview
+            }
+          />
+          <PccAnalyticsCard
+            viewModel={ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS.estimateExposurePreview}
+            footprint="standard"
+            tier="tier2"
+            region="operational"
+            spanOverrides={
+              ESTIMATING_PRECONSTRUCTION_ANALYTICS_SPAN_OVERRIDES.estimateExposurePreview
+            }
+          />
+        </>
+      ) : null}
 
       <PccDashboardCard
         footprint="standard"

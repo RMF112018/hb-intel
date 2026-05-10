@@ -90,11 +90,22 @@ describe('PccSurfaceRouter — Phase 05 primary-tab routing', () => {
 });
 
 describe('PccSurfaceRouter — Phase 05 reusable PccPrimaryDashboardSurface', () => {
+  // Phase 06 Prompt 07 — `estimating-preconstruction` is the sole exception:
+  // the surface inserts two preview analytics cards (Handoff Continuity
+  // Preview + Estimate Exposure Preview) between Module status and the
+  // selected-module card, so estimating renders 5 direct cards (hero +
+  // Module status + 2 analytics + Selected module). All other primary
+  // dashboards continue to render exactly 3 direct cards.
   for (const tabId of NEW_DASHBOARD_PRIMARY_TABS) {
-    it(`'${tabId}' renders the three Phase 05 dashboard cards as direct bento children`, () => {
+    const expectedCount = tabId === 'estimating-preconstruction' ? 5 : 3;
+    const cardSummary =
+      tabId === 'estimating-preconstruction'
+        ? 'five direct bento children (hero + Module status + 2 analytics + Selected module)'
+        : 'three direct bento children (hero + Module status + Selected module)';
+    it(`'${tabId}' renders ${cardSummary}`, () => {
       const { container } = renderRouter(tabId);
       const cards = getDirectChildCards(container);
-      expect(cards.length).toBe(3);
+      expect(cards.length).toBe(expectedCount);
       // No nested cards — every card is at the top level.
       expect(container.querySelectorAll('[data-pcc-card] [data-pcc-card]').length).toBe(0);
     });
