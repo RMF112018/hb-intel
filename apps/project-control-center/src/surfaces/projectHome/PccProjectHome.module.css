@@ -278,3 +278,44 @@
   color: var(--pcc-color-text-muted);
   font-style: italic;
 }
+
+/* Phase 06 Prompt 02 — Project Home gateway action (rendered in the
+   PccDashboardCard `action` slot). Native button + visible reason text
+   for disabled/preview-only gateways. */
+
+.gatewayAction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.gatewayActionButton {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--pcc-radius-sm);
+  border: 1px solid var(--pcc-color-border);
+  background: var(--pcc-color-canvas);
+  color: var(--pcc-color-text-primary);
+  cursor: pointer;
+}
+
+.gatewayActionButton:hover:not(:disabled) {
+  background: var(--pcc-color-surface);
+}
+
+.gatewayActionButton:disabled {
+  cursor: not-allowed;
+  color: var(--pcc-color-text-muted);
+  opacity: 0.78;
+}
+
+.gatewayActionReason {
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+  text-align: right;
+  max-inline-size: 24ch;
+}

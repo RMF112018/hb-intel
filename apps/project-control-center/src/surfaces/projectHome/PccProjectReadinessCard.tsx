@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { SAMPLE_WORKFLOW_ITEMS, type IWorkflowItem, type WorkflowModuleId } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
+import { PccProjectHomeGatewayAction } from './PccProjectHomeGatewayAction';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
@@ -43,13 +44,24 @@ const ProjectReadinessBody: FC = () => {
   );
 };
 
-export const PccProjectReadinessCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
+export const PccProjectReadinessCard: FC<PccProjectHomeCardProps> = ({
+  state = 'preview',
+  spanOverrides,
+  gateway,
+  onSelectModule,
+}) => (
   <PccDashboardCard
     footprint="standard"
     tier="tier2"
     region="operational"
     eyebrow="Readiness"
     title="Project Readiness"
+    spanOverrides={spanOverrides}
+    action={
+      gateway ? (
+        <PccProjectHomeGatewayAction gateway={gateway} onSelectModule={onSelectModule} />
+      ) : undefined
+    }
   >
     {state === 'preview' ? <ProjectReadinessBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>

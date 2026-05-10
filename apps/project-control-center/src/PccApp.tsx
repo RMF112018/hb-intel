@@ -34,6 +34,7 @@ export const PccApp: FC<PccAppProps> = ({ forceMode, readModelClient }) => {
         activePrimaryTabId={shell.activePrimaryTabId}
         activeModuleId={shell.activeModuleId}
         readModelClient={readModelClient}
+        onSelectModule={shell.selectModule}
       />
     </PccShell>
   );

@@ -6,6 +6,7 @@ import {
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { PccProjectHomeGatewayAction } from './PccProjectHomeGatewayAction';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
@@ -62,6 +63,9 @@ const MissingConfigurationsBody: FC<{
 export const PccMissingConfigurationsCard: FC<PccMissingConfigurationsCardProps> = ({
   state = 'preview',
   missingConfigurations,
+  spanOverrides,
+  gateway,
+  onSelectModule,
 }) => (
   <PccDashboardCard
     footprint="standard"
@@ -69,6 +73,12 @@ export const PccMissingConfigurationsCard: FC<PccMissingConfigurationsCardProps>
     region="state"
     eyebrow="Setup"
     title="Missing Configurations"
+    spanOverrides={spanOverrides}
+    action={
+      gateway ? (
+        <PccProjectHomeGatewayAction gateway={gateway} onSelectModule={onSelectModule} />
+      ) : undefined
+    }
   >
     {state === 'preview' ? (
       <MissingConfigurationsBody

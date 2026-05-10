@@ -11,6 +11,7 @@ import {
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { PccProjectHomeGatewayAction } from './PccProjectHomeGatewayAction';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
@@ -158,6 +159,9 @@ function resolveDocumentControlSources(
 export const PccDocumentControlCard: FC<PccDocumentControlCardProps> = ({
   state = 'preview',
   sources,
+  spanOverrides,
+  gateway,
+  onSelectModule,
 }) => (
   <PccDashboardCard
     footprint="wide"
@@ -165,6 +169,12 @@ export const PccDocumentControlCard: FC<PccDocumentControlCardProps> = ({
     region="operational"
     eyebrow="Documents"
     title="Document Control Center"
+    spanOverrides={spanOverrides}
+    action={
+      gateway ? (
+        <PccProjectHomeGatewayAction gateway={gateway} onSelectModule={onSelectModule} />
+      ) : undefined
+    }
   >
     {state === 'preview' ? (
       <DocumentControlBody sources={resolveDocumentControlSources(sources)} />

@@ -3,6 +3,7 @@ import { SAMPLE_SITE_HEALTH_SUMMARY, type ISiteHealthSummary } from '@hbc/models
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { PccProjectHomeGatewayAction } from './PccProjectHomeGatewayAction';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
@@ -55,6 +56,9 @@ const SiteHealthSummaryBody: FC<{ summary: ISiteHealthSummary }> = ({ summary })
 export const PccSiteHealthSummaryCard: FC<PccSiteHealthSummaryCardProps> = ({
   state = 'preview',
   summary,
+  spanOverrides,
+  gateway,
+  onSelectModule,
 }) => (
   <PccDashboardCard
     footprint="standard"
@@ -62,6 +66,12 @@ export const PccSiteHealthSummaryCard: FC<PccSiteHealthSummaryCardProps> = ({
     region="operational"
     eyebrow="Site Health"
     title="Site Health Summary"
+    spanOverrides={spanOverrides}
+    action={
+      gateway ? (
+        <PccProjectHomeGatewayAction gateway={gateway} onSelectModule={onSelectModule} />
+      ) : undefined
+    }
   >
     {state === 'preview' ? (
       <SiteHealthSummaryBody summary={summary ?? SAMPLE_SITE_HEALTH_SUMMARY} />

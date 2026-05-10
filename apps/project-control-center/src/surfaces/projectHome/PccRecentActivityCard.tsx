@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { SAMPLE_BUSINESS_AUDIT_EVENTS } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
+import { PccProjectHomeGatewayAction } from './PccProjectHomeGatewayAction';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
@@ -35,13 +36,24 @@ const RecentActivityBody: FC = () => (
   </ul>
 );
 
-export const PccRecentActivityCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
+export const PccRecentActivityCard: FC<PccProjectHomeCardProps> = ({
+  state = 'preview',
+  spanOverrides,
+  gateway,
+  onSelectModule,
+}) => (
   <PccDashboardCard
     footprint="tall"
     tier="tier3"
     region="reference"
     eyebrow="Activity"
     title="Recent Activity"
+    spanOverrides={spanOverrides}
+    action={
+      gateway ? (
+        <PccProjectHomeGatewayAction gateway={gateway} onSelectModule={onSelectModule} />
+      ) : undefined
+    }
   >
     {state === 'preview' ? <RecentActivityBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>

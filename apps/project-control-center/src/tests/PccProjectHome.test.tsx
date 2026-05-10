@@ -500,18 +500,22 @@ describe('Project Home bento dashboard', () => {
         expect(i, `card '${t}' should appear`).toBeGreaterThanOrEqual(0);
         return i;
       };
-      // Lifecycle Timeline is promoted above Procore + reference + history.
+      // Phase 06 Prompt 02 — operational spine renders first; lifecycle
+      // section follows below the spine.
+      expect(idx('External Platforms')).toBeLessThan(idx('Lifecycle Timeline'));
+      expect(idx('Team Snapshot')).toBeLessThan(idx('Lifecycle Timeline'));
+      expect(idx('Recent Activity')).toBeLessThan(idx('Lifecycle Timeline'));
+      // Lifecycle Timeline is rendered above Procore + Ask HBI inside the
+      // unified-lifecycle section's renderAfterTimeline slot.
+      expect(idx('Lifecycle Timeline')).toBeLessThan(idx('Ask HBI — Grounded Project Answers'));
       expect(idx('Lifecycle Timeline')).toBeLessThan(idx('Procore snapshot'));
-      expect(idx('Lifecycle Timeline')).toBeLessThan(idx('External Platforms'));
-      expect(idx('Lifecycle Timeline')).toBeLessThan(idx('Team Snapshot'));
-      expect(idx('Lifecycle Timeline')).toBeLessThan(idx('Recent Activity'));
-      // Ask HBI is promoted above Procore and is not last.
+      // Ask HBI sits inside renderAfterTimeline (above Procore snapshot).
       expect(idx('Ask HBI — Grounded Project Answers')).toBeLessThan(idx('Procore snapshot'));
-      expect(idx('Ask HBI — Grounded Project Answers')).toBeLessThan(titles.length - 1);
-      // Lower-detail lifecycle cards remain at the tail.
-      expect(idx('Project Memory')).toBeGreaterThan(idx('Recent Activity'));
-      expect(idx('Project Lens')).toBeGreaterThan(idx('Recent Activity'));
-      expect(idx('Related Records')).toBeGreaterThan(idx('Recent Activity'));
+      // Lower-detail lifecycle cards remain at the tail (after Procore
+      // snapshot, which is the last node inside renderAfterTimeline).
+      expect(idx('Project Memory')).toBeGreaterThan(idx('Procore snapshot'));
+      expect(idx('Project Lens')).toBeGreaterThan(idx('Procore snapshot'));
+      expect(idx('Related Records')).toBeGreaterThan(idx('Procore snapshot'));
     });
 
     // Bento direct-child invariant. After Wave 15A wave-b9 Prompt 4B-01 the
@@ -660,10 +664,14 @@ describe('Project Home bento dashboard', () => {
       expect(i, `card '${t}' should appear`).toBeGreaterThanOrEqual(0);
       return i;
     };
-    expect(idx('Approvals & Checkpoints')).toBeLessThan(idx('Project Readiness'));
-    expect(idx('Project Readiness')).toBeLessThan(idx('Document Control Center'));
-    expect(idx('Document Control Center')).toBeLessThan(idx('Site Health Summary'));
-    expect(idx('Site Health Summary')).toBeLessThan(idx('Missing Configurations'));
+    // Phase 06 Prompt 02 — canonical operational spine order:
+    // Priority Actions → Site Health Summary → Document Control Center →
+    // Project Readiness → Approvals & Checkpoints → Missing Configurations
+    // → External Platforms.
+    expect(idx('Site Health Summary')).toBeLessThan(idx('Document Control Center'));
+    expect(idx('Document Control Center')).toBeLessThan(idx('Project Readiness'));
+    expect(idx('Project Readiness')).toBeLessThan(idx('Approvals & Checkpoints'));
+    expect(idx('Approvals & Checkpoints')).toBeLessThan(idx('Missing Configurations'));
     expect(idx('Missing Configurations')).toBeLessThan(idx('External Platforms'));
   });
 

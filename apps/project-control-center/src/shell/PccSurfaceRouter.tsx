@@ -43,6 +43,12 @@ export interface PccSurfaceRouterProps {
    * driven.
    */
   readModelClient?: IPccSurfaceRouterReadModelClient;
+  /**
+   * Phase 06 Prompt 02 — `shell.selectModule` callback. Threaded only to
+   * `PccProjectHome` for the Phase 06 card-level gateway wiring; other
+   * surfaces are not yet integrated with this seam.
+   */
+  onSelectModule?: (id: PccModuleId) => void;
 }
 
 /**
@@ -68,11 +74,12 @@ export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
   activePrimaryTabId,
   activeModuleId,
   readModelClient,
+  onSelectModule,
 }) => {
   const tabId = normalizePrimaryTabId(activePrimaryTabId);
   switch (tabId) {
     case 'project-home':
-      return <PccProjectHome readModelClient={readModelClient} />;
+      return <PccProjectHome readModelClient={readModelClient} onSelectModule={onSelectModule} />;
     case 'documents':
       return <PccDocumentsSurface readModelClient={readModelClient} />;
     case 'core-tools':
@@ -85,7 +92,7 @@ export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
         <PccPrimaryDashboardSurface activePrimaryTabId={tabId} activeModuleId={activeModuleId} />
       );
     default:
-      return <PccProjectHome readModelClient={readModelClient} />;
+      return <PccProjectHome readModelClient={readModelClient} onSelectModule={onSelectModule} />;
   }
 };
 

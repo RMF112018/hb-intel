@@ -21,6 +21,7 @@ import { SAMPLE_APPROVAL_CHECKPOINTS, type ApprovalRequestState } from '@hbc/mod
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill, type PccStatusPillTone } from '../../ui/PccStatusPill';
+import { PccProjectHomeGatewayAction } from './PccProjectHomeGatewayAction';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
@@ -152,6 +153,9 @@ const FixtureBody: FC = () => (
 export const PccApprovalsCheckpointsCard: FC<PccApprovalsCheckpointsCardProps> = ({
   state = 'preview',
   viewModel,
+  spanOverrides,
+  gateway,
+  onSelectModule,
 }) => {
   const sourceMarker = viewModel ? 'read-model' : 'fixture';
   return (
@@ -161,6 +165,12 @@ export const PccApprovalsCheckpointsCard: FC<PccApprovalsCheckpointsCardProps> =
       region="operational"
       eyebrow="Approvals"
       title="Approvals & Checkpoints"
+      spanOverrides={spanOverrides}
+      action={
+        gateway ? (
+          <PccProjectHomeGatewayAction gateway={gateway} onSelectModule={onSelectModule} />
+        ) : undefined
+      }
     >
       <div data-pcc-approvals-card-source={sourceMarker}>
         {state === 'preview' ? (

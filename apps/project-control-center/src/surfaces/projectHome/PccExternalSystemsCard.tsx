@@ -3,6 +3,7 @@ import { SAMPLE_EXTERNAL_SYSTEM_LINKS } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
+import { PccProjectHomeGatewayAction } from './PccProjectHomeGatewayAction';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
@@ -75,13 +76,24 @@ const ExternalSystemsBody: FC = () => (
   </>
 );
 
-export const PccExternalSystemsCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
+export const PccExternalSystemsCard: FC<PccProjectHomeCardProps> = ({
+  state = 'preview',
+  spanOverrides,
+  gateway,
+  onSelectModule,
+}) => (
   <PccDashboardCard
     footprint="standard"
     tier="tier3"
     region="reference"
     eyebrow="Integrations"
     title="External Platforms"
+    spanOverrides={spanOverrides}
+    action={
+      gateway ? (
+        <PccProjectHomeGatewayAction gateway={gateway} onSelectModule={onSelectModule} />
+      ) : undefined
+    }
   >
     {state === 'preview' ? <ExternalSystemsBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>

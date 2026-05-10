@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
+import { PccProjectHomeGatewayAction } from './PccProjectHomeGatewayAction';
 import type { PccProjectHomeCardProps } from './shared';
 import { TEAM_SNAPSHOT_PLACEHOLDER } from './teamSnapshotPlaceholder';
 import styles from './PccProjectHome.module.css';
@@ -25,13 +26,24 @@ const TeamSnapshotBody: FC = () => (
   </div>
 );
 
-export const PccTeamSnapshotCard: FC<PccProjectHomeCardProps> = ({ state = 'preview' }) => (
+export const PccTeamSnapshotCard: FC<PccProjectHomeCardProps> = ({
+  state = 'preview',
+  spanOverrides,
+  gateway,
+  onSelectModule,
+}) => (
   <PccDashboardCard
     footprint="rail"
     tier="tier3"
     region="rail"
     eyebrow="People"
     title="Team Snapshot"
+    spanOverrides={spanOverrides}
+    action={
+      gateway ? (
+        <PccProjectHomeGatewayAction gateway={gateway} onSelectModule={onSelectModule} />
+      ) : undefined
+    }
   >
     {state === 'preview' ? <TeamSnapshotBody /> : <PccPreviewState state={state} />}
   </PccDashboardCard>

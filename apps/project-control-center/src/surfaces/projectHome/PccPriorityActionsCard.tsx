@@ -4,6 +4,7 @@ import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { buildPccPriorityActionsRailViewModel } from './priorityActionsRailAdapter';
 import { PccPriorityActionsRail } from './PccPriorityActionsRail';
+import { PccProjectHomeGatewayAction } from './PccProjectHomeGatewayAction';
 import type { PccProjectHomeCardProps } from './shared';
 
 interface PccPriorityActionsCardProps extends PccProjectHomeCardProps {
@@ -24,6 +25,9 @@ interface PccPriorityActionsCardProps extends PccProjectHomeCardProps {
 export const PccPriorityActionsCard: FC<PccPriorityActionsCardProps> = ({
   state = 'preview',
   actions,
+  spanOverrides,
+  gateway,
+  onSelectModule,
 }) => (
   <PccDashboardCard
     footprint="wide"
@@ -31,6 +35,12 @@ export const PccPriorityActionsCard: FC<PccPriorityActionsCardProps> = ({
     region="operational"
     eyebrow="Today"
     title="Priority Actions"
+    spanOverrides={spanOverrides}
+    action={
+      gateway ? (
+        <PccProjectHomeGatewayAction gateway={gateway} onSelectModule={onSelectModule} />
+      ) : undefined
+    }
   >
     {state === 'preview' ? (
       <PccPriorityActionsRail
