@@ -1,6 +1,6 @@
 import { afterEach, describe, it, expect } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import { PCC_PRIMARY_TAB_IDS } from '@hbc/models/pcc';
+import { PCC_PRIMARY_TAB_IDS, getPrimaryNavigationTab } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import {
   PCC_RESPONSIVE_MODES,
@@ -8,6 +8,7 @@ import {
   type PccResponsiveMode,
 } from '../layout/footprints';
 import { PCC_SHELL_SURFACE_HEADER_METADATA } from '../shell/surfaceHeaderMetadata';
+import { PCC_SURFACE_HERO_DESCRIPTIONS } from '../shell/surfaceHeroCopy';
 import { getPrimaryTabSelectionControl } from './shellSurfaceSelection';
 
 const COMPACT_MODES = new Set<PccResponsiveMode>([
@@ -221,75 +222,81 @@ describe('resolveResponsiveMode 8-mode boundary contract', () => {
 });
 
 /**
- * Phase 05 wave-b10 Prompt 04 intentionally keeps the hero stable on the
- * legacy Project Home view-model until Prompt 06 migrates hero/header
- * metadata to the Phase 05 primary-tab axis. The shell-rendered hero
- * production-band markers (heroHighlights + governanceMicrocopy) remain
- * sourced from `PCC_SHELL_SURFACE_HEADER_METADATA['project-home']` for
- * every primary tab in this prompt; per-primary-tab hero parity becomes
- * the Prompt 06 contract.
+ * Phase 05 wave-b10 Prompt 06 — hero parity per primary tab. The shell
+ * hero (secondary title, surface description, heroHighlights,
+ * governanceMicrocopy) tracks `activePrimaryTabId` end-to-end. The
+ * Prompt 04 stable-hero contract (hero pinned to Project Home for every
+ * primary tab) is retired here.
  */
-describe('PccShell hero stable at Project Home until Prompt 06 (Phase 05 wave-b10 Prompt 04)', () => {
+describe('PccShell hero parity per Phase 05 primary tab (Prompt 06 final)', () => {
   afterEach(() => {
     cleanup();
   });
 
-  function expectHeroBandShowsProjectHomeMetadata(container: HTMLElement): void {
+  it('default render shows the Project Home production hero band and the global Client fact', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
     const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['project-home'];
-
     expect(container.querySelector('[data-pcc-hero-secondary-title]')?.textContent).toBe(
       'Project Home',
+    );
+    expect(container.querySelector('[data-pcc-hero-surface-description]')?.textContent).toBe(
+      PCC_SURFACE_HERO_DESCRIPTIONS['project-home'],
     );
 
     const highlightZone = container.querySelector('[data-pcc-hero-highlights]');
     expect(highlightZone).not.toBeNull();
-    const highlights = highlightZone!.querySelectorAll('[data-pcc-hero-highlight]');
-    expect(highlights).toHaveLength(metadata.heroHighlights.length);
-    metadata.heroHighlights.forEach((expectedHighlight, index) => {
-      const node = highlights[index]!;
-      expect(node.getAttribute('data-pcc-hero-highlight')).toBe(expectedHighlight.id);
-    });
+    const highlightIds = Array.from(
+      highlightZone!.querySelectorAll('[data-pcc-hero-highlight]'),
+    ).map((n) => n.getAttribute('data-pcc-hero-highlight'));
+    expect(highlightIds).toEqual(metadata.heroHighlights.map((h) => h.id));
 
-    const microcopyZone = container.querySelector('[data-pcc-hero-governance-microcopy]');
-    expect(microcopyZone).not.toBeNull();
-    const microcopyItems = microcopyZone!.querySelectorAll(
-      '[data-pcc-hero-governance-microcopy-item]',
-    );
-    expect(microcopyItems).toHaveLength(metadata.governanceMicrocopy.length);
-    metadata.governanceMicrocopy.forEach((expectedMicrocopy, index) => {
-      const node = microcopyItems[index]!;
-      expect(node.getAttribute('data-pcc-hero-governance-microcopy-item')).toBe(
-        expectedMicrocopy.id,
-      );
-    });
-  }
-
-  it('default render shows the Project Home production hero band and the global Client fact', () => {
-    const { container } = render(<PccApp forceMode="standardLaptop" />);
-    expectHeroBandShowsProjectHomeMetadata(container);
     const clientCell = container.querySelector('[data-pcc-hero-fact-client]');
     expect(clientCell, 'Project Home hero must render the Client fact').not.toBeNull();
     expect(clientCell!.querySelector('dt')?.textContent).toBe('Client');
     expect(clientCell!.querySelector('dd')?.textContent).toBe('Sample Owner LLC');
   });
 
-  it('hero stays on the Project Home view-model after every Phase 05 primary tab click (Prompt 06 will migrate hero band to track activePrimaryTabId)', () => {
-    const { container } = render(<PccApp forceMode="standardLaptop" />);
-    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+  for (const tabId of PCC_PRIMARY_TAB_IDS) {
+    it(`'${tabId}' click flips hero secondary title, description, highlights, and microcopy in lockstep with the active primary tab`, () => {
+      const { container } = render(<PccApp forceMode="standardLaptop" />);
       const tab = getPrimaryTabSelectionControl(container, tabId);
       expect(tab, `primary tab '${tabId}' should render`).not.toBeNull();
       fireEvent.click(tab!);
 
-      // Active panel marker tracks the Phase 05 primary tab id…
       const shellPanel = container.querySelector(
         `main[role="tabpanel"][data-pcc-active-surface-panel="${tabId}"]`,
       );
       expect(shellPanel, `shell panel must own active primary tab '${tabId}'`).not.toBeNull();
 
-      // …but the hero band stays on the legacy Project Home view-model
-      // for the duration of Prompt 04. Prompt 06 will replace this with
-      // per-primary-tab hero parity.
-      expectHeroBandShowsProjectHomeMetadata(container);
-    }
+      const expectedLabel = getPrimaryNavigationTab(tabId).label;
+      expect(container.querySelector('[data-pcc-hero-secondary-title]')?.textContent).toBe(
+        expectedLabel,
+      );
+
+      expect(container.querySelector('[data-pcc-hero-surface-description]')?.textContent).toBe(
+        PCC_SURFACE_HERO_DESCRIPTIONS[tabId],
+      );
+
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
+      const highlightIds = Array.from(container.querySelectorAll('[data-pcc-hero-highlight]')).map(
+        (n) => n.getAttribute('data-pcc-hero-highlight'),
+      );
+      expect(highlightIds).toEqual(metadata.heroHighlights.map((h) => h.id));
+
+      const microcopyIds = Array.from(
+        container.querySelectorAll('[data-pcc-hero-governance-microcopy-item]'),
+      ).map((n) => n.getAttribute('data-pcc-hero-governance-microcopy-item'));
+      expect(microcopyIds).toEqual(metadata.governanceMicrocopy.map((m) => m.id));
+    });
+  }
+
+  it('documents hero secondary title is "Document Control" and never the bare "Documents"', () => {
+    const { container } = render(<PccApp forceMode="standardLaptop" />);
+    const tab = getPrimaryTabSelectionControl(container, 'documents');
+    expect(tab).not.toBeNull();
+    fireEvent.click(tab!);
+    const secondary = container.querySelector('[data-pcc-hero-secondary-title]')?.textContent;
+    expect(secondary).toBe('Document Control');
+    expect(secondary).not.toBe('Documents');
   });
 });

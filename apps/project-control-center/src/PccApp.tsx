@@ -19,7 +19,7 @@ export interface PccAppProps {
 
 export const PccApp: FC<PccAppProps> = ({ forceMode, readModelClient }) => {
   const shell = usePccShellState();
-  const heroViewModel = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, shell.activeSurfaceId);
+  const heroViewModel = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, shell.activePrimaryTabId);
 
   return (
     <PccShell

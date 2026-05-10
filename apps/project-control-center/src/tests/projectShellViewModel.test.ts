@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
-  PCC_MVP_SURFACE_IDS,
+  PCC_PRIMARY_TAB_IDS,
   PCC_PROJECT_STAGES,
   SAMPLE_PROJECT_PROFILE,
+  getPrimaryNavigationTab,
   type IProjectProfile,
+  type PccPrimaryTabId,
   type PccProjectStage,
 } from '@hbc/models/pcc';
 import { PCC_SURFACE_HERO_DESCRIPTIONS } from '../shell/surfaceHeroCopy';
@@ -40,7 +42,6 @@ describe('formatScheduledCompletion', () => {
   });
 
   it('is timezone-stable (UTC anchor)', () => {
-    // Boundary case: ISO day 01 should not regress to the previous month.
     expect(formatScheduledCompletion('2027-01-01')).toBe('Jan 1, 2027');
     expect(formatScheduledCompletion('2027-12-31')).toBe('Dec 31, 2027');
   });
@@ -56,8 +57,6 @@ describe('formatScheduledCompletion', () => {
 });
 
 describe('formatProjectStage', () => {
-  // Iterate the canonical PccProjectStage tuple from @hbc/models so any new
-  // member added in @hbc/models forces a label-map update via TypeScript.
   const expectedLabels: Record<PccProjectStage, string> = {
     lead: 'Lead',
     estimating: 'Estimating',
@@ -88,22 +87,28 @@ describe('deriveShellHeroViewModel', () => {
     expect(vm.projectStageLabel).toBe('Active Construction');
   });
 
-  // Wave 15A wave-b9 Prompt 4B-01 — `clientDisplay` is profile-derived
-  // and global (the existing facts row already renders globally across
-  // PCC surfaces), not surface-aware.
-  it('derives clientDisplay identically across every surface (proves global, not surface-scoped)', () => {
-    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId);
+  // Phase 05 wave-b10 Prompt 06 — `clientDisplay` is profile-derived
+  // and global, not primary-tab-aware.
+  it('derives clientDisplay identically across every primary tab (proves global, not primary-tab-scoped)', () => {
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, tabId);
       expect(vm.clientDisplay).toBe(SAMPLE_PROJECT_PROFILE.clientName);
     }
   });
 
-  for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-    it(`uses the local hero-copy description for ${surfaceId} (never PCC_MVP_SURFACES.description)`, () => {
-      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId);
-      expect(vm.surfaceDescription).toBe(PCC_SURFACE_HERO_DESCRIPTIONS[surfaceId]);
+  for (const tabId of PCC_PRIMARY_TAB_IDS) {
+    it(`uses the local hero-copy description for ${tabId}`, () => {
+      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, tabId);
+      expect(vm.surfaceDescription).toBe(PCC_SURFACE_HERO_DESCRIPTIONS[tabId]);
     });
   }
+
+  it('secondaryTitle equals the registry primary-tab label for every primary tab', () => {
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, tabId);
+      expect(vm.secondaryTitle).toBe(getPrimaryNavigationTab(tabId).label);
+    }
+  });
 
   it('renders "Not listed" when optional profile fields are absent', () => {
     const sparse: IProjectProfile = {
@@ -119,12 +124,20 @@ describe('deriveShellHeroViewModel', () => {
     expect(vm.estimatedValueDisplay).toBe('Not listed');
     expect(vm.scheduledCompletionDisplay).toBe('Not listed');
   });
+
+  it('invalid input passed through an unsafe cast normalizes to project-home', () => {
+    const vm = deriveShellHeroViewModel(
+      SAMPLE_PROJECT_PROFILE,
+      'not-a-tab' as unknown as PccPrimaryTabId,
+    );
+    expect(vm.secondaryTitle).toBe('Project Home');
+  });
 });
 
-describe('deriveShellHeroViewModel — wave-b7 Prompt 02 surface header metadata', () => {
-  for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-    it(`exposes non-empty surfaceSummaryItems / surfaceCues / readOnlyCue / heroHighlights / governanceMicrocopy for "${surfaceId}"`, () => {
-      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId);
+describe('deriveShellHeroViewModel — Phase 05 wave-b10 Prompt 06 surface header metadata', () => {
+  for (const tabId of PCC_PRIMARY_TAB_IDS) {
+    it(`exposes non-empty surfaceSummaryItems / surfaceCues / readOnlyCue / heroHighlights / governanceMicrocopy for "${tabId}"`, () => {
+      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, tabId);
       expect(vm.surfaceSummaryItems.length).toBeGreaterThan(0);
       expect(vm.surfaceCues.length).toBeGreaterThan(0);
       expect(vm.readOnlyCue.trim().length).toBeGreaterThan(0);
@@ -154,9 +167,9 @@ describe('deriveShellHeroViewModel — wave-b7 Prompt 02 surface header metadata
   }
 
   it('mirrors the canonical PCC_SHELL_SURFACE_HEADER_METADATA entries by reference', () => {
-    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId);
-      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, tabId);
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
       expect(vm.surfaceSummaryItems).toBe(metadata.surfaceSummaryItems);
       expect(vm.surfaceCues).toBe(metadata.surfaceCues);
       expect(vm.readOnlyCue).toBe(metadata.readOnlyCue);
@@ -178,37 +191,106 @@ describe('deriveShellHeroViewModel — wave-b7 Prompt 02 surface header metadata
     expect(vm.readOnlyCue).toContain('writeback');
   });
 
-  it('Approvals metadata locks no-approval-authority and explicit-governed-action copy', () => {
-    const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'approvals');
-    const authority = vm.surfaceSummaryItems.find((item) => item.id === 'authority');
-    const approvalBoundary = vm.surfaceCues.find((cue) => cue.id === 'approval-boundary');
-    expect(authority?.value).toBe('No approval authority');
-    expect(approvalBoundary).toBeDefined();
-    expect(vm.readOnlyCue).toContain('approvals require explicit governed action');
+  it('Core Tools metadata communicates HBI advisory + no-decision + no-approval-authority + no-writeback', () => {
+    const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'core-tools');
+    const cue = vm.readOnlyCue.toLowerCase();
+    expect(cue).toContain('advisory');
+    expect(cue).toContain('decision');
+    expect(cue).toContain('approval');
+    // The PCC core-tools posture is "no write back" (separated form).
+    // Match both 'writeback' and 'write back' so the assertion holds
+    // across either canonical phrasing.
+    expect(cue).toMatch(/(writeback|write back)/);
+    const hbiNoAuthority = vm.governanceMicrocopy.find((m) => m.id === 'hbi-no-authority');
+    expect(hbiNoAuthority?.text).toBeDefined();
+    expect(hbiNoAuthority!.text.toLowerCase()).toContain('advisory');
+    expect(hbiNoAuthority!.text.toLowerCase()).toContain('decision');
+    expect(hbiNoAuthority!.text.toLowerCase()).toContain('approval');
+    expect(hbiNoAuthority!.text.toLowerCase()).toMatch(/(writeback|write back)/);
+  });
+
+  it('Documents metadata uses Document Control language (not the bare "Documents" label)', () => {
+    const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'documents');
+    const mode = vm.surfaceSummaryItems.find((item) => item.id === 'mode');
+    expect(mode?.value).toBe('Document Control preview');
+    expect(vm.surfaceDescription).toContain('Document Control');
+  });
+
+  it('Cost & Time metadata includes the Sage book-of-record posture', () => {
+    const vm = deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'cost-time');
+    expect(vm.readOnlyCue).toContain('Sage remains the accounting book of record');
+    const sageBoundary = vm.surfaceCues.find((cue) => cue.id === 'sage-book-of-record');
+    expect(sageBoundary?.value).toContain('Sage');
+    const sageMicrocopy = vm.governanceMicrocopy.find((m) => m.id === 'sage-no-writeback');
+    expect(sageMicrocopy?.text).toContain('Sage');
+    expect(sageMicrocopy!.text).toContain('does not write back');
   });
 
   it('does not leak forbidden DOM-marker strings into metadata copy', () => {
-    // Structural guard only — keeps `data-pcc-source-confidence` and
-    // `data-pcc-pill*` marker tokens out of the copy. Word blocklists
-    // (e.g. "writeback authority", "source of truth") are intentionally
-    // omitted: per-surface readOnlyCue copy legitimately describes the
-    // *absence* of writeback authority and asserting against the bare
-    // phrase produces false positives on negating copy
-    // (feedback_word_blocklists_break_on_corrected_copy).
     const serialized = JSON.stringify(PCC_SHELL_SURFACE_HEADER_METADATA);
     expect(serialized).not.toContain('data-pcc-source-confidence');
     expect(serialized).not.toContain('data-pcc-pill');
     expect(serialized).not.toContain('data-pcc-hero-pill');
   });
+
+  it('no metadata copy contains forbidden developer-facing terms', () => {
+    // Note: 'fixture' and 'mock' are intentionally NOT in this list
+    // because the carried-forward Project Home metadata uses
+    // "Fixture / read-model preview" as the visible product Source
+    // label — that posture statement is intentional and distinct from
+    // a developer-only scaffold artifact.
+    const FORBIDDEN_TERMS = [
+      'todo',
+      'tbd',
+      'placeholder',
+      'stub',
+      'debug',
+      'dev-only',
+      'not implemented',
+      'lorem',
+      'developer',
+      'code agent',
+      'prompt',
+      'repo',
+      'test selector',
+      'internal only',
+    ];
+    const escapeRegex = (input: string): string => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Concatenate every visible value (label and value strings) plus
+    // governance microcopy text and readOnlyCue. JSON.stringify includes
+    // 'fixture'-shaped tokens like `"surfaceSummaryItems"` (none of the
+    // forbidden terms are field-name substrings, so a serialized scan is
+    // safe), but to be conservative we scan only the visible value
+    // surface. The descriptions map is also scanned.
+    const visibleStrings: string[] = [];
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const m = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
+      visibleStrings.push(m.readOnlyCue);
+      for (const item of m.surfaceSummaryItems) {
+        visibleStrings.push(item.label, item.value);
+      }
+      for (const cue of m.surfaceCues) {
+        visibleStrings.push(cue.label, cue.value);
+      }
+      for (const h of m.heroHighlights) {
+        visibleStrings.push(h.label, h.value);
+      }
+      for (const m2 of m.governanceMicrocopy) {
+        visibleStrings.push(m2.text);
+      }
+      visibleStrings.push(PCC_SURFACE_HERO_DESCRIPTIONS[tabId]);
+    }
+    const haystack = visibleStrings.join(' ').toLowerCase();
+    for (const term of FORBIDDEN_TERMS) {
+      const re = new RegExp(`\\b${escapeRegex(term)}\\b`, 'i');
+      expect(re.test(haystack), `forbidden term '${term}' must not appear in hero copy`).toBe(
+        false,
+      );
+    }
+  });
 });
 
-describe('PCC_SHELL_SURFACE_HEADER_METADATA — wave-b7 Prompt 03 contract floor', () => {
-  // Affirmative-action verbs that must never appear AS A LABEL on a
-  // summary item or cue. We assert label *equality*, not substring on
-  // values, because per-surface readOnlyCue / cue value copy
-  // legitimately mentions these verbs in negating phrases (e.g.
-  // "No approve / reject action from this header"). Memory:
-  // feedback_word_blocklists_break_on_corrected_copy.
+describe('PCC_SHELL_SURFACE_HEADER_METADATA — Phase 05 wave-b10 Prompt 06 contract floor', () => {
   const AFFIRMATIVE_ACTION_LABELS = [
     'Approve',
     'Reject',
@@ -218,10 +300,10 @@ describe('PCC_SHELL_SURFACE_HEADER_METADATA — wave-b7 Prompt 03 contract floor
     'Launch',
   ] as const;
 
-  it.each([...PCC_MVP_SURFACE_IDS])(
+  it.each([...PCC_PRIMARY_TAB_IDS])(
     '"%s" carries at least three summary items and two cues with non-empty fields',
-    (surfaceId) => {
-      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+    (tabId) => {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
       expect(metadata.surfaceSummaryItems.length).toBeGreaterThanOrEqual(3);
       expect(metadata.surfaceCues.length).toBeGreaterThanOrEqual(2);
       expect(metadata.readOnlyCue.trim().length).toBeGreaterThan(0);
@@ -238,130 +320,113 @@ describe('PCC_SHELL_SURFACE_HEADER_METADATA — wave-b7 Prompt 03 contract floor
     },
   );
 
-  it('every entry covers exactly the canonical surface tuple', () => {
+  it('every entry covers exactly the canonical Phase 05 primary-tab tuple', () => {
     expect(Object.keys(PCC_SHELL_SURFACE_HEADER_METADATA).sort()).toEqual(
-      [...PCC_MVP_SURFACE_IDS].sort(),
+      [...PCC_PRIMARY_TAB_IDS].sort(),
     );
   });
 
+  it('PCC_SURFACE_HERO_DESCRIPTIONS covers exactly the canonical Phase 05 primary-tab tuple', () => {
+    expect(Object.keys(PCC_SURFACE_HERO_DESCRIPTIONS).sort()).toEqual(
+      [...PCC_PRIMARY_TAB_IDS].sort(),
+    );
+  });
+
+  it('every primary tab has at least three hero highlights', () => {
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
+      expect(
+        metadata.heroHighlights.length,
+        `primary tab '${tabId}' must define at least three hero highlights`,
+      ).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('every primary tab has at least two governance microcopy items', () => {
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
+      expect(
+        metadata.governanceMicrocopy.length,
+        `primary tab '${tabId}' must define at least two governance microcopy items`,
+      ).toBeGreaterThanOrEqual(2);
+    }
+  });
+
   it('no metadata value contains a live URL', () => {
-    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
       for (const item of metadata.surfaceSummaryItems) {
         expect(
           item.value,
-          `summary item "${item.id}" on "${surfaceId}" must not contain a live URL`,
+          `summary item "${item.id}" on "${tabId}" must not contain a live URL`,
         ).not.toMatch(/https?:\/\//i);
       }
       for (const cue of metadata.surfaceCues) {
-        expect(
-          cue.value,
-          `cue "${cue.id}" on "${surfaceId}" must not contain a live URL`,
-        ).not.toMatch(/https?:\/\//i);
+        expect(cue.value, `cue "${cue.id}" on "${tabId}" must not contain a live URL`).not.toMatch(
+          /https?:\/\//i,
+        );
       }
       expect(
         metadata.readOnlyCue,
-        `readOnlyCue on "${surfaceId}" must not contain a live URL`,
+        `readOnlyCue on "${tabId}" must not contain a live URL`,
       ).not.toMatch(/https?:\/\//i);
     }
   });
 
   it('no metadata label is an affirmative-action verb', () => {
     const affirmativeSet = new Set<string>(AFFIRMATIVE_ACTION_LABELS);
-    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
       for (const item of metadata.surfaceSummaryItems) {
         expect(
           affirmativeSet.has(item.label),
-          `summary item "${item.id}" on "${surfaceId}" must not use affirmative-action label "${item.label}"`,
+          `summary item "${item.id}" on "${tabId}" must not use affirmative-action label "${item.label}"`,
         ).toBe(false);
       }
       for (const cue of metadata.surfaceCues) {
         expect(
           affirmativeSet.has(cue.label),
-          `cue "${cue.id}" on "${surfaceId}" must not use affirmative-action label "${cue.label}"`,
+          `cue "${cue.id}" on "${tabId}" must not use affirmative-action label "${cue.label}"`,
         ).toBe(false);
       }
-      // Wave 15A wave-b9 Prompt 4B-02 — heroHighlights labels are
-      // production-visible end-user labels and must follow the same
-      // affirmative-action guard as the legacy metadata fields. The scan
-      // applies to LABELS only (per
-      // `feedback_word_blocklists_break_on_corrected_copy`); microcopy
-      // text and highlight values may legitimately reference governed
-      // actions in negating phrases.
       for (const highlight of metadata.heroHighlights) {
         expect(
           affirmativeSet.has(highlight.label),
-          `heroHighlight "${highlight.id}" on "${surfaceId}" must not use affirmative-action label "${highlight.label}"`,
+          `heroHighlight "${highlight.id}" on "${tabId}" must not use affirmative-action label "${highlight.label}"`,
         ).toBe(false);
       }
     }
   });
 
-  it('locks project-readiness no-execution cue (wave-b8 Prompt 02)', () => {
-    const cue = PCC_SHELL_SURFACE_HEADER_METADATA['project-readiness'].surfaceCues.find(
-      (c) => c.id === 'no-execution',
-    );
-    expect(cue, 'no-execution cue must exist on project-readiness').toBeDefined();
-    expect(cue!.label).toBe('Posture');
-    expect(cue!.value).toContain('No checklist completion');
-    expect(cue!.value).toContain('evidence execution');
-    expect(cue!.value).toContain('from this header');
-  });
-
-  it('locks external-systems launch-context cue (wave-b8 Prompt 02)', () => {
-    const cue = PCC_SHELL_SURFACE_HEADER_METADATA['external-systems'].surfaceCues.find(
-      (c) => c.id === 'launch-context',
-    );
-    expect(cue, 'launch-context cue must exist on external-systems').toBeDefined();
-    expect(cue!.label).toBe('Boundary');
-    expect(cue!.value).toContain('Launch links open');
-    expect(cue!.value).toContain('source system');
-    expect(cue!.value).toContain('new tab');
-  });
-
-  it('keeps cue and summary-item ids unique per surface', () => {
-    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+  it('keeps cue and summary-item ids unique per primary tab', () => {
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
       const cueIds = metadata.surfaceCues.map((c) => c.id);
       const summaryIds = metadata.surfaceSummaryItems.map((s) => s.id);
       expect(
         new Set(cueIds).size,
-        `cue ids on "${surfaceId}" must be unique (got [${cueIds.join(', ')}])`,
+        `cue ids on "${tabId}" must be unique (got [${cueIds.join(', ')}])`,
       ).toBe(cueIds.length);
       expect(
         new Set(summaryIds).size,
-        `summary item ids on "${surfaceId}" must be unique (got [${summaryIds.join(', ')}])`,
+        `summary item ids on "${tabId}" must be unique (got [${summaryIds.join(', ')}])`,
       ).toBe(summaryIds.length);
     }
   });
 
-  // Wave 15A wave-b9 Prompt 4B-02 — heroHighlights / governanceMicrocopy
-  // contract floor. heroHighlights ids and governanceMicrocopy ids must
-  // be unique per surface; every entry must have non-empty fields; every
-  // surface must define at least one of each.
-  it('every surface defines at least one heroHighlight and at least one governanceMicrocopy item with unique ids', () => {
-    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
-      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
-      expect(
-        metadata.heroHighlights.length,
-        `surface "${surfaceId}" must define at least one heroHighlight`,
-      ).toBeGreaterThan(0);
-      expect(
-        metadata.governanceMicrocopy.length,
-        `surface "${surfaceId}" must define at least one governanceMicrocopy item`,
-      ).toBeGreaterThan(0);
-
+  it('every primary tab defines unique heroHighlight + governanceMicrocopy ids with non-empty fields', () => {
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
       const highlightIds = metadata.heroHighlights.map((h) => h.id);
       expect(
         new Set(highlightIds).size,
-        `heroHighlight ids on "${surfaceId}" must be unique (got [${highlightIds.join(', ')}])`,
+        `heroHighlight ids on "${tabId}" must be unique (got [${highlightIds.join(', ')}])`,
       ).toBe(highlightIds.length);
 
       const microcopyIds = metadata.governanceMicrocopy.map((m) => m.id);
       expect(
         new Set(microcopyIds).size,
-        `governanceMicrocopy ids on "${surfaceId}" must be unique (got [${microcopyIds.join(', ')}])`,
+        `governanceMicrocopy ids on "${tabId}" must be unique (got [${microcopyIds.join(', ')}])`,
       ).toBe(microcopyIds.length);
 
       for (const highlight of metadata.heroHighlights) {
@@ -386,34 +451,35 @@ describe('PCC_SHELL_SURFACE_HEADER_METADATA — wave-b7 Prompt 03 contract floor
     expect(microcopyTexts.some((t) => t === 'Read-only preview')).toBe(true);
   });
 
-  it('Approvals heroHighlights cover approval-status / routing / escalations and microcopy preserves the governed-workflow reminder', () => {
-    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['approvals'];
+  it('Core Tools heroHighlights cover hbi-assistant / team-access / approvals-checkpoints', () => {
+    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['core-tools'];
     const highlightIds = metadata.heroHighlights.map((h) => h.id);
-    expect(highlightIds).toContain('approval-status');
-    expect(highlightIds).toContain('routing');
-    expect(highlightIds).toContain('escalations');
-    const microcopyTexts = metadata.governanceMicrocopy.map((m) => m.text).join(' ');
-    expect(microcopyTexts).toContain('governed approval workflows');
+    expect(highlightIds).toContain('hbi-assistant');
+    expect(highlightIds).toContain('team-access');
+    expect(highlightIds).toContain('approvals-checkpoints');
   });
 
-  it('Project Readiness governanceMicrocopy preserves the no-checklist-completion source-module reminder (governance posture from prior surfaceCues moved into demoted microcopy)', () => {
-    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['project-readiness'];
-    const noChecklistCompletion = metadata.governanceMicrocopy.find(
-      (m) => m.id === 'no-checklist-completion',
-    );
-    expect(noChecklistCompletion, 'no-checklist-completion microcopy must exist').toBeDefined();
-    expect(noChecklistCompletion!.text).toContain('Checklist completion');
-    expect(noChecklistCompletion!.text).toContain('source module');
+  it('Startup & Closeout heroHighlights cover startup-center / responsibility-matrix / closeout-warranty', () => {
+    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['startup-closeout'];
+    const highlightIds = metadata.heroHighlights.map((h) => h.id);
+    expect(highlightIds).toContain('startup-center');
+    expect(highlightIds).toContain('responsibility-matrix');
+    expect(highlightIds).toContain('closeout-warranty');
   });
 
-  it('External Systems governanceMicrocopy preserves the launch-context source-system-new-tab reminder (governance posture from prior surfaceCues moved into demoted microcopy)', () => {
-    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['external-systems'];
-    const launchContextReminder = metadata.governanceMicrocopy.find(
-      (m) => m.id === 'launch-context-reminder',
-    );
-    expect(launchContextReminder, 'launch-context-reminder microcopy must exist').toBeDefined();
-    expect(launchContextReminder!.text).toContain('Launch links open');
-    expect(launchContextReminder!.text).toContain('source system');
-    expect(launchContextReminder!.text).toContain('new tab');
+  it('Cost & Time heroHighlights cover financial-review / schedule-monitor / procurement-buyout', () => {
+    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['cost-time'];
+    const highlightIds = metadata.heroHighlights.map((h) => h.id);
+    expect(highlightIds).toContain('financial-review');
+    expect(highlightIds).toContain('schedule-monitor');
+    expect(highlightIds).toContain('procurement-buyout');
+  });
+
+  it('Documents heroHighlights cover document-sources / record-source / open-items', () => {
+    const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['documents'];
+    const highlightIds = metadata.heroHighlights.map((h) => h.id);
+    expect(highlightIds).toContain('document-sources');
+    expect(highlightIds).toContain('record-source');
+    expect(highlightIds).toContain('open-items');
   });
 });

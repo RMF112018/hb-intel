@@ -1,35 +1,26 @@
-import type { PccMvpSurfaceId } from '@hbc/models/pcc';
+import type { PccPrimaryTabId } from '@hbc/models/pcc';
 
 /**
  * PCC shell surface header metadata seam.
  *
- * Wave 15A wave-b7 Prompt 02 introduced `surfaceSummaryItems`, `surfaceCues`,
- * and `readOnlyCue` so the shell hero could absorb duplicate surface-header
- * content without altering bento header cards. Wave 15A wave-b9 Prompt 4B-02
- * adds the production-visible band: `heroHighlights` (end-user posture
- * highlights — labels and short values) and `governanceMicrocopy` (subordinate
- * read-only / governed-workflow reminders). The hero band renders the new
- * fields as primary content; the legacy `surfaceSummaryItems` /
- * `surfaceCues` / `readOnlyCue` fields remain populated to anchor source /
- * authority / no-writeback governance assertions in tests but are no longer
- * rendered as the primary visible band.
+ * Phase 05 wave-b10 Prompt 06 — re-keyed to `PccPrimaryTabId`. Two
+ * legacy keys carry forward (`project-home`, `documents`); six new
+ * primary-tab entries (`core-tools`, `estimating-preconstruction`,
+ * `startup-closeout`, `project-controls`, `cost-time`,
+ * `systems-administration`) replace the legacy six (`team-and-access`,
+ * `project-readiness`, `approvals`, `external-systems`,
+ * `control-center-settings`, `site-health`). The legacy surface
+ * components remain on disk and are reachable through the Phase 05
+ * module dropdowns; their hero metadata moves into the parent primary
+ * tab's posture.
  *
- * Every value is a deterministic, presentational string. No entry implies
- * live counts, writeback authority, or autonomous HBI decisions. Keyed
- * exhaustively over `PccMvpSurfaceId` so a new surface cannot land without
- * supplying compact preview metadata.
- *
- * TODO(PCC future phase): Replace static hero highlight values with
- * backend-generated project/surface summary records. The intended target is a
- * site-specific SharePoint list that stores precomputed PCC hero summaries by
- * project and surface. The shell hero should eventually read those summaries
- * from the PCC read model instead of carrying static preview values here.
- *
- * TODO(PCC future phase): Introduce backend summary functions that compute
- * Project Home, Team & Access, Documents, Readiness, Approvals, External
- * Platforms, Settings, and Site Health hero summaries. Persist the computed
- * results to a project/site-scoped SharePoint list, then expose them through
- * the PCC read model for shell hero rendering.
+ * Every value is a deterministic, presentational string. No entry
+ * implies live counts, writeback authority, or autonomous HBI
+ * decisions. The hero band renders `heroHighlights` and
+ * `governanceMicrocopy` as primary visible content; the legacy
+ * `surfaceSummaryItems` / `surfaceCues` / `readOnlyCue` fields stay
+ * populated to anchor source / authority / no-writeback governance
+ * assertions in tests.
  */
 
 export type PccShellSurfaceSummaryTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
@@ -73,7 +64,7 @@ export interface IPccShellSurfaceHeaderMetadata {
 }
 
 export const PCC_SHELL_SURFACE_HEADER_METADATA: Readonly<
-  Record<PccMvpSurfaceId, IPccShellSurfaceHeaderMetadata>
+  Record<PccPrimaryTabId, IPccShellSurfaceHeaderMetadata>
 > = {
   'project-home': {
     surfaceSummaryItems: [
@@ -118,60 +109,57 @@ export const PCC_SHELL_SURFACE_HEADER_METADATA: Readonly<
       },
     ],
   },
-  'team-and-access': {
+  'core-tools': {
     surfaceSummaryItems: [
-      { id: 'mode', label: 'Mode', value: 'Team access preview', tone: 'info' },
-      { id: 'source', label: 'Source', value: 'Project team and access posture' },
-      { id: 'authority', label: 'Authority', value: 'Request context only' },
+      { id: 'mode', label: 'Mode', value: 'Core Tools preview', tone: 'info' },
+      { id: 'source', label: 'Source', value: 'Cross-cutting project tools posture' },
+      { id: 'authority', label: 'Authority', value: 'Advisory only — no decisions, no writeback' },
     ],
     surfaceCues: [
       {
-        id: 'team-visibility',
+        id: 'core-tools-posture',
         label: 'Focus',
-        value: 'Team visibility and permission posture',
+        value: 'Assistance, access, directory, platforms, and checkpoints',
       },
-      {
-        id: 'access-boundary',
-        label: 'Boundary',
-        value: 'No access changes from this header',
-      },
+      { id: 'hbi-boundary', label: 'HBI', value: 'Advisory only, no decisions or approvals' },
     ],
-    readOnlyCue: 'Read-only preview — access changes require governed workflows.',
+    readOnlyCue:
+      'Read-only preview — HBI is advisory; PCC does not make decisions, provide approval authority, or write back to source systems from this header.',
     heroHighlights: [
       {
-        id: 'team-summary',
-        label: 'Team Summary',
-        value: 'Internal · external · guest posture',
+        id: 'hbi-assistant',
+        label: 'HBI Assistant',
+        value: 'Advisory context for the active project',
         kind: 'summary',
       },
       {
-        id: 'access-requests',
-        label: 'Access Requests',
-        value: 'Request context only',
+        id: 'team-access',
+        label: 'Team & Access',
+        value: 'Project team and access posture',
         kind: 'status',
       },
       {
-        id: 'permission-reminder',
-        label: 'Permission Reminder',
-        value: 'Changes follow governed workflows',
+        id: 'approvals-checkpoints',
+        label: 'Approvals & Checkpoints',
+        value: 'Checkpoint context only',
         kind: 'reminder',
       },
     ],
     governanceMicrocopy: [
       { id: 'read-only', text: 'Read-only preview' },
       {
-        id: 'access-manager-reminder',
-        text: 'Only access managers can change project team permissions.',
+        id: 'hbi-no-authority',
+        text: 'HBI Assistant is advisory only; it does not make decisions, provide approval authority, or write back to source systems.',
       },
     ],
   },
   documents: {
     surfaceSummaryItems: [
-      { id: 'mode', label: 'Mode', value: 'Document control preview', tone: 'info' },
+      { id: 'mode', label: 'Mode', value: 'Document Control preview', tone: 'info' },
       {
         id: 'source',
         label: 'Source',
-        value: 'SharePoint / OneDrive / external references',
+        value: 'Project Record · OneDrive · external references',
       },
       { id: 'authority', label: 'Authority', value: 'Navigation context only' },
     ],
@@ -183,7 +171,8 @@ export const PCC_SHELL_SURFACE_HEADER_METADATA: Readonly<
       },
       { id: 'external-files', label: 'Boundary', value: 'No file moves or writeback' },
     ],
-    readOnlyCue: 'Read-only preview — no uploads, moves, deletes, or external launches.',
+    readOnlyCue:
+      'Read-only preview — no uploads, moves, deletes, or external launches from this header.',
     heroHighlights: [
       {
         id: 'document-sources',
@@ -212,276 +201,242 @@ export const PCC_SHELL_SURFACE_HEADER_METADATA: Readonly<
       },
     ],
   },
-  'project-readiness': {
+  'estimating-preconstruction': {
     surfaceSummaryItems: [
-      { id: 'mode', label: 'Mode', value: 'Readiness preview', tone: 'info' },
-      {
-        id: 'source',
-        label: 'Source',
-        value: 'Readiness framework and module signals',
-      },
-      { id: 'authority', label: 'Authority', value: 'Evidence context only' },
+      { id: 'mode', label: 'Mode', value: 'Preconstruction continuity preview', tone: 'info' },
+      { id: 'source', label: 'Source', value: 'Estimating handoff and continuity posture' },
+      { id: 'authority', label: 'Authority', value: 'Reference only' },
     ],
     surfaceCues: [
       {
-        id: 'readiness-posture',
+        id: 'continuity-posture',
         label: 'Focus',
-        value: 'Blockers, evidence, and startup-to-closeout controls',
+        value: 'Handoff context, assumptions, alternates, and exclusions',
       },
-      {
-        id: 'module-boundary',
-        label: 'Boundary',
-        value: 'No checklist completion from this header',
-      },
-      {
-        id: 'no-execution',
-        label: 'Posture',
-        value: 'No checklist completion or evidence execution from this header',
-      },
+      { id: 'reference-only', label: 'Boundary', value: 'No estimating actions from this header' },
     ],
-    readOnlyCue: 'Read-only preview — readiness actions remain governed by source modules.',
+    readOnlyCue: 'Read-only preview — preconstruction continuity is reference-only in this phase.',
     heroHighlights: [
       {
-        id: 'readiness-status',
-        label: 'Readiness Status',
-        value: 'Stage gates in progress',
-        kind: 'status',
-      },
-      {
-        id: 'blockers',
-        label: 'Blockers',
-        value: 'Open items in queue',
+        id: 'preconstruction-handoff',
+        label: 'Preconstruction Handoff',
+        value: 'Continuity context for the active project',
         kind: 'summary',
       },
       {
-        id: 'evidence',
-        label: 'Evidence',
-        value: 'Confidence pending source confirmation',
+        id: 'estimate-assumptions',
+        label: 'Assumptions / Alternates / Exclusions',
+        value: 'Estimate-stage references',
+        kind: 'reminder',
+      },
+      {
+        id: 'future-estimating',
+        label: 'Future Estimating Modules',
+        value: 'Planned for a future release',
         kind: 'next-step',
       },
     ],
     governanceMicrocopy: [
       { id: 'read-only', text: 'Read-only preview' },
       {
-        id: 'blockers-reminder',
-        text: 'Resolve blockers before advancing readiness posture.',
-      },
-      {
-        id: 'no-checklist-completion',
-        text: 'Checklist completion happens in the source module, not here.',
+        id: 'reference-only-reminder',
+        text: 'Estimating continuity is reference-only; no estimating actions occur in this header.',
       },
     ],
   },
-  approvals: {
+  'startup-closeout': {
     surfaceSummaryItems: [
-      {
-        id: 'mode',
-        label: 'Mode',
-        value: 'Approval checkpoint preview',
-        tone: 'info',
-      },
-      { id: 'source', label: 'Source', value: 'Routing and checkpoint context' },
-      { id: 'authority', label: 'Authority', value: 'No approval authority' },
+      { id: 'mode', label: 'Mode', value: 'Startup & Closeout preview', tone: 'info' },
+      { id: 'source', label: 'Source', value: 'Readiness, responsibility, and closeout posture' },
+      { id: 'authority', label: 'Authority', value: 'Context only' },
     ],
     surfaceCues: [
       {
-        id: 'routing-posture',
+        id: 'startup-closeout-posture',
         label: 'Focus',
-        value: 'Pending decisions and checkpoint posture',
+        value: 'Startup readiness, responsibilities, turnover, and warranty',
+      },
+      { id: 'no-action', label: 'Boundary', value: 'No execution from this header' },
+    ],
+    readOnlyCue:
+      'Read-only preview — readiness and closeout signals are context only; source modules own actions.',
+    heroHighlights: [
+      {
+        id: 'startup-center',
+        label: 'Startup Center',
+        value: 'Readiness onboarding context',
+        kind: 'summary',
       },
       {
-        id: 'approval-boundary',
+        id: 'responsibility-matrix',
+        label: 'Responsibility Matrix',
+        value: 'Assignment and responsibility posture',
+        kind: 'status',
+      },
+      {
+        id: 'closeout-warranty',
+        label: 'Closeout / Warranty',
+        value: 'Closeout, turnover, and warranty signals',
+        kind: 'next-step',
+      },
+    ],
+    governanceMicrocopy: [
+      { id: 'read-only', text: 'Read-only preview' },
+      {
+        id: 'source-modules-own-actions',
+        text: 'Closeout and warranty actions remain in their source modules.',
+      },
+    ],
+  },
+  'project-controls': {
+    surfaceSummaryItems: [
+      { id: 'mode', label: 'Mode', value: 'Project Controls preview', tone: 'info' },
+      {
+        id: 'source',
+        label: 'Source',
+        value: 'Permits, inspections, constraints, and field posture',
+      },
+      { id: 'authority', label: 'Authority', value: 'Read-only context' },
+    ],
+    surfaceCues: [
+      {
+        id: 'controls-posture',
+        label: 'Focus',
+        value: 'Permits, inspections, constraints, compliance, and communication',
+      },
+      {
+        id: 'source-workflows',
         label: 'Boundary',
-        value: 'No approve / reject action from this header',
+        value: 'Source workflows own permit and inspection actions',
       },
     ],
     readOnlyCue:
-      'Read-only preview — approvals require explicit governed action outside the shell header.',
+      'Read-only preview — controls context is read-only; source workflows own permit, inspection, and compliance actions.',
     heroHighlights: [
       {
-        id: 'approval-status',
-        label: 'Approval Status',
-        value: 'Pending decisions require review',
+        id: 'permits-inspections',
+        label: 'Permits & Inspections',
+        value: 'Permit and inspection control context',
+        kind: 'summary',
+      },
+      {
+        id: 'constraints-log',
+        label: 'Constraints Log',
+        value: 'Active constraints and exposure',
         kind: 'status',
       },
       {
-        id: 'routing',
-        label: 'Routing',
-        value: 'Checkpoint context only',
-        kind: 'summary',
-      },
-      {
-        id: 'escalations',
-        label: 'Escalations',
-        value: 'Overdue items in queue',
-        kind: 'next-step',
-      },
-    ],
-    governanceMicrocopy: [
-      { id: 'read-only', text: 'Read-only preview' },
-      {
-        id: 'governed-workflow-reminder',
-        text: 'Approval actions remain in governed approval workflows.',
-      },
-    ],
-  },
-  'external-systems': {
-    surfaceSummaryItems: [
-      {
-        id: 'mode',
-        label: 'Mode',
-        value: 'External platform preview',
-        tone: 'info',
-      },
-      {
-        id: 'source',
-        label: 'Source',
-        value: 'Platform registry and mapping posture',
-      },
-      { id: 'authority', label: 'Authority', value: 'Launch context only' },
-    ],
-    surfaceCues: [
-      {
-        id: 'registry-posture',
-        label: 'Focus',
-        value: 'External platform mapping and source health',
-      },
-      {
-        id: 'integration-boundary',
-        label: 'Boundary',
-        value: 'No sync or external writeback',
-      },
-      {
-        id: 'launch-context',
-        label: 'Boundary',
-        value: 'Launch links open the source system in a new tab',
-      },
-    ],
-    readOnlyCue: 'Read-only preview — external platform actions remain outside this header.',
-    heroHighlights: [
-      {
-        id: 'launch-links',
-        label: 'Launch Links',
-        value: 'External integrations tracked',
-        kind: 'summary',
-      },
-      {
-        id: 'mapping-warnings',
-        label: 'Mapping Warnings',
-        value: 'Configuration warnings in queue',
-        kind: 'status',
-      },
-      {
-        id: 'reviews',
-        label: 'Reviews',
-        value: 'Pending mapping reviews',
-        kind: 'next-step',
-      },
-    ],
-    governanceMicrocopy: [
-      { id: 'read-only', text: 'Read-only preview' },
-      {
-        id: 'launch-context-reminder',
-        text: 'Launch links open the source system in a new tab.',
-      },
-    ],
-  },
-  'control-center-settings': {
-    surfaceSummaryItems: [
-      { id: 'mode', label: 'Mode', value: 'Settings preview', tone: 'info' },
-      {
-        id: 'source',
-        label: 'Source',
-        value: 'Project, site, persona, and integration context',
-      },
-      { id: 'authority', label: 'Authority', value: 'Configuration context only' },
-    ],
-    surfaceCues: [
-      {
-        id: 'settings-posture',
-        label: 'Focus',
-        value: 'Setup posture and inherited configuration context',
-      },
-      {
-        id: 'settings-boundary',
-        label: 'Boundary',
-        value: 'No setting changes from this header',
-      },
-    ],
-    readOnlyCue:
-      'Read-only preview — saving, updating, and tenant changes require governed settings workflows managed by your PCC administrator.',
-    heroHighlights: [
-      {
-        id: 'settings-scope',
-        label: 'Settings Scope',
-        value: 'Project · site · persona · integrations',
-        kind: 'summary',
-      },
-      {
-        id: 'setup-items',
-        label: 'Setup Items',
-        value: 'Configuration items outstanding',
-        kind: 'next-step',
-      },
-      {
-        id: 'governance',
-        label: 'Governance',
-        value: 'Managed by PCC administrator',
+        id: 'risk-field-comms',
+        label: 'Risk · Field · Communications',
+        value: 'Cross-controls coordination context',
         kind: 'reminder',
       },
     ],
     governanceMicrocopy: [
       { id: 'read-only', text: 'Read-only preview' },
       {
-        id: 'governed-workflows-reminder',
-        text: 'Tenant and project settings are managed through governed workflows.',
+        id: 'source-workflows-own',
+        text: 'Permit, inspection, and compliance actions remain in their source workflows.',
       },
     ],
   },
-  'site-health': {
+  'cost-time': {
     surfaceSummaryItems: [
-      { id: 'mode', label: 'Mode', value: 'Site health preview', tone: 'info' },
-      { id: 'source', label: 'Source', value: 'Configuration drift and repair posture' },
-      { id: 'authority', label: 'Authority', value: 'Repair context only' },
+      { id: 'mode', label: 'Mode', value: 'Cost & Time preview', tone: 'info' },
+      {
+        id: 'source',
+        label: 'Source',
+        value: 'Financial, schedule, procurement, and exposure posture',
+      },
+      { id: 'authority', label: 'Authority', value: 'Review only — no writeback to Sage' },
     ],
     surfaceCues: [
       {
-        id: 'health-posture',
+        id: 'cost-time-posture',
         label: 'Focus',
-        value: 'Drift, repair posture, and operating health signals',
+        value: 'Financial review, schedule, procurement, buyout, and exposure context',
       },
       {
-        id: 'repair-boundary',
+        id: 'sage-book-of-record',
         label: 'Boundary',
-        value: 'No repair acknowledgement from this header',
+        value: 'Sage remains the accounting book of record',
       },
     ],
-    readOnlyCue: 'Read-only preview — repair acknowledgements require governed source workflows.',
+    readOnlyCue:
+      'Read-only preview — Sage remains the accounting book of record for cost, commitment, and exposure data; PCC does not write back to Sage.',
+    heroHighlights: [
+      {
+        id: 'financial-review',
+        label: 'Financial Review',
+        value: 'Project financial posture for review only',
+        kind: 'summary',
+      },
+      {
+        id: 'schedule-monitor',
+        label: 'Schedule Monitor',
+        value: 'Schedule posture and risk context',
+        kind: 'status',
+      },
+      {
+        id: 'procurement-buyout',
+        label: 'Procurement & Buyout',
+        value: 'Procurement and buyout review context',
+        kind: 'next-step',
+      },
+    ],
+    governanceMicrocopy: [
+      { id: 'read-only', text: 'Read-only preview' },
+      {
+        id: 'sage-no-writeback',
+        text: 'Sage remains the accounting book of record; PCC does not write back to Sage.',
+      },
+    ],
+  },
+  'systems-administration': {
+    surfaceSummaryItems: [
+      { id: 'mode', label: 'Mode', value: 'Systems Administration preview', tone: 'info' },
+      { id: 'source', label: 'Source', value: 'Site health, settings, and integration posture' },
+      { id: 'authority', label: 'Authority', value: 'Administrative context only' },
+    ],
+    surfaceCues: [
+      {
+        id: 'admin-posture',
+        label: 'Focus',
+        value: 'Site health, settings, integration, and module configuration',
+      },
+      {
+        id: 'governed-settings',
+        label: 'Boundary',
+        value: 'Settings changes remain in governed administrator workflows',
+      },
+    ],
+    readOnlyCue:
+      'Read-only preview — administrative context only; settings, integration, and tenant changes remain in governed administrator workflows.',
     heroHighlights: [
       {
         id: 'site-health',
         label: 'Site Health',
-        value: 'Drift and repair signals',
+        value: 'Drift and repair posture',
         kind: 'summary',
       },
       {
-        id: 'last-scan',
-        label: 'Last Scan',
-        value: 'Recent automated check',
+        id: 'control-center-settings',
+        label: 'Control Center Settings',
+        value: 'Site, project, persona, and integration scope',
         kind: 'status',
       },
       {
-        id: 'repair-posture',
-        label: 'Repair Posture',
-        value: 'Managed through SharePoint admin tooling',
+        id: 'integration-procore-mapping',
+        label: 'Integration · Procore Mapping',
+        value: 'Source-system mapping and sync-health context',
         kind: 'reminder',
       },
     ],
     governanceMicrocopy: [
       { id: 'read-only', text: 'Read-only preview' },
       {
-        id: 'failing-checks-reminder',
-        text: 'Review failing checks before relying on site automation.',
+        id: 'governed-administrator',
+        text: 'Settings, integration, and tenant changes are managed through governed administrator workflows.',
       },
     ],
   },

@@ -1,5 +1,5 @@
-import type { IProjectProfile, PccMvpSurfaceId, PccProjectStage } from '@hbc/models/pcc';
-import { PCC_MVP_SURFACES } from '@hbc/models/pcc';
+import type { IProjectProfile, PccPrimaryTabId, PccProjectStage } from '@hbc/models/pcc';
+import { getPrimaryNavigationTab, normalizePrimaryTabId } from '@hbc/models/pcc';
 import { PCC_SURFACE_HERO_DESCRIPTIONS } from '../shell/surfaceHeroCopy';
 import {
   PCC_SHELL_SURFACE_HEADER_METADATA,
@@ -106,14 +106,15 @@ export function formatProjectStage(stage: PccProjectStage): string {
 
 export function deriveShellHeroViewModel(
   profile: IProjectProfile,
-  activeSurfaceId: PccMvpSurfaceId,
+  activePrimaryTabId: PccPrimaryTabId,
 ): IPccShellHeroViewModel {
-  const surface = PCC_MVP_SURFACES[activeSurfaceId];
-  const headerMetadata = PCC_SHELL_SURFACE_HEADER_METADATA[activeSurfaceId];
+  const tabId = normalizePrimaryTabId(activePrimaryTabId);
+  const tab = getPrimaryNavigationTab(tabId);
+  const headerMetadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
   return {
     primaryTitle: 'Project Control Center',
-    secondaryTitle: surface.displayName,
-    surfaceDescription: PCC_SURFACE_HERO_DESCRIPTIONS[activeSurfaceId],
+    secondaryTitle: tab.label,
+    surfaceDescription: PCC_SURFACE_HERO_DESCRIPTIONS[tabId],
     projectName: profile.projectName,
     location: profile.projectLocation ?? NOT_LISTED,
     clientDisplay: profile.clientName ?? NOT_LISTED,

@@ -1,10 +1,10 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
 import {
-  PCC_MVP_SURFACES,
-  PCC_MVP_SURFACE_IDS,
+  PCC_PRIMARY_TAB_IDS,
   SAMPLE_PROJECT_PROFILE,
-  type PccMvpSurfaceId,
+  getPrimaryNavigationTab,
+  type PccPrimaryTabId,
 } from '@hbc/models/pcc';
 import { PCC_RESPONSIVE_MODES, type PccResponsiveMode } from '../layout/footprints';
 import { PCC_SURFACE_HERO_DESCRIPTIONS } from '../shell/surfaceHeroCopy';
@@ -17,10 +17,10 @@ afterEach(() => {
 });
 
 function renderHero(overrides: Partial<PccProjectHeroBandProps> = {}) {
-  const activeSurfaceId: PccMvpSurfaceId = overrides.viewModel ? 'project-home' : 'project-home';
+  const activePrimaryTabId: PccPrimaryTabId = 'project-home';
   const props: PccProjectHeroBandProps = {
     mode: 'standardLaptop',
-    viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, activeSurfaceId),
+    viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, activePrimaryTabId),
     ...overrides,
   };
   return render(<PccProjectHeroBand {...props} />);
@@ -33,23 +33,26 @@ describe('PccProjectHeroBand — locked content (Wave 15A wave-b2)', () => {
     expect(primary?.textContent).toBe('Project Control Center');
   });
 
-  it('renders the active surface name as the secondary title', () => {
+  // Phase 05 wave-b10 Prompt 06 — hero secondary title equals the
+  // primary-tab registry label. Migrated from legacy `'approvals'`
+  // (now a Core Tools module) to a Phase 05 primary-tab id.
+  it('renders the active primary-tab label as the secondary title', () => {
     const { container } = renderHero({
-      viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'approvals'),
+      viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'core-tools'),
     });
     const secondary = container.querySelector('[data-pcc-hero-secondary-title]');
-    expect(secondary?.textContent).toBe(PCC_MVP_SURFACES.approvals.displayName);
+    expect(secondary?.textContent).toBe(getPrimaryNavigationTab('core-tools').label);
   });
 
-  it.each(PCC_MVP_SURFACE_IDS)(
-    'renders the local compact hero description for "%s" (never PCC_MVP_SURFACES.description)',
-    (surfaceId) => {
+  it.each([...PCC_PRIMARY_TAB_IDS])(
+    'renders the local compact hero description for "%s" (never a registry description fallback)',
+    (tabId) => {
       cleanup();
       const { container } = renderHero({
-        viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId),
+        viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, tabId),
       });
       const description = container.querySelector('[data-pcc-hero-surface-description]');
-      expect(description?.textContent).toBe(PCC_SURFACE_HERO_DESCRIPTIONS[surfaceId]);
+      expect(description?.textContent).toBe(PCC_SURFACE_HERO_DESCRIPTIONS[tabId]);
     },
   );
 
@@ -258,14 +261,14 @@ describe('PccProjectHeroBand — responsive markers preserved', () => {
 });
 
 describe('PccProjectHeroBand — wave-b9 Prompt 4B-02 production hero highlights and governance microcopy zones', () => {
-  it.each(PCC_MVP_SURFACE_IDS)(
+  it.each([...PCC_PRIMARY_TAB_IDS])(
     'renders the heroHighlights row and governanceMicrocopy row for "%s"',
-    (surfaceId) => {
+    (tabId) => {
       cleanup();
       const { container } = renderHero({
-        viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId),
+        viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, tabId),
       });
-      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[surfaceId];
+      const metadata = PCC_SHELL_SURFACE_HEADER_METADATA[tabId];
 
       const highlightZones = container.querySelectorAll('[data-pcc-hero-highlights]');
       expect(highlightZones).toHaveLength(1);
@@ -369,15 +372,15 @@ describe('PccProjectHeroBand — wave-b9 Prompt 4B-02 production hero highlights
       'Grounded preview, no writeback',
     ] as const;
     cleanup();
-    for (const surfaceId of PCC_MVP_SURFACE_IDS) {
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
       cleanup();
       const { container } = renderHero({
-        viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, surfaceId),
+        viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, tabId),
       });
       const highlightZone = container.querySelector('[data-pcc-hero-highlights]');
       expect(
         highlightZone,
-        `surface "${surfaceId}" must render the highlights zone`,
+        `primary tab "${tabId}" must render the highlights zone`,
       ).not.toBeNull();
       const labelTexts = Array.from(
         highlightZone!.querySelectorAll<HTMLElement>('[data-pcc-hero-highlight] :first-child'),
@@ -388,47 +391,23 @@ describe('PccProjectHeroBand — wave-b9 Prompt 4B-02 production hero highlights
       for (const forbidden of FORBIDDEN_LABELS) {
         expect(
           labelTexts,
-          `surface "${surfaceId}" highlight labels must not contain legacy scaffold label "${forbidden}"`,
+          `primary tab "${tabId}" highlight labels must not contain legacy scaffold label "${forbidden}"`,
         ).not.toContain(forbidden);
       }
       for (const forbidden of FORBIDDEN_VALUES) {
         expect(
           valueTexts,
-          `surface "${surfaceId}" highlight values must not contain legacy scaffold value "${forbidden}"`,
+          `primary tab "${tabId}" highlight values must not contain legacy scaffold value "${forbidden}"`,
         ).not.toContain(forbidden);
       }
     }
   });
 
-  it('renders the no-checklist-completion governance microcopy item for project-readiness (wave-b9 Prompt 4B-02 — the no-execution / no-checklist-completion governance posture moved from `surfaceCues` rendering into the demoted governanceMicrocopy band; metadata still carries the original `surfaceCues` entry, asserted in projectShellViewModel.test.ts)', () => {
-    cleanup();
-    const { container } = renderHero({
-      viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'project-readiness'),
-    });
-    const node = container.querySelector(
-      '[data-pcc-hero-governance-microcopy-item="no-checklist-completion"]',
-    );
-    expect(
-      node,
-      'project-readiness must render the no-checklist-completion microcopy',
-    ).not.toBeNull();
-    expect(node!.textContent).toContain('Checklist completion');
-    expect(node!.textContent).toContain('source module');
-  });
-
-  it('renders the launch-context-reminder governance microcopy item for external-systems (wave-b9 Prompt 4B-02 — the launch-context governance posture moved into the demoted governanceMicrocopy band; metadata still carries the original `surfaceCues` entry, asserted in projectShellViewModel.test.ts)', () => {
-    cleanup();
-    const { container } = renderHero({
-      viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'external-systems'),
-    });
-    const node = container.querySelector(
-      '[data-pcc-hero-governance-microcopy-item="launch-context-reminder"]',
-    );
-    expect(
-      node,
-      'external-systems must render the launch-context-reminder microcopy',
-    ).not.toBeNull();
-    expect(node!.textContent).toContain('Launch links open');
-    expect(node!.textContent).toContain('source system');
-  });
+  // Phase 05 wave-b10 Prompt 06 — the legacy `project-readiness`
+  // `no-checklist-completion` and `external-systems`
+  // `launch-context-reminder` governance microcopy items are removed
+  // with their parent legacy surface ids. Equivalent Phase 05 coverage
+  // lives in `projectShellViewModel.test.ts` (Sage book-of-record on
+  // `cost-time`; HBI advisory on `core-tools`; Document Control posture
+  // on `documents`).
 });

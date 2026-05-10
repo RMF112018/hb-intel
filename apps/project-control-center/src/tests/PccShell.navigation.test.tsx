@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { fireEvent, render } from '@testing-library/react';
-import { PCC_PRIMARY_TAB_IDS } from '@hbc/models/pcc';
+import { PCC_PRIMARY_TAB_IDS, getPrimaryNavigationTab } from '@hbc/models/pcc';
 import { PccApp } from '../PccApp';
 import { getPrimaryNavToggle, getPrimaryTabSelectionControl } from './shellSurfaceSelection';
 
@@ -39,7 +39,7 @@ describe('PccShell navigation — Phase 05 grouped primary tabs', () => {
     expect(main.getAttribute('aria-labelledby')).toBe('pcc-tab-project-home');
   });
 
-  it('clicking each primary tab updates aria-selected, panel marker, and aria-labelledby in lockstep', () => {
+  it('clicking each primary tab updates aria-selected, panel marker, aria-labelledby, and hero secondary title in lockstep', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const main = container.querySelector('main[role="tabpanel"]') as HTMLElement;
     for (const tabId of PCC_PRIMARY_TAB_IDS) {
@@ -49,6 +49,12 @@ describe('PccShell navigation — Phase 05 grouped primary tabs', () => {
       expect(tab!.getAttribute('aria-selected')).toBe('true');
       expect(main.getAttribute('data-pcc-active-surface-panel')).toBe(tabId);
       expect(main.getAttribute('aria-labelledby')).toBe(`pcc-tab-${tabId}`);
+      // Phase 05 wave-b10 Prompt 06 — hero secondary title flips to
+      // the registry primary-tab label on every click.
+      expect(
+        container.querySelector('[data-pcc-hero-secondary-title]')?.textContent,
+        `hero secondary title must mirror primary tab '${tabId}' label`,
+      ).toBe(getPrimaryNavigationTab(tabId).label);
     }
   });
 
