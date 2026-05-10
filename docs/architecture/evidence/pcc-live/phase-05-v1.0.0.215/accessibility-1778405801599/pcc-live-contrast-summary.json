@@ -1,0 +1,114 @@
+[
+  {
+    "surfaceId": "project-home",
+    "ruleId": "color-contrast",
+    "count": 95,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "project-home",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "core-tools",
+    "ruleId": "color-contrast",
+    "count": 2,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "core-tools",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "documents",
+    "ruleId": "color-contrast",
+    "count": 3,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "documents",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "ruleId": "color-contrast",
+    "count": 2,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "ruleId": "color-contrast",
+    "count": 2,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "project-controls",
+    "ruleId": "color-contrast",
+    "count": 2,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "project-controls",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "cost-time",
+    "ruleId": "color-contrast",
+    "count": 2,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "cost-time",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  },
+  {
+    "surfaceId": "systems-administration",
+    "ruleId": "color-contrast",
+    "count": 2,
+    "needsReview": true,
+    "details": "Axe color-contrast summary. Operator review required."
+  },
+  {
+    "surfaceId": "systems-administration",
+    "ruleId": "computed-contrast-heuristic",
+    "count": 0,
+    "needsReview": true,
+    "details": "Computed contrast heuristic is informational only."
+  }
+]

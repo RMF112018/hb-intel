@@ -1,0 +1,860 @@
+[
+  {
+    "category": "disabled-reason-copy",
+    "disposition": "needs-review",
+    "surfaceId": "project-home",
+    "evidenceIds": [
+      "EV-87",
+      "EV-88",
+      "EV-89",
+      "EV-90"
+    ],
+    "title": "Disabled controls missing clear reason copy",
+    "rationale": "Disabled or blocked affordances are visible without explicit reason language in nearby text.",
+    "supportingCopyHashes": [
+      "tx-388186237",
+      "tx-1574381661"
+    ],
+    "reviewerPrompt": "Confirm each disabled control explains condition, impact, and next step."
+  },
+  {
+    "category": "hbi-authority-language",
+    "disposition": "needs-review",
+    "surfaceId": "project-home",
+    "evidenceIds": [
+      "EV-100",
+      "EV-101",
+      "EV-102",
+      "EV-103"
+    ],
+    "title": "HBI authority boundary risk terms detected",
+    "rationale": "Mutation-authority verbs appear in HBI/command-adjacent visible copy and require human boundary review.",
+    "supportingCopyHashes": [
+      "tx-878402717",
+      "tx-1656358221",
+      "tx-1751772044",
+      "tx-388186237"
+    ],
+    "reviewerPrompt": "Verify HBI language remains advisory and does not imply autonomous mutation authority."
+  },
+  {
+    "category": "source-of-record-language",
+    "disposition": "review-support",
+    "surfaceId": "project-home",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96",
+      "EV-97",
+      "EV-98",
+      "EV-99"
+    ],
+    "title": "Source boundary/confidence copy observed",
+    "rationale": "Source-of-record and confidence/freshness language is present and ready for operator review.",
+    "supportingCopyHashes": [
+      "tx-1922399406",
+      "tx-206158383",
+      "tx-78687973",
+      "tx-523548059",
+      "tx-493742731",
+      "tx-658861829",
+      "tx-1108085528",
+      "tx-296750792"
+    ],
+    "reviewerPrompt": "Confirm source ownership boundaries and freshness/confidence wording are clear and non-conflicting."
+  },
+  {
+    "category": "construction-language",
+    "disposition": "review-support",
+    "surfaceId": "project-home",
+    "evidenceIds": [
+      "EV-83",
+      "EV-84",
+      "EV-85",
+      "EV-86"
+    ],
+    "title": "Construction operations language signals observed",
+    "rationale": "Construction-domain terms are present in visible-copy snippets.",
+    "supportingCopyHashes": [
+      "tx-881813338",
+      "tx-1316988471",
+      "tx-1656358221",
+      "tx-1809167251",
+      "tx-1809167251",
+      "tx-388186237",
+      "tx-27312795"
+    ],
+    "reviewerPrompt": "Assess whether copy reflects jobsite operations language rather than generic dashboard language."
+  },
+  {
+    "category": "state-copy-quality",
+    "disposition": "review-support",
+    "surfaceId": "project-home",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96"
+    ],
+    "title": "State copy extracted for review",
+    "rationale": "State-oriented visible copy is available for quality review.",
+    "supportingCopyHashes": [
+      "tx-45678",
+      "tx-1346468776",
+      "tx-197067502",
+      "tx-923775132",
+      "tx-997081092",
+      "tx-1107295629",
+      "tx-889889002",
+      "tx-1809167251"
+    ],
+    "reviewerPrompt": "Review whether state copy communicates condition, impact, owner, and next step."
+  },
+  {
+    "category": "owner-action-responsibility",
+    "disposition": "review-support",
+    "surfaceId": "project-home",
+    "evidenceIds": [
+      "EV-91",
+      "EV-92",
+      "EV-105"
+    ],
+    "title": "Owner/action/responsibility language observed",
+    "rationale": "Ownership and next-action language exists in extracted snippets.",
+    "supportingCopyHashes": [
+      "tx-527156836",
+      "tx-1656358221",
+      "tx-923775132",
+      "tx-523548059",
+      "tx-1224616912"
+    ],
+    "reviewerPrompt": "Verify who owns the next action and whether urgency/priority are clear."
+  },
+  {
+    "category": "mock-fixture-transparency",
+    "disposition": "review-support",
+    "surfaceId": "project-home",
+    "evidenceIds": [
+      "EV-106"
+    ],
+    "title": "Mock/fixture/demo transparency labels observed",
+    "rationale": "Mock/fixture/demo markers are visible and can be audited for clarity.",
+    "supportingCopyHashes": [
+      "tx-878402717",
+      "tx-469158346"
+    ],
+    "reviewerPrompt": "Confirm non-production data is explicitly labeled for operators."
+  },
+  {
+    "category": "hbi-authority-language",
+    "disposition": "needs-review",
+    "surfaceId": "core-tools",
+    "evidenceIds": [
+      "EV-100",
+      "EV-101",
+      "EV-102",
+      "EV-103"
+    ],
+    "title": "HBI authority boundary risk terms detected",
+    "rationale": "Mutation-authority verbs appear in HBI/command-adjacent visible copy and require human boundary review.",
+    "supportingCopyHashes": [
+      "tx-1511715358"
+    ],
+    "reviewerPrompt": "Verify HBI language remains advisory and does not imply autonomous mutation authority."
+  },
+  {
+    "category": "source-of-record-language",
+    "disposition": "review-support",
+    "surfaceId": "core-tools",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96",
+      "EV-97",
+      "EV-98",
+      "EV-99"
+    ],
+    "title": "Source boundary/confidence copy observed",
+    "rationale": "Source-of-record and confidence/freshness language is present and ready for operator review.",
+    "supportingCopyHashes": [
+      "tx-1922399406",
+      "tx-206158383",
+      "tx-78687973",
+      "tx-1511715358"
+    ],
+    "reviewerPrompt": "Confirm source ownership boundaries and freshness/confidence wording are clear and non-conflicting."
+  },
+  {
+    "category": "construction-language",
+    "disposition": "review-support",
+    "surfaceId": "core-tools",
+    "evidenceIds": [
+      "EV-83",
+      "EV-84",
+      "EV-85",
+      "EV-86"
+    ],
+    "title": "Construction operations language signals observed",
+    "rationale": "Construction-domain terms are present in visible-copy snippets.",
+    "supportingCopyHashes": [
+      "tx-881813338",
+      "tx-1316988471"
+    ],
+    "reviewerPrompt": "Assess whether copy reflects jobsite operations language rather than generic dashboard language."
+  },
+  {
+    "category": "state-copy-quality",
+    "disposition": "review-support",
+    "surfaceId": "core-tools",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96"
+    ],
+    "title": "State copy extracted for review",
+    "rationale": "State-oriented visible copy is available for quality review.",
+    "supportingCopyHashes": [
+      "tx-45678",
+      "tx-1346468776",
+      "tx-197067502",
+      "tx-1511715358",
+      "tx-1413526693"
+    ],
+    "reviewerPrompt": "Review whether state copy communicates condition, impact, owner, and next step."
+  },
+  {
+    "category": "owner-action-responsibility",
+    "disposition": "review-support",
+    "surfaceId": "core-tools",
+    "evidenceIds": [
+      "EV-91",
+      "EV-92",
+      "EV-105"
+    ],
+    "title": "Owner/action/responsibility language observed",
+    "rationale": "Ownership and next-action language exists in extracted snippets.",
+    "supportingCopyHashes": [
+      "tx-1511715358"
+    ],
+    "reviewerPrompt": "Verify who owns the next action and whether urgency/priority are clear."
+  },
+  {
+    "category": "mock-fixture-transparency",
+    "disposition": "operator-pending",
+    "surfaceId": "core-tools",
+    "evidenceIds": [
+      "EV-106"
+    ],
+    "title": "Mock/fixture/demo transparency not clearly observed",
+    "rationale": "No clear mock/fixture/demo markers were detected in bounded snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Confirm non-production data is explicitly labeled for operators."
+  },
+  {
+    "category": "disabled-reason-copy",
+    "disposition": "needs-review",
+    "surfaceId": "documents",
+    "evidenceIds": [
+      "EV-87",
+      "EV-88",
+      "EV-89",
+      "EV-90"
+    ],
+    "title": "Disabled controls missing clear reason copy",
+    "rationale": "Disabled or blocked affordances are visible without explicit reason language in nearby text.",
+    "supportingCopyHashes": [
+      "tx-911028088"
+    ],
+    "reviewerPrompt": "Confirm each disabled control explains condition, impact, and next step."
+  },
+  {
+    "category": "hbi-authority-language",
+    "disposition": "needs-review",
+    "surfaceId": "documents",
+    "evidenceIds": [
+      "EV-100",
+      "EV-101",
+      "EV-102",
+      "EV-103"
+    ],
+    "title": "HBI authority boundary risk terms detected",
+    "rationale": "Mutation-authority verbs appear in HBI/command-adjacent visible copy and require human boundary review.",
+    "supportingCopyHashes": [
+      "tx-911028088",
+      "tx-1932621758",
+      "tx-2039743949"
+    ],
+    "reviewerPrompt": "Verify HBI language remains advisory and does not imply autonomous mutation authority."
+  },
+  {
+    "category": "source-of-record-language",
+    "disposition": "review-support",
+    "surfaceId": "documents",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96",
+      "EV-97",
+      "EV-98",
+      "EV-99"
+    ],
+    "title": "Source boundary/confidence copy observed",
+    "rationale": "Source-of-record and confidence/freshness language is present and ready for operator review.",
+    "supportingCopyHashes": [
+      "tx-1922399406",
+      "tx-206158383",
+      "tx-78687973",
+      "tx-888581387",
+      "tx-1254760895",
+      "tx-1014973158",
+      "tx-12312530",
+      "tx-1220738745"
+    ],
+    "reviewerPrompt": "Confirm source ownership boundaries and freshness/confidence wording are clear and non-conflicting."
+  },
+  {
+    "category": "construction-language",
+    "disposition": "review-support",
+    "surfaceId": "documents",
+    "evidenceIds": [
+      "EV-83",
+      "EV-84",
+      "EV-85",
+      "EV-86"
+    ],
+    "title": "Construction operations language signals observed",
+    "rationale": "Construction-domain terms are present in visible-copy snippets.",
+    "supportingCopyHashes": [
+      "tx-881813338",
+      "tx-1316988471"
+    ],
+    "reviewerPrompt": "Assess whether copy reflects jobsite operations language rather than generic dashboard language."
+  },
+  {
+    "category": "state-copy-quality",
+    "disposition": "review-support",
+    "surfaceId": "documents",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96"
+    ],
+    "title": "State copy extracted for review",
+    "rationale": "State-oriented visible copy is available for quality review.",
+    "supportingCopyHashes": [
+      "tx-45678",
+      "tx-1346468776",
+      "tx-197067502"
+    ],
+    "reviewerPrompt": "Review whether state copy communicates condition, impact, owner, and next step."
+  },
+  {
+    "category": "owner-action-responsibility",
+    "disposition": "review-support",
+    "surfaceId": "documents",
+    "evidenceIds": [
+      "EV-91",
+      "EV-92",
+      "EV-105"
+    ],
+    "title": "Owner/action/responsibility language observed",
+    "rationale": "Ownership and next-action language exists in extracted snippets.",
+    "supportingCopyHashes": [
+      "tx-90354967"
+    ],
+    "reviewerPrompt": "Verify who owns the next action and whether urgency/priority are clear."
+  },
+  {
+    "category": "mock-fixture-transparency",
+    "disposition": "operator-pending",
+    "surfaceId": "documents",
+    "evidenceIds": [
+      "EV-106"
+    ],
+    "title": "Mock/fixture/demo transparency not clearly observed",
+    "rationale": "No clear mock/fixture/demo markers were detected in bounded snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Confirm non-production data is explicitly labeled for operators."
+  },
+  {
+    "category": "source-of-record-language",
+    "disposition": "review-support",
+    "surfaceId": "estimating-preconstruction",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96",
+      "EV-97",
+      "EV-98",
+      "EV-99"
+    ],
+    "title": "Source boundary/confidence copy observed",
+    "rationale": "Source-of-record and confidence/freshness language is present and ready for operator review.",
+    "supportingCopyHashes": [
+      "tx-1922399406",
+      "tx-206158383",
+      "tx-78687973",
+      "tx-788372512"
+    ],
+    "reviewerPrompt": "Confirm source ownership boundaries and freshness/confidence wording are clear and non-conflicting."
+  },
+  {
+    "category": "construction-language",
+    "disposition": "review-support",
+    "surfaceId": "estimating-preconstruction",
+    "evidenceIds": [
+      "EV-83",
+      "EV-84",
+      "EV-85",
+      "EV-86"
+    ],
+    "title": "Construction operations language signals observed",
+    "rationale": "Construction-domain terms are present in visible-copy snippets.",
+    "supportingCopyHashes": [
+      "tx-881813338",
+      "tx-1316988471"
+    ],
+    "reviewerPrompt": "Assess whether copy reflects jobsite operations language rather than generic dashboard language."
+  },
+  {
+    "category": "state-copy-quality",
+    "disposition": "review-support",
+    "surfaceId": "estimating-preconstruction",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96"
+    ],
+    "title": "State copy extracted for review",
+    "rationale": "State-oriented visible copy is available for quality review.",
+    "supportingCopyHashes": [
+      "tx-45678",
+      "tx-1346468776",
+      "tx-197067502",
+      "tx-788372512"
+    ],
+    "reviewerPrompt": "Review whether state copy communicates condition, impact, owner, and next step."
+  },
+  {
+    "category": "owner-action-responsibility",
+    "disposition": "operator-pending",
+    "surfaceId": "estimating-preconstruction",
+    "evidenceIds": [
+      "EV-91",
+      "EV-92",
+      "EV-105"
+    ],
+    "title": "Owner/action/responsibility language not clearly observed",
+    "rationale": "Ownership/next-action signals were limited in extracted snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Verify who owns the next action and whether urgency/priority are clear."
+  },
+  {
+    "category": "mock-fixture-transparency",
+    "disposition": "operator-pending",
+    "surfaceId": "estimating-preconstruction",
+    "evidenceIds": [
+      "EV-106"
+    ],
+    "title": "Mock/fixture/demo transparency not clearly observed",
+    "rationale": "No clear mock/fixture/demo markers were detected in bounded snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Confirm non-production data is explicitly labeled for operators."
+  },
+  {
+    "category": "hbi-authority-language",
+    "disposition": "needs-review",
+    "surfaceId": "startup-closeout",
+    "evidenceIds": [
+      "EV-100",
+      "EV-101",
+      "EV-102",
+      "EV-103"
+    ],
+    "title": "HBI authority boundary risk terms detected",
+    "rationale": "Mutation-authority verbs appear in HBI/command-adjacent visible copy and require human boundary review.",
+    "supportingCopyHashes": [
+      "tx-759144768"
+    ],
+    "reviewerPrompt": "Verify HBI language remains advisory and does not imply autonomous mutation authority."
+  },
+  {
+    "category": "source-of-record-language",
+    "disposition": "review-support",
+    "surfaceId": "startup-closeout",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96",
+      "EV-97",
+      "EV-98",
+      "EV-99"
+    ],
+    "title": "Source boundary/confidence copy observed",
+    "rationale": "Source-of-record and confidence/freshness language is present and ready for operator review.",
+    "supportingCopyHashes": [
+      "tx-1922399406",
+      "tx-206158383",
+      "tx-78687973",
+      "tx-1456284860"
+    ],
+    "reviewerPrompt": "Confirm source ownership boundaries and freshness/confidence wording are clear and non-conflicting."
+  },
+  {
+    "category": "construction-language",
+    "disposition": "review-support",
+    "surfaceId": "startup-closeout",
+    "evidenceIds": [
+      "EV-83",
+      "EV-84",
+      "EV-85",
+      "EV-86"
+    ],
+    "title": "Construction operations language signals observed",
+    "rationale": "Construction-domain terms are present in visible-copy snippets.",
+    "supportingCopyHashes": [
+      "tx-881813338",
+      "tx-1316988471",
+      "tx-881813338",
+      "tx-1456284860",
+      "tx-881813338"
+    ],
+    "reviewerPrompt": "Assess whether copy reflects jobsite operations language rather than generic dashboard language."
+  },
+  {
+    "category": "state-copy-quality",
+    "disposition": "review-support",
+    "surfaceId": "startup-closeout",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96"
+    ],
+    "title": "State copy extracted for review",
+    "rationale": "State-oriented visible copy is available for quality review.",
+    "supportingCopyHashes": [
+      "tx-45678",
+      "tx-1346468776",
+      "tx-197067502",
+      "tx-1456284860",
+      "tx-759144768"
+    ],
+    "reviewerPrompt": "Review whether state copy communicates condition, impact, owner, and next step."
+  },
+  {
+    "category": "owner-action-responsibility",
+    "disposition": "operator-pending",
+    "surfaceId": "startup-closeout",
+    "evidenceIds": [
+      "EV-91",
+      "EV-92",
+      "EV-105"
+    ],
+    "title": "Owner/action/responsibility language not clearly observed",
+    "rationale": "Ownership/next-action signals were limited in extracted snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Verify who owns the next action and whether urgency/priority are clear."
+  },
+  {
+    "category": "mock-fixture-transparency",
+    "disposition": "operator-pending",
+    "surfaceId": "startup-closeout",
+    "evidenceIds": [
+      "EV-106"
+    ],
+    "title": "Mock/fixture/demo transparency not clearly observed",
+    "rationale": "No clear mock/fixture/demo markers were detected in bounded snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Confirm non-production data is explicitly labeled for operators."
+  },
+  {
+    "category": "source-of-record-language",
+    "disposition": "review-support",
+    "surfaceId": "project-controls",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96",
+      "EV-97",
+      "EV-98",
+      "EV-99"
+    ],
+    "title": "Source boundary/confidence copy observed",
+    "rationale": "Source-of-record and confidence/freshness language is present and ready for operator review.",
+    "supportingCopyHashes": [
+      "tx-1922399406",
+      "tx-206158383",
+      "tx-78687973",
+      "tx-1703687573"
+    ],
+    "reviewerPrompt": "Confirm source ownership boundaries and freshness/confidence wording are clear and non-conflicting."
+  },
+  {
+    "category": "construction-language",
+    "disposition": "review-support",
+    "surfaceId": "project-controls",
+    "evidenceIds": [
+      "EV-83",
+      "EV-84",
+      "EV-85",
+      "EV-86"
+    ],
+    "title": "Construction operations language signals observed",
+    "rationale": "Construction-domain terms are present in visible-copy snippets.",
+    "supportingCopyHashes": [
+      "tx-881813338",
+      "tx-1316988471",
+      "tx-1493163585"
+    ],
+    "reviewerPrompt": "Assess whether copy reflects jobsite operations language rather than generic dashboard language."
+  },
+  {
+    "category": "state-copy-quality",
+    "disposition": "review-support",
+    "surfaceId": "project-controls",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96"
+    ],
+    "title": "State copy extracted for review",
+    "rationale": "State-oriented visible copy is available for quality review.",
+    "supportingCopyHashes": [
+      "tx-45678",
+      "tx-1346468776",
+      "tx-197067502",
+      "tx-1703687573",
+      "tx-1493163585"
+    ],
+    "reviewerPrompt": "Review whether state copy communicates condition, impact, owner, and next step."
+  },
+  {
+    "category": "owner-action-responsibility",
+    "disposition": "operator-pending",
+    "surfaceId": "project-controls",
+    "evidenceIds": [
+      "EV-91",
+      "EV-92",
+      "EV-105"
+    ],
+    "title": "Owner/action/responsibility language not clearly observed",
+    "rationale": "Ownership/next-action signals were limited in extracted snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Verify who owns the next action and whether urgency/priority are clear."
+  },
+  {
+    "category": "mock-fixture-transparency",
+    "disposition": "operator-pending",
+    "surfaceId": "project-controls",
+    "evidenceIds": [
+      "EV-106"
+    ],
+    "title": "Mock/fixture/demo transparency not clearly observed",
+    "rationale": "No clear mock/fixture/demo markers were detected in bounded snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Confirm non-production data is explicitly labeled for operators."
+  },
+  {
+    "category": "hbi-authority-language",
+    "disposition": "needs-review",
+    "surfaceId": "cost-time",
+    "evidenceIds": [
+      "EV-100",
+      "EV-101",
+      "EV-102",
+      "EV-103"
+    ],
+    "title": "HBI authority boundary risk terms detected",
+    "rationale": "Mutation-authority verbs appear in HBI/command-adjacent visible copy and require human boundary review.",
+    "supportingCopyHashes": [
+      "tx-193513605"
+    ],
+    "reviewerPrompt": "Verify HBI language remains advisory and does not imply autonomous mutation authority."
+  },
+  {
+    "category": "source-of-record-language",
+    "disposition": "review-support",
+    "surfaceId": "cost-time",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96",
+      "EV-97",
+      "EV-98",
+      "EV-99"
+    ],
+    "title": "Source boundary/confidence copy observed",
+    "rationale": "Source-of-record and confidence/freshness language is present and ready for operator review.",
+    "supportingCopyHashes": [
+      "tx-1922399406",
+      "tx-206158383",
+      "tx-78687973",
+      "tx-193513605"
+    ],
+    "reviewerPrompt": "Confirm source ownership boundaries and freshness/confidence wording are clear and non-conflicting."
+  },
+  {
+    "category": "construction-language",
+    "disposition": "review-support",
+    "surfaceId": "cost-time",
+    "evidenceIds": [
+      "EV-83",
+      "EV-84",
+      "EV-85",
+      "EV-86"
+    ],
+    "title": "Construction operations language signals observed",
+    "rationale": "Construction-domain terms are present in visible-copy snippets.",
+    "supportingCopyHashes": [
+      "tx-881813338",
+      "tx-1316988471"
+    ],
+    "reviewerPrompt": "Assess whether copy reflects jobsite operations language rather than generic dashboard language."
+  },
+  {
+    "category": "state-copy-quality",
+    "disposition": "review-support",
+    "surfaceId": "cost-time",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96"
+    ],
+    "title": "State copy extracted for review",
+    "rationale": "State-oriented visible copy is available for quality review.",
+    "supportingCopyHashes": [
+      "tx-45678",
+      "tx-1346468776",
+      "tx-197067502",
+      "tx-193513605"
+    ],
+    "reviewerPrompt": "Review whether state copy communicates condition, impact, owner, and next step."
+  },
+  {
+    "category": "owner-action-responsibility",
+    "disposition": "operator-pending",
+    "surfaceId": "cost-time",
+    "evidenceIds": [
+      "EV-91",
+      "EV-92",
+      "EV-105"
+    ],
+    "title": "Owner/action/responsibility language not clearly observed",
+    "rationale": "Ownership/next-action signals were limited in extracted snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Verify who owns the next action and whether urgency/priority are clear."
+  },
+  {
+    "category": "mock-fixture-transparency",
+    "disposition": "operator-pending",
+    "surfaceId": "cost-time",
+    "evidenceIds": [
+      "EV-106"
+    ],
+    "title": "Mock/fixture/demo transparency not clearly observed",
+    "rationale": "No clear mock/fixture/demo markers were detected in bounded snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Confirm non-production data is explicitly labeled for operators."
+  },
+  {
+    "category": "source-of-record-language",
+    "disposition": "review-support",
+    "surfaceId": "systems-administration",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96",
+      "EV-97",
+      "EV-98",
+      "EV-99"
+    ],
+    "title": "Source boundary/confidence copy observed",
+    "rationale": "Source-of-record and confidence/freshness language is present and ready for operator review.",
+    "supportingCopyHashes": [
+      "tx-1922399406",
+      "tx-206158383",
+      "tx-78687973",
+      "tx-2093456677"
+    ],
+    "reviewerPrompt": "Confirm source ownership boundaries and freshness/confidence wording are clear and non-conflicting."
+  },
+  {
+    "category": "construction-language",
+    "disposition": "review-support",
+    "surfaceId": "systems-administration",
+    "evidenceIds": [
+      "EV-83",
+      "EV-84",
+      "EV-85",
+      "EV-86"
+    ],
+    "title": "Construction operations language signals observed",
+    "rationale": "Construction-domain terms are present in visible-copy snippets.",
+    "supportingCopyHashes": [
+      "tx-881813338",
+      "tx-1316988471"
+    ],
+    "reviewerPrompt": "Assess whether copy reflects jobsite operations language rather than generic dashboard language."
+  },
+  {
+    "category": "state-copy-quality",
+    "disposition": "review-support",
+    "surfaceId": "systems-administration",
+    "evidenceIds": [
+      "EV-93",
+      "EV-94",
+      "EV-95",
+      "EV-96"
+    ],
+    "title": "State copy extracted for review",
+    "rationale": "State-oriented visible copy is available for quality review.",
+    "supportingCopyHashes": [
+      "tx-45678",
+      "tx-1346468776",
+      "tx-197067502",
+      "tx-2093456677",
+      "tx-1578734045"
+    ],
+    "reviewerPrompt": "Review whether state copy communicates condition, impact, owner, and next step."
+  },
+  {
+    "category": "owner-action-responsibility",
+    "disposition": "operator-pending",
+    "surfaceId": "systems-administration",
+    "evidenceIds": [
+      "EV-91",
+      "EV-92",
+      "EV-105"
+    ],
+    "title": "Owner/action/responsibility language not clearly observed",
+    "rationale": "Ownership/next-action signals were limited in extracted snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Verify who owns the next action and whether urgency/priority are clear."
+  },
+  {
+    "category": "mock-fixture-transparency",
+    "disposition": "operator-pending",
+    "surfaceId": "systems-administration",
+    "evidenceIds": [
+      "EV-106"
+    ],
+    "title": "Mock/fixture/demo transparency not clearly observed",
+    "rationale": "No clear mock/fixture/demo markers were detected in bounded snippets.",
+    "supportingCopyHashes": [],
+    "reviewerPrompt": "Confirm non-production data is explicitly labeled for operators."
+  }
+]

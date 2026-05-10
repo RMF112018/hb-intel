@@ -1,0 +1,1016 @@
+[
+  {
+    "surfaceId": "project-home",
+    "stateKind": "loading",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "empty",
+    "observed": true,
+    "selector": "div:nth-of-type(3)",
+    "copySnippet": "EmptySelect a sample question to see a grounded preview.Each sample question is project-scoped and answered from this pr",
+    "hasImpact": true,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "error",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "blocked",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "degraded",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "preview",
+    "observed": true,
+    "selector": "div:nth-of-type(3)",
+    "copySnippet": "EmptySelect a sample question to see a grounded preview.Each sample question is project-scoped and answered from this pr",
+    "hasImpact": true,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "read-only",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "deferred",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "unavailable",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "unauthorized",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "stale",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "missing-config",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "mock-demo",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "stateKind": "fixture",
+    "observed": true,
+    "selector": "div:nth-of-type(3)",
+    "copySnippet": "EmptySelect a sample question to see a grounded preview.Each sample question is project-scoped and answered from this pr",
+    "hasImpact": true,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "loading",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "empty",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "error",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "blocked",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "degraded",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "preview",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "read-only",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "deferred",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "unavailable",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "unauthorized",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "stale",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "missing-config",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "mock-demo",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "stateKind": "fixture",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "loading",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "empty",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "error",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "blocked",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "degraded",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "preview",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "read-only",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "deferred",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "unavailable",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "unauthorized",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "stale",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "missing-config",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "mock-demo",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "stateKind": "fixture",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "loading",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "empty",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "error",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "blocked",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "degraded",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "preview",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "read-only",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "deferred",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "unavailable",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "unauthorized",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "stale",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "missing-config",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "mock-demo",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "stateKind": "fixture",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "loading",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "empty",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "error",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "blocked",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "degraded",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "preview",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "read-only",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "deferred",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "unavailable",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "unauthorized",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "stale",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "missing-config",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "mock-demo",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "stateKind": "fixture",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "loading",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "empty",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "error",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "blocked",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "degraded",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "preview",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "read-only",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "deferred",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "unavailable",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "unauthorized",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "stale",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "missing-config",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "mock-demo",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "stateKind": "fixture",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "loading",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "empty",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "error",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "blocked",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "degraded",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "preview",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "read-only",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "deferred",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "unavailable",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "unauthorized",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "stale",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "missing-config",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "mock-demo",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "stateKind": "fixture",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "loading",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "empty",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "error",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "blocked",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "degraded",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "preview",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "read-only",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "deferred",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "unavailable",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "unauthorized",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "stale",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "missing-config",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "mock-demo",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "stateKind": "fixture",
+    "observed": false,
+    "hasImpact": false,
+    "hasOwner": false,
+    "hasNextStep": false,
+    "needsReview": false
+  }
+]

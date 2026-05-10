@@ -16,15 +16,20 @@ export const PCC_SURFACE_BLOCK_EVIDENCE_IDS = [
 
 export type PccSurfaceBlockEvidenceId = (typeof PCC_SURFACE_BLOCK_EVIDENCE_IDS)[number];
 
+// Phase 05 wave-b10 Prompt 08 — surface block IDs migrated from the
+// eight legacy MVP surfaces to the eight Phase 05 primary tabs. The
+// EV-125..EV-132 evidence block IDs remain the canonical surface
+// evidence anchors; only the per-surface block-id strings and surface
+// ids change to match the Phase 05 grouped-tab navigation model.
 export type PccSurfaceEvidenceBlockId =
   | 'project-home-surface-block'
-  | 'team-and-access-surface-block'
+  | 'core-tools-surface-block'
   | 'documents-surface-block'
-  | 'project-readiness-surface-block'
-  | 'approvals-surface-block'
-  | 'external-systems-surface-block'
-  | 'control-center-settings-surface-block'
-  | 'site-health-surface-block'
+  | 'estimating-preconstruction-surface-block'
+  | 'startup-closeout-surface-block'
+  | 'project-controls-surface-block'
+  | 'cost-time-surface-block'
+  | 'systems-administration-surface-block'
   | 'shared-primitive-system-block'
   | 'cross-surface-evidence-index-block';
 
@@ -54,9 +59,9 @@ export const PCC_SURFACE_BLOCK_MAPPING: readonly PccSurfaceEvidenceBlockMappingI
   },
   {
     evId: 'EV-126',
-    blockId: 'team-and-access-surface-block',
+    blockId: 'core-tools-surface-block',
     blockType: 'surface',
-    surfaceId: 'team-and-access',
+    surfaceId: 'core-tools',
   },
   {
     evId: 'EV-127',
@@ -66,33 +71,33 @@ export const PCC_SURFACE_BLOCK_MAPPING: readonly PccSurfaceEvidenceBlockMappingI
   },
   {
     evId: 'EV-128',
-    blockId: 'project-readiness-surface-block',
+    blockId: 'estimating-preconstruction-surface-block',
     blockType: 'surface',
-    surfaceId: 'project-readiness',
+    surfaceId: 'estimating-preconstruction',
   },
   {
     evId: 'EV-129',
-    blockId: 'approvals-surface-block',
+    blockId: 'startup-closeout-surface-block',
     blockType: 'surface',
-    surfaceId: 'approvals',
+    surfaceId: 'startup-closeout',
   },
   {
     evId: 'EV-130',
-    blockId: 'external-systems-surface-block',
+    blockId: 'project-controls-surface-block',
     blockType: 'surface',
-    surfaceId: 'external-systems',
+    surfaceId: 'project-controls',
   },
   {
     evId: 'EV-131',
-    blockId: 'control-center-settings-surface-block',
+    blockId: 'cost-time-surface-block',
     blockType: 'surface',
-    surfaceId: 'control-center-settings',
+    surfaceId: 'cost-time',
   },
   {
     evId: 'EV-132',
-    blockId: 'site-health-surface-block',
+    blockId: 'systems-administration-surface-block',
     blockType: 'surface',
-    surfaceId: 'site-health',
+    surfaceId: 'systems-administration',
   },
   {
     evId: 'EV-133',

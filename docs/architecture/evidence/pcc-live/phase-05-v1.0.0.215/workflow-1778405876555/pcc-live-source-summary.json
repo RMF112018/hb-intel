@@ -1,0 +1,66 @@
+[
+  {
+    "surfaceId": "project-home",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "core-tools",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "documents",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "project-controls",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "cost-time",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  },
+  {
+    "surfaceId": "systems-administration",
+    "sourceSystem": "Unknown",
+    "observed": false,
+    "readOnlyBoundaryObserved": false,
+    "writeAuthorityClaimObserved": false,
+    "needsReview": true
+  }
+]

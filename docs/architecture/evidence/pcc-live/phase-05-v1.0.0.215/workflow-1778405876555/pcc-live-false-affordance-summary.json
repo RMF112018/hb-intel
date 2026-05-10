@@ -1,0 +1,1460 @@
+[
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(2)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(3)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(4)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(5)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(6)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(7)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(8)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(10)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(11)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(12)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(13)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(14)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(15)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(16)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(17)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(18)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(19)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(20)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "a:nth-of-type(21)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(22)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(23)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(24)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(25)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(26)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(27)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(28)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(29)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(30)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(31)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(32)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(33)",
+    "falseAffordanceRisk": "needs-review",
+    "needsReview": true
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(34)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(35)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(36)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(37)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(38)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(39)",
+    "falseAffordanceRisk": "needs-review",
+    "needsReview": true
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(40)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(41)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(42)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(43)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(44)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(45)",
+    "falseAffordanceRisk": "high",
+    "needsReview": true
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(46)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(47)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-home",
+    "selector": "button:nth-of-type(48)",
+    "falseAffordanceRisk": "medium",
+    "needsReview": true
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(2)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(3)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(4)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(5)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(6)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(7)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(8)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(10)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(11)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(12)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(13)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(14)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(15)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(16)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(17)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(18)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(19)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "a:nth-of-type(20)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(21)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(22)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(23)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(24)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(25)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(26)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(27)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(28)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "core-tools",
+    "selector": "button:nth-of-type(29)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(2)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(3)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(4)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(5)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(6)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(7)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(8)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(10)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(11)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(12)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(13)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(14)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(15)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(16)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(17)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(18)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(19)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "a:nth-of-type(20)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(21)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(22)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(23)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(24)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(25)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(26)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(27)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(28)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(29)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(30)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(31)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(32)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(33)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(34)",
+    "falseAffordanceRisk": "needs-review",
+    "needsReview": true
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(35)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(36)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "documents",
+    "selector": "button:nth-of-type(37)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(2)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(3)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(4)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(5)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(6)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(7)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(8)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(10)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(11)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(12)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(13)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(14)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(15)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(16)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(17)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(18)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(19)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "a:nth-of-type(20)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(21)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(22)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(23)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(24)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(25)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(26)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(27)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(28)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "selector": "button:nth-of-type(29)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(2)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(3)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(4)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(5)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(6)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(7)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(8)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(10)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(11)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(12)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(13)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(14)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(15)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(16)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(17)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(18)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(19)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "a:nth-of-type(20)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(21)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(22)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(23)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(24)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(25)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(26)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(27)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(28)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "selector": "button:nth-of-type(29)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(2)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(3)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(4)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(5)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(6)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(7)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(8)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(10)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(11)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(12)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(13)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(14)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(15)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(16)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(17)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(18)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(19)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "a:nth-of-type(20)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(21)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(22)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(23)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(24)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(25)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(26)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(27)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(28)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "project-controls",
+    "selector": "button:nth-of-type(29)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(2)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(3)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(4)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(5)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(6)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(7)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(8)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(10)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(11)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(12)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(13)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(14)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(15)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(16)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(17)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(18)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(19)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "a:nth-of-type(20)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(21)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(22)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(23)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(24)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(25)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(26)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(27)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(28)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "cost-time",
+    "selector": "button:nth-of-type(29)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(2)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(3)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(4)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(5)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(6)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(7)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(8)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(10)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(11)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(12)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(13)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(14)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(15)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(16)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(17)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(18)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(19)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "a:nth-of-type(20)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(21)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(22)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(23)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(24)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(25)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(26)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(27)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(28)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  },
+  {
+    "surfaceId": "systems-administration",
+    "selector": "button:nth-of-type(29)",
+    "falseAffordanceRisk": "none-observed",
+    "needsReview": false
+  }
+]

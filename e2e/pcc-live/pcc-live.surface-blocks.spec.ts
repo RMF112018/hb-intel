@@ -14,6 +14,9 @@ import {
   PCC_SURFACE_BLOCK_MAPPING,
 } from './pcc-live.surface-blocks.types';
 
+// Phase 05 wave-b10 Prompt 08 — required block files migrated to the
+// eight Phase 05 primary tabs (see PCC_SURFACE_BLOCK_MAPPING). Block
+// JSON/MD filenames mirror PccSurfaceEvidenceBlockId.
 const REQUIRED_FILES = [
   'pcc-live-surface-blocks-evidence.json',
   'pcc-live-surface-blocks-evidence.md',
@@ -21,20 +24,20 @@ const REQUIRED_FILES = [
   'surface-block-index.md',
   'blocks/project-home-surface-block.json',
   'blocks/project-home-surface-block.md',
-  'blocks/team-and-access-surface-block.json',
-  'blocks/team-and-access-surface-block.md',
+  'blocks/core-tools-surface-block.json',
+  'blocks/core-tools-surface-block.md',
   'blocks/documents-surface-block.json',
   'blocks/documents-surface-block.md',
-  'blocks/project-readiness-surface-block.json',
-  'blocks/project-readiness-surface-block.md',
-  'blocks/approvals-surface-block.json',
-  'blocks/approvals-surface-block.md',
-  'blocks/external-systems-surface-block.json',
-  'blocks/external-systems-surface-block.md',
-  'blocks/control-center-settings-surface-block.json',
-  'blocks/control-center-settings-surface-block.md',
-  'blocks/site-health-surface-block.json',
-  'blocks/site-health-surface-block.md',
+  'blocks/estimating-preconstruction-surface-block.json',
+  'blocks/estimating-preconstruction-surface-block.md',
+  'blocks/startup-closeout-surface-block.json',
+  'blocks/startup-closeout-surface-block.md',
+  'blocks/project-controls-surface-block.json',
+  'blocks/project-controls-surface-block.md',
+  'blocks/cost-time-surface-block.json',
+  'blocks/cost-time-surface-block.md',
+  'blocks/systems-administration-surface-block.json',
+  'blocks/systems-administration-surface-block.md',
   'blocks/shared-primitive-system-block.json',
   'blocks/shared-primitive-system-block.md',
   'blocks/cross-surface-evidence-index-block.json',
@@ -111,6 +114,9 @@ test('EV tuple and fixed mapping validity', () => {
   }
 
   expect(PCC_SURFACE_BLOCK_MAPPING).toHaveLength(10);
+  // Phase 05 wave-b10 Prompt 08 — surface block IDs migrated to the
+  // eight Phase 05 primary tabs. EV-125..EV-132 anchor identity is
+  // preserved; only per-surface block id strings + surface IDs change.
   expect(PCC_SURFACE_BLOCK_MAPPING).toEqual([
     {
       evId: 'EV-125',
@@ -120,9 +126,9 @@ test('EV tuple and fixed mapping validity', () => {
     },
     {
       evId: 'EV-126',
-      blockId: 'team-and-access-surface-block',
+      blockId: 'core-tools-surface-block',
       blockType: 'surface',
-      surfaceId: 'team-and-access',
+      surfaceId: 'core-tools',
     },
     {
       evId: 'EV-127',
@@ -132,33 +138,33 @@ test('EV tuple and fixed mapping validity', () => {
     },
     {
       evId: 'EV-128',
-      blockId: 'project-readiness-surface-block',
+      blockId: 'estimating-preconstruction-surface-block',
       blockType: 'surface',
-      surfaceId: 'project-readiness',
+      surfaceId: 'estimating-preconstruction',
     },
     {
       evId: 'EV-129',
-      blockId: 'approvals-surface-block',
+      blockId: 'startup-closeout-surface-block',
       blockType: 'surface',
-      surfaceId: 'approvals',
+      surfaceId: 'startup-closeout',
     },
     {
       evId: 'EV-130',
-      blockId: 'external-systems-surface-block',
+      blockId: 'project-controls-surface-block',
       blockType: 'surface',
-      surfaceId: 'external-systems',
+      surfaceId: 'project-controls',
     },
     {
       evId: 'EV-131',
-      blockId: 'control-center-settings-surface-block',
+      blockId: 'cost-time-surface-block',
       blockType: 'surface',
-      surfaceId: 'control-center-settings',
+      surfaceId: 'cost-time',
     },
     {
       evId: 'EV-132',
-      blockId: 'site-health-surface-block',
+      blockId: 'systems-administration-surface-block',
       blockType: 'surface',
-      surfaceId: 'site-health',
+      surfaceId: 'systems-administration',
     },
     {
       evId: 'EV-133',

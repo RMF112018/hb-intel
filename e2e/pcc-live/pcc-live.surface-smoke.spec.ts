@@ -84,27 +84,38 @@ test('PCC hosted runtime navigates all eight surfaces through safe tabs', async 
     `Surface smoke failed for: ${failed.map((surface) => `${surface.surfaceId} (${surface.warning ?? 'no warning'})`).join(', ')}`,
   ).toHaveLength(0);
 
-  // Wave 15A wave-b8 Prompt 05A — Phase 03 conditional command-header
-  // hero markers must render in hosted DOM for every surface. Evidence
-  // is already written above; these assertions gate the test outcome
-  // on actual tenant-served Phase 03 behavior. A tenant package
-  // lagging the local 1.0.0.19 source will fail here with diagnostic
-  // surface-by-surface output. Cue-id contracts for project-readiness
-  // (`no-execution`) and external-systems (`launch-context`) are
-  // asserted as per-surface inclusion checks.
+  // Phase 05 wave-b10 Prompt 08 — hosted hero/command-search markers
+  // must render for every Phase 05 primary tab. Evidence is already
+  // written above; these assertions gate the test outcome on actual
+  // tenant-served Phase 05 behavior. A tenant package lagging the
+  // local source will fail here with diagnostic surface-by-surface
+  // output. The legacy `project-readiness` (`no-execution`) and
+  // `external-systems` (`launch-context`) cue contracts are removed
+  // here because those surfaces are no longer Phase 05 primary tabs;
+  // their governance posture migrated to per-primary-tab
+  // governanceMicrocopy in Prompt 06 (locked at the unit-test level
+  // in apps/project-control-center/src/tests/projectShellViewModel.test.ts).
   for (const surface of surfaceResults) {
+    // Phase 05 wave-b10 Prompt 08 — the legacy hero zones
+    // `[data-pcc-hero-surface-summary]`, `[data-pcc-hero-surface-cues]`,
+    // and `[data-pcc-hero-read-only-cue]` were demoted in Prompt 06 from
+    // primary visible hero content to metadata-only seam fields. The
+    // rendered hero band now exposes `[data-pcc-hero-highlights]` and
+    // `[data-pcc-hero-governance-microcopy]` instead, locked at the
+    // unit-test level (PccProjectHeroBand.test.tsx,
+    // PccShell.responsive.test.tsx). Live evidence here proves the
+    // hero band renders with a Phase-05-correct secondary title and a
+    // read-only command-search slot for every primary tab; deeper hero
+    // contracts remain locked at the unit-test level rather than
+    // duplicated in hosted assertions.
     expect(
-      surface.heroSummaryZoneCount,
-      `Surface ${surface.surfaceId}: expected 1 [data-pcc-hero-surface-summary]`,
-    ).toBe(1);
+      surface.heroBandFound,
+      `Surface ${surface.surfaceId}: expected the hero band to render ([data-pcc-project-hero-band])`,
+    ).toBe(true);
     expect(
-      surface.heroCueZoneCount,
-      `Surface ${surface.surfaceId}: expected 1 [data-pcc-hero-surface-cues]`,
-    ).toBe(1);
-    expect(
-      surface.heroReadOnlyCueCount,
-      `Surface ${surface.surfaceId}: expected 1 [data-pcc-hero-read-only-cue]`,
-    ).toBe(1);
+      surface.heroSecondaryTitleText,
+      `Surface ${surface.surfaceId}: expected hero secondary title to equal '${surface.label}'`,
+    ).toBe(surface.label);
     expect(
       surface.heroCommandSearchCount,
       `Surface ${surface.surfaceId}: expected 1 [data-pcc-hero-command-search]`,
@@ -141,19 +152,6 @@ test('PCC hosted runtime navigates all eight surfaces through safe tabs', async 
       surface.heroCommandSearchInteractiveCounts.roleButton,
       `Surface ${surface.surfaceId}: command-search must contain zero [role="button"]`,
     ).toBe(0);
-
-    if (surface.surfaceId === 'project-readiness') {
-      expect(
-        surface.heroCueIds,
-        `Surface project-readiness: expected [data-pcc-hero-surface-cue="no-execution"] (Prompt 02 cue marker)`,
-      ).toContain('no-execution');
-    }
-    if (surface.surfaceId === 'external-systems') {
-      expect(
-        surface.heroCueIds,
-        `Surface external-systems: expected [data-pcc-hero-surface-cue="launch-context"] (Prompt 02 cue marker)`,
-      ).toContain('launch-context');
-    }
   }
 });
 
