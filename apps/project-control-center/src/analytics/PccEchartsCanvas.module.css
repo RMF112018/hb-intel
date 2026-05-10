@@ -1,0 +1,20 @@
+/* Phase 06 Prompt 03 — PCC analytics chart canvas styles. Token-driven;
+   responsive; no horizontal overflow. */
+
+.container {
+  inline-size: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.chartHost {
+  inline-size: 100%;
+  min-block-size: 168px;
+  block-size: 100%;
+}
+
+@media (max-width: 480px) {
+  .chartHost {
+    min-block-size: 140px;
+  }
+}

@@ -1,0 +1,100 @@
+/* Phase 06 Prompt 03 — PCC analytics card body styles. */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-sm, 8px);
+}
+
+.stateRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--pcc-space-sm, 8px);
+  margin: 0;
+  font-size: 11px;
+  color: var(--pcc-color-text-muted, #605e5c);
+  letter-spacing: 0.04em;
+}
+
+.stateLabel {
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-primary, #1b1b1b);
+}
+
+.sourceLabel {
+  font-style: italic;
+}
+
+.explanation {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--pcc-space-xs, 4px) var(--pcc-space-sm, 8px);
+  border-inline-start: 3px solid var(--pcc-color-accent, #f37021);
+  background: var(--pcc-color-canvas, transparent);
+  border-radius: var(--pcc-radius-sm, 4px);
+}
+
+.explanationLabel {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary, #1b1b1b);
+}
+
+.explanationDescription {
+  margin: 0;
+  font-size: 11px;
+  color: var(--pcc-color-text-muted, #605e5c);
+}
+
+.description {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-color-text-primary, #1b1b1b);
+}
+
+.summary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--pcc-space-xs, 4px) var(--pcc-space-sm, 8px);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--pcc-space-xs, 4px);
+  font-size: 12px;
+}
+
+.summaryLabel {
+  color: var(--pcc-color-text-muted, #605e5c);
+}
+
+.summaryValue {
+  font-weight: 600;
+  color: var(--pcc-color-text-primary, #1b1b1b);
+}
+
+/* Tone hooks — tests assert via data-pcc-analytics-card-summary-tone, so
+   tone is encoded as a data attribute (non-color-only signal). Visual
+   tone is layered through variable-driven color/icon, not from color
+   alone, so accessibility is preserved. */
+.summaryValue[data-pcc-analytics-card-summary-tone='info'] {
+  color: var(--pcc-color-info, #3b9fff);
+}
+.summaryValue[data-pcc-analytics-card-summary-tone='success'] {
+  color: var(--pcc-color-success, #00c896);
+}
+.summaryValue[data-pcc-analytics-card-summary-tone='warning'] {
+  color: var(--pcc-color-warning, #ffb020);
+}
+.summaryValue[data-pcc-analytics-card-summary-tone='danger'] {
+  color: var(--pcc-color-danger, #ff4d4d);
+}
