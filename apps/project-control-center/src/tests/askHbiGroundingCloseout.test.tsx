@@ -98,7 +98,7 @@ const SURFACE_ROUTER_FILE = resolve(__dirname, '..', 'shell', 'PccSurfaceRouter.
 // ─────────────────────────────────────────────────────────────────────
 
 describe('Ask-HBI closeout — integrated Project Home idle posture and bento invariants', () => {
-  it('renders 15 cards (14 + Wave 13E Procore snapshot, post Wave 15A wave-b9 Prompt 4B-01 Project Intelligence removal), the Ask-HBI card mounts in idle posture, no answer rows are visible, no card is nested inside another card, and the panel disclaimer is present', async () => {
+  it('renders 18 cards (Phase 06 Prompt 04: 12 spine+analytics + 4 unified lifecycle + 1 Ask HBI + 1 Procore snapshot), the Ask-HBI card mounts in idle posture, no answer rows are visible, no card is nested inside another card, and the panel disclaimer is present', async () => {
     const { container, findByText } = render(
       <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
@@ -106,7 +106,7 @@ describe('Ask-HBI closeout — integrated Project Home idle posture and bento in
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     const cards = container.querySelectorAll('[data-pcc-card]');
-    expect(cards).toHaveLength(15);
+    expect(cards).toHaveLength(18);
     for (const card of cards) {
       expect(card.parentElement === grid).toBe(true);
     }

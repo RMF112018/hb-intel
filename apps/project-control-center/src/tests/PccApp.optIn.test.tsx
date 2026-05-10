@@ -149,10 +149,11 @@ describe('PccApp default fixture path', () => {
   it('renders the post-Prompt-4B-01 9-card baseline without invoking fetch when no readModelClient is supplied', async () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const cards = container.querySelectorAll('[data-pcc-card]');
-    // Wave 15A wave-b9 Prompt 4B-01 — `PccProjectIntelligenceCard` was
-    // removed from Project Home; fixture-only fallback now renders 9
-    // cards (was 10).
-    expect(cards).toHaveLength(9);
+    // Phase 06 Prompt 04 — fixture-only Project Home renders the
+    // canonical 12-card order: 9 operational spine + 3 preview analytics
+    // cards (Action Exposure Mix, Project Health Trend,
+    // Readiness / Approval Rollup).
+    expect(cards).toHaveLength(12);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
@@ -167,14 +168,12 @@ describe('mount(...) opt-in', () => {
     });
     await waitFor(() => {
       const cards = host.querySelectorAll('[data-pcc-card]');
-      // Wave 99 / Prompts 05B + 06C — read-model-driven Project Home
-      // renders 9 existing cards (Wave 15A wave-b9 Prompt 4B-01 removed
-      // `PccProjectIntelligenceCard`) + 4 unified-lifecycle cards + 1
-      // Ask-HBI card = 14. Wave 13 / Prompt 13E — adds 1 Procore
-      // snapshot card (15 total). The Ask-HBI card mounts in idle
-      // posture (initialQuery={null}), so its presence does not
-      // introduce a getUnifiedSearch fetch on initial mount.
-      expect(cards.length).toBe(15);
+      // Phase 06 Prompt 04 — read-model-driven Project Home renders 18
+      // cards: 12 spine+analytics (9 operational + 3 preview analytics) +
+      // 4 unified-lifecycle cards + 1 Ask-HBI card + 1 Procore snapshot.
+      // Ask-HBI mounts in idle posture (initialQuery={null}), so it does
+      // not introduce a getUnifiedSearch fetch on initial mount.
+      expect(cards.length).toBe(18);
     });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -237,11 +236,12 @@ describe('mount(...) opt-in', () => {
     const cards = host.querySelectorAll('[data-pcc-card]');
     // Wave 99 / Prompts 05B + 06C + Wave 15A wave-b9 Prompt 4B-01 —
     // 9 existing (post-Intelligence-removal) + 4 unified-lifecycle
-    // + 1 Ask-HBI = 14. Wave 13 / Prompt 13E — +1 Procore snapshot
-    // = 15. Ask-HBI mounts in idle posture, so the canonical
+    // Phase 06 Prompt 04 — read-model-driven Project Home: 12
+    // spine+analytics + 4 unified-lifecycle + 1 Ask-HBI + 1 Procore
+    // snapshot = 18. Ask-HBI mounts in idle posture, so the canonical
     // backend-mode URL set above is unchanged (no extra unified-search
     // request added until the user clicks a sample query).
-    expect(cards).toHaveLength(15);
+    expect(cards).toHaveLength(18);
     const grid = host.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     for (const card of cards) {
@@ -272,7 +272,7 @@ describe('mount(...) opt-in', () => {
     // Wave 13 / Prompt 13E — Procore snapshot card adds 1.
     // Wave 15A wave-b9 Prompt 4B-01 — Project Intelligence removed
     // from baseline (was 16 → 15).
-    expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(15);
+    expect(host.querySelectorAll('[data-pcc-card]')).toHaveLength(18);
   });
 
   it('mount(...) returns a thenable that resolves so the SPFx shell can chain .catch()', async () => {
@@ -295,9 +295,9 @@ describe('mount(...) opt-in', () => {
       // itself is governed by that sibling test — this is intentionally
       // mirroring the canonical fixture-mode contract, NOT an independent
       // magic number. If the canonical fixture-mode count changes, both
-      // tests move together. Wave 15A wave-b9 Prompt 4B-01 dropped the
-      // canonical from 16 → 15 (Project Intelligence removed).
-      expect(cards.length).toBe(15);
+      // tests move together. Phase 06 Prompt 04 raised the canonical
+      // from 15 → 18 (3 preview analytics cards added).
+      expect(cards.length).toBe(18);
     });
     // Secondary guard: confirms the new path stays inside the no-runtime
     // posture (fixture client is synchronous/in-memory). Decisive proof of

@@ -71,9 +71,9 @@ function getCardBody(container: HTMLElement): HTMLElement {
 }
 
 function getLastSetOptionArg(): Record<string, unknown> {
-  const calls = setOptionMock.mock.calls as readonly [Record<string, unknown>, ...unknown[]][];
+  const calls = setOptionMock.mock.calls as unknown as readonly (readonly unknown[])[];
   if (calls.length === 0) throw new Error('setOption was not called');
-  return calls[calls.length - 1]![0];
+  return calls[calls.length - 1]![0] as Record<string, unknown>;
 }
 
 describe('PccAnalyticsCard — render states', () => {

@@ -63,9 +63,9 @@ function findContainer(node: Element): HTMLElement {
 }
 
 function getLastSetOptionArg(): Record<string, unknown> {
-  const calls = setOptionMock.mock.calls as readonly [Record<string, unknown>, ...unknown[]][];
+  const calls = setOptionMock.mock.calls as unknown as readonly (readonly unknown[])[];
   if (calls.length === 0) throw new Error('setOption was not called');
-  return calls[calls.length - 1]![0];
+  return calls[calls.length - 1]![0] as Record<string, unknown>;
 }
 
 describe('PccEchartsCanvas — markers and accessibility', () => {
@@ -92,9 +92,9 @@ describe('PccEchartsCanvas — initialization', () => {
   it('initializes ECharts once with SVG renderer + pcc-analytics theme', () => {
     render(<PccEchartsCanvas {...baseProps} />);
     expect(initMock).toHaveBeenCalledTimes(1);
-    const [, themeArg, optsArg] = initMock.mock.calls[0]!;
-    expect(themeArg).toBe('pcc-analytics');
-    expect(optsArg).toEqual({ renderer: 'svg' });
+    const initArgs = initMock.mock.calls[0] as unknown as readonly unknown[];
+    expect(initArgs[1]).toBe('pcc-analytics');
+    expect(initArgs[2]).toEqual({ renderer: 'svg' });
   });
 
   it('calls setOption with the provided option (preserving animation)', () => {

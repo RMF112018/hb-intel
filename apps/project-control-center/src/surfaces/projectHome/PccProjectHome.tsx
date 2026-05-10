@@ -1,5 +1,6 @@
 import { Fragment, type FC } from 'react';
 import type { PccModuleId } from '@hbc/models/pcc';
+import { PccAnalyticsCard } from '../../analytics';
 import { PccPriorityActionsCard } from './PccPriorityActionsCard';
 import { PccSiteHealthSummaryCard } from './PccSiteHealthSummaryCard';
 import { PccDocumentControlCard } from './PccDocumentControlCard';
@@ -10,6 +11,10 @@ import { PccExternalSystemsCard } from './PccExternalSystemsCard';
 import { PccTeamSnapshotCard } from './PccTeamSnapshotCard';
 import { PccRecentActivityCard } from './PccRecentActivityCard';
 import { PccProjectHomeReadModelContent } from './PccProjectHomeReadModelContent';
+import {
+  PROJECT_HOME_ANALYTICS_SPAN_OVERRIDES,
+  PROJECT_HOME_ANALYTICS_VIEW_MODELS,
+} from './projectHomeAnalytics';
 import {
   PROJECT_HOME_OPERATIONAL_GATEWAYS,
   PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES,
@@ -78,6 +83,20 @@ export const PccProjectHome: FC<PccProjectHomeProps> = ({ readModelClient, onSel
         gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.documentControl}
         onSelectModule={onSelectModule}
       />
+      <PccAnalyticsCard
+        viewModel={PROJECT_HOME_ANALYTICS_VIEW_MODELS.actionExposureMix}
+        footprint="standard"
+        tier="tier2"
+        region="operational"
+        spanOverrides={PROJECT_HOME_ANALYTICS_SPAN_OVERRIDES.actionExposureMix}
+      />
+      <PccAnalyticsCard
+        viewModel={PROJECT_HOME_ANALYTICS_VIEW_MODELS.projectHealthTrend}
+        footprint="standard"
+        tier="tier2"
+        region="operational"
+        spanOverrides={PROJECT_HOME_ANALYTICS_SPAN_OVERRIDES.projectHealthTrend}
+      />
       <PccProjectReadinessCard
         spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.projectReadiness}
         gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.projectReadiness}
@@ -87,6 +106,13 @@ export const PccProjectHome: FC<PccProjectHomeProps> = ({ readModelClient, onSel
         spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.approvalsCheckpoints}
         gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.approvalsCheckpoints}
         onSelectModule={onSelectModule}
+      />
+      <PccAnalyticsCard
+        viewModel={PROJECT_HOME_ANALYTICS_VIEW_MODELS.readinessApprovalRollup}
+        footprint="standard"
+        tier="tier2"
+        region="operational"
+        spanOverrides={PROJECT_HOME_ANALYTICS_SPAN_OVERRIDES.readinessApprovalRollup}
       />
       <PccMissingConfigurationsCard
         spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.missingConfigurations}

@@ -30,39 +30,31 @@ function readDirectCardTitlesInOrder(grid: Element): string[] {
     .map((card) => card.querySelector('h2,h3,h4')?.textContent?.trim() ?? '(untitled)');
 }
 
-// Phase 06 Prompt 02 — canonical nine-card operational spine:
-// Priority Actions, Site Health Summary, Document Control Center,
-// Project Readiness, Approvals & Checkpoints, Missing Configurations,
-// External Platforms, Team Snapshot, Recent Activity. Replaces the
-// Wave 15A wave-b9 Prompt 4B-01 nine-card order.
+// Phase 06 Prompt 04 — canonical twelve-card fixture order: the Prompt 02
+// nine-card operational spine with three preview analytics cards
+// interleaved (Action Exposure Mix + Project Health Trend after Document
+// Control Center; Readiness / Approval Rollup between Approvals &
+// Checkpoints and Missing Configurations).
 const FIXTURE_EXPECTED_ORDER = [
   'Priority Actions',
   'Site Health Summary',
   'Document Control Center',
+  'Action Exposure Mix',
+  'Project Health Trend',
   'Project Readiness',
   'Approvals & Checkpoints',
+  'Readiness / Approval Rollup',
   'Missing Configurations',
   'External Platforms',
   'Team Snapshot',
   'Recent Activity',
 ] as const;
 
-// Phase 06 Prompt 02 — read-model path begins with the same nine-card
-// operational spine, then renders Lifecycle / Ask HBI / Procore Snapshot
-// inside the unified-lifecycle section's renderAfterTimeline slot, then
-// the lower-detail lifecycle cards (Project Memory, Project Lens,
-// Related Records) at the tail. External Platforms / Team Snapshot /
-// Recent Activity moved out of renderAfterTimeline into the spine.
+// Phase 06 Prompt 04 — read-model path is the twelve-card fixture order
+// followed by Lifecycle Timeline + Ask HBI + Procore Snapshot (inside
+// renderAfterTimeline) + Project Memory + Project Lens + Related Records.
 const READ_MODEL_EXPECTED_ORDER = [
-  'Priority Actions',
-  'Site Health Summary',
-  'Document Control Center',
-  'Project Readiness',
-  'Approvals & Checkpoints',
-  'Missing Configurations',
-  'External Platforms',
-  'Team Snapshot',
-  'Recent Activity',
+  ...FIXTURE_EXPECTED_ORDER,
   'Lifecycle Timeline',
   'Ask HBI — Grounded Project Answers',
   'Procore snapshot',
@@ -73,7 +65,7 @@ const READ_MODEL_EXPECTED_ORDER = [
 
 describe('Project Home — first-impression composition order', () => {
   describe('fixture path', () => {
-    it('renders the Phase 06 Prompt 02 nine-card spine as direct bento children', () => {
+    it('renders the Phase 06 Prompt 04 twelve-card fixture order as direct bento children', () => {
       const { container } = render(<PccApp forceMode="desktop" />);
       const grid = container.querySelector('[data-pcc-bento-grid]');
       expect(grid, 'bento grid should render').not.toBeNull();
@@ -108,7 +100,7 @@ describe('Project Home — first-impression composition order', () => {
   });
 
   describe('read-model path', () => {
-    it('renders the Phase 06 Prompt 02 15-card sequence (waits for both async hooks to settle)', async () => {
+    it('renders the Phase 06 Prompt 04 18-card sequence (waits for both async hooks to settle)', async () => {
       const client = createPccFixtureReadModelClient();
       const { container } = render(<PccApp forceMode="desktop" readModelClient={client} />);
 

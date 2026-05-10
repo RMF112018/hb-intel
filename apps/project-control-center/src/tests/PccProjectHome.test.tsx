@@ -45,15 +45,24 @@ const SUPPRESSED_FIXTURES = SAMPLE_PRIORITY_ACTIONS.filter((a) =>
 // tests, so the card-level `[data-pcc-active-surface-panel="project-home"]`
 // compatibility marker is no longer rendered (the shell `<main>` carries
 // the marker on its own).
+// Phase 06 Prompt 04 — REQUIRED_CARD_TITLES is the canonical 12-card
+// fixture order: the Prompt 02 nine-card operational spine with three
+// preview analytics cards interleaved (Action Exposure Mix +
+// Project Health Trend after Document Control Center;
+// Readiness / Approval Rollup between Approvals & Checkpoints and
+// Missing Configurations).
 const REQUIRED_CARD_TITLES = [
   'Priority Actions',
   'Site Health Summary',
   'Document Control Center',
+  'Action Exposure Mix',
+  'Project Health Trend',
   'Project Readiness',
   'Approvals & Checkpoints',
+  'Readiness / Approval Rollup',
+  'Missing Configurations',
   'External Platforms',
   'Team Snapshot',
-  'Missing Configurations',
   'Recent Activity',
 ] as const;
 
@@ -491,10 +500,10 @@ describe('Project Home bento dashboard', () => {
             child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
         )
         .map((card) => card.querySelector('h2,h3,h4')?.textContent?.trim() ?? '(untitled)');
-      // Wave 15A wave-b9 Prompt 4B-01 — Project Intelligence removed; the
-      // read-model path now renders 15 cards (10 base − 1 Intelligence + 4
-      // unified-lifecycle + 1 Ask HBI + 1 Procore snapshot).
-      expect(titles).toHaveLength(15);
+      // Phase 06 Prompt 04 — read-model path renders 18 cards: 12
+      // spine+analytics (9 operational + 3 preview analytics) + 4
+      // unified-lifecycle + 1 Ask HBI + 1 Procore snapshot.
+      expect(titles).toHaveLength(18);
       const idx = (t: string): number => {
         const i = titles.indexOf(t);
         expect(i, `card '${t}' should appear`).toBeGreaterThanOrEqual(0);
@@ -697,7 +706,7 @@ describe('Project Home bento dashboard', () => {
   // 15 cards). Each test below names which path it exercises and asserts
   // the path-specific cardinality / content invariants.
 
-  it('fixture-only fallback (no readModelClient) preserves the post-Prompt-4B-01 9-card baseline and renders no unified-lifecycle titles', () => {
+  it('fixture-only fallback (no readModelClient) renders the Phase 06 Prompt 04 12-card baseline (9 operational + 3 analytics) and no unified-lifecycle titles', () => {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectHome />
@@ -730,7 +739,7 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
-  it('read-model-driven path renders 15 cards (9 existing + 4 unified lifecycle + 1 Ask HBI + 1 Procore snapshot) and exposes each unified-lifecycle body marker as a direct child of the bento grid', async () => {
+  it('read-model-driven path renders 18 cards (12 Phase 06 Prompt 04 spine+analytics + 4 unified lifecycle + 1 Ask HBI + 1 Procore snapshot) and exposes each unified-lifecycle body marker as a direct child of the bento grid', async () => {
     const { container, findByText } = render(
       <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );

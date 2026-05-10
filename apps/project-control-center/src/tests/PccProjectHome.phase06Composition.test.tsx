@@ -26,6 +26,8 @@ afterEach(() => {
  *   - footprint-fallback behavior at smaller modes.
  */
 
+// Prompt 02 nine-card operational spine — preserved for the
+// "operational-only filtered sequence" assertion.
 const SPINE_TITLES_IN_ORDER: readonly string[] = [
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.priorityActions,
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary,
@@ -38,8 +40,25 @@ const SPINE_TITLES_IN_ORDER: readonly string[] = [
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.recentActivity,
 ];
 
+// Prompt 04 canonical 12-card fixture order — three preview analytics
+// cards interleaved into the operational spine.
+const PROMPT_04_FIXTURE_ORDER: readonly string[] = [
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.priorityActions,
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary,
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.documentControl,
+  'Action Exposure Mix',
+  'Project Health Trend',
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness,
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.approvalsCheckpoints,
+  'Readiness / Approval Rollup',
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.missingConfigurations,
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.externalPlatforms,
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.teamSnapshot,
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.recentActivity,
+];
+
 const READ_MODEL_FULL_ORDER: readonly string[] = [
-  ...SPINE_TITLES_IN_ORDER,
+  ...PROMPT_04_FIXTURE_ORDER,
   'Lifecycle Timeline',
   'Ask HBI — Grounded Project Answers',
   'Procore snapshot',
@@ -77,7 +96,7 @@ function getCardByTitle(grid: HTMLElement, title: string): HTMLElement {
 }
 
 describe('Project Home Phase 06 composition — fixture path', () => {
-  it('renders the canonical nine-card operational spine in order', () => {
+  it('renders the Prompt 04 canonical twelve-card fixture order (operational spine + three analytics cards)', () => {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectHome />
@@ -85,10 +104,10 @@ describe('Project Home Phase 06 composition — fixture path', () => {
     );
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
-    expect(getCardTitles(grid!)).toEqual(SPINE_TITLES_IN_ORDER);
+    expect(getCardTitles(grid!)).toEqual(PROMPT_04_FIXTURE_ORDER);
   });
 
-  it('renders exactly nine direct bento children, all data-pcc-card articles', () => {
+  it('renders exactly twelve direct bento children, all data-pcc-card articles', () => {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectHome />
@@ -96,12 +115,24 @@ describe('Project Home Phase 06 composition — fixture path', () => {
     );
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const directCards = getDirectChildCards(grid);
-    expect(directCards).toHaveLength(9);
+    expect(directCards).toHaveLength(12);
     expect(
       Array.from(grid.children).every(
         (child) => child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
       ),
     ).toBe(true);
+  });
+
+  it('the operational-only filtered sequence still equals the Prompt 02 nine-card spine', () => {
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccProjectHome />
+      </PccBentoGrid>,
+    );
+    const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
+    const titles = getCardTitles(grid);
+    const operationalOnly = titles.filter((t) => SPINE_TITLES_IN_ORDER.includes(t));
+    expect(operationalOnly).toEqual(SPINE_TITLES_IN_ORDER);
   });
 
   it('does not contain "Project Intelligence" anywhere in the grid', () => {
@@ -116,7 +147,7 @@ describe('Project Home Phase 06 composition — fixture path', () => {
 });
 
 describe('Project Home Phase 06 composition — read-model path', () => {
-  it('renders the canonical nine-card operational spine first, then lifecycle / Ask HBI / Procore / Memory / Lens / Related Records', async () => {
+  it('renders the Prompt 04 canonical twelve-card spine+analytics first, then lifecycle / Ask HBI / Procore / Memory / Lens / Related Records', async () => {
     const client = createPccFixtureReadModelClient();
     const { container, findByText } = render(
       <PccBentoGrid forceMode="desktop">
@@ -133,7 +164,7 @@ describe('Project Home Phase 06 composition — read-model path', () => {
     });
   });
 
-  it('first nine direct cards exactly match the spine order on the read-model path', async () => {
+  it('first twelve direct cards exactly match the Prompt 04 fixture order on the read-model path', async () => {
     const client = createPccFixtureReadModelClient();
     const { container, findByText } = render(
       <PccBentoGrid forceMode="desktop">
@@ -143,7 +174,7 @@ describe('Project Home Phase 06 composition — read-model path', () => {
     await findByText('Lifecycle Timeline');
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const titles = getCardTitles(grid);
-    expect(titles.slice(0, 9)).toEqual(SPINE_TITLES_IN_ORDER);
+    expect(titles.slice(0, 12)).toEqual(PROMPT_04_FIXTURE_ORDER);
   });
 
   it('every direct bento child is a [data-pcc-card] article on the read-model path', async () => {
