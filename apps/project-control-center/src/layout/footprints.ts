@@ -251,3 +251,47 @@ export function resolveFootprintColumnSpan(
     FOOTPRINT_MIN_COLUMN_SPANS[mode][footprint],
   );
 }
+
+export type PccCardSpanOverrides = Partial<Record<PccResponsiveMode, number>>;
+
+export type PccCardSpanSource = 'footprint' | 'override';
+
+export interface PccResolvedCardColumnSpan {
+  readonly columnSpan: number;
+  readonly source: PccCardSpanSource;
+  readonly overrideMode?: PccResponsiveMode;
+}
+
+/**
+ * Resolves a card's column span from (a) its footprint default + minimum and
+ * (b) an optional per-mode override.
+ *
+ * An explicit override for the active mode wins over both
+ * `FOOTPRINT_COLUMN_SPANS` and `FOOTPRINT_MIN_COLUMN_SPANS`. This is required
+ * so Phase 06 layouts can intentionally place a card narrower than its
+ * footprint's global minimum (e.g. a `hero` footprint sized to 3 columns
+ * inside a 12-column row). Overrides are integer-truncated and clamped to
+ * `[1, columns]`; non-finite values fall back to the footprint span.
+ */
+export function resolveDashboardCardColumnSpan(
+  mode: PccResponsiveMode,
+  footprint: PccCardFootprint,
+  columns: number,
+  spanOverrides?: PccCardSpanOverrides,
+): PccResolvedCardColumnSpan {
+  const footprintSpan = resolveFootprintColumnSpan(mode, footprint);
+  const override = spanOverrides?.[mode];
+
+  if (typeof override !== 'number' || !Number.isFinite(override)) {
+    return { columnSpan: footprintSpan, source: 'footprint' };
+  }
+
+  const integerOverride = Math.trunc(override);
+  const clampedOverride = Math.min(Math.max(integerOverride, 1), columns);
+
+  return {
+    columnSpan: clampedOverride,
+    source: 'override',
+    overrideMode: mode,
+  };
+}

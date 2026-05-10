@@ -1,8 +1,9 @@
 import { useId, type CSSProperties, type FC, type JSX, type ReactNode } from 'react';
 import {
   FOOTPRINT_MIN_INLINE_SIZE_PX,
-  resolveFootprintColumnSpan,
+  resolveDashboardCardColumnSpan,
   type PccCardFootprint,
+  type PccCardSpanOverrides,
 } from './footprints';
 import { usePccBentoContext } from './PccBentoGrid';
 import { useBentoRowSpan } from './useBentoRowSpan';
@@ -42,6 +43,13 @@ export interface PccDashboardCardProps {
    * extra DOM wrapper that would break the bento grid invariant.
    */
   dataActiveSurfacePanel?: string;
+  /**
+   * Per-card, mode-keyed column-span override. Wins over the footprint
+   * default and the footprint minimum. Clamped to `[1, columns]` against
+   * the active bento mode's column count. Non-finite values fall back to
+   * the footprint-derived span.
+   */
+  spanOverrides?: PccCardSpanOverrides;
 }
 
 export type PccCardTierSource = 'explicit' | 'hierarchy' | 'default';
@@ -91,10 +99,17 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
   ariaDescribedBy,
   headingLevel,
   dataActiveSurfacePanel,
+  spanOverrides,
 }) => {
-  const { mode } = usePccBentoContext();
+  const { mode, columns } = usePccBentoContext();
   const { ref, rowSpan, measuredHeight } = useBentoRowSpan();
-  const columnSpan = resolveFootprintColumnSpan(mode, footprint);
+  const resolvedColumnSpan = resolveDashboardCardColumnSpan(
+    mode,
+    footprint,
+    columns,
+    spanOverrides,
+  );
+  const columnSpan = resolvedColumnSpan.columnSpan;
   const minInlineSize = FOOTPRINT_MIN_INLINE_SIZE_PX[mode][footprint];
 
   const headingId = useId();
@@ -123,6 +138,8 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
       data-pcc-heading-level={String(resolvedHeadingLevel)}
       data-pcc-mode={mode}
       data-pcc-column-span={columnSpan}
+      data-pcc-span-source={resolvedColumnSpan.source}
+      data-pcc-span-override-mode={resolvedColumnSpan.overrideMode}
       data-pcc-row-span={rowSpan}
       data-pcc-measured-height={measuredHeight}
       data-pcc-active-surface-panel={dataActiveSurfacePanel}
