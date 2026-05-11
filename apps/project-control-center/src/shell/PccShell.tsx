@@ -109,15 +109,21 @@ export const PccShell: FC<PccShellProps> = ({
       data-pcc-shell-mode={shellMode}
       data-pcc-shell-host-fit=""
     >
-      <PccHorizontalTabs
-        mode={shellMode}
-        activePrimaryTabId={activePrimaryTabId}
-        activeModuleId={activeModuleId}
-        onSelectPrimarySurface={(id) => onSelectPrimarySurface?.(id)}
-        onSelectModule={(id) => onSelectModule?.(id)}
-        panelId={ACTIVE_PANEL_ID}
-      />
-      <PccProjectHeroBand mode={shellMode} viewModel={heroViewModel} />
+      <section
+        className={styles.commandSurface}
+        data-pcc-command-surface=""
+        data-pcc-command-surface-variant="unified-gradient"
+      >
+        <PccHorizontalTabs
+          mode={shellMode}
+          activePrimaryTabId={activePrimaryTabId}
+          activeModuleId={activeModuleId}
+          onSelectPrimarySurface={(id) => onSelectPrimarySurface?.(id)}
+          onSelectModule={(id) => onSelectModule?.(id)}
+          panelId={ACTIVE_PANEL_ID}
+        />
+        <PccProjectHeroBand mode={shellMode} viewModel={heroViewModel} />
+      </section>
       <main
         id={ACTIVE_PANEL_ID}
         role="tabpanel"

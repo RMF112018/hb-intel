@@ -179,22 +179,52 @@ describe('PccShell responsive behaviour (thin shell: hero + tabs + canvas)', () 
     unmount();
   });
 
-  it('renders shell components in tabs → hero → main DOM order (Wave 15A wave-b9 Prompt 4B-03)', () => {
+  it('wraps tabs and hero in a unified PCC command surface above main (Phase 08 Prompt 04 Foleon direction)', () => {
     const { container } = render(<PccApp forceMode="standardLaptop" />);
+
+    const shell = container.querySelector('[data-pcc-shell-host-fit]');
+    const commandSurface = container.querySelector('[data-pcc-command-surface]');
     const tabs = container.querySelector('[data-pcc-horizontal-tabs]');
     const hero = container.querySelector('[data-pcc-project-hero-band]');
     const main = container.querySelector('main[role="tabpanel"]#pcc-active-surface-panel');
+
+    expect(shell, '[data-pcc-shell-host-fit] outer shell must render').not.toBeNull();
+    expect(commandSurface, '[data-pcc-command-surface] section must render').not.toBeNull();
     expect(tabs, '[data-pcc-horizontal-tabs] tablist must render').not.toBeNull();
     expect(hero, '[data-pcc-project-hero-band] hero must render').not.toBeNull();
     expect(main, 'main[role="tabpanel"] active-surface panel must render').not.toBeNull();
+
+    // Command surface is unique and carries the unified-gradient variant.
+    expect(container.querySelectorAll('[data-pcc-command-surface]')).toHaveLength(1);
+    expect(commandSurface!.getAttribute('data-pcc-command-surface-variant')).toBe(
+      'unified-gradient',
+    );
+
+    // Command surface is a direct child of the shell.
+    expect(commandSurface!.parentElement).toBe(shell);
+
+    // Tabs and hero are both descendants of the command surface.
+    expect(commandSurface!.contains(tabs!)).toBe(true);
+    expect(commandSurface!.contains(hero!)).toBe(true);
+
+    // Inside the command surface, tabs still precede hero.
     expect(
       tabs!.compareDocumentPosition(hero!) & Node.DOCUMENT_POSITION_FOLLOWING,
-      'tablist must precede the hero band in DOM order',
+      'tablist must precede the hero band inside the command surface',
     ).toBeTruthy();
+
+    // Command surface precedes <main> in DOM order; <main> is a sibling, not a descendant.
     expect(
-      hero!.compareDocumentPosition(main!) & Node.DOCUMENT_POSITION_FOLLOWING,
-      'hero band must precede the active-surface tabpanel main in DOM order',
+      commandSurface!.compareDocumentPosition(main!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      'command surface must precede the active-surface tabpanel main in DOM order',
     ).toBeTruthy();
+    expect(commandSurface!.contains(main!)).toBe(false);
+
+    // Bento grid remains a descendant of <main>, never of the command surface.
+    const grid = container.querySelector('[data-pcc-bento-grid]');
+    expect(grid, 'bento grid must render').not.toBeNull();
+    expect(main!.contains(grid!)).toBe(true);
+    expect(commandSurface!.contains(grid!)).toBe(false);
   });
 });
 

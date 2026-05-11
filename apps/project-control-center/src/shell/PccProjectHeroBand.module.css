@@ -28,6 +28,12 @@
   flex-direction: column;
 }
 
+/* Phase 08 Prompt 04 (Foleon direction) — the hero band is now nested
+   inside the shell's `.commandSurface` gradient field. The slab decorations
+   (own background, box-shadow, border-bottom) are removed so the hero
+   participates in the unified field; the command surface owns slab depth
+   and the `.tabSeam` below owns the canvas transition. Grid layout and
+   responsive padding are preserved verbatim. */
 .heroSurface {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -39,9 +45,7 @@
   align-items: start;
   gap: var(--pcc-space-md) var(--pcc-space-lg);
   padding: var(--pcc-space-lg) var(--pcc-space-xl);
-  background: var(--pcc-color-card);
-  border-bottom: 1px solid var(--pcc-color-border);
-  box-shadow: var(--pcc-elevation-card);
+  background: transparent;
 }
 
 .heroBand[data-pcc-hero-density='compact'] .heroSurface {

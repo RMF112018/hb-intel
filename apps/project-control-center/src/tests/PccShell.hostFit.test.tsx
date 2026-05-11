@@ -75,4 +75,36 @@ describe('PccShell host-fit (Phase 08 Prompt 03)', () => {
     const grid = panel!.querySelector('[data-pcc-bento-grid]');
     expect(grid, 'bento grid must mount as a descendant of the active tabpanel').not.toBeNull();
   });
+
+  // Phase 08 Prompt 04 (Foleon direction) — unified PCC Command Surface.
+  // The section wraps the tab bar and hero but stays unlabeled so its
+  // implicit ARIA role is `generic`, not `region` — that preserves the
+  // existing zero-count assertion for `role="navigation"` /
+  // `role="complementary"` under the host-fit boundary. It also never
+  // contains the bento grid or the active surface tabpanel.
+
+  it('renders the command surface section unlabeled so its implicit role is generic', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const commandSurface = container.querySelector('[data-pcc-command-surface]');
+    expect(commandSurface, '[data-pcc-command-surface] must render').not.toBeNull();
+    expect(commandSurface!.tagName).toBe('SECTION');
+    expect(commandSurface!.hasAttribute('aria-label')).toBe(false);
+    expect(commandSurface!.hasAttribute('aria-labelledby')).toBe(false);
+    expect(commandSurface!.getAttribute('role')).toBeNull();
+    expect(commandSurface!.getAttribute('data-pcc-command-surface-variant')).toBe(
+      'unified-gradient',
+    );
+  });
+
+  it('command surface contains tabs and hero only — never the bento grid or active tabpanel', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const commandSurface = container.querySelector(
+      '[data-pcc-command-surface]',
+    ) as HTMLElement | null;
+    expect(commandSurface, '[data-pcc-command-surface] must render').not.toBeNull();
+    expect(commandSurface!.querySelector('[data-pcc-horizontal-tabs]')).not.toBeNull();
+    expect(commandSurface!.querySelector('[data-pcc-project-hero-band]')).not.toBeNull();
+    expect(commandSurface!.querySelector('[data-pcc-bento-grid]')).toBeNull();
+    expect(commandSurface!.querySelector('main[role="tabpanel"]')).toBeNull();
+  });
 });

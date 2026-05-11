@@ -21,6 +21,29 @@
   box-shadow: inset 0 1px 0 0 var(--pcc-color-card);
 }
 
+/* Phase 08 Prompt 04 (Foleon direction) — unified PCC Command Surface.
+   Wraps the tab bar and hero band in one token-only gradient field so
+   they read as a single premium slab inside SharePoint. `position` stays
+   `static` and no `z-index` is declared — this preserves the launcher
+   dropdown's `position: absolute; z-index: 20` stacking context. The
+   `.canvas` rule above already owns the seam to the operational canvas. */
+.commandSurface {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--pcc-color-rail-accent) 8%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--pcc-color-card) 94%, var(--pcc-color-rail)),
+      var(--pcc-color-card)
+    );
+}
+
 @media (max-width: 720px) {
   .canvas {
     padding: var(--pcc-space-sm);
