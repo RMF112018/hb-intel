@@ -1,23 +1,26 @@
-/* PccCommandSearch — non-interactive preview capsule (Wave 15A wave-b2 / Prompt 04)
+/* PccCommandSearch — non-interactive preview capsule (Phase 08 Prompt 05)
  *
- * Purely informational. Renders no input, no button, no link, no role
- * implying activation. Visible title + helper copy carry the accessible name.
+ * Premium preview of the future command-search capability. Renders no
+ * input, no button, no link, no role implying activation. Visible title +
+ * helper + cue + preview examples carry the accessible name.
  *
- * Tokens only: --pcc-color-* / --pcc-space-* / --pcc-radius-*. No hex literals.
+ * Tokens only: --pcc-color-* / --pcc-space-* / --pcc-radius-* /
+ * --pcc-elevation-card / --pcc-status-info. No hex literals. No new tokens.
  */
 
 .previewCapsule {
   display: inline-flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
-  gap: 2px;
-  padding: var(--pcc-space-xs) var(--pcc-space-md);
-  background: var(--pcc-color-canvas);
+  gap: var(--pcc-space-sm);
+  padding: var(--pcc-space-sm) var(--pcc-space-md);
+  background: var(--pcc-color-card);
   border: 1px solid var(--pcc-color-border);
   border-radius: var(--pcc-radius-md);
+  box-shadow: var(--pcc-elevation-card);
   color: var(--pcc-color-text-muted);
   min-width: 0;
-  max-width: 360px;
+  max-width: 480px;
   /* The capsule is a <div>; ensure no inherited interactive cursor leaks in. */
   cursor: default;
   user-select: none;
@@ -25,7 +28,34 @@
 
 .previewCapsule[data-pcc-command-search='icon'] {
   padding: 4px var(--pcc-space-sm);
-  max-width: 240px;
+  max-width: 256px;
+  gap: var(--pcc-space-xs);
+}
+
+.previewGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: var(--pcc-color-text-muted);
+  margin-top: 2px;
+}
+
+.previewCapsule[data-pcc-command-search='icon'] .previewGlyph {
+  margin-top: 0;
+}
+
+.previewContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+  min-width: 0;
+}
+
+.previewCapsule[data-pcc-command-search='icon'] .previewContent {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--pcc-space-xs);
 }
 
 .previewTitle {
@@ -51,8 +81,29 @@
   overflow: hidden;
 }
 
-.previewCapsule[data-pcc-command-search='icon'] .previewHelper {
+.previewCue {
   font-size: 11px;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--pcc-status-info);
+}
+
+.previewExamples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pcc-space-xs);
+  margin-top: 2px;
+}
+
+.previewExample {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--pcc-space-sm);
+  border: 1px solid var(--pcc-color-border);
+  border-radius: var(--pcc-radius-sm);
+  background: var(--pcc-color-canvas);
+  color: var(--pcc-color-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
 }

@@ -108,9 +108,13 @@ describe('PccProjectHeroBand — locked content (Wave 15A wave-b2)', () => {
     expect(capsule).not.toBeNull();
 
     // Visible text is the accessible name — no aria-label override.
+    // Phase 08 Prompt 05 refined the helper copy from "unavailable in this
+    // preview." to "preview-only in this phase." The dedicated
+    // PccCommandSearch.test.tsx owns the full helper sentence; this hero
+    // test only asserts the load-bearing preview-only semantic.
     const text = slot!.textContent ?? '';
     expect(text).toContain('Command Search — Preview');
-    expect(text).toContain('Search and project commands are unavailable in this preview.');
+    expect(text).toContain('preview-only in this phase');
   });
 
   it('renders the visual hero surface and the hero/tab seam', () => {
