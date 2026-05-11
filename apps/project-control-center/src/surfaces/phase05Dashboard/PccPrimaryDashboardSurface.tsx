@@ -75,6 +75,13 @@ function resolveContextModule(
  * Renders between `Module status` and the selected-module card so analytics
  * cards remain direct children of the bento grid via `PccDashboardCard`
  * inside `PccAnalyticsCard`.
+ *
+ * TODO(post-mvp): Replace the current primary-tab-only analytics routing
+ * with read-model-backed stage/lifecycle/role emphasis once the route/module
+ * model exposes project stage, lifecycle phase, source authority, and persona
+ * context. Work-center analytics should remain deterministic projections over
+ * source-backed envelopes and must not imply command execution, approval
+ * execution, source-system mutation, or autonomous decisioning.
  */
 function renderPrimaryDashboardAnalytics(activePrimaryTabId: PccPrimaryTabId): ReactElement | null {
   if (activePrimaryTabId === 'estimating-preconstruction') {

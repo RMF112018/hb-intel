@@ -20,6 +20,13 @@
  * `PccProjectHomeUnifiedLifecycleSection` (Lifecycle Timeline →
  * Ask HBI + Procore Snapshot inside `renderAfterTimeline` → Project
  * Memory → Project Lens → Related Records).
+ *
+ * TODO(post-mvp): When Project Home read-model envelopes include project
+ * stage, lifecycle phase, role/persona lens, readiness blockers, source
+ * confidence, and cross-stage traceability, use that context to prioritize
+ * Project Home cards and lifecycle sections. The read-model path remains
+ * advisory/read-only until command-model gates authorize workflow execution,
+ * approval execution, or source-system writeback.
  */
 
 import type { FC } from 'react';

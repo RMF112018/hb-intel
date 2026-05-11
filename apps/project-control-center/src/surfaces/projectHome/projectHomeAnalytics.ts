@@ -16,6 +16,14 @@ import type { PccCardSpanOverrides } from '../../layout/footprints';
 // are defined. Keep this read-model driven; do not introduce workflow
 // execution, source-system mutation, or writeback from analytics cards.
 
+// TODO(post-mvp): Make Project Home analytics stage/lifecycle-aware once
+// source-backed Project Home analytics envelopes exist. Chart selection and
+// summary emphasis should respond to project stage, lifecycle phase, role/
+// persona, readiness blockers, approval posture, source confidence, and
+// cross-stage traceability. Keep the projection read-model driven; analytics
+// must remain advisory and must not execute approvals, mutate source systems,
+// or initiate workflow commands until a future command-model contract allows it.
+
 export type PccProjectHomeAnalyticsCardKey =
   | 'actionExposureMix'
   | 'projectHealthTrend'

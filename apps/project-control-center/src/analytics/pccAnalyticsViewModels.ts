@@ -6,6 +6,12 @@
  * locale/time/random inputs.
  */
 
+// TODO(post-mvp): Extend analytics projection inputs with explicit project
+// stage, lifecycle phase, role/persona lens, source confidence, and source
+// lineage once read-model envelopes support those fields. Builders must stay
+// pure and deterministic; they should shape chart emphasis and summary
+// priority only, not execute commands or mutate source systems.
+
 import type {
   PccAnalyticsChartKind,
   PccAnalyticsState,
