@@ -477,7 +477,14 @@ test('Scroll-segment preserves requested active-panel/container scroll before ca
         data-pcc-active-surface-panel="project-home"
         style="height: 260px; overflow-y: auto; overflow-x: auto; border: 1px solid #ccc;"
       >
-        <div data-pcc-bento-grid style="width: 1500px; height: 1500px;"></div>
+        <div data-pcc-bento-grid style="width: 1500px; height: 1500px;">
+          <div style="height: 260px; background: #e6f0ff;">Panel Row 1</div>
+          <div style="height: 260px; background: #ffd9d9;">Panel Row 2</div>
+          <div style="height: 260px; background: #d9ffd9;">Panel Row 3</div>
+          <div style="height: 260px; background: #fff4cc;">Panel Row 4</div>
+          <div style="height: 260px; background: #e9ddff;">Panel Row 5</div>
+          <div style="height: 200px; background: #d9f7ff;">Panel Tail</div>
+        </div>
       </section>
       <article data-pcc-card><h2>Synthetic Card</h2></article>
     </main>

@@ -14,8 +14,8 @@
 - lockfile md5 after: `7c19ccfa8718a42f7f55ce178a626996`
 
 ## Scope
-- What changed: Prompt 02 preflight, source-state checks, required validation commands, focused live rerun attempt, blocked closeout documentation.
-- What did not change: no production or test source changes, no dependency or lockfile changes, no package version edits, no blueprint doc edits.
+- What changed: Prompt 02 preflight, source-state checks, required validation commands, focused live rerun attempts (sandbox and escalated), blocked closeout documentation.
+- What did not change: no production or test source changes as part of Prompt 02 evidence rerun, no dependency or lockfile changes, no package version edits, no blueprint doc edits.
 - Explicit note: native SharePoint assistant button is an environmental overlay and not a PCC defect.
 
 ## Source-State Verification
@@ -30,18 +30,19 @@
   - `git rev-parse HEAD` -> pass
   - `git log --oneline -5` -> pass
   - Prompt 1B ancestor check -> `Prompt 1B ancestor: yes`
-  - lockfile md5 check -> `7c19ccfa8718a42f7f55ce178a626996` (expected)
+  - lockfile md5 check (`python3`) -> `7c19ccfa8718a42f7f55ce178a626996` (expected)
   - helper/source guard greps -> pass
   - `pnpm --filter @hbc/spfx-project-control-center check-types` -> pass
-  - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.screenshot.spec.ts` -> pass with self-skips (`3 passed, 3 skipped`)
+  - `pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.screenshot.spec.ts` -> pass (`5 passed`, `1 skipped`) after Prompt 1B synthetic fixture correction
   - `pnpm exec playwright test --config=playwright.pcc-live.config.ts --list` -> pass
   - `pnpm pcc:e2e:evidence:registry` -> pass (`8 passed`)
   - `pnpm exec prettier --check ...` -> pass
   - `git diff --check` -> pass
-  - `PCC_EVIDENCE_OUTPUT_DIR="docs/architecture/evidence/pcc-live/phase-06-v1.0.0.219-screenshot-reliability-rerun" pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.screenshot.spec.ts` -> pass with self-skips (`3 passed, 3 skipped`)
+  - `PCC_EVIDENCE_OUTPUT_DIR="docs/architecture/evidence/pcc-live/phase-06-v1.0.0.219-screenshot-reliability-rerun" pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.screenshot.spec.ts` (sandbox) -> pass with self-skip for live capture lane
+  - escalated rerun outside sandbox -> pass with same self-skip for live capture lane
 - synthetic browser proof status:
-  - window-document: not proven in this runtime (test self-skipped)
-  - active-panel/container: not proven in this runtime (test self-skipped)
+  - window-document: proven (synthetic test passes)
+  - active-panel/container: proven (synthetic test passes)
 
 ## Evidence Root
 - path: `docs/architecture/evidence/pcc-live/phase-06-v1.0.0.219-screenshot-reliability-rerun`
@@ -81,8 +82,8 @@ No live screenshot evidence payload exists to evaluate:
 - screenshots operator review: not applicable for this blocked run (no new live screenshots)
 
 ## Remaining Operator-Pending Items
-- Live/browser-capable runtime required to generate and evaluate focused `1.0.0.219` screenshot evidence.
-- Re-run Prompt 02 in an environment where live screenshot capture does not self-skip.
+- Live/browser-capable runtime with configured PCC live env (so screenshot capture lane does not self-skip) is required to generate and evaluate focused `1.0.0.219` screenshot evidence.
+- Re-run Prompt 02 where live screenshot capture actually executes and emits evidence JSON/screenshots.
 
 ## Conclusion
 - BLOCKED
