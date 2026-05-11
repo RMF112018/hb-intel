@@ -4,6 +4,9 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-shadow: var(--pcc-elevation-card);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -13,7 +16,9 @@
   padding: var(--pcc-space-md) var(--pcc-space-lg);
   display: block;
   overflow-x: hidden;
+  background: var(--pcc-color-canvas);
   border-top: 1px solid var(--pcc-color-border);
+  box-shadow: inset 0 1px 0 0 var(--pcc-color-card);
 }
 
 @media (max-width: 720px) {

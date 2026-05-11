@@ -107,6 +107,7 @@ export const PccShell: FC<PccShellProps> = ({
       style={PCC_THEME_VARS}
       data-pcc-shell="thin"
       data-pcc-shell-mode={shellMode}
+      data-pcc-shell-host-fit=""
     >
       <PccHorizontalTabs
         mode={shellMode}
