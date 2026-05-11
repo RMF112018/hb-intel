@@ -191,3 +191,80 @@ describe('Project Home gateway actions — per-mapping click coverage', () => {
     expect(getSelectedModuleTitle(container)).toBe('Team & Access');
   });
 });
+
+// Phase 08 Prompt 08 — additive evidence markers split by concern:
+// - module-target marker on the <button> (actionable target).
+// - disabled-reason-visibility marker on the wrapper <span> (group state).
+// Markers do NOT duplicate across button + wrapper.
+
+interface GatewayModuleExpectation {
+  readonly label: string;
+  readonly module: string;
+}
+
+const GATEWAY_MODULE_EXPECTATIONS: readonly GatewayModuleExpectation[] = [
+  { label: 'Open Action Center', module: 'action-center' },
+  { label: 'Open Site Health', module: 'site-health' },
+  { label: 'Open Document Control', module: 'document-control-center' },
+  { label: 'Open Startup Center', module: 'startup-center' },
+  { label: 'Open Approvals', module: 'approvals-checkpoints' },
+  { label: 'Open Settings', module: 'control-center-settings' },
+  { label: 'Open External Platforms', module: 'external-platforms' },
+  { label: 'Open Team & Access', module: 'team-access' },
+  // Disabled preview-only gateway: no moduleId in the registry.
+  { label: 'View Activity Context', module: '' },
+];
+
+function getWrapperForLabel(container: HTMLElement, label: string): HTMLElement {
+  const button = getButtonByLabel(container, label);
+  const wrapper = button.closest<HTMLElement>('[data-pcc-project-home-gateway]');
+  if (!wrapper) {
+    throw new Error(`Gateway wrapper for "${label}" not found`);
+  }
+  return wrapper;
+}
+
+describe('Project Home gateway actions — Phase 08 Prompt 08 evidence markers', () => {
+  it.each(GATEWAY_MODULE_EXPECTATIONS)(
+    'button for "$label" carries data-pcc-project-home-gateway-module="$module"',
+    ({ label, module }) => {
+      const { container } = render(<PccApp forceMode="desktop" />);
+      const button = getButtonByLabel(container, label);
+      expect(button.getAttribute('data-pcc-project-home-gateway-module')).toBe(module);
+    },
+  );
+
+  it('wrapper for an enabled gateway carries data-pcc-project-home-gateway-disabled-reason="none"', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const wrapper = getWrapperForLabel(container, 'Open Action Center');
+    expect(wrapper.getAttribute('data-pcc-project-home-gateway-disabled-reason')).toBe('none');
+    // Sentinel: no reason copy renders on enabled gateways.
+    expect(wrapper.querySelector('[data-pcc-project-home-gateway-reason]')).toBeNull();
+  });
+
+  it('wrapper for the disabled Recent Activity gateway carries data-pcc-project-home-gateway-disabled-reason="visible" and renders the reason copy', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const wrapper = getWrapperForLabel(container, 'View Activity Context');
+    expect(wrapper.getAttribute('data-pcc-project-home-gateway-disabled-reason')).toBe('visible');
+    const reason = wrapper.querySelector('[data-pcc-project-home-gateway-reason]');
+    expect(reason).not.toBeNull();
+    expect(reason?.textContent).toBe('Activity context is preview-only in this release.');
+  });
+
+  it('no gateway action wrapper duplicates the disabled-reason marker on its button', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    // Placement contract sentinel: markers are split by concern. The
+    // disabled-reason-visibility marker lives on the wrapper only; tests
+    // should never find it on a button.
+    const buttonsWithReasonMarker = container.querySelectorAll(
+      'button[data-pcc-project-home-gateway-disabled-reason]',
+    );
+    expect(buttonsWithReasonMarker).toHaveLength(0);
+    // The complementary sentinel: buttons should never carry the wrapper's
+    // marker, and wrappers should never carry the button's module marker.
+    const wrappersWithModuleMarker = container.querySelectorAll(
+      'span[data-pcc-project-home-gateway][data-pcc-project-home-gateway-module]',
+    );
+    expect(wrappersWithModuleMarker).toHaveLength(0);
+  });
+});

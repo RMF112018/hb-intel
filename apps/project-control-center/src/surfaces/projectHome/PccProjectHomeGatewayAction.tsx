@@ -41,7 +41,11 @@ export const PccProjectHomeGatewayAction: FC<PccProjectHomeGatewayActionProps> =
   };
 
   return (
-    <span className={styles.gatewayAction} data-pcc-project-home-gateway="">
+    <span
+      className={styles.gatewayAction}
+      data-pcc-project-home-gateway=""
+      data-pcc-project-home-gateway-disabled-reason={reason ? 'visible' : 'none'}
+    >
       <button
         type="button"
         className={styles.gatewayActionButton}
@@ -51,6 +55,7 @@ export const PccProjectHomeGatewayAction: FC<PccProjectHomeGatewayActionProps> =
         data-pcc-project-home-gateway-action={moduleMarker}
         data-pcc-project-home-gateway-label={gateway.label}
         data-pcc-project-home-gateway-state={stateMarker}
+        data-pcc-project-home-gateway-module={gateway.moduleId ?? ''}
       >
         {gateway.label}
       </button>

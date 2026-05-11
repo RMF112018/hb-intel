@@ -303,7 +303,18 @@
 }
 
 .gatewayActionButton:hover:not(:disabled) {
-  background: var(--pcc-color-surface);
+  background: var(--pcc-color-rail-hover);
+  border-color: color-mix(in srgb, var(--pcc-color-rail-accent) 40%, var(--pcc-color-border));
+}
+
+.gatewayActionButton:active:not(:disabled) {
+  background: var(--pcc-color-rail-pressed);
+}
+
+.gatewayActionButton:focus-visible {
+  outline: 2px solid var(--pcc-color-rail-accent);
+  outline-offset: 2px;
+  border-radius: var(--pcc-radius-sm);
 }
 
 .gatewayActionButton:disabled {
