@@ -85,12 +85,24 @@ test('Screenshot writer preserves sanitized output policy', async () => {
             bentoGridLeft: 0,
             bentoGridRight: 1280,
             bentoGridWidth: 1280,
+            heroBandLeft: 0,
+            firstHeadingOrCardLeft: 0,
+            minRelevantLeft: 0,
             documentClientWidth: 1280,
             documentScrollWidth: 1280,
             horizontalResetApplied: true,
             horizontalScrollWithinTolerance: true,
             surfacePanelLeftWithinTolerance: true,
             bentoGridLeftWithinTolerance: true,
+            heroBandLeftWithinTolerance: true,
+            firstHeadingOrCardLeftWithinTolerance: true,
+            horizontalResetCandidateCount: 6,
+            horizontalResetAppliedCount: 3,
+            horizontalResetExcludedCount: 0,
+            horizontalNormalizationAttempts: 1,
+            horizontalNormalizationSucceeded: true,
+            horizontalNormalizationFailures: [],
+            horizontalTopFailingCandidates: [],
             captureReliabilityWarnings: [],
             segmentClassification: 'meaningful',
             contentSha256: 'abc123',
@@ -379,12 +391,36 @@ test('Screenshot capture self-skips without live env', async () => {
       expect(Array.isArray(shot.captureReliabilityWarnings)).toBe(true);
       expect(typeof shot.surfacePanelLeftWithinTolerance).toBe('boolean');
       expect(typeof shot.bentoGridLeftWithinTolerance).toBe('boolean');
+      expect(typeof shot.heroBandLeftWithinTolerance).toBe('boolean');
+      expect(typeof shot.firstHeadingOrCardLeftWithinTolerance).toBe('boolean');
+      expect(typeof shot.minRelevantLeft).toBe('number');
+      expect(typeof shot.horizontalNormalizationSucceeded).toBe('boolean');
       if (shot.kind === 'scroll-segment') {
         expect(
           shot.segmentClassification === 'meaningful' ||
             shot.segmentClassification === 'duplicate' ||
             shot.segmentClassification === 'not-scrollable',
         ).toBe(true);
+      }
+    }
+    if (surface.surfaceId === 'cost-time' || surface.surfaceId === 'systems-administration') {
+      for (const shot of surface.screenshots) {
+        expect(shot.horizontalScrollWithinTolerance).toBe(true);
+        expect(shot.surfacePanelLeftWithinTolerance).toBe(true);
+        expect(shot.bentoGridLeftWithinTolerance).toBe(true);
+        expect(shot.heroBandLeftWithinTolerance).toBe(true);
+        expect(shot.firstHeadingOrCardLeftWithinTolerance).toBe(true);
+        expect(shot.minRelevantLeft).toBeGreaterThanOrEqual(-2);
+        const clippedWarnings = shot.captureReliabilityWarnings.filter(
+          (w) =>
+            w.includes('horizontal-scroll-drift') ||
+            w.includes('active-surface-panel-left-clipped') ||
+            w.includes('bento-grid-left-clipped') ||
+            w.includes('hero-band-left-clipped') ||
+            w.includes('first-heading-card-left-clipped') ||
+            w.includes('horizontal-normalization-failed'),
+        );
+        expect(clippedWarnings).toHaveLength(0);
       }
     }
     const scrollSegments = surface.screenshots.filter((s) => s.kind === 'scroll-segment');
@@ -525,6 +561,103 @@ test('Scroll-segment preserves requested active-panel/container scroll before ca
     );
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
+    await context.close();
+    await browser.close();
+  }
+});
+
+test('Global-overflow normalization clears host-wrapper clipping and preserves segment vertical mode', async () => {
+  let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
+  try {
+    browser = await chromium.launch({ headless: true });
+  } catch {
+    test.skip(true, 'Browser launch unavailable in current runtime; skipping synthetic fixture.');
+    return;
+  }
+  const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  const page = await context.newPage();
+  await page.setContent(`
+    <div id="spPageChromeAppDiv" style="width: 900px; overflow-x: auto;">
+      <div id="vpc_WebPart.ProjectControlCenterWebPart.external.synthetic" style="width: 2200px;">
+        <div data-pcc-horizontal-tabs>
+          <button data-pcc-tab-id="project-home" aria-selected="true">Project Home</button>
+        </div>
+        <main role="tabpanel" data-pcc-active-surface-panel="project-home">
+          <section data-pcc-project-hero-band style="height: 80px;">Hero</section>
+          <div data-pcc-bento-grid style="width: 2100px; height: 1600px;">
+            <h2>Heading</h2>
+            <article data-pcc-card>Card A</article>
+          </div>
+        </main>
+      </div>
+    </div>
+  `);
+
+  await page.evaluate(() => {
+    const host = document.getElementById('spPageChromeAppDiv');
+    if (host) host.scrollLeft = 420;
+  });
+
+  try {
+    const before = await page.evaluate(() => {
+      const panel = document.querySelector<HTMLElement>('[data-pcc-active-surface-panel]');
+      const bento = document.querySelector<HTMLElement>('[data-pcc-bento-grid]');
+      const hero = document.querySelector<HTMLElement>('[data-pcc-project-hero-band]');
+      const heading = document.querySelector<HTMLElement>('h2');
+      const values = [
+        panel?.getBoundingClientRect().left ?? 0,
+        bento?.getBoundingClientRect().left ?? 0,
+        hero?.getBoundingClientRect().left ?? 0,
+        heading?.getBoundingClientRect().left ?? 0,
+      ];
+      return Math.min(...values);
+    });
+    expect(before).toBeLessThan(-2);
+
+    const preserved = await page.evaluate(() => {
+      const panel = document.querySelector<HTMLElement>('[data-pcc-active-surface-panel]');
+      if (panel) panel.scrollTop = 300;
+      const beforeY = panel?.scrollTop ?? window.scrollY;
+      document.documentElement.scrollLeft = 0;
+      document.body.scrollLeft = 0;
+      const selectors = [
+        '#spPageChromeAppDiv',
+        '[id^="vpc_WebPart.ProjectControlCenterWebPart.external"]',
+        '[data-pcc-root]',
+        '[data-pcc-active-surface-panel]',
+        '[data-pcc-bento-grid]',
+        '[data-pcc-project-hero-band]',
+      ];
+      for (const selector of selectors) {
+        for (const node of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
+          node.scrollLeft = 0;
+        }
+      }
+      for (const node of Array.from(document.querySelectorAll<HTMLElement>('body *')).slice(
+        0,
+        250,
+      )) {
+        const style = getComputedStyle(node);
+        const wide = node.scrollWidth > node.clientWidth + 1;
+        const transformed = style.transform !== 'none';
+        const shifted = node.getBoundingClientRect().left < -2;
+        if (wide || transformed || shifted) node.scrollLeft = 0;
+      }
+      const afterY = panel?.scrollTop ?? window.scrollY;
+      const bento = document.querySelector<HTMLElement>('[data-pcc-bento-grid]');
+      const hero = document.querySelector<HTMLElement>('[data-pcc-project-hero-band]');
+      const heading = document.querySelector<HTMLElement>('h2');
+      const values = [
+        panel?.getBoundingClientRect().left ?? 0,
+        bento?.getBoundingClientRect().left ?? 0,
+        hero?.getBoundingClientRect().left ?? 0,
+        heading?.getBoundingClientRect().left ?? 0,
+      ];
+      return { beforeY, afterY, minLeft: Math.min(...values) };
+    });
+    expect(Math.abs(preserved.afterY - preserved.beforeY)).toBeLessThanOrEqual(1);
+    expect(preserved.minLeft).toBeGreaterThanOrEqual(-2);
+  } finally {
     await context.close();
     await browser.close();
   }

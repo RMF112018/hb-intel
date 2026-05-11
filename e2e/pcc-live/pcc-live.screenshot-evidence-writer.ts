@@ -269,7 +269,10 @@ export async function writePccScreenshotEvidence(
         shot.captureReliabilityWarnings.filter(
           (w) =>
             w.includes('active-surface-panel-left-clipped') ||
-            w.includes('bento-grid-left-clipped'),
+            w.includes('bento-grid-left-clipped') ||
+            w.includes('hero-band-left-clipped') ||
+            w.includes('first-heading-card-left-clipped') ||
+            w.includes('min-relevant-left-clipped'),
         ).length,
       0,
     );
@@ -322,25 +325,30 @@ export async function writePccScreenshotEvidence(
   contactSheetLines.push('- No Phase 4 readiness is approved.');
   contactSheetLines.push('');
   contactSheetLines.push(
-    '| Surface | Kind | Viewport | File | Scroll req/actual | Segment state | Horizontal reset | Left clipping | Duplicate warning | Display Path | Operator Review | Artifact Policy |',
+    '| Surface | Kind | Viewport | File | Scroll req/actual | Segment state | Horizontal reset | Min left | Norm ok | Norm candidates | Left clipping | Duplicate warning | Display Path | Operator Review | Artifact Policy |',
   );
-  contactSheetLines.push('|---|---|---|---|---|---|---|---|---|---|---|---|');
+  contactSheetLines.push('|---|---|---|---|---|---|---|---:|---|---:|---|---|---|---|---|');
   for (const surface of surfaces) {
     for (const screenshot of surface.screenshots) {
       const displayPath = displayPathForMarkdown(screenshot.path);
       const scrollState = `${screenshot.requestedScrollY ?? 0}/${Math.round(screenshot.actualScrollY)}`;
       const segmentState = screenshot.segmentClassification ?? 'meaningful';
       const leftClip =
-        screenshot.surfacePanelLeftWithinTolerance && screenshot.bentoGridLeftWithinTolerance
+        screenshot.surfacePanelLeftWithinTolerance &&
+        screenshot.bentoGridLeftWithinTolerance &&
+        screenshot.heroBandLeftWithinTolerance &&
+        screenshot.firstHeadingOrCardLeftWithinTolerance &&
+        screenshot.minRelevantLeft >= -2
           ? 'no'
           : 'yes';
+      const normOk = screenshot.horizontalNormalizationSucceeded ? 'yes' : 'no';
       const duplicateWarn = screenshot.captureReliabilityWarnings.some((w) =>
         w.includes('duplicate'),
       )
         ? 'yes'
         : 'no';
       contactSheetLines.push(
-        `| ${escapeMdCell(surface.surfaceId)} (${escapeMdCell(surface.label)}) | ${screenshot.kind} | ${screenshot.viewportWidth}x${screenshot.viewportHeight} | ${escapeMdCell(screenshot.fileName)} | ${scrollState} | ${segmentState} | ${screenshot.horizontalResetApplied ? 'yes' : 'no'} | ${leftClip} | ${duplicateWarn} | ${escapeMdCell(displayPath)} | operator-review-required | commit-eligible-after-scrub |`,
+        `| ${escapeMdCell(surface.surfaceId)} (${escapeMdCell(surface.label)}) | ${screenshot.kind} | ${screenshot.viewportWidth}x${screenshot.viewportHeight} | ${escapeMdCell(screenshot.fileName)} | ${scrollState} | ${segmentState} | ${screenshot.horizontalResetApplied ? 'yes' : 'no'} | ${screenshot.minRelevantLeft.toFixed(2)} | ${normOk} | ${screenshot.horizontalResetCandidateCount} | ${leftClip} | ${duplicateWarn} | ${escapeMdCell(displayPath)} | operator-review-required | commit-eligible-after-scrub |`,
       );
       if (canEmbedMarkdownImage(screenshot.path)) {
         contactSheetLines.push(`![${escapeMdCell(screenshot.fileName)}](${displayPath})`);

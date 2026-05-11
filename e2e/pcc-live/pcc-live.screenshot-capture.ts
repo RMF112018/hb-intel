@@ -13,9 +13,11 @@ import type {
 
 const CARD_SELECTOR = '[data-pcc-card]';
 const HEADING_SELECTOR = '[role="heading"], h1, h2, h3, h4, h5, h6';
+const HERO_SELECTOR = '[data-pcc-project-hero-band]';
 const HORIZONTAL_SCROLL_TOLERANCE_PX = 2;
 const LEFT_BOUND_TOLERANCE_PX = -2;
 const SCROLL_POSITION_TOLERANCE_PX = 2;
+const FOCUSED_HARD_FAIL_SURFACES = new Set(['cost-time', 'systems-administration']);
 
 interface CaptureScrollDiagnostics {
   requestedScrollY?: number;
@@ -31,6 +33,9 @@ interface CaptureScrollDiagnostics {
   bentoGridLeft: number | null;
   bentoGridRight: number | null;
   bentoGridWidth: number | null;
+  heroBandLeft: number | null;
+  firstHeadingOrCardLeft: number | null;
+  minRelevantLeft: number;
   documentClientWidth: number;
   documentScrollWidth: number;
   viewportWidth: number;
@@ -39,6 +44,15 @@ interface CaptureScrollDiagnostics {
   horizontalScrollWithinTolerance: boolean;
   surfacePanelLeftWithinTolerance: boolean;
   bentoGridLeftWithinTolerance: boolean;
+  heroBandLeftWithinTolerance: boolean;
+  firstHeadingOrCardLeftWithinTolerance: boolean;
+  horizontalResetCandidateCount: number;
+  horizontalResetAppliedCount: number;
+  horizontalResetExcludedCount: number;
+  horizontalNormalizationAttempts: number;
+  horizontalNormalizationSucceeded: boolean;
+  horizontalNormalizationFailures: string[];
+  horizontalTopFailingCandidates: string[];
   captureReliabilityWarnings: string[];
 }
 
@@ -65,6 +79,14 @@ interface CaptureContext {
 interface PreparedCaptureState {
   diagnostics: CaptureScrollDiagnostics;
   horizontalResetApplied: boolean;
+}
+
+interface HorizontalNormalizationResult {
+  applied: boolean;
+  candidateCount: number;
+  appliedCount: number;
+  excludedCount: number;
+  topFailingCandidates: string[];
 }
 
 function sanitizeHeading(input: string): { text: string; changed: boolean } {
@@ -116,7 +138,10 @@ async function waitForLayoutStabilization(page: Page): Promise<void> {
   await page.waitForTimeout(80);
 }
 
-async function clearHorizontalScroll(page: Page, resetToTop: boolean): Promise<boolean> {
+async function normalizeHorizontalCaptureState(
+  page: Page,
+  resetToTop: boolean,
+): Promise<HorizontalNormalizationResult> {
   return page.evaluate(
     ({ shouldResetToTop }) => {
       if (shouldResetToTop) {
@@ -125,46 +150,120 @@ async function clearHorizontalScroll(page: Page, resetToTop: boolean): Promise<b
       document.documentElement.scrollLeft = 0;
       document.body.scrollLeft = 0;
 
-      const selectors = [
+      const pccSelectors = [
         '[data-pcc-root]',
         '[data-pcc-active-surface-panel]',
         'main[role="tabpanel"][data-pcc-active-surface-panel]',
         '[data-pcc-bento-grid]',
+        '[data-pcc-project-hero-band]',
         '[data-pcc-shell]',
         '[data-pcc-surface-shell]',
+        '[data-pcc-horizontal-tabs]',
+      ];
+      const hostSelectors = [
+        '#spPageChromeAppDiv',
+        '[id^="vpc_WebPart.ProjectControlCenterWebPart.external"]',
       ];
 
-      for (const selector of selectors) {
-        const nodes = Array.from(document.querySelectorAll<HTMLElement>(selector));
-        for (const node of nodes) {
-          node.scrollLeft = 0;
+      const seen = new Set<HTMLElement>();
+      const candidates: Array<{ node: HTMLElement; reason: string }> = [];
+
+      const addCandidate = (node: HTMLElement | null, reason: string) => {
+        if (!node || seen.has(node)) return;
+        seen.add(node);
+        candidates.push({ node, reason });
+      };
+
+      for (const selector of pccSelectors) {
+        for (const node of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
+          addCandidate(node, `pcc-selector:${selector}`);
         }
       }
 
-      const fallback = Array.from(document.querySelectorAll<HTMLElement>('body *')).filter((el) => {
-        if (!el.offsetParent) return false;
-        if (el.scrollWidth <= el.clientWidth + 1) return false;
-        const style = getComputedStyle(el);
-        if (style.visibility === 'hidden' || style.display === 'none') return false;
-        return /(auto|scroll|clip)/.test(style.overflowX);
-      });
-
-      for (const node of fallback.slice(0, 250)) {
-        node.scrollLeft = 0;
+      for (const selector of hostSelectors) {
+        for (const node of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
+          addCandidate(node, `host-selector:${selector}`);
+        }
       }
 
-      return true;
+      const activeTab = document.querySelector<HTMLElement>(
+        '[data-pcc-tab-id][aria-selected="true"], [data-pcc-tab-id][data-pcc-tab-active="true"]',
+      );
+      const activePanel = document.querySelector<HTMLElement>(
+        'main[role="tabpanel"][data-pcc-active-surface-panel], [data-pcc-active-surface-panel]',
+      );
+      const bento = document.querySelector<HTMLElement>('[data-pcc-bento-grid]');
+
+      const addAncestors = (node: HTMLElement | null, reason: string) => {
+        let cur = node;
+        for (let i = 0; i < 14 && cur; i += 1) {
+          addCandidate(cur, `${reason}:ancestor-${i}`);
+          cur = cur.parentElement;
+        }
+      };
+
+      addAncestors(activeTab, 'active-tab');
+      addAncestors(activePanel, 'active-panel');
+      addAncestors(bento, 'bento-grid');
+
+      const overflowFallback = Array.from(document.querySelectorAll<HTMLElement>('body *')).filter(
+        (el) => {
+          if (!el.offsetParent) return false;
+          const style = getComputedStyle(el);
+          if (style.visibility === 'hidden' || style.display === 'none') return false;
+          const wide = el.scrollWidth > el.clientWidth + 1;
+          const overflowX = /(auto|scroll|clip|hidden)/.test(style.overflowX);
+          const shifted = el.getBoundingClientRect().left < -2;
+          const transformed = style.transform !== 'none';
+          return wide || overflowX || shifted || transformed;
+        },
+      );
+
+      for (const node of overflowFallback.slice(0, 250)) {
+        addCandidate(node, 'global-overflow-candidate');
+      }
+
+      let appliedCount = 0;
+      let excludedCount = 0;
+      const failed: string[] = [];
+
+      for (const candidate of candidates) {
+        if (!candidate.node.isConnected) {
+          excludedCount += 1;
+          continue;
+        }
+        const before = candidate.node.scrollLeft;
+        candidate.node.scrollLeft = 0;
+        const after = candidate.node.scrollLeft;
+        if (Math.abs(after) <= 2) {
+          appliedCount += before !== after ? 1 : 0;
+        } else {
+          failed.push(`${candidate.reason}:${candidate.node.tagName.toLowerCase()}:${after}`);
+        }
+      }
+
+      return {
+        applied: true,
+        candidateCount: candidates.length,
+        appliedCount,
+        excludedCount,
+        topFailingCandidates: failed.slice(0, 8),
+      };
     },
     { shouldResetToTop: resetToTop },
   );
 }
 
-async function resetToTopAndClearHorizontalScroll(page: Page): Promise<boolean> {
-  return clearHorizontalScroll(page, true);
+async function resetToTopAndClearHorizontalScroll(
+  page: Page,
+): Promise<HorizontalNormalizationResult> {
+  return normalizeHorizontalCaptureState(page, true);
 }
 
-async function clearHorizontalScrollPreservingVerticalPosition(page: Page): Promise<boolean> {
-  return clearHorizontalScroll(page, false);
+async function clearHorizontalScrollPreservingVerticalPosition(
+  page: Page,
+): Promise<HorizontalNormalizationResult> {
+  return normalizeHorizontalCaptureState(page, false);
 }
 
 async function selectScrollRoot(page: Page): Promise<ScrollRootSelection> {
@@ -252,7 +351,8 @@ async function setScrollYForRoot(page: Page, root: ScrollRootSelection, y: numbe
 async function collectDiagnostics(
   page: Page,
   scrollRoot: ScrollRootSelection,
-  horizontalResetApplied: boolean,
+  normalization: HorizontalNormalizationResult,
+  normalizationAttempts: number,
   requestedScrollY?: number,
 ): Promise<CaptureScrollDiagnostics> {
   const diag = await page.evaluate(
@@ -263,13 +363,21 @@ async function collectDiagnostics(
         'main[role="tabpanel"][data-pcc-active-surface-panel], [data-pcc-active-surface-panel]',
       );
       const bento = document.querySelector<HTMLElement>('[data-pcc-bento-grid]');
+      const hero = document.querySelector<HTMLElement>('[data-pcc-project-hero-band]');
+      const heading = document.querySelector<HTMLElement>(
+        '[data-pcc-active-surface-panel] [role="heading"], [data-pcc-active-surface-panel] h1, [data-pcc-active-surface-panel] h2, [data-pcc-active-surface-panel] h3, [data-pcc-active-surface-panel] [data-pcc-card]',
+      );
 
       const panelRect = panel ? panel.getBoundingClientRect() : null;
       const bentoRect = bento ? bento.getBoundingClientRect() : null;
+      const heroRect = hero ? hero.getBoundingClientRect() : null;
+      const headingRect = heading ? heading.getBoundingClientRect() : null;
 
       const nodes: HTMLElement[] = [doc as unknown as HTMLElement, body];
       if (panel) nodes.push(panel);
       if (bento) nodes.push(bento);
+      if (hero) nodes.push(hero);
+      if (heading) nodes.push(heading);
 
       let maxObserved = 0;
       for (const node of nodes) {
@@ -280,6 +388,10 @@ async function collectDiagnostics(
         rootKind === 'window-document'
           ? window.scrollY
           : (document.querySelector<HTMLElement>(rootSelector)?.scrollTop ?? window.scrollY);
+
+      const leftVals = [panelRect?.left, bentoRect?.left, heroRect?.left, headingRect?.left].filter(
+        (v): v is number => typeof v === 'number',
+      );
 
       return {
         actualScrollY,
@@ -294,6 +406,9 @@ async function collectDiagnostics(
         bentoGridLeft: bentoRect ? bentoRect.left : null,
         bentoGridRight: bentoRect ? bentoRect.right : null,
         bentoGridWidth: bentoRect ? bentoRect.width : null,
+        heroBandLeft: heroRect ? heroRect.left : null,
+        firstHeadingOrCardLeft: headingRect ? headingRect.left : null,
+        minRelevantLeft: leftVals.length > 0 ? Math.min(...leftVals) : 0,
         documentClientWidth: doc.clientWidth,
         documentScrollWidth: doc.scrollWidth,
         viewportWidth: window.innerWidth,
@@ -312,6 +427,10 @@ async function collectDiagnostics(
     diag.activeSurfacePanelLeft === null || diag.activeSurfacePanelLeft >= LEFT_BOUND_TOLERANCE_PX;
   const bentoGridLeftWithinTolerance =
     diag.bentoGridLeft === null || diag.bentoGridLeft >= LEFT_BOUND_TOLERANCE_PX;
+  const heroBandLeftWithinTolerance =
+    diag.heroBandLeft === null || diag.heroBandLeft >= LEFT_BOUND_TOLERANCE_PX;
+  const firstHeadingOrCardLeftWithinTolerance =
+    diag.firstHeadingOrCardLeft === null || diag.firstHeadingOrCardLeft >= LEFT_BOUND_TOLERANCE_PX;
 
   if (requestedScrollY !== undefined) {
     const delta = Math.abs(diag.actualScrollY - requestedScrollY);
@@ -339,14 +458,41 @@ async function collectDiagnostics(
       `bento-grid-left-clipped left=${diag.bentoGridLeft} threshold=${LEFT_BOUND_TOLERANCE_PX}`,
     );
   }
+  if (!heroBandLeftWithinTolerance) {
+    captureReliabilityWarnings.push(
+      `hero-band-left-clipped left=${diag.heroBandLeft} threshold=${LEFT_BOUND_TOLERANCE_PX}`,
+    );
+  }
+  if (!firstHeadingOrCardLeftWithinTolerance) {
+    captureReliabilityWarnings.push(
+      `first-heading-card-left-clipped left=${diag.firstHeadingOrCardLeft} threshold=${LEFT_BOUND_TOLERANCE_PX}`,
+    );
+  }
+  if (diag.minRelevantLeft < LEFT_BOUND_TOLERANCE_PX) {
+    captureReliabilityWarnings.push(
+      `min-relevant-left-clipped minRelevantLeft=${diag.minRelevantLeft} threshold=${LEFT_BOUND_TOLERANCE_PX}`,
+    );
+  }
+  if (normalization.topFailingCandidates.length > 0) {
+    captureReliabilityWarnings.push('horizontal-normalization-failed');
+  }
 
   return {
     requestedScrollY,
     ...diag,
-    horizontalResetApplied,
+    horizontalResetApplied: normalization.applied,
     horizontalScrollWithinTolerance,
     surfacePanelLeftWithinTolerance,
     bentoGridLeftWithinTolerance,
+    heroBandLeftWithinTolerance,
+    firstHeadingOrCardLeftWithinTolerance,
+    horizontalResetCandidateCount: normalization.candidateCount,
+    horizontalResetAppliedCount: normalization.appliedCount,
+    horizontalResetExcludedCount: normalization.excludedCount,
+    horizontalNormalizationAttempts: normalizationAttempts,
+    horizontalNormalizationSucceeded: normalization.topFailingCandidates.length === 0,
+    horizontalNormalizationFailures: normalization.topFailingCandidates,
+    horizontalTopFailingCandidates: normalization.topFailingCandidates,
     captureReliabilityWarnings,
   };
 }
@@ -357,25 +503,35 @@ async function collectPreparedState(
   resetStrategy: 'top-and-horizontal' | 'horizontal-only',
   requestedScrollY?: number,
 ): Promise<PreparedCaptureState> {
-  const horizontalResetApplied =
+  const initialNormalization =
     resetStrategy === 'top-and-horizontal'
       ? await resetToTopAndClearHorizontalScroll(page)
       : await clearHorizontalScrollPreservingVerticalPosition(page);
   await waitForLayoutStabilization(page);
 
-  let diag = await collectDiagnostics(page, scrollRoot, horizontalResetApplied, requestedScrollY);
+  let attempts = 1;
+  let normalization = initialNormalization;
+  let diag = await collectDiagnostics(page, scrollRoot, normalization, attempts, requestedScrollY);
   if (
     !diag.horizontalScrollWithinTolerance ||
     !diag.surfacePanelLeftWithinTolerance ||
-    !diag.bentoGridLeftWithinTolerance
+    !diag.bentoGridLeftWithinTolerance ||
+    !diag.heroBandLeftWithinTolerance ||
+    !diag.firstHeadingOrCardLeftWithinTolerance
   ) {
-    if (resetStrategy === 'top-and-horizontal') {
-      await resetToTopAndClearHorizontalScroll(page);
-    } else {
-      await clearHorizontalScrollPreservingVerticalPosition(page);
-    }
+    normalization =
+      resetStrategy === 'top-and-horizontal'
+        ? await resetToTopAndClearHorizontalScroll(page)
+        : await clearHorizontalScrollPreservingVerticalPosition(page);
+    attempts += 1;
     await waitForLayoutStabilization(page);
-    const retryDiag = await collectDiagnostics(page, scrollRoot, true, requestedScrollY);
+    const retryDiag = await collectDiagnostics(
+      page,
+      scrollRoot,
+      normalization,
+      attempts,
+      requestedScrollY,
+    );
     diag = {
       ...retryDiag,
       captureReliabilityWarnings: [
@@ -387,7 +543,7 @@ async function collectPreparedState(
 
   return {
     diagnostics: diag,
-    horizontalResetApplied,
+    horizontalResetApplied: normalization.applied,
   };
 }
 
@@ -427,12 +583,24 @@ function buildArtifactFromPreCaptureState(
     bentoGridLeft: diagnostics.bentoGridLeft,
     bentoGridRight: diagnostics.bentoGridRight,
     bentoGridWidth: diagnostics.bentoGridWidth,
+    heroBandLeft: diagnostics.heroBandLeft,
+    firstHeadingOrCardLeft: diagnostics.firstHeadingOrCardLeft,
+    minRelevantLeft: diagnostics.minRelevantLeft,
     documentClientWidth: diagnostics.documentClientWidth,
     documentScrollWidth: diagnostics.documentScrollWidth,
     horizontalResetApplied: diagnostics.horizontalResetApplied,
     horizontalScrollWithinTolerance: diagnostics.horizontalScrollWithinTolerance,
     surfacePanelLeftWithinTolerance: diagnostics.surfacePanelLeftWithinTolerance,
     bentoGridLeftWithinTolerance: diagnostics.bentoGridLeftWithinTolerance,
+    heroBandLeftWithinTolerance: diagnostics.heroBandLeftWithinTolerance,
+    firstHeadingOrCardLeftWithinTolerance: diagnostics.firstHeadingOrCardLeftWithinTolerance,
+    horizontalResetCandidateCount: diagnostics.horizontalResetCandidateCount,
+    horizontalResetAppliedCount: diagnostics.horizontalResetAppliedCount,
+    horizontalResetExcludedCount: diagnostics.horizontalResetExcludedCount,
+    horizontalNormalizationAttempts: diagnostics.horizontalNormalizationAttempts,
+    horizontalNormalizationSucceeded: diagnostics.horizontalNormalizationSucceeded,
+    horizontalNormalizationFailures: diagnostics.horizontalNormalizationFailures,
+    horizontalTopFailingCandidates: diagnostics.horizontalTopFailingCandidates,
     captureReliabilityWarnings: diagnostics.captureReliabilityWarnings,
     notScrollableReason: context.notScrollableReason,
     segmentClassification: context.notScrollableReason ? 'not-scrollable' : undefined,
@@ -500,6 +668,47 @@ function markDuplicateDiagnostics(
       }
     }
   }
+}
+
+function assertFocusedSurfaceCaptureGate(
+  surfaceId: PccScreenshotArtifact['surfaceId'],
+  kind: PccScreenshotArtifact['kind'],
+  diag: CaptureScrollDiagnostics,
+): void {
+  if (!FOCUSED_HARD_FAIL_SURFACES.has(surfaceId)) return;
+  const clippingWarnings = diag.captureReliabilityWarnings.filter(
+    (w) =>
+      w.includes('horizontal-scroll-drift') ||
+      w.includes('active-surface-panel-left-clipped') ||
+      w.includes('bento-grid-left-clipped') ||
+      w.includes('hero-band-left-clipped') ||
+      w.includes('first-heading-card-left-clipped') ||
+      w.includes('min-relevant-left-clipped') ||
+      w.includes('horizontal-normalization-failed'),
+  );
+  const failed =
+    !diag.horizontalScrollWithinTolerance ||
+    !diag.surfacePanelLeftWithinTolerance ||
+    !diag.bentoGridLeftWithinTolerance ||
+    !diag.heroBandLeftWithinTolerance ||
+    !diag.firstHeadingOrCardLeftWithinTolerance ||
+    diag.minRelevantLeft < LEFT_BOUND_TOLERANCE_PX ||
+    clippingWarnings.length > 0;
+
+  if (!failed) return;
+  const details = [
+    `surfaceId=${surfaceId}`,
+    `artifact=${kind}`,
+    `minRelevantLeft=${diag.minRelevantLeft}`,
+    `activeSurfacePanelLeft=${diag.activeSurfacePanelLeft}`,
+    `bentoGridLeft=${diag.bentoGridLeft}`,
+    `heroBandLeft=${diag.heroBandLeft}`,
+    `firstHeadingOrCardLeft=${diag.firstHeadingOrCardLeft}`,
+    `horizontalNormalizationAttempts=${diag.horizontalNormalizationAttempts}`,
+    `topFailingCandidates=${diag.horizontalTopFailingCandidates.join(' | ') || 'none'}`,
+    `warnings=${clippingWarnings.join(' | ') || 'none'}`,
+  ];
+  throw new Error(`Focused clipping hard-fail: ${details.join('; ')}`);
 }
 
 async function extractCardSummaries(
@@ -582,6 +791,12 @@ export async function capturePccSurfaceScreenshots(
   const results: PccSurfaceScreenshotEvidence[] = [];
 
   for (const surface of input.surfaces) {
+    try {
+      const preNavRoot = await selectScrollRoot(input.page);
+      await collectPreparedState(input.page, preNavRoot, 'top-and-horizontal', 0);
+    } catch {
+      // Best effort pre-navigation normalization.
+    }
     const smoke = await input.pageObject.assertSurfaceActive(surface);
 
     const surfaceShots: PccScreenshotArtifact[] = [];
@@ -589,12 +804,15 @@ export async function capturePccSurfaceScreenshots(
 
     try {
       const scrollRoot = await selectScrollRoot(input.page);
+      await collectPreparedState(input.page, scrollRoot, 'top-and-horizontal', 0);
+      await waitForLayoutStabilization(input.page);
       const aboveFold = path.join(screenshotDir, `surface-${surface.id}-above-fold.png`);
       const aboveFoldPrepared = await collectPreparedState(
         input.page,
         scrollRoot,
         'top-and-horizontal',
       );
+      assertFocusedSurfaceCaptureGate(surface.id, 'above-fold', aboveFoldPrepared.diagnostics);
       surfaceShots.push(
         await captureArtifactWithPreCaptureDiagnostics(
           input.page,
@@ -618,6 +836,7 @@ export async function capturePccSurfaceScreenshots(
         scrollRoot,
         'top-and-horizontal',
       );
+      assertFocusedSurfaceCaptureGate(surface.id, 'full-page', fullPagePrepared.diagnostics);
       surfaceShots.push(
         await captureArtifactWithPreCaptureDiagnostics(
           input.page,
@@ -644,6 +863,7 @@ export async function capturePccSurfaceScreenshots(
           'top-and-horizontal',
           0,
         );
+        assertFocusedSurfaceCaptureGate(surface.id, 'scroll-segment', segmentPrepared.diagnostics);
         surfaceShots.push(
           await captureArtifactWithPreCaptureDiagnostics(
             input.page,
@@ -693,6 +913,11 @@ export async function capturePccSurfaceScreenshots(
             'horizontal-only',
             targetY,
           );
+          assertFocusedSurfaceCaptureGate(
+            surface.id,
+            'scroll-segment',
+            segmentPrepared.diagnostics,
+          );
           const segmentPath = path.join(
             screenshotDir,
             `surface-${surface.id}-scroll-${String(segmentIndex).padStart(3, '0')}.png`,
@@ -723,7 +948,11 @@ export async function capturePccSurfaceScreenshots(
       await setScrollYForRoot(input.page, scrollRoot, 0);
       await waitForLayoutStabilization(input.page);
     } catch (error) {
-      warnings.push(`Screenshot capture error: ${String(error).slice(0, 180)}`);
+      const message = `Screenshot capture error: ${String(error).slice(0, 400)}`;
+      warnings.push(message);
+      if (FOCUSED_HARD_FAIL_SURFACES.has(surface.id)) {
+        throw new Error(message);
+      }
     }
 
     markDuplicateDiagnostics(surfaceShots, warnings);
