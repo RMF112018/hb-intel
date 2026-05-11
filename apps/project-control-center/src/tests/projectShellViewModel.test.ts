@@ -441,10 +441,14 @@ describe('PCC_SHELL_SURFACE_HEADER_METADATA — Phase 05 wave-b10 Prompt 06 cont
     }
   });
 
-  it('Project Home heroHighlights cover priority-actions / approvals / setup-gaps and microcopy includes a Read-only preview reminder', () => {
+  it('Project Home heroHighlights cover todays-focus / approvals / setup-gaps and microcopy includes a Read-only preview reminder', () => {
+    // Phase 08 Prompt 04 — the project-home first highlight was reframed
+    // from `priority-actions` to `todays-focus` (kind='next-step',
+    // tone='attention'). The new label absorbs the prior priority-actions
+    // semantic into a Today's Focus framing without dropping it.
     const metadata = PCC_SHELL_SURFACE_HEADER_METADATA['project-home'];
     const highlightIds = metadata.heroHighlights.map((h) => h.id);
-    expect(highlightIds).toContain('priority-actions');
+    expect(highlightIds).toContain('todays-focus');
     expect(highlightIds).toContain('approvals');
     expect(highlightIds).toContain('setup-gaps');
     const microcopyTexts = metadata.governanceMicrocopy.map((m) => m.text);

@@ -83,10 +83,11 @@ export const PCC_SHELL_SURFACE_HEADER_METADATA: Readonly<
     readOnlyCue: 'Read-only preview — no decisions, approvals, or writeback authority.',
     heroHighlights: [
       {
-        id: 'priority-actions',
-        label: 'Priority Actions',
-        value: 'Highest-severity items first',
-        kind: 'summary',
+        id: 'todays-focus',
+        label: "Today's Focus",
+        value: 'Priority actions and blocking signals to triage',
+        tone: 'attention',
+        kind: 'next-step',
       },
       {
         id: 'approvals',

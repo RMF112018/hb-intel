@@ -237,6 +237,11 @@
   color: var(--pcc-status-danger);
 }
 
+.heroHighlight[data-pcc-hero-highlight-kind='next-step'] {
+  border-inline-start: 2px solid var(--pcc-color-rail-accent);
+  padding-inline-start: var(--pcc-space-sm);
+}
+
 .governanceMicrocopy {
   grid-area: microcopy;
   display: flex;

@@ -301,16 +301,53 @@ describe('PccProjectHeroBand — wave-b9 Prompt 4B-02 production hero highlights
 
   it('defaults highlight tone to "neutral" and kind to "summary" when the metadata entry omits them', () => {
     cleanup();
-    const { container } = renderHero();
-    // SAMPLE_PROJECT_PROFILE on project-home renders highlights without
-    // explicit `tone`, so they must surface the "neutral" default
-    // (project-home highlights also omit `kind`-other-than-summary on
-    // priority-actions, so the default-marker contract is verifiable on
-    // that node).
-    const priorityActions = container.querySelector('[data-pcc-hero-highlight="priority-actions"]');
-    expect(priorityActions).not.toBeNull();
-    expect(priorityActions?.getAttribute('data-pcc-hero-highlight-tone')).toBe('neutral');
-    expect(priorityActions?.getAttribute('data-pcc-hero-highlight-kind')).toBe('summary');
+    // Phase 08 Prompt 04 — project-home's first heroHighlight was reframed
+    // to "Today's Focus" (kind='next-step', tone='attention'), so the
+    // default-marker contract is now verified on a sibling surface whose
+    // first highlight still omits both `tone` and `kind` overrides.
+    // `core-tools` `hbi-assistant` keeps `kind: 'summary'` and no `tone`,
+    // making it the canonical default-marker anchor.
+    const { container } = renderHero({
+      viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, 'core-tools'),
+    });
+    const hbiAssistant = container.querySelector('[data-pcc-hero-highlight="hbi-assistant"]');
+    expect(hbiAssistant).not.toBeNull();
+    expect(hbiAssistant?.getAttribute('data-pcc-hero-highlight-tone')).toBe('neutral');
+    expect(hbiAssistant?.getAttribute('data-pcc-hero-highlight-kind')).toBe('summary');
+  });
+
+  it('renders a project-home "Today\'s Focus" highlight with attention tone and next-step kind, and that highlight is project-home-specific', () => {
+    // Phase 08 Prompt 04 — Project Home includes an explicit current-focus
+    // posture summary via `surfaceHeaderMetadata.ts`. The Today's Focus
+    // value is deterministic (no live date / tenant / source call) and
+    // absorbs the prior "Priority Actions" semantic into a current-focus
+    // framing per memory `feedback_combine_dont_replace_metadata_cue`.
+    cleanup();
+    const { container: projectHomeContainer } = renderHero();
+    const focusNodes = projectHomeContainer.querySelectorAll(
+      '[data-pcc-hero-highlight="todays-focus"]',
+    );
+    expect(focusNodes).toHaveLength(1);
+    const focus = focusNodes[0]!;
+    expect(focus.getAttribute('data-pcc-hero-highlight-tone')).toBe('attention');
+    expect(focus.getAttribute('data-pcc-hero-highlight-kind')).toBe('next-step');
+    expect(focus.textContent).toContain("Today's Focus");
+    expect(focus.textContent).toContain('Priority actions and blocking signals to triage');
+
+    // Sentinel: Today's Focus is Project Home posture only — no other
+    // primary surface emits a `todays-focus` highlight.
+    for (const tabId of PCC_PRIMARY_TAB_IDS) {
+      if (tabId === 'project-home') continue;
+      cleanup();
+      const { container } = renderHero({
+        viewModel: deriveShellHeroViewModel(SAMPLE_PROJECT_PROFILE, tabId),
+      });
+      const others = container.querySelectorAll('[data-pcc-hero-highlight="todays-focus"]');
+      expect(
+        others,
+        `primary tab "${tabId}" must not render a Today's Focus highlight`,
+      ).toHaveLength(0);
+    }
   });
 
   it('renders no interactive descendants inside the heroHighlights and governanceMicrocopy zones', () => {
