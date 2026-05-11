@@ -8,16 +8,28 @@
  * --pcc-elevation-card / --pcc-status-info. No hex literals. No new tokens.
  */
 
+/* Phase 08 Prompt 05 (Foleon direction) — glass-capsule polish.
+   Subtle top-edge accent gradient, accent-tinted border, larger radius
+   for the rounded-slab principle, and dual-shadow stack (inset top
+   highlight + base card elevation) so the capsule reads as a polished
+   element nested inside the unified command-surface gradient field.
+   All token-driven; no raw colors; non-interactive contract preserved. */
 .previewCapsule {
   display: inline-flex;
   flex-direction: row;
   align-items: flex-start;
   gap: var(--pcc-space-sm);
   padding: var(--pcc-space-sm) var(--pcc-space-md);
-  background: var(--pcc-color-card);
-  border: 1px solid var(--pcc-color-border);
-  border-radius: var(--pcc-radius-md);
-  box-shadow: var(--pcc-elevation-card);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pcc-color-card) 96%, var(--pcc-color-rail-accent)),
+    var(--pcc-color-card)
+  );
+  border: 1px solid color-mix(in srgb, var(--pcc-color-rail-accent) 18%, var(--pcc-color-border));
+  border-radius: var(--pcc-radius-lg);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, var(--pcc-color-card) 60%, transparent),
+    var(--pcc-elevation-card);
   color: var(--pcc-color-text-muted);
   min-width: 0;
   max-width: 480px;
@@ -37,7 +49,7 @@
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  color: var(--pcc-color-text-muted);
+  color: color-mix(in srgb, var(--pcc-color-rail-accent) 50%, var(--pcc-color-text-muted));
   margin-top: 2px;
 }
 
