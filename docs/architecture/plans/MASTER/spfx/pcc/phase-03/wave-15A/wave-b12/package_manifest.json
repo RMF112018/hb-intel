@@ -1,0 +1,28 @@
+{
+  "package_name": "PCC_Phase_07_Prompt_Package",
+  "created_utc": "2026-05-11T09:54:05Z",
+  "purpose": "Phase 07 implementation plan and Claude Code Opus 4.7 prompt package for shared dashboard top-card remediation.",
+  "baseline": {
+    "pcc_version": "1.0.0.218",
+    "pnpm_lock_md5": "7c19ccfa8718a42f7f55ce178a626996",
+    "phase_06_evidence_commits": [
+      "4c772ac3c8e48c46bb5f5bdb108fb53b1b51bb7a",
+      "e6886489bb4f85d32840f69914dfb3b615f28aaf"
+    ]
+  },
+  "files": [
+    "00_Phase_07_Implementation_Plan.md",
+    "README.md",
+    "auditor/Fresh_Session_Auditor_Prompt_Phase_07.md",
+    "prompts/00_Pre_Edit_Repo_Truth_Evidence_Gate.md",
+    "prompts/01_Phase_05_Remediation_Anti_Regression_Tests.md",
+    "prompts/02_Remove_Shared_Dashboard_Header_Cards.md",
+    "prompts/03_Update_Shared_Dashboard_Test_Matrices.md",
+    "prompts/04_Per_Surface_Analytics_Order_and_Count_Updates.md",
+    "prompts/05_Cost_Time_Sage_Cue_and_Source_Posture.md",
+    "prompts/06_Project_Home_and_Documents_Preservation_Sweep.md",
+    "prompts/07_Static_Guards_Accessibility_and_No_False_Affordance.md",
+    "prompts/08_Focused_Live_Playwright_Evidence_Optional.md",
+    "prompts/09_Closeout_Report_and_Commit_Guidance.md"
+  ]
+}
