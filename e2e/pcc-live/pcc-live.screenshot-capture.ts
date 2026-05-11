@@ -62,6 +62,11 @@ interface CaptureContext {
   requestedScrollY?: number;
 }
 
+interface PreparedCaptureState {
+  diagnostics: CaptureScrollDiagnostics;
+  horizontalResetApplied: boolean;
+}
+
 function sanitizeHeading(input: string): { text: string; changed: boolean } {
   const original = input;
   const noQuery = original.replace(/\?.*$/g, '');
@@ -111,42 +116,55 @@ async function waitForLayoutStabilization(page: Page): Promise<void> {
   await page.waitForTimeout(80);
 }
 
-async function applyHorizontalReset(page: Page): Promise<boolean> {
-  return page.evaluate(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollLeft = 0;
-    document.body.scrollLeft = 0;
+async function clearHorizontalScroll(page: Page, resetToTop: boolean): Promise<boolean> {
+  return page.evaluate(
+    ({ shouldResetToTop }) => {
+      if (shouldResetToTop) {
+        window.scrollTo(0, 0);
+      }
+      document.documentElement.scrollLeft = 0;
+      document.body.scrollLeft = 0;
 
-    const selectors = [
-      '[data-pcc-root]',
-      '[data-pcc-active-surface-panel]',
-      'main[role="tabpanel"][data-pcc-active-surface-panel]',
-      '[data-pcc-bento-grid]',
-      '[data-pcc-shell]',
-      '[data-pcc-surface-shell]',
-    ];
+      const selectors = [
+        '[data-pcc-root]',
+        '[data-pcc-active-surface-panel]',
+        'main[role="tabpanel"][data-pcc-active-surface-panel]',
+        '[data-pcc-bento-grid]',
+        '[data-pcc-shell]',
+        '[data-pcc-surface-shell]',
+      ];
 
-    for (const selector of selectors) {
-      const nodes = Array.from(document.querySelectorAll<HTMLElement>(selector));
-      for (const node of nodes) {
+      for (const selector of selectors) {
+        const nodes = Array.from(document.querySelectorAll<HTMLElement>(selector));
+        for (const node of nodes) {
+          node.scrollLeft = 0;
+        }
+      }
+
+      const fallback = Array.from(document.querySelectorAll<HTMLElement>('body *')).filter((el) => {
+        if (!el.offsetParent) return false;
+        if (el.scrollWidth <= el.clientWidth + 1) return false;
+        const style = getComputedStyle(el);
+        if (style.visibility === 'hidden' || style.display === 'none') return false;
+        return /(auto|scroll|clip)/.test(style.overflowX);
+      });
+
+      for (const node of fallback.slice(0, 250)) {
         node.scrollLeft = 0;
       }
-    }
 
-    const fallback = Array.from(document.querySelectorAll<HTMLElement>('body *')).filter((el) => {
-      if (!el.offsetParent) return false;
-      if (el.scrollWidth <= el.clientWidth + 1) return false;
-      const style = getComputedStyle(el);
-      if (style.visibility === 'hidden' || style.display === 'none') return false;
-      return /(auto|scroll|clip)/.test(style.overflowX);
-    });
+      return true;
+    },
+    { shouldResetToTop: resetToTop },
+  );
+}
 
-    for (const node of fallback.slice(0, 250)) {
-      node.scrollLeft = 0;
-    }
+async function resetToTopAndClearHorizontalScroll(page: Page): Promise<boolean> {
+  return clearHorizontalScroll(page, true);
+}
 
-    return true;
-  });
+async function clearHorizontalScrollPreservingVerticalPosition(page: Page): Promise<boolean> {
+  return clearHorizontalScroll(page, false);
 }
 
 async function selectScrollRoot(page: Page): Promise<ScrollRootSelection> {
@@ -333,12 +351,16 @@ async function collectDiagnostics(
   };
 }
 
-async function resetAndCollectDiagnostics(
+async function collectPreparedState(
   page: Page,
   scrollRoot: ScrollRootSelection,
+  resetStrategy: 'top-and-horizontal' | 'horizontal-only',
   requestedScrollY?: number,
-): Promise<CaptureScrollDiagnostics> {
-  const horizontalResetApplied = await applyHorizontalReset(page);
+): Promise<PreparedCaptureState> {
+  const horizontalResetApplied =
+    resetStrategy === 'top-and-horizontal'
+      ? await resetToTopAndClearHorizontalScroll(page)
+      : await clearHorizontalScrollPreservingVerticalPosition(page);
   await waitForLayoutStabilization(page);
 
   let diag = await collectDiagnostics(page, scrollRoot, horizontalResetApplied, requestedScrollY);
@@ -347,7 +369,11 @@ async function resetAndCollectDiagnostics(
     !diag.surfacePanelLeftWithinTolerance ||
     !diag.bentoGridLeftWithinTolerance
   ) {
-    await applyHorizontalReset(page);
+    if (resetStrategy === 'top-and-horizontal') {
+      await resetToTopAndClearHorizontalScroll(page);
+    } else {
+      await clearHorizontalScrollPreservingVerticalPosition(page);
+    }
     await waitForLayoutStabilization(page);
     const retryDiag = await collectDiagnostics(page, scrollRoot, true, requestedScrollY);
     diag = {
@@ -359,22 +385,18 @@ async function resetAndCollectDiagnostics(
     };
   }
 
-  return diag;
+  return {
+    diagnostics: diag,
+    horizontalResetApplied,
+  };
 }
 
-async function buildArtifact(
-  page: Page,
+function buildArtifactFromPreCaptureState(
   screenshotPath: string,
   kind: PccScreenshotArtifact['kind'],
   context: CaptureContext,
-): Promise<PccScreenshotArtifact> {
-  const diagnostics = await resetAndCollectDiagnostics(
-    page,
-    context.scrollRoot,
-    context.requestedScrollY,
-  );
-  const fileDiag = await collectFileDiagnostics(screenshotPath);
-
+  diagnostics: CaptureScrollDiagnostics,
+): PccScreenshotArtifact {
   return {
     surfaceId: context.surfaceId,
     kind,
@@ -414,10 +436,24 @@ async function buildArtifact(
     captureReliabilityWarnings: diagnostics.captureReliabilityWarnings,
     notScrollableReason: context.notScrollableReason,
     segmentClassification: context.notScrollableReason ? 'not-scrollable' : undefined,
-    contentSha256: fileDiag.contentSha256,
-    fileSizeBytes: fileDiag.fileSizeBytes,
     operatorReviewRequired: true,
   };
+}
+
+async function captureArtifactWithPreCaptureDiagnostics(
+  page: Page,
+  screenshotPath: string,
+  kind: PccScreenshotArtifact['kind'],
+  context: CaptureContext,
+  diagnostics: CaptureScrollDiagnostics,
+  screenshotOptions: { fullPage?: boolean; mask?: string[] },
+): Promise<PccScreenshotArtifact> {
+  await takeScreenshot(page, screenshotPath, screenshotOptions);
+  const artifact = buildArtifactFromPreCaptureState(screenshotPath, kind, context, diagnostics);
+  const fileDiag = await collectFileDiagnostics(screenshotPath);
+  artifact.contentSha256 = fileDiag.contentSha256;
+  artifact.fileSizeBytes = fileDiag.fileSizeBytes;
+  return artifact;
 }
 
 function markDuplicateDiagnostics(
@@ -553,50 +589,80 @@ export async function capturePccSurfaceScreenshots(
 
     try {
       const scrollRoot = await selectScrollRoot(input.page);
-      await resetAndCollectDiagnostics(input.page, scrollRoot);
-
       const aboveFold = path.join(screenshotDir, `surface-${surface.id}-above-fold.png`);
-      await takeScreenshot(input.page, aboveFold, { mask: maskSelectors });
+      const aboveFoldPrepared = await collectPreparedState(
+        input.page,
+        scrollRoot,
+        'top-and-horizontal',
+      );
       surfaceShots.push(
-        await buildArtifact(input.page, aboveFold, 'above-fold', {
-          surfaceId: surface.id,
-          viewportWidth: viewport.width,
-          viewportHeight: viewport.height,
-          scrollRoot,
-          meaningfulScrollDelta: 0,
-        }),
+        await captureArtifactWithPreCaptureDiagnostics(
+          input.page,
+          aboveFold,
+          'above-fold',
+          {
+            surfaceId: surface.id,
+            viewportWidth: viewport.width,
+            viewportHeight: viewport.height,
+            scrollRoot,
+            meaningfulScrollDelta: 0,
+          },
+          aboveFoldPrepared.diagnostics,
+          { mask: maskSelectors },
+        ),
       );
 
       const fullPage = path.join(screenshotDir, `surface-${surface.id}-full-page.png`);
-      await resetAndCollectDiagnostics(input.page, scrollRoot);
-      await takeScreenshot(input.page, fullPage, { fullPage: true, mask: maskSelectors });
+      const fullPagePrepared = await collectPreparedState(
+        input.page,
+        scrollRoot,
+        'top-and-horizontal',
+      );
       surfaceShots.push(
-        await buildArtifact(input.page, fullPage, 'full-page', {
-          surfaceId: surface.id,
-          viewportWidth: viewport.width,
-          viewportHeight: viewport.height,
-          scrollRoot,
-          meaningfulScrollDelta: 0,
-        }),
+        await captureArtifactWithPreCaptureDiagnostics(
+          input.page,
+          fullPage,
+          'full-page',
+          {
+            surfaceId: surface.id,
+            viewportWidth: viewport.width,
+            viewportHeight: viewport.height,
+            scrollRoot,
+            meaningfulScrollDelta: 0,
+          },
+          fullPagePrepared.diagnostics,
+          { fullPage: true, mask: maskSelectors },
+        ),
       );
 
       const maxScrollableY = Math.max(0, scrollRoot.maxScrollY);
       if (maxScrollableY <= SCROLL_POSITION_TOLERANCE_PX) {
         const segmentPath = path.join(screenshotDir, `surface-${surface.id}-scroll-001.png`);
-        await resetAndCollectDiagnostics(input.page, scrollRoot, 0);
-        await takeScreenshot(input.page, segmentPath, { mask: maskSelectors });
+        const segmentPrepared = await collectPreparedState(
+          input.page,
+          scrollRoot,
+          'top-and-horizontal',
+          0,
+        );
         surfaceShots.push(
-          await buildArtifact(input.page, segmentPath, 'scroll-segment', {
-            surfaceId: surface.id,
-            viewportWidth: viewport.width,
-            viewportHeight: viewport.height,
-            scrollRoot,
-            segmentIndex: 1,
-            segmentCount: 1,
-            requestedScrollY: 0,
-            meaningfulScrollDelta: 0,
-            notScrollableReason: 'content-not-scrollable',
-          }),
+          await captureArtifactWithPreCaptureDiagnostics(
+            input.page,
+            segmentPath,
+            'scroll-segment',
+            {
+              surfaceId: surface.id,
+              viewportWidth: viewport.width,
+              viewportHeight: viewport.height,
+              scrollRoot,
+              segmentIndex: 1,
+              segmentCount: 1,
+              requestedScrollY: 0,
+              meaningfulScrollDelta: 0,
+              notScrollableReason: 'content-not-scrollable',
+            },
+            segmentPrepared.diagnostics,
+            { mask: maskSelectors },
+          ),
         );
       } else {
         const segmentCount = Math.max(
@@ -621,23 +687,34 @@ export async function capturePccSurfaceScreenshots(
         for (const targetY of sortedTargets) {
           await setScrollYForRoot(input.page, scrollRoot, targetY);
           await waitForLayoutStabilization(input.page);
+          const segmentPrepared = await collectPreparedState(
+            input.page,
+            scrollRoot,
+            'horizontal-only',
+            targetY,
+          );
           const segmentPath = path.join(
             screenshotDir,
             `surface-${surface.id}-scroll-${String(segmentIndex).padStart(3, '0')}.png`,
           );
-          await resetAndCollectDiagnostics(input.page, scrollRoot, targetY);
-          await takeScreenshot(input.page, segmentPath, { mask: maskSelectors });
           surfaceShots.push(
-            await buildArtifact(input.page, segmentPath, 'scroll-segment', {
-              surfaceId: surface.id,
-              viewportWidth: viewport.width,
-              viewportHeight: viewport.height,
-              scrollRoot,
-              segmentIndex,
-              segmentCount: sortedTargets.length,
-              requestedScrollY: targetY,
-              meaningfulScrollDelta: targetY,
-            }),
+            await captureArtifactWithPreCaptureDiagnostics(
+              input.page,
+              segmentPath,
+              'scroll-segment',
+              {
+                surfaceId: surface.id,
+                viewportWidth: viewport.width,
+                viewportHeight: viewport.height,
+                scrollRoot,
+                segmentIndex,
+                segmentCount: sortedTargets.length,
+                requestedScrollY: targetY,
+                meaningfulScrollDelta: targetY,
+              },
+              segmentPrepared.diagnostics,
+              { mask: maskSelectors },
+            ),
           );
           segmentIndex += 1;
         }

@@ -263,7 +263,11 @@ async function resetHorizontalState(page: Page): Promise<void> {
     window.scrollTo(0, 0);
     document.documentElement.scrollLeft = 0;
     document.body.scrollLeft = 0;
-    const selectors = ['[data-pcc-active-surface-panel]', '[data-pcc-bento-grid]', '[data-pcc-shell]'];
+    const selectors = [
+      '[data-pcc-active-surface-panel]',
+      '[data-pcc-bento-grid]',
+      '[data-pcc-shell]',
+    ];
     for (const selector of selectors) {
       const nodes = Array.from(document.querySelectorAll<HTMLElement>(selector));
       for (const node of nodes) node.scrollLeft = 0;

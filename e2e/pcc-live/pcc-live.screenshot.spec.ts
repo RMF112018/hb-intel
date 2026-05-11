@@ -401,6 +401,128 @@ test('Screenshot capture self-skips without live env', async () => {
   await browser.close();
 });
 
+test('Scroll-segment preserves requested window-document scroll before capture', async () => {
+  let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
+  try {
+    browser = await chromium.launch({ headless: true });
+  } catch {
+    test.skip(true, 'Browser launch unavailable in current runtime; skipping synthetic fixture.');
+    return;
+  }
+  const context = await browser.newContext({ viewport: { width: 1200, height: 700 } });
+  const page = await context.newPage();
+  await page.setContent(`
+    <main data-pcc-root>
+      <section data-pcc-active-surface-panel="project-home">
+        <div data-pcc-bento-grid style="height: 100px; width: 100%;"></div>
+      </section>
+      <div style="height: 2800px;"></div>
+      <article data-pcc-card><h2>Synthetic Card</h2></article>
+    </main>
+  `);
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pcc-scroll-window-'));
+  const fakePageObject = {
+    assertSurfaceActive: async () => ({ passed: true as const }),
+  } as unknown as PccLivePageObject;
+
+  try {
+    const captured = await capturePccSurfaceScreenshots({
+      page,
+      pageObject: fakePageObject,
+      surfaces: [PCC_LIVE_SURFACES[0]],
+      outputDir: tmpDir,
+      maxScrollSegments: 2,
+    });
+
+    const segments = captured.surfaces[0].screenshots.filter((s) => s.kind === 'scroll-segment');
+    const meaningfulWindowSegment = segments.find(
+      (s) =>
+        s.scrollRootKind === 'window-document' &&
+        (s.requestedScrollY ?? 0) > 0 &&
+        s.segmentClassification === 'meaningful',
+    );
+
+    expect(meaningfulWindowSegment).toBeDefined();
+    expect((meaningfulWindowSegment!.requestedScrollY ?? 0) > 0).toBe(true);
+    expect(
+      Math.abs(
+        (meaningfulWindowSegment!.requestedScrollY ?? 0) - meaningfulWindowSegment!.actualScrollY,
+      ) <= 2,
+    ).toBe(true);
+    expect(meaningfulWindowSegment!.horizontalScrollWithinTolerance).toBe(true);
+    expect(meaningfulWindowSegment!.captureReliabilityWarnings.join(' ')).not.toContain(
+      'actual-scroll-mismatch',
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    await context.close();
+    await browser.close();
+  }
+});
+
+test('Scroll-segment preserves requested active-panel/container scroll before capture', async () => {
+  let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
+  try {
+    browser = await chromium.launch({ headless: true });
+  } catch {
+    test.skip(true, 'Browser launch unavailable in current runtime; skipping synthetic fixture.');
+    return;
+  }
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const page = await context.newPage();
+  await page.setContent(`
+    <main data-pcc-root>
+      <section
+        data-pcc-active-surface-panel="project-home"
+        style="height: 260px; overflow-y: auto; overflow-x: auto; border: 1px solid #ccc;"
+      >
+        <div data-pcc-bento-grid style="width: 1500px; height: 1500px;"></div>
+      </section>
+      <article data-pcc-card><h2>Synthetic Card</h2></article>
+    </main>
+  `);
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pcc-scroll-panel-'));
+  const fakePageObject = {
+    assertSurfaceActive: async () => ({ passed: true as const }),
+  } as unknown as PccLivePageObject;
+
+  try {
+    const captured = await capturePccSurfaceScreenshots({
+      page,
+      pageObject: fakePageObject,
+      surfaces: [PCC_LIVE_SURFACES[0]],
+      outputDir: tmpDir,
+      maxScrollSegments: 2,
+    });
+
+    const segments = captured.surfaces[0].screenshots.filter((s) => s.kind === 'scroll-segment');
+    const meaningfulPanelSegment = segments.find(
+      (s) =>
+        (s.scrollRootKind === 'active-surface-panel' || s.scrollRootKind === 'pcc-container') &&
+        (s.requestedScrollY ?? 0) > 0 &&
+        s.segmentClassification === 'meaningful',
+    );
+
+    expect(meaningfulPanelSegment).toBeDefined();
+    expect((meaningfulPanelSegment!.requestedScrollY ?? 0) > 0).toBe(true);
+    expect(
+      Math.abs(
+        (meaningfulPanelSegment!.requestedScrollY ?? 0) - meaningfulPanelSegment!.actualScrollY,
+      ) <= 2,
+    ).toBe(true);
+    expect(meaningfulPanelSegment!.horizontalScrollWithinTolerance).toBe(true);
+    expect(meaningfulPanelSegment!.captureReliabilityWarnings.join(' ')).not.toContain(
+      'actual-scroll-mismatch',
+    );
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    await context.close();
+    await browser.close();
+  }
+});
+
 function runResultPath(outputDir: string, fileName: string): string {
   return path.join(outputDir, fileName);
 }
