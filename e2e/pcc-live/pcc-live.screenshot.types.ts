@@ -50,6 +50,8 @@ type _EvidenceTupleAssignableToPrompt02 = AssertTrue<
 type _EvidenceTupleUnique = AssertTrue<UniqueTuple<typeof PCC_SCREENSHOT_INITIAL_EVIDENCE_IDS>>;
 
 export type PccScreenshotKind = 'above-fold' | 'full-page' | 'scroll-segment';
+export type PccScrollRootKind = 'active-surface-panel' | 'pcc-container' | 'window-document';
+export type PccScrollSegmentClassification = 'meaningful' | 'duplicate' | 'not-scrollable';
 
 export interface PccScreenshotArtifact {
   surfaceId: PccLiveSurfaceId;
@@ -61,6 +63,37 @@ export interface PccScreenshotArtifact {
   scrollY?: number;
   viewportWidth: number;
   viewportHeight: number;
+  segmentIndex?: number;
+  segmentCount?: number;
+  requestedScrollY?: number;
+  actualScrollY: number;
+  meaningfulScrollDelta: number;
+  scrollRootKind: PccScrollRootKind;
+  scrollRootSelector: string;
+  contentScrollHeight: number;
+  contentClientHeight: number;
+  actualWindowScrollY: number;
+  actualDocumentScrollLeft: number;
+  actualBodyScrollLeft: number;
+  maxHorizontalScrollLeftObserved: number;
+  activeSurfacePanelLeft: number | null;
+  activeSurfacePanelRight: number | null;
+  activeSurfacePanelWidth: number | null;
+  activeSurfacePanelScrollLeft: number | null;
+  bentoGridLeft: number | null;
+  bentoGridRight: number | null;
+  bentoGridWidth: number | null;
+  documentClientWidth: number;
+  documentScrollWidth: number;
+  horizontalResetApplied: boolean;
+  horizontalScrollWithinTolerance: boolean;
+  surfacePanelLeftWithinTolerance: boolean;
+  bentoGridLeftWithinTolerance: boolean;
+  captureReliabilityWarnings: string[];
+  notScrollableReason?: string;
+  segmentClassification?: PccScrollSegmentClassification;
+  contentSha256?: string;
+  fileSizeBytes?: number;
   operatorReviewRequired: true;
 }
 

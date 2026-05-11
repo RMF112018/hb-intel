@@ -20,6 +20,7 @@ import type { PccLiveSurfaceDefinition } from './pcc-live.surfaces';
 const GRID_SELECTOR = '[data-pcc-bento-grid]';
 const CARD_SELECTOR = '[data-pcc-card]';
 const PANEL_SELECTOR = '[data-pcc-active-surface-panel]';
+const LEFT_BOUND_TOLERANCE_PX = -2;
 
 const MASK_SELECTORS = [
   'input',
@@ -257,6 +258,36 @@ async function takeBreakpointScreenshot(
   };
 }
 
+async function resetHorizontalState(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollLeft = 0;
+    document.body.scrollLeft = 0;
+    const selectors = ['[data-pcc-active-surface-panel]', '[data-pcc-bento-grid]', '[data-pcc-shell]'];
+    for (const selector of selectors) {
+      const nodes = Array.from(document.querySelectorAll<HTMLElement>(selector));
+      for (const node of nodes) node.scrollLeft = 0;
+    }
+  });
+  await page.waitForTimeout(80);
+}
+
+async function collectLeftBoundDiagnostics(page: Page): Promise<{
+  panelLeft: number | null;
+  bentoLeft: number | null;
+}> {
+  return page.evaluate(() => {
+    const panel = document.querySelector<HTMLElement>(
+      'main[role="tabpanel"][data-pcc-active-surface-panel], [data-pcc-active-surface-panel]',
+    );
+    const bento = document.querySelector<HTMLElement>('[data-pcc-bento-grid]');
+    return {
+      panelLeft: panel ? panel.getBoundingClientRect().left : null,
+      bentoLeft: bento ? bento.getBoundingClientRect().left : null,
+    };
+  });
+}
+
 export interface CapturePccBreakpointsInput {
   page: Page;
   pageObject: PccLivePageObject;
@@ -293,6 +324,18 @@ export async function capturePccBreakpoints(
     for (const surface of input.surfaces) {
       const warnings: string[] = [];
       await input.pageObject.assertSurfaceActive(surface);
+      await resetHorizontalState(input.page);
+      const bounds = await collectLeftBoundDiagnostics(input.page);
+      if (bounds.panelLeft !== null && bounds.panelLeft < LEFT_BOUND_TOLERANCE_PX) {
+        warnings.push(
+          `Capture reliability warning: active panel left clipping panelLeft=${bounds.panelLeft} threshold=${LEFT_BOUND_TOLERANCE_PX}.`,
+        );
+      }
+      if (bounds.bentoLeft !== null && bounds.bentoLeft < LEFT_BOUND_TOLERANCE_PX) {
+        warnings.push(
+          `Capture reliability warning: bento left clipping bentoLeft=${bounds.bentoLeft} threshold=${LEFT_BOUND_TOLERANCE_PX}.`,
+        );
+      }
 
       const grid = await measureBreakpointGrid(input.page, surface, viewport);
       if (!grid) {

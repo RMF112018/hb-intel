@@ -65,8 +65,36 @@ test('Screenshot writer preserves sanitized output policy', async () => {
             fileName: 'surface-project-home-above-fold.png',
             width: 1280,
             height: 720,
+            scrollY: 0,
             viewportWidth: 1280,
             viewportHeight: 720,
+            actualScrollY: 0,
+            meaningfulScrollDelta: 0,
+            scrollRootKind: 'window-document',
+            scrollRootSelector: 'window/document',
+            contentScrollHeight: 1200,
+            contentClientHeight: 720,
+            actualWindowScrollY: 0,
+            actualDocumentScrollLeft: 0,
+            actualBodyScrollLeft: 0,
+            maxHorizontalScrollLeftObserved: 0,
+            activeSurfacePanelLeft: 0,
+            activeSurfacePanelRight: 1280,
+            activeSurfacePanelWidth: 1280,
+            activeSurfacePanelScrollLeft: 0,
+            bentoGridLeft: 0,
+            bentoGridRight: 1280,
+            bentoGridWidth: 1280,
+            documentClientWidth: 1280,
+            documentScrollWidth: 1280,
+            horizontalResetApplied: true,
+            horizontalScrollWithinTolerance: true,
+            surfacePanelLeftWithinTolerance: true,
+            bentoGridLeftWithinTolerance: true,
+            captureReliabilityWarnings: [],
+            segmentClassification: 'meaningful',
+            contentSha256: 'abc123',
+            fileSizeBytes: 100,
             operatorReviewRequired: true,
           },
         ],
@@ -346,6 +374,25 @@ test('Screenshot capture self-skips without live env', async () => {
     expect(hasCards || hasWarning).toBe(true);
     for (const shot of surface.screenshots) {
       expect(shot.operatorReviewRequired).toBe(true);
+      expect(typeof shot.actualScrollY).toBe('number');
+      expect(typeof shot.horizontalResetApplied).toBe('boolean');
+      expect(Array.isArray(shot.captureReliabilityWarnings)).toBe(true);
+      expect(typeof shot.surfacePanelLeftWithinTolerance).toBe('boolean');
+      expect(typeof shot.bentoGridLeftWithinTolerance).toBe('boolean');
+      if (shot.kind === 'scroll-segment') {
+        expect(
+          shot.segmentClassification === 'meaningful' ||
+            shot.segmentClassification === 'duplicate' ||
+            shot.segmentClassification === 'not-scrollable',
+        ).toBe(true);
+      }
+    }
+    const scrollSegments = surface.screenshots.filter((s) => s.kind === 'scroll-segment');
+    expect(scrollSegments.length).toBeGreaterThan(0);
+    for (const segment of scrollSegments) {
+      const moved = Math.abs((segment.requestedScrollY ?? 0) - segment.actualScrollY) <= 2;
+      const explicitNotScrollable = segment.segmentClassification === 'not-scrollable';
+      expect(moved || explicitNotScrollable).toBe(true);
     }
   }
 

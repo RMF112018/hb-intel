@@ -252,11 +252,35 @@ export async function writePccScreenshotEvidence(
   lines.push(`- Warning count: ${summary.totalWarnings}`);
   lines.push('');
   lines.push('## Surface Table');
-  lines.push('| Surface | Passed | Screenshots | Card Summaries | Warnings |');
-  lines.push('|---|---|---:|---:|---:|');
+  lines.push(
+    '| Surface | Passed | Screenshots | Card Summaries | Warnings | Scroll mismatch | Left-clipping | Duplicate | Not-scrollable |',
+  );
+  lines.push('|---|---|---:|---:|---:|---:|---:|---:|---:|');
   for (const surface of surfaces) {
+    const scrollMismatchCount = surface.screenshots.reduce(
+      (sum, shot) =>
+        sum +
+        shot.captureReliabilityWarnings.filter((w) => w.includes('actual-scroll-mismatch')).length,
+      0,
+    );
+    const leftClipCount = surface.screenshots.reduce(
+      (sum, shot) =>
+        sum +
+        shot.captureReliabilityWarnings.filter(
+          (w) =>
+            w.includes('active-surface-panel-left-clipped') ||
+            w.includes('bento-grid-left-clipped'),
+        ).length,
+      0,
+    );
+    const duplicateCount = surface.screenshots.filter(
+      (shot) => shot.segmentClassification === 'duplicate',
+    ).length;
+    const notScrollableCount = surface.screenshots.filter(
+      (shot) => shot.segmentClassification === 'not-scrollable',
+    ).length;
     lines.push(
-      `| ${surface.surfaceId} | ${surface.passed ? 'yes' : 'no'} | ${surface.screenshots.length} | ${surface.cardSummaries.length} | ${surface.warnings.length} |`,
+      `| ${surface.surfaceId} | ${surface.passed ? 'yes' : 'no'} | ${surface.screenshots.length} | ${surface.cardSummaries.length} | ${surface.warnings.length} | ${scrollMismatchCount} | ${leftClipCount} | ${duplicateCount} | ${notScrollableCount} |`,
     );
   }
   lines.push('');
@@ -298,14 +322,25 @@ export async function writePccScreenshotEvidence(
   contactSheetLines.push('- No Phase 4 readiness is approved.');
   contactSheetLines.push('');
   contactSheetLines.push(
-    '| Surface | Kind | Viewport | File | Display Path | Operator Review | Artifact Policy |',
+    '| Surface | Kind | Viewport | File | Scroll req/actual | Segment state | Horizontal reset | Left clipping | Duplicate warning | Display Path | Operator Review | Artifact Policy |',
   );
-  contactSheetLines.push('|---|---|---|---|---|---|---|');
+  contactSheetLines.push('|---|---|---|---|---|---|---|---|---|---|---|---|');
   for (const surface of surfaces) {
     for (const screenshot of surface.screenshots) {
       const displayPath = displayPathForMarkdown(screenshot.path);
+      const scrollState = `${screenshot.requestedScrollY ?? 0}/${Math.round(screenshot.actualScrollY)}`;
+      const segmentState = screenshot.segmentClassification ?? 'meaningful';
+      const leftClip =
+        screenshot.surfacePanelLeftWithinTolerance && screenshot.bentoGridLeftWithinTolerance
+          ? 'no'
+          : 'yes';
+      const duplicateWarn = screenshot.captureReliabilityWarnings.some((w) =>
+        w.includes('duplicate'),
+      )
+        ? 'yes'
+        : 'no';
       contactSheetLines.push(
-        `| ${escapeMdCell(surface.surfaceId)} (${escapeMdCell(surface.label)}) | ${screenshot.kind} | ${screenshot.viewportWidth}x${screenshot.viewportHeight} | ${escapeMdCell(screenshot.fileName)} | ${escapeMdCell(displayPath)} | operator-review-required | commit-eligible-after-scrub |`,
+        `| ${escapeMdCell(surface.surfaceId)} (${escapeMdCell(surface.label)}) | ${screenshot.kind} | ${screenshot.viewportWidth}x${screenshot.viewportHeight} | ${escapeMdCell(screenshot.fileName)} | ${scrollState} | ${segmentState} | ${screenshot.horizontalResetApplied ? 'yes' : 'no'} | ${leftClip} | ${duplicateWarn} | ${escapeMdCell(displayPath)} | operator-review-required | commit-eligible-after-scrub |`,
       );
       if (canEmbedMarkdownImage(screenshot.path)) {
         contactSheetLines.push(`![${escapeMdCell(screenshot.fileName)}](${displayPath})`);
