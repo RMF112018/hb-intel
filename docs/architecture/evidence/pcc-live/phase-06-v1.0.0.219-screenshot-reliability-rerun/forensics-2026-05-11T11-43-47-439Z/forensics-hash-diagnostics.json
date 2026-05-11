@@ -1,0 +1,106 @@
+{
+  "project-home": [
+    {
+      "kind": "above-fold",
+      "fileName": "surface-project-home-above-fold.png",
+      "sha256": "75c50175e07bcc70cebbf651496bda4bf5178879764540a7b80f698470ade299",
+      "fileSizeBytes": 166694,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "kind": "full-page",
+      "fileName": "surface-project-home-full-page.png",
+      "sha256": "75c50175e07bcc70cebbf651496bda4bf5178879764540a7b80f698470ade299",
+      "fileSizeBytes": 166694,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "kind": "scroll-001",
+      "fileName": "surface-project-home-scroll-001.png",
+      "sha256": "75c50175e07bcc70cebbf651496bda4bf5178879764540a7b80f698470ade299",
+      "fileSizeBytes": 166694,
+      "width": 1280,
+      "height": 720
+    }
+  ],
+  "documents": [
+    {
+      "kind": "above-fold",
+      "fileName": "surface-documents-above-fold.png",
+      "sha256": "795d8025514a449b5b6a08cb375d0d4d5ac928a82b5c836af25a42430bf73e21",
+      "fileSizeBytes": 159100,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "kind": "full-page",
+      "fileName": "surface-documents-full-page.png",
+      "sha256": "795d8025514a449b5b6a08cb375d0d4d5ac928a82b5c836af25a42430bf73e21",
+      "fileSizeBytes": 159100,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "kind": "scroll-001",
+      "fileName": "surface-documents-scroll-001.png",
+      "sha256": "795d8025514a449b5b6a08cb375d0d4d5ac928a82b5c836af25a42430bf73e21",
+      "fileSizeBytes": 159100,
+      "width": 1280,
+      "height": 720
+    }
+  ],
+  "cost-time": [
+    {
+      "kind": "above-fold",
+      "fileName": "surface-cost-time-above-fold.png",
+      "sha256": "ed54bb0d5bb3be7dedd0836809565b85feea5c4b00af8226657bcfd408df9e16",
+      "fileSizeBytes": 160465,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "kind": "full-page",
+      "fileName": "surface-cost-time-full-page.png",
+      "sha256": "ed54bb0d5bb3be7dedd0836809565b85feea5c4b00af8226657bcfd408df9e16",
+      "fileSizeBytes": 160465,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "kind": "scroll-001",
+      "fileName": "surface-cost-time-scroll-001.png",
+      "sha256": "ed54bb0d5bb3be7dedd0836809565b85feea5c4b00af8226657bcfd408df9e16",
+      "fileSizeBytes": 160465,
+      "width": 1280,
+      "height": 720
+    }
+  ],
+  "systems-administration": [
+    {
+      "kind": "above-fold",
+      "fileName": "surface-systems-administration-above-fold.png",
+      "sha256": "dbd1dc93224a52cc833bce8e2e76bcb3b068e88916ef2d1c558113b3902f82da",
+      "fileSizeBytes": 144287,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "kind": "full-page",
+      "fileName": "surface-systems-administration-full-page.png",
+      "sha256": "dbd1dc93224a52cc833bce8e2e76bcb3b068e88916ef2d1c558113b3902f82da",
+      "fileSizeBytes": 144287,
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "kind": "scroll-001",
+      "fileName": "surface-systems-administration-scroll-001.png",
+      "sha256": "dbd1dc93224a52cc833bce8e2e76bcb3b068e88916ef2d1c558113b3902f82da",
+      "fileSizeBytes": 144287,
+      "width": 1280,
+      "height": 720
+    }
+  ]
+}

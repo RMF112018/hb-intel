@@ -1,0 +1,834 @@
+[
+  {
+    "surfaceId": "project-home",
+    "mode": "playwright-click",
+    "beforeScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ],
+    "afterScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ]
+  },
+  {
+    "surfaceId": "project-home",
+    "mode": "dom-click",
+    "beforeScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ],
+    "afterScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ]
+  },
+  {
+    "surfaceId": "documents",
+    "mode": "playwright-click",
+    "beforeScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ],
+    "afterScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-documents",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ]
+  },
+  {
+    "surfaceId": "documents",
+    "mode": "dom-click",
+    "beforeScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ],
+    "afterScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-documents",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ]
+  },
+  {
+    "surfaceId": "cost-time",
+    "mode": "playwright-click",
+    "beforeScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ],
+    "afterScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-cost-time",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ]
+  },
+  {
+    "surfaceId": "cost-time",
+    "mode": "dom-click",
+    "beforeScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ],
+    "afterScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-cost-time",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ]
+  },
+  {
+    "surfaceId": "systems-administration",
+    "mode": "playwright-click",
+    "beforeScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ],
+    "afterScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-systems-administration",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ]
+  },
+  {
+    "surfaceId": "systems-administration",
+    "mode": "dom-click",
+    "beforeScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ],
+    "afterScrollLeftByAncestor": [
+      {
+        "path": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-systems-administration",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      },
+      {
+        "path": "div > div > div > div > div > div > div > div > div > div",
+        "scrollLeft": 0
+      }
+    ]
+  }
+]

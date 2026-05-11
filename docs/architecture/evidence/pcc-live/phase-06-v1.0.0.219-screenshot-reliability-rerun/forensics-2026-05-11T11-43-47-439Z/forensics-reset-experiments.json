@@ -1,0 +1,1893 @@
+[
+  {
+    "surfaceId": "cost-time",
+    "baseline": {
+      "activePanelLeftOk": false,
+      "bentoGridLeftOk": true,
+      "heroBandLeftOk": false,
+      "firstVisibleHeadingLeftOk": true,
+      "minRelevantLeft": -10,
+      "failingSelectors": [
+        "activePanel",
+        "heroBand"
+      ]
+    },
+    "individual": [
+      {
+        "candidate": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-cost-time",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div#spPageChromeAppDiv > div > div > div > section > div > article > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": true,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": true,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": 48,
+          "failingSelectors": []
+        }
+      },
+      {
+        "candidate": "div > div#spPageChromeAppDiv > div > div > div > section > div > article > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div#spPageChromeAppDiv > div > div > div > section > div > article > div > div > h1",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div#spPageChromeAppDiv > div > div > div > section > div > article > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > section > div > article > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > section > div > article > div > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > section > div > article > div > div > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > article > div > div > div > div > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "article > div > div > div > div > div > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-core-tools > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-documents > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-estimating-preconstruction > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-startup-closeout > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-controls > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-cost-time > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-systems-administration > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "html > body > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      }
+    ],
+    "groups": [
+      {
+        "group": "tab-chain",
+        "members": [
+          "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-cost-time",
+          "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+          "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+          "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+          "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div"
+        ],
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "group": "panel-chain",
+        "members": [
+          "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel",
+          "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+          "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div"
+        ],
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "group": "grid-chain",
+        "members": [
+          "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel > div",
+          "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel",
+          "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+          "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div"
+        ],
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "group": "global-overflow-candidates",
+        "members": [
+          "div > div > div#spPageChromeAppDiv > div > div > div > section > div > article > div",
+          "div > div#spPageChromeAppDiv > div > div > div > section > div > article > div > div",
+          "div#spPageChromeAppDiv > div > div > div > section > div > article > div > div > h1",
+          "div#spPageChromeAppDiv > div > div > div > section > div > article > div > div > div",
+          "div > div > div > section > div > article > div > div > div > div",
+          "div > div > section > div > article > div > div > div > div > div",
+          "div > section > div > article > div > div > div > div > div > div",
+          "div > article > div > div > div > div > div > div > div > div",
+          "article > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+          "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-core-tools > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-documents > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-estimating-preconstruction > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-startup-closeout > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-controls > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-cost-time > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-systems-administration > span",
+          "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel",
+          "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel > div",
+          "html > body > div"
+        ],
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -10,
+          "failingSelectors": [
+            "activePanel",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": true,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": true,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": 48,
+          "failingSelectors": []
+        }
+      }
+    ]
+  },
+  {
+    "surfaceId": "systems-administration",
+    "baseline": {
+      "activePanelLeftOk": false,
+      "bentoGridLeftOk": false,
+      "heroBandLeftOk": false,
+      "firstVisibleHeadingLeftOk": true,
+      "minRelevantLeft": -265,
+      "failingSelectors": [
+        "activePanel",
+        "bentoGrid",
+        "heroBand"
+      ]
+    },
+    "individual": [
+      {
+        "candidate": "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-systems-administration",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div > div > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div#spPageChromeAppDiv > div > div > div > section > div > article > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": true,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": true,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": 48,
+          "failingSelectors": []
+        }
+      },
+      {
+        "candidate": "div > div#spPageChromeAppDiv > div > div > div > section > div > article > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div#spPageChromeAppDiv > div > div > div > section > div > article > div > div > h1",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div#spPageChromeAppDiv > div > div > div > section > div > article > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > div > section > div > article > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div > section > div > article > div > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > section > div > article > div > div > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > article > div > div > div > div > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "article > div > div > div > div > div > div > div > div > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-core-tools > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-documents > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-estimating-preconstruction > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-startup-closeout > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-controls > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-cost-time > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-systems-administration > span",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "candidate": "html > body > div",
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      }
+    ],
+    "groups": [
+      {
+        "group": "tab-chain",
+        "members": [
+          "div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-systems-administration",
+          "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div",
+          "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+          "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+          "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div"
+        ],
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "group": "panel-chain",
+        "members": [
+          "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel",
+          "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+          "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div"
+        ],
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "group": "grid-chain",
+        "members": [
+          "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel > div",
+          "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel",
+          "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+          "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div"
+        ],
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        }
+      },
+      {
+        "group": "global-overflow-candidates",
+        "members": [
+          "div > div > div#spPageChromeAppDiv > div > div > div > section > div > article > div",
+          "div > div#spPageChromeAppDiv > div > div > div > section > div > article > div > div",
+          "div#spPageChromeAppDiv > div > div > div > section > div > article > div > div > h1",
+          "div#spPageChromeAppDiv > div > div > div > section > div > article > div > div > div",
+          "div > div > div > section > div > article > div > div > div > div",
+          "div > div > section > div > article > div > div > div > div > div",
+          "div > section > div > article > div > div > div > div > div > div",
+          "div > article > div > div > div > div > div > div > div > div",
+          "article > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div",
+          "div > div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d",
+          "div > div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div",
+          "div > div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div",
+          "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-home > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-core-tools > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-documents > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-estimating-preconstruction > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-startup-closeout > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-project-controls > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-cost-time > span",
+          "div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > div > div > button#pcc-tab-systems-administration > span",
+          "div > div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel",
+          "div > div > div > div#bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div#vpc_WebPart.ProjectControlCenterWebPart.external.bf7c860a-b6cf-4e4c-86e6-8b0b3529825d > div > div > main#pcc-active-surface-panel > div",
+          "html > body > div"
+        ],
+        "before": {
+          "activePanelLeftOk": false,
+          "bentoGridLeftOk": false,
+          "heroBandLeftOk": false,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": -265,
+          "failingSelectors": [
+            "activePanel",
+            "bentoGrid",
+            "heroBand"
+          ]
+        },
+        "after": {
+          "activePanelLeftOk": true,
+          "bentoGridLeftOk": true,
+          "heroBandLeftOk": true,
+          "firstVisibleHeadingLeftOk": true,
+          "minRelevantLeft": 48,
+          "failingSelectors": []
+        }
+      }
+    ]
+  }
+]
