@@ -2,8 +2,9 @@
  * Phase 06 Prompt 10 — Cost & Time analytics card contract.
  *
  * Locks the three preview analytics cards inserted into the Cost & Time
- * primary dashboard: cost-time-only rendering, exact 6-card direct-child
- * order, Prompts 07 / 08 / 09 cross-conditional regression locks, per-card
+ * primary dashboard: cost-time-only rendering, exact 5-card direct-child
+ * order (post-Phase-07 Prompt 02 — generic Dashboard hero card removed),
+ * Prompts 07 / 08 / 09 cross-conditional regression locks, per-card
  * markers, verbatim preview-copy strings, source-label override, fallback
  * summary outside the chart canvas, span overrides at four 12-/10-column
  * modes plus tabletLandscape footprint-fallback, all four registry-driven
@@ -424,6 +425,123 @@ describe('Cost & Time analytics — Sage book-of-record posture line visible and
       expect(grid.querySelectorAll('[data-pcc-dashboard-book-of-record]')).toHaveLength(0);
     });
   }
+});
+
+const SAGE_CUE_EXACT_TEXT =
+  'Sage remains the accounting book of record for cost, commitment, and exposure data; PCC does not write back to Sage.';
+
+describe('Cost & Time analytics — Sage cue position and posture (Phase 07 Prompt 05)', () => {
+  const SAGE_CUE_FORBIDDEN_AFFIRMATIVE_PATTERNS: readonly RegExp[] = [
+    /will write back/i,
+    /can write back/i,
+    /sync(?:s|ed)? to Sage/i,
+    /post(?:s|ed)? to Sage/i,
+    /update(?:s|d)? Sage/i,
+    /mutate(?:s|d)? Sage/i,
+    /accounting mutation/i,
+  ];
+
+  it('renders the Sage cue verbatim inside the Module status card with post-Phase-07 host-card markers', () => {
+    const { container } = renderCostTime();
+    const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
+    const cue = grid.querySelector<HTMLElement>('[data-pcc-dashboard-book-of-record="cost-time"]');
+    expect(cue, 'Cost & Time Sage cue must render').not.toBeNull();
+    expect(cue!.textContent?.trim()).toBe(SAGE_CUE_EXACT_TEXT);
+
+    const card = cue!.closest<HTMLElement>('[data-pcc-card]');
+    expect(card, 'Sage cue must be inside a [data-pcc-card]').not.toBeNull();
+    expect(
+      card!.querySelector('h2, h3, h4')?.textContent?.trim(),
+      'Sage cue host card heading must be "Module status"',
+    ).toBe('Module status');
+
+    expect(card!.getAttribute('data-pcc-footprint')).toBe('wide');
+    expect(card!.getAttribute('data-pcc-card-hierarchy')).toBe('standard');
+    expect(card!.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(card!.getAttribute('data-pcc-card-region')).toBe('operational');
+
+    expect(card!.getAttribute('data-pcc-footprint')).not.toBe('hero');
+    expect(card!.getAttribute('data-pcc-card-hierarchy')).not.toBe('primary');
+    expect(card!.getAttribute('data-pcc-card-tier')).not.toBe('tier1');
+    expect(card!.getAttribute('data-pcc-card-region')).not.toBe('command');
+  });
+
+  it('Sage cue contains "does not write back to Sage" and asserts zero affirmative Sage writeback/sync/mutation language on the cue node only', () => {
+    const { container } = renderCostTime();
+    const cue = container.querySelector<HTMLElement>(
+      '[data-pcc-dashboard-book-of-record="cost-time"]',
+    );
+    expect(cue, 'Sage cue must render').not.toBeNull();
+    const cueText = cue!.textContent ?? '';
+    expect(cueText).toContain('does not write back to Sage');
+    for (const pattern of SAGE_CUE_FORBIDDEN_AFFIRMATIVE_PATTERNS) {
+      expect(
+        pattern.test(cueText),
+        `Sage cue must not match affirmative writeback/sync/mutation pattern ${pattern}`,
+      ).toBe(false);
+    }
+  });
+
+  it('first direct Cost & Time card is "Module status" and no generic Cost & Time hero card survives', () => {
+    const { container } = renderCostTime();
+    const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
+    const directCards = Array.from(grid.children).filter(
+      (child): child is HTMLElement =>
+        child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
+    );
+    expect(directCards.length).toBeGreaterThanOrEqual(1);
+    expect(directCards[0].querySelector('h2, h3, h4')?.textContent?.trim()).toBe('Module status');
+    const heroPatternCard = directCards.find(
+      (card) =>
+        card.querySelector('h2, h3, h4')?.textContent?.trim() === 'Cost & Time' &&
+        card.getAttribute('data-pcc-footprint') === 'hero' &&
+        card.getAttribute('data-pcc-card-hierarchy') === 'primary' &&
+        card.getAttribute('data-pcc-card-tier') === 'tier1' &&
+        card.getAttribute('data-pcc-card-region') === 'command',
+    );
+    expect(
+      heroPatternCard,
+      'no Cost & Time direct card may match the removed Phase 05 generic Dashboard hero pattern',
+    ).toBeUndefined();
+  });
+});
+
+describe('Cost & Time analytics — selected-module behavior with Sage cue relocated (Phase 07 Prompt 05)', () => {
+  it('Cost & Time render with activeModuleId="procurement-buyout" keeps the Sage cue inside Module status and renders the Procurement & Buyout selected-module card without leaking the cue', () => {
+    const { container } = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccPrimaryDashboardSurface
+          activePrimaryTabId="cost-time"
+          activeModuleId="procurement-buyout"
+        />
+      </PccBentoGrid>,
+    );
+    const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
+
+    const cue = grid.querySelector<HTMLElement>('[data-pcc-dashboard-book-of-record="cost-time"]');
+    expect(cue, 'Sage cue must still render with an active Cost & Time module').not.toBeNull();
+    const cueHostCard = cue!.closest<HTMLElement>('[data-pcc-card]');
+    expect(
+      cueHostCard!.querySelector('h2, h3, h4')?.textContent?.trim(),
+      'Sage cue must remain inside the Module status card on the activeModuleId render path',
+    ).toBe('Module status');
+
+    const selectedInner = grid.querySelector<HTMLElement>('[data-pcc-selected-module-card]');
+    expect(selectedInner, 'Selected-module marker div must render').not.toBeNull();
+    expect(selectedInner!.getAttribute('data-pcc-selected-module-id')).toBe('procurement-buyout');
+    expect(selectedInner!.getAttribute('data-pcc-selected-module-state')).toBe('preview');
+    expect(selectedInner!.getAttribute('data-pcc-selected-module-parent-tab')).toBe('cost-time');
+
+    const selectedHostCard = selectedInner!.closest<HTMLElement>('[data-pcc-card]');
+    expect(
+      selectedHostCard!.querySelector('h2, h3, h4')?.textContent?.trim(),
+      'Selected-module card heading must equal the registry label "Procurement & Buyout"',
+    ).toBe('Procurement & Buyout');
+    expect(
+      selectedHostCard!.textContent ?? '',
+      'Selected-module card must not include the Sage book-of-record cue',
+    ).not.toContain('Sage remains the accounting book of record');
+  });
 });
 
 describe('Phase 05 dashboard + PCC analytics — does not import echarts-for-react', () => {
