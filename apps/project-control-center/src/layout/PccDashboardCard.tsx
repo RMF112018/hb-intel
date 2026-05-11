@@ -20,12 +20,36 @@ export type PccCardRegion =
   | 'detail'
   | 'rail';
 
+export type PccCardTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+
+export type PccCardSourceSystem =
+  | 'none'
+  | 'pcc'
+  | 'sharepoint'
+  | 'procore'
+  | 'sage'
+  | 'power-bi'
+  | 'external'
+  | 'future';
+
 export interface PccDashboardCardProps {
   footprint?: PccCardFootprint;
   hierarchy?: 'primary' | 'standard' | 'supporting';
   tier?: PccCardTier;
   region?: PccCardRegion;
   density?: 'comfortable' | 'compact';
+  /**
+   * Optional content-driven status tone. Defaults to `'neutral'`. Non-neutral
+   * tones apply a token-only inset accent stripe via `box-shadow` while
+   * retaining base card elevation.
+   */
+  tone?: PccCardTone;
+  /**
+   * Optional source-system marker for evidence and future surface treatments.
+   * Defaults to `'none'`. Emitted as a stable `data-*` attribute only; no
+   * visual treatment is applied in this prompt.
+   */
+  sourceSystem?: PccCardSourceSystem;
   title?: string;
   eyebrow?: string;
   action?: ReactNode;
@@ -91,6 +115,8 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
   tier,
   region,
   density = 'comfortable',
+  tone = 'neutral',
+  sourceSystem = 'none',
   title,
   eyebrow,
   action,
@@ -135,6 +161,8 @@ export const PccDashboardCard: FC<PccDashboardCardProps> = ({
       data-pcc-card-region={resolvedRegion}
       data-pcc-card-region-source={regionSource}
       data-pcc-card-density={density}
+      data-pcc-card-tone={tone}
+      data-pcc-card-source-system={sourceSystem}
       data-pcc-heading-level={String(resolvedHeadingLevel)}
       data-pcc-mode={mode}
       data-pcc-column-span={columnSpan}

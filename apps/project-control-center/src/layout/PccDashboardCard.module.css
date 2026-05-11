@@ -133,6 +133,12 @@
   border-style: dashed;
   border-color: color-mix(in srgb, var(--pcc-status-neutral) 48%, var(--pcc-color-border));
   background: color-mix(in srgb, var(--pcc-color-canvas) 72%, var(--pcc-color-card));
+  /* Dual-shadow stack: inset status-neutral accent stripe + base card
+     elevation. State cards anchor status posture but should retain elevation
+     parity with operational cards. */
+  box-shadow:
+    inset 3px 0 0 0 color-mix(in srgb, var(--pcc-status-neutral) 60%, var(--pcc-color-border)),
+    var(--pcc-elevation-card);
 }
 
 .card[data-pcc-card-region='command'] {
@@ -163,6 +169,12 @@
   border-color: color-mix(in srgb, var(--pcc-color-border) 60%, var(--pcc-color-canvas));
   background: color-mix(in srgb, var(--pcc-color-canvas) 36%, var(--pcc-color-card));
   opacity: 0.94;
+  /* Inset-only by design: deferred posture intentionally drops base card
+     elevation to reinforce reduced-emphasis "waiting" state alongside the
+     existing opacity / canvas-dominant background. Do not promote to a
+     dual-shadow stack without a separate operator-authorized refresh. */
+  box-shadow: inset 3px 0 0 0
+    color-mix(in srgb, var(--pcc-color-border) 70%, var(--pcc-color-canvas));
 }
 
 .card[data-pcc-card-region='detail'] .body {
@@ -180,4 +192,34 @@
 .card[data-pcc-card-region='rail'] .body {
   padding: var(--pcc-space-sm);
   gap: var(--pcc-space-xs);
+}
+
+/* Tone-conditional inset accent stripes. Dual-shadow stack retains base card
+   elevation alongside the tone marker — tone is a content-driven status
+   framing, not a reduced-emphasis posture, so elevation parity is preserved.
+   tone='neutral' (default) has no rule and continues to use the base
+   `.card { box-shadow: var(--pcc-elevation-card) }`. */
+
+.card[data-pcc-card-tone='info'] {
+  box-shadow:
+    inset 3px 0 0 0 var(--pcc-status-info),
+    var(--pcc-elevation-card);
+}
+
+.card[data-pcc-card-tone='success'] {
+  box-shadow:
+    inset 3px 0 0 0 var(--pcc-status-success),
+    var(--pcc-elevation-card);
+}
+
+.card[data-pcc-card-tone='warning'] {
+  box-shadow:
+    inset 3px 0 0 0 var(--pcc-status-warning),
+    var(--pcc-elevation-card);
+}
+
+.card[data-pcc-card-tone='danger'] {
+  box-shadow:
+    inset 3px 0 0 0 var(--pcc-status-danger),
+    var(--pcc-elevation-card);
 }

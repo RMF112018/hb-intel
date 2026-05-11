@@ -240,3 +240,72 @@ describe('PccDashboardCard contract source markers', () => {
     expect(container.querySelector('h2')).toBeNull();
   });
 });
+
+describe('PccDashboardCard tone and source-system markers (Phase 08 Prompt 07)', () => {
+  it('defaults to tone="neutral" and source-system="none" when neither prop is provided', () => {
+    const { container } = renderCard();
+    const card = getCard(container);
+    expect(card.getAttribute('data-pcc-card-tone')).toBe('neutral');
+    expect(card.getAttribute('data-pcc-card-source-system')).toBe('none');
+  });
+
+  it.each(['info', 'success', 'warning', 'danger'] as const)(
+    'emits data-pcc-card-tone="%s" when tone is explicitly set',
+    (tone) => {
+      const { container } = renderCard({ tone });
+      const card = getCard(container);
+      expect(card.getAttribute('data-pcc-card-tone')).toBe(tone);
+    },
+  );
+
+  it.each(['pcc', 'sage', 'sharepoint', 'procore', 'future'] as const)(
+    'emits data-pcc-card-source-system="%s" when sourceSystem is explicitly set',
+    (sourceSystem) => {
+      const { container } = renderCard({ sourceSystem });
+      const card = getCard(container);
+      expect(card.getAttribute('data-pcc-card-source-system')).toBe(sourceSystem);
+    },
+  );
+
+  it('remains non-interactive when tone and sourceSystem are both explicitly set', () => {
+    const { container } = renderCard({
+      tone: 'danger',
+      sourceSystem: 'sage',
+      title: 'Status card',
+    });
+    const card = getCard(container);
+    expect(card.tagName).toBe('ARTICLE');
+    expect(card.getAttribute('role')).toBeNull();
+    expect(card.getAttribute('tabindex')).toBeNull();
+    expect(card.getAttribute('onclick')).toBeNull();
+    expect(card.querySelectorAll('[role="button"]')).toHaveLength(0);
+    expect(card.querySelectorAll('[tabindex="0"]')).toHaveLength(0);
+  });
+
+  it('preserves all existing data-* markers alongside the new tone and source-system markers', () => {
+    const { container } = renderCard({
+      tone: 'info',
+      sourceSystem: 'pcc',
+      title: 'Composite marker check',
+    });
+    const card = getCard(container);
+    // Pre-existing markers stay
+    expect(card.getAttribute('data-pcc-card')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-footprint')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-card-hierarchy')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-card-tier')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-card-tier-source')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-card-region')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-card-region-source')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-card-density')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-heading-level')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-mode')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-column-span')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-span-source')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-row-span')).not.toBeNull();
+    expect(card.getAttribute('data-pcc-measured-height')).not.toBeNull();
+    // New Prompt 07 markers
+    expect(card.getAttribute('data-pcc-card-tone')).toBe('info');
+    expect(card.getAttribute('data-pcc-card-source-system')).toBe('pcc');
+  });
+});
