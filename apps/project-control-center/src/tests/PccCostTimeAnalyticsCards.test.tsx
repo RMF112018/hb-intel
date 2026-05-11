@@ -213,14 +213,14 @@ describe('Cost & Time analytics — Prompt 07 Estimating cross-conditional regre
 });
 
 describe('Cost & Time analytics — Prompt 08 Startup & Closeout cross-conditional regression lock', () => {
-  it("'startup-closeout' still renders exactly 6 direct cards with all three Startup & Closeout titles and zero Cost & Time analytics titles", () => {
+  it("'startup-closeout' still renders exactly 5 direct cards with all three Startup & Closeout titles and zero Cost & Time analytics titles", () => {
     const { container } = renderOtherTab('startup-closeout');
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const directCards = Array.from(grid.children).filter(
       (child): child is HTMLElement =>
         child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
     );
-    expect(directCards).toHaveLength(6);
+    expect(directCards).toHaveLength(5);
     expect(grid.textContent).toContain('Startup Readiness Completion');
     expect(grid.textContent).toContain('Responsibility Coverage');
     expect(grid.textContent).toContain('Closeout & Warranty Readiness');
@@ -231,14 +231,14 @@ describe('Cost & Time analytics — Prompt 08 Startup & Closeout cross-condition
 });
 
 describe('Cost & Time analytics — Prompt 09 Project Controls cross-conditional regression lock', () => {
-  it("'project-controls' still renders exactly 6 direct cards with all three Project Controls titles and zero Cost & Time analytics titles", () => {
+  it("'project-controls' still renders exactly 5 direct cards with all three Project Controls titles and zero Cost & Time analytics titles", () => {
     const { container } = renderOtherTab('project-controls');
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const directCards = Array.from(grid.children).filter(
       (child): child is HTMLElement =>
         child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
     );
-    expect(directCards).toHaveLength(6);
+    expect(directCards).toHaveLength(5);
     expect(grid.textContent).toContain('Constraints Aging');
     expect(grid.textContent).toContain('Permit / Inspection Readiness');
     expect(grid.textContent).toContain('Risk / Issue Severity Distribution');

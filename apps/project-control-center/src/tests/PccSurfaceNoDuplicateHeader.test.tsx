@@ -1,7 +1,8 @@
 /**
- * PCC no-duplicate-header regression — Phase 05 wave-b10 Prompt 04.
+ * PCC no-duplicate-header regression — Phase 05 wave-b10 Prompt 04,
+ * tightened by Phase 07 Prompt 02.
  *
- * Locks the Phase 05 end state: every routed primary-tab dashboard
+ * Locks the post-Phase-07 end state: every routed primary-tab dashboard
  * starts its bento with operational content (not a page-title /
  * description-only restatement of the shell hero), and no card carries
  * a card-level `data-pcc-active-surface-panel` marker (the shell
@@ -9,10 +10,12 @@
  *
  * The "first operational heading" map identifies the canonical first
  * direct-child card heading per primary tab in the PccApp default
- * render path. For the six new dashboards (Core Tools, Estimating &
- * Preconstruction, etc.) the first heading is the dashboard's
- * Overview card title (the registry `dashboardTitle`). Project Home
- * and Document Control reuse the existing surfaces' first cards.
+ * render path. Phase 07 Prompt 02 removed the Phase 05-regressed generic
+ * Dashboard hero card from the six shared primary-dashboard surfaces, so
+ * `core-tools`, `estimating-preconstruction`, `startup-closeout`,
+ * `project-controls`, `cost-time`, and `systems-administration` now
+ * lead with `Module status`. Project Home and Document Control retain
+ * their specialized first cards.
  */
 
 import { afterEach, describe, expect, it } from 'vitest';
@@ -24,13 +27,13 @@ import { getPrimaryTabSelectionControl } from './shellSurfaceSelection';
 
 const FIRST_OPERATIONAL_HEADING: Readonly<Record<PccPrimaryTabId, string>> = {
   'project-home': 'Priority Actions',
-  'core-tools': 'Core Tools',
+  'core-tools': 'Module status',
   documents: 'Document sources unavailable',
-  'estimating-preconstruction': 'Estimating & Preconstruction',
-  'startup-closeout': 'Project Startup & Closeout',
-  'project-controls': 'Project Controls',
-  'cost-time': 'Cost & Time',
-  'systems-administration': 'Systems Administration',
+  'estimating-preconstruction': 'Module status',
+  'startup-closeout': 'Module status',
+  'project-controls': 'Module status',
+  'cost-time': 'Module status',
+  'systems-administration': 'Module status',
 };
 
 const REMOVED_HEADER_HEADINGS: readonly string[] = [HB_DOCUMENT_CONTROL_CENTER_TITLE];
