@@ -1,17 +1,19 @@
 /**
- * Phase 06 Prompt 09 — Project Controls analytics card contract.
+ * Phase 06 Prompt 11 — Systems Administration analytics card contract.
  *
- * Locks the three preview analytics cards inserted into the Project
- * Controls primary dashboard: project-controls-only rendering, exact
- * 6-card direct-child order, Prompt 07 Estimating + Prompt 08 Startup
- * & Closeout cross-conditional regression locks, per-card markers,
- * verbatim preview-copy strings, source-label override, fallback
- * summary outside the chart canvas, span overrides at four 12-/10-column
- * modes plus tabletLandscape footprint-fallback, all seven registry-
- * driven module rows visible (5 deferred / 2 preview-selectable), no
- * Project Intelligence regression, zero card-level active-panel marker,
- * and the static `echarts-for-react`-not-imported guard scoped to PCC
- * analytics + the Phase 05 dashboard surface.
+ * Locks the three preview analytics cards inserted into the Systems
+ * Administration primary dashboard: systems-administration-only
+ * rendering, exact 6-card direct-child order, Prompts 07 / 08 / 09 / 10
+ * cross-conditional regression locks, per-card markers, verbatim preview-
+ * copy strings, source-label override, fallback summary outside the chart
+ * canvas, span overrides at four 12-/10-column modes plus tabletLandscape
+ * footprint-fallback, all five registry-driven module rows visible (1
+ * deferred / 4 preview-selectable), Procore mapping/sync-health no-
+ * writeback authority cue still visible when active, Cost & Time Sage
+ * book-of-record marker scoped only to cost-time, no Project Intelligence
+ * regression, zero card-level active-panel marker, and the static
+ * `echarts-for-react`-not-imported guard scoped to PCC analytics + the
+ * Phase 05 dashboard surface.
  *
  * Mocks `echarts/core` so jsdom doesn't spin up real ECharts during the
  * dashboard renders.
@@ -55,10 +57,10 @@ import {
   PCC_ANALYTICS_PREVIEW_LABEL,
 } from '../analytics/pccAnalyticsA11y';
 import {
-  PROJECT_CONTROLS_ANALYTICS_VIEW_MODELS,
-  type PccProjectControlsAnalyticsCardKey,
-} from '../surfaces/phase05Dashboard/projectControlsAnalytics';
-import type { PccPrimaryTabId } from '@hbc/models/pcc';
+  SYSTEMS_ADMINISTRATION_ANALYTICS_VIEW_MODELS,
+  type PccSystemsAdministrationAnalyticsCardKey,
+} from '../surfaces/phase05Dashboard/systemsAdministrationAnalytics';
+import type { PccModuleId, PccPrimaryTabId } from '@hbc/models/pcc';
 import type { PccResponsiveMode } from '../layout/footprints';
 
 afterEach(() => {
@@ -67,50 +69,70 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const ANALYTICS_KEYS: readonly PccProjectControlsAnalyticsCardKey[] = [
-  'constraintsAging',
-  'permitInspectionReadiness',
-  'riskIssueSeverityDistribution',
+const ANALYTICS_KEYS: readonly PccSystemsAdministrationAnalyticsCardKey[] = [
+  'integrationHealthSummary',
+  'configurationSeverity',
+  'procoreMappingSyncPosture',
 ];
 
-const ANALYTICS_TITLE_BY_KEY: Readonly<Record<PccProjectControlsAnalyticsCardKey, string>> = {
-  constraintsAging: 'Constraints Aging',
-  permitInspectionReadiness: 'Permit / Inspection Readiness',
-  riskIssueSeverityDistribution: 'Risk / Issue Severity Distribution',
+const ANALYTICS_TITLE_BY_KEY: Readonly<Record<PccSystemsAdministrationAnalyticsCardKey, string>> = {
+  integrationHealthSummary: 'Integration Health Summary',
+  configurationSeverity: 'Configuration Severity',
+  procoreMappingSyncPosture: 'Procore Mapping / Sync Posture',
 };
 
-const ANALYTICS_ID_BY_KEY: Readonly<Record<PccProjectControlsAnalyticsCardKey, string>> = {
-  constraintsAging: 'pcc-project-controls-constraints-aging',
-  permitInspectionReadiness: 'pcc-project-controls-permit-inspection-readiness',
-  riskIssueSeverityDistribution: 'pcc-project-controls-risk-issue-severity-distribution',
+const ANALYTICS_ID_BY_KEY: Readonly<Record<PccSystemsAdministrationAnalyticsCardKey, string>> = {
+  integrationHealthSummary: 'pcc-systems-administration-integration-health-summary',
+  configurationSeverity: 'pcc-systems-administration-configuration-severity',
+  procoreMappingSyncPosture: 'pcc-systems-administration-procore-mapping-sync-posture',
 };
 
-const SAMPLE_SOURCE_LABEL = 'Source: deterministic project controls sample';
+const SAMPLE_SOURCE_LABEL = 'Source: deterministic systems administration sample';
 
-const PROJECT_CONTROLS_MODULE_LABELS_VISIBLE = [
-  'Project Controls',
-  'Permits & Inspections',
-  'Contract & Compliance',
-  'Risk / Issues / Decisions',
-  'Constraints Log',
-  'Field Operations',
-  'Meeting & Communication',
+const SYSTEMS_ADMINISTRATION_MODULE_LABELS_VISIBLE = [
+  'Site Health',
+  'Control Center Settings',
+  'Integration Settings',
+  'Procore Mapping / Sync Health',
+  'Module Configuration',
 ] as const;
 
-const DEFERRED_MODULE_IDS = [
-  'project-controls-center',
-  'contract-compliance',
-  'risk-issues-decisions',
-  'field-operations',
-  'meeting-communication',
+const DEFERRED_MODULE_IDS = ['integration-settings'] as const;
+
+const PREVIEW_SELECTABLE_MODULE_IDS = [
+  'site-health',
+  'control-center-settings',
+  'procore-mapping-sync-health',
+  'module-configuration',
 ] as const;
 
-const PREVIEW_SELECTABLE_MODULE_IDS = ['permits-inspections', 'constraints-log'] as const;
+const PROCORE_AUTHORITY_CUE =
+  'Mapping and sync-health context only. No writeback to Procore is performed here.';
 
-function renderProjectControls(mode: PccResponsiveMode = 'desktop') {
+const PRIMARY_DASHBOARD_TABS_WITHOUT_BOOK_OF_RECORD: readonly PccPrimaryTabId[] = [
+  'core-tools',
+  'estimating-preconstruction',
+  'startup-closeout',
+  'project-controls',
+  'systems-administration',
+];
+
+function renderSystemsAdministration(mode: PccResponsiveMode = 'desktop') {
   return render(
     <PccBentoGrid forceMode={mode}>
-      <PccPrimaryDashboardSurface activePrimaryTabId="project-controls" />
+      <PccPrimaryDashboardSurface activePrimaryTabId="systems-administration" />
+    </PccBentoGrid>,
+  );
+}
+
+function renderWithActiveModule(
+  tabId: PccPrimaryTabId,
+  activeModuleId: PccModuleId,
+  mode: PccResponsiveMode = 'desktop',
+) {
+  return render(
+    <PccBentoGrid forceMode={mode}>
+      <PccPrimaryDashboardSurface activePrimaryTabId={tabId} activeModuleId={activeModuleId} />
     </PccBentoGrid>,
   );
 }
@@ -144,9 +166,9 @@ function getCardArticle(container: HTMLElement, id: string): HTMLElement {
   return article;
 }
 
-describe('Project Controls analytics — title rendering', () => {
+describe('Systems Administration analytics — title rendering', () => {
   it('renders all three analytics card titles in the bento grid', () => {
-    const { container } = renderProjectControls();
+    const { container } = renderSystemsAdministration();
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
     for (const key of ANALYTICS_KEYS) {
@@ -155,29 +177,28 @@ describe('Project Controls analytics — title rendering', () => {
   });
 });
 
-describe('Project Controls analytics — exact 6-card direct order', () => {
-  it('renders Project Controls → Module status → 3 analytics → Select a module when no module is active', () => {
-    const { container } = renderProjectControls();
+describe('Systems Administration analytics — exact 6-card direct order', () => {
+  it('renders Systems Administration → Module status → 3 analytics → Select a module when no module is active', () => {
+    const { container } = renderSystemsAdministration();
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const titles = readDirectCardTitlesInOrder(grid);
     expect(titles).toEqual([
-      'Project Controls',
+      'Systems Administration',
       'Module status',
-      'Constraints Aging',
-      'Permit / Inspection Readiness',
-      'Risk / Issue Severity Distribution',
+      'Integration Health Summary',
+      'Configuration Severity',
+      'Procore Mapping / Sync Posture',
       'Select a module',
     ]);
   });
 });
 
-describe('Project Controls analytics — unrelated dashboards remain unchanged', () => {
-  // Phase 06 Prompt 11 — systems-administration now renders 6 cards (3 of
-  // its own analytics). core-tools is the only remaining primary dashboard
-  // that uses PccPrimaryDashboardSurface and still renders the unchanged
-  // 3-card baseline.
+describe('Systems Administration analytics — unrelated dashboards remain unchanged', () => {
+  // Phase 06 Prompt 11 — core-tools is the only remaining primary
+  // dashboard that uses PccPrimaryDashboardSurface and still renders the
+  // unchanged 3-card baseline.
   for (const tabId of ['core-tools'] as const) {
-    it(`'${tabId}' renders zero project-controls analytics cards and exactly 3 direct dashboard cards`, () => {
+    it(`'${tabId}' renders zero systems-administration analytics cards and exactly 3 direct dashboard cards`, () => {
       const { container } = renderOtherTab(tabId);
       const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
       const directCards = Array.from(grid.children).filter(
@@ -192,8 +213,8 @@ describe('Project Controls analytics — unrelated dashboards remain unchanged',
   }
 });
 
-describe('Project Controls analytics — Prompt 07 Estimating cross-conditional regression lock', () => {
-  it("'estimating-preconstruction' still renders exactly 5 direct cards with both Estimating titles and zero Project Controls analytics titles", () => {
+describe('Systems Administration analytics — Prompt 07 Estimating cross-conditional regression lock', () => {
+  it("'estimating-preconstruction' still renders exactly 5 direct cards with both Estimating titles and zero Systems Administration analytics titles", () => {
     const { container } = renderOtherTab('estimating-preconstruction');
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const directCards = Array.from(grid.children).filter(
@@ -209,8 +230,8 @@ describe('Project Controls analytics — Prompt 07 Estimating cross-conditional 
   });
 });
 
-describe('Project Controls analytics — Prompt 08 Startup & Closeout cross-conditional regression lock', () => {
-  it("'startup-closeout' still renders exactly 6 direct cards with all three Startup & Closeout titles and zero Project Controls analytics titles", () => {
+describe('Systems Administration analytics — Prompt 08 Startup & Closeout cross-conditional regression lock', () => {
+  it("'startup-closeout' still renders exactly 6 direct cards with all three Startup & Closeout titles and zero Systems Administration analytics titles", () => {
     const { container } = renderOtherTab('startup-closeout');
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const directCards = Array.from(grid.children).filter(
@@ -227,9 +248,45 @@ describe('Project Controls analytics — Prompt 08 Startup & Closeout cross-cond
   });
 });
 
-describe('Project Controls analytics — per-card markers', () => {
-  it('emits the canonical analytics card markers for each Project Controls analytics card', () => {
-    const { container } = renderProjectControls();
+describe('Systems Administration analytics — Prompt 09 Project Controls cross-conditional regression lock', () => {
+  it("'project-controls' still renders exactly 6 direct cards with all three Project Controls titles and zero Systems Administration analytics titles", () => {
+    const { container } = renderOtherTab('project-controls');
+    const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
+    const directCards = Array.from(grid.children).filter(
+      (child): child is HTMLElement =>
+        child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
+    );
+    expect(directCards).toHaveLength(6);
+    expect(grid.textContent).toContain('Constraints Aging');
+    expect(grid.textContent).toContain('Permit / Inspection Readiness');
+    expect(grid.textContent).toContain('Risk / Issue Severity Distribution');
+    for (const key of ANALYTICS_KEYS) {
+      expect(grid.textContent).not.toContain(ANALYTICS_TITLE_BY_KEY[key]);
+    }
+  });
+});
+
+describe('Systems Administration analytics — Prompt 10 Cost & Time cross-conditional regression lock', () => {
+  it("'cost-time' still renders exactly 6 direct cards with all three Cost & Time titles and zero Systems Administration analytics titles", () => {
+    const { container } = renderOtherTab('cost-time');
+    const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
+    const directCards = Array.from(grid.children).filter(
+      (child): child is HTMLElement =>
+        child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
+    );
+    expect(directCards).toHaveLength(6);
+    expect(grid.textContent).toContain('Schedule Milestone Posture');
+    expect(grid.textContent).toContain('Procurement / Buyout Exposure');
+    expect(grid.textContent).toContain('Commitment / Cost Exposure Preview');
+    for (const key of ANALYTICS_KEYS) {
+      expect(grid.textContent).not.toContain(ANALYTICS_TITLE_BY_KEY[key]);
+    }
+  });
+});
+
+describe('Systems Administration analytics — per-card markers', () => {
+  it('emits the canonical analytics card markers for each Systems Administration analytics card', () => {
+    const { container } = renderSystemsAdministration();
     for (const key of ANALYTICS_KEYS) {
       const id = ANALYTICS_ID_BY_KEY[key];
       const body = container.querySelector(`[data-pcc-analytics-card="${id}"]`);
@@ -243,9 +300,9 @@ describe('Project Controls analytics — per-card markers', () => {
   });
 });
 
-describe('Project Controls analytics — verbatim preview copy and source label', () => {
+describe('Systems Administration analytics — verbatim preview copy and source label', () => {
   it('renders the verbatim preview-copy strings inside each analytics card explanation', () => {
-    const { container } = renderProjectControls();
+    const { container } = renderSystemsAdministration();
     for (const key of ANALYTICS_KEYS) {
       const id = ANALYTICS_ID_BY_KEY[key];
       const body = container.querySelector(`[data-pcc-analytics-card="${id}"]`);
@@ -256,8 +313,8 @@ describe('Project Controls analytics — verbatim preview copy and source label'
     }
   });
 
-  it('overrides the source label to "Source: deterministic project controls sample" on each analytics card', () => {
-    const { container } = renderProjectControls();
+  it('overrides the source label to "Source: deterministic systems administration sample" on each analytics card', () => {
+    const { container } = renderSystemsAdministration();
     for (const key of ANALYTICS_KEYS) {
       const id = ANALYTICS_ID_BY_KEY[key];
       const body = container.querySelector(`[data-pcc-analytics-card="${id}"]`);
@@ -267,15 +324,15 @@ describe('Project Controls analytics — verbatim preview copy and source label'
   });
 });
 
-describe('Project Controls analytics — fallback summary outside chart and direct-child invariant', () => {
+describe('Systems Administration analytics — fallback summary outside chart and direct-child invariant', () => {
   it('renders the summary list with no row nested inside the chart canvas', () => {
-    const { container } = renderProjectControls();
+    const { container } = renderSystemsAdministration();
     for (const key of ANALYTICS_KEYS) {
       const id = ANALYTICS_ID_BY_KEY[key];
       const body = container.querySelector(`[data-pcc-analytics-card="${id}"]`);
       const summaryRows = body!.querySelectorAll('[data-pcc-analytics-card-summary-row]');
       expect(summaryRows.length, `${id} should have summary rows`).toBe(
-        PROJECT_CONTROLS_ANALYTICS_VIEW_MODELS[key].summary.length,
+        SYSTEMS_ADMINISTRATION_ANALYTICS_VIEW_MODELS[key].summary.length,
       );
       for (const row of Array.from(summaryRows)) {
         expect(row.closest('[data-pcc-analytics-chart]')).toBeNull();
@@ -284,7 +341,7 @@ describe('Project Controls analytics — fallback summary outside chart and dire
   });
 
   it('every analytics card article is a direct child of [data-pcc-bento-grid]', () => {
-    const { container } = renderProjectControls();
+    const { container } = renderSystemsAdministration();
     const grid = container.querySelector('[data-pcc-bento-grid]');
     for (const key of ANALYTICS_KEYS) {
       const article = getCardArticle(container, ANALYTICS_ID_BY_KEY[key]);
@@ -293,23 +350,23 @@ describe('Project Controls analytics — fallback summary outside chart and dire
   });
 });
 
-describe('Project Controls analytics — span overrides', () => {
-  const TWELVE_COL_SPAN: Readonly<Record<PccProjectControlsAnalyticsCardKey, number>> = {
-    constraintsAging: 4,
-    permitInspectionReadiness: 4,
-    riskIssueSeverityDistribution: 4,
+describe('Systems Administration analytics — span overrides', () => {
+  const TWELVE_COL_SPAN: Readonly<Record<PccSystemsAdministrationAnalyticsCardKey, number>> = {
+    integrationHealthSummary: 4,
+    configurationSeverity: 4,
+    procoreMappingSyncPosture: 4,
   };
-  const STANDARD_LAPTOP_SPAN: Readonly<Record<PccProjectControlsAnalyticsCardKey, number>> = {
-    constraintsAging: 3,
-    permitInspectionReadiness: 4,
-    riskIssueSeverityDistribution: 3,
+  const STANDARD_LAPTOP_SPAN: Readonly<Record<PccSystemsAdministrationAnalyticsCardKey, number>> = {
+    integrationHealthSummary: 3,
+    configurationSeverity: 4,
+    procoreMappingSyncPosture: 3,
   };
 
   function assertOverrides(
-    expectedByKey: Readonly<Record<PccProjectControlsAnalyticsCardKey, number>>,
+    expectedByKey: Readonly<Record<PccSystemsAdministrationAnalyticsCardKey, number>>,
     mode: PccResponsiveMode,
   ): void {
-    const { container } = renderProjectControls(mode);
+    const { container } = renderSystemsAdministration(mode);
     for (const key of ANALYTICS_KEYS) {
       const article = getCardArticle(container, ANALYTICS_ID_BY_KEY[key]);
       expect(article.getAttribute('data-pcc-column-span'), `${key} column span at ${mode}`).toBe(
@@ -336,8 +393,8 @@ describe('Project Controls analytics — span overrides', () => {
     assertOverrides(STANDARD_LAPTOP_SPAN, 'standardLaptop');
   });
 
-  it('falls back to footprint behavior at tabletLandscape (no project-controls analytics override declared)', () => {
-    const { container } = renderProjectControls('tabletLandscape');
+  it('falls back to footprint behavior at tabletLandscape (no systems-administration analytics override declared)', () => {
+    const { container } = renderSystemsAdministration('tabletLandscape');
     for (const key of ANALYTICS_KEYS) {
       const article = getCardArticle(container, ANALYTICS_ID_BY_KEY[key]);
       expect(article.getAttribute('data-pcc-span-source')).toBe('footprint');
@@ -346,16 +403,16 @@ describe('Project Controls analytics — span overrides', () => {
   });
 });
 
-describe('Project Controls analytics — registry rows preserved and posture invariants', () => {
-  it('keeps all seven Project Controls module rows visible (registry unchanged)', () => {
-    const { container } = renderProjectControls();
-    for (const label of PROJECT_CONTROLS_MODULE_LABELS_VISIBLE) {
+describe('Systems Administration analytics — registry rows preserved and posture invariants', () => {
+  it('keeps all five Systems Administration module rows visible (registry unchanged)', () => {
+    const { container } = renderSystemsAdministration();
+    for (const label of SYSTEMS_ADMINISTRATION_MODULE_LABELS_VISIBLE) {
       expect(container.textContent).toContain(label);
     }
   });
 
-  it('preserves deferred / non-selectable posture for project-controls-center, contract-compliance, risk-issues-decisions, field-operations, meeting-communication', () => {
-    const { container } = renderProjectControls();
+  it('preserves deferred / non-selectable posture for integration-settings', () => {
+    const { container } = renderSystemsAdministration();
     for (const moduleId of DEFERRED_MODULE_IDS) {
       const row = container.querySelector(`[data-pcc-dashboard-module-row="${moduleId}"]`);
       expect(row, `module row for ${moduleId} should render`).not.toBeNull();
@@ -364,8 +421,8 @@ describe('Project Controls analytics — registry rows preserved and posture inv
     }
   });
 
-  it('preserves preview / selectable posture for permits-inspections and constraints-log', () => {
-    const { container } = renderProjectControls();
+  it('preserves preview / selectable posture for site-health, control-center-settings, procore-mapping-sync-health, module-configuration', () => {
+    const { container } = renderSystemsAdministration();
     for (const moduleId of PREVIEW_SELECTABLE_MODULE_IDS) {
       const row = container.querySelector(`[data-pcc-dashboard-module-row="${moduleId}"]`);
       expect(row, `module row for ${moduleId} should render`).not.toBeNull();
@@ -374,17 +431,50 @@ describe('Project Controls analytics — registry rows preserved and posture inv
     }
   });
 
-  it('does not contain "Project Intelligence" anywhere in the Project Controls dashboard', () => {
-    const { container } = renderProjectControls();
+  it('does not contain "Project Intelligence" anywhere in the Systems Administration dashboard', () => {
+    const { container } = renderSystemsAdministration();
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     expect(grid.textContent ?? '').not.toContain('Project Intelligence');
   });
 
   it('renders zero card-level [data-pcc-active-surface-panel] markers (shell owns the active panel)', () => {
-    const { container } = renderProjectControls();
+    const { container } = renderSystemsAdministration();
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     expect(grid.querySelectorAll('[data-pcc-card][data-pcc-active-surface-panel]')).toHaveLength(0);
   });
+});
+
+describe('Systems Administration analytics — Procore Mapping / Sync Health no-writeback authority cue', () => {
+  it('renders the registry-driven Procore no-writeback authority cue in the selected-module body when activeModuleId is procore-mapping-sync-health', () => {
+    const { container } = renderWithActiveModule(
+      'systems-administration',
+      'procore-mapping-sync-health',
+    );
+    const selectedModuleBody = container.querySelector('[data-pcc-selected-module-card]');
+    expect(selectedModuleBody, 'selected-module body should render').not.toBeNull();
+    expect(selectedModuleBody!.getAttribute('data-pcc-selected-module-id')).toBe(
+      'procore-mapping-sync-health',
+    );
+    expect(selectedModuleBody!.textContent).toContain(PROCORE_AUTHORITY_CUE);
+  });
+});
+
+describe('Systems Administration analytics — Cost & Time Sage book-of-record remains scoped', () => {
+  it("'cost-time' still renders the Sage book-of-record marker", () => {
+    const { container } = renderOtherTab('cost-time');
+    const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
+    const bookOfRecord = grid.querySelector('[data-pcc-dashboard-book-of-record="cost-time"]');
+    expect(bookOfRecord, 'cost-time book-of-record line should render').not.toBeNull();
+    expect(bookOfRecord!.textContent ?? '').toContain('Sage remains the accounting book of record');
+  });
+
+  for (const tabId of PRIMARY_DASHBOARD_TABS_WITHOUT_BOOK_OF_RECORD) {
+    it(`'${tabId}' renders zero [data-pcc-dashboard-book-of-record] markers`, () => {
+      const { container } = renderOtherTab(tabId);
+      const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
+      expect(grid.querySelectorAll('[data-pcc-dashboard-book-of-record]')).toHaveLength(0);
+    });
+  }
 });
 
 describe('Phase 05 dashboard + PCC analytics — does not import echarts-for-react', () => {

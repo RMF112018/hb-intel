@@ -169,10 +169,11 @@ describe('Project Startup & Closeout analytics — exact 6-card direct order', (
 });
 
 describe('Project Startup & Closeout analytics — unrelated dashboards remain unchanged', () => {
-  // Phase 06 Prompt 10 — cost-time now renders 6 cards (3 of its own
-  // analytics). The remaining unrelated 3-card primary dashboards are
-  // core-tools and systems-administration. Iterate those.
-  for (const tabId of ['core-tools', 'systems-administration'] as const) {
+  // Phase 06 Prompt 11 — systems-administration now renders 6 cards (3 of
+  // its own analytics). core-tools is the only remaining primary dashboard
+  // that uses PccPrimaryDashboardSurface and still renders the unchanged
+  // 3-card baseline.
+  for (const tabId of ['core-tools'] as const) {
     it(`'${tabId}' renders zero startup analytics cards and exactly 3 direct dashboard cards`, () => {
       const { container } = renderOtherTab(tabId);
       const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;

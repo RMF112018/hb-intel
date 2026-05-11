@@ -175,7 +175,11 @@ describe('Cost & Time analytics — exact 6-card direct order', () => {
 });
 
 describe('Cost & Time analytics — unrelated dashboards remain unchanged', () => {
-  for (const tabId of ['core-tools', 'systems-administration'] as const) {
+  // Phase 06 Prompt 11 — systems-administration now renders 6 cards (3 of
+  // its own analytics). core-tools is the only remaining primary dashboard
+  // that uses PccPrimaryDashboardSurface and still renders the unchanged
+  // 3-card baseline.
+  for (const tabId of ['core-tools'] as const) {
     it(`'${tabId}' renders zero cost-time analytics cards and exactly 3 direct dashboard cards`, () => {
       const { container } = renderOtherTab(tabId);
       const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;

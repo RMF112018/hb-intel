@@ -23,6 +23,10 @@ import {
   PROJECT_CONTROLS_ANALYTICS_VIEW_MODELS,
 } from './projectControlsAnalytics';
 import {
+  SYSTEMS_ADMINISTRATION_ANALYTICS_SPAN_OVERRIDES,
+  SYSTEMS_ADMINISTRATION_ANALYTICS_VIEW_MODELS,
+} from './systemsAdministrationAnalytics';
+import {
   STARTUP_CLOSEOUT_ANALYTICS_SPAN_OVERRIDES,
   STARTUP_CLOSEOUT_ANALYTICS_VIEW_MODELS,
 } from './startupCloseoutAnalytics';
@@ -59,12 +63,13 @@ function resolveContextModule(
 }
 
 /**
- * Phase 06 Prompts 07 + 08 + 09 + 10 — preview analytics insertion for the
- * shared primary dashboard surface. Routes:
+ * Phase 06 Prompts 07 + 08 + 09 + 10 + 11 — preview analytics insertion
+ * for the shared primary dashboard surface. Routes:
  *   - `estimating-preconstruction` → 2 Estimating cards (Prompt 07);
  *   - `startup-closeout` → 3 Startup & Closeout cards (Prompt 08);
  *   - `project-controls` → 3 Project Controls cards (Prompt 09);
  *   - `cost-time` → 3 Cost & Time cards (Prompt 10);
+ *   - `systems-administration` → 3 Systems Administration cards (Prompt 11);
  *   - all other primary tabs → null.
  *
  * Renders between `Module status` and the selected-module card so analytics
@@ -176,6 +181,34 @@ function renderPrimaryDashboardAnalytics(activePrimaryTabId: PccPrimaryTabId): R
           tier="tier2"
           region="operational"
           spanOverrides={COST_TIME_ANALYTICS_SPAN_OVERRIDES.commitmentCostExposurePreview}
+        />
+      </>
+    );
+  }
+
+  if (activePrimaryTabId === 'systems-administration') {
+    return (
+      <>
+        <PccAnalyticsCard
+          viewModel={SYSTEMS_ADMINISTRATION_ANALYTICS_VIEW_MODELS.integrationHealthSummary}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={SYSTEMS_ADMINISTRATION_ANALYTICS_SPAN_OVERRIDES.integrationHealthSummary}
+        />
+        <PccAnalyticsCard
+          viewModel={SYSTEMS_ADMINISTRATION_ANALYTICS_VIEW_MODELS.configurationSeverity}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={SYSTEMS_ADMINISTRATION_ANALYTICS_SPAN_OVERRIDES.configurationSeverity}
+        />
+        <PccAnalyticsCard
+          viewModel={SYSTEMS_ADMINISTRATION_ANALYTICS_VIEW_MODELS.procoreMappingSyncPosture}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={SYSTEMS_ADMINISTRATION_ANALYTICS_SPAN_OVERRIDES.procoreMappingSyncPosture}
         />
       </>
     );
