@@ -20,6 +20,7 @@ README.md
 package_manifest.json
 00_PCC_Phase_08_Product_Experience_Enhancement_Plan.md          (canonical Phase 08 plan)
 00_PCC_Phase_08_Product_Experience_Enhancement_Implementation_Plan.md  (historical predecessor, retained for context)
+01_Screenshot_Baseline_Findings.md                              (Prompt 02 output — surface-by-surface findings matrix)
 reference/01_Screenshot_Baseline_Findings_Template.md
 reference/02_Operator_Visual_Review_Checklist.md
 templates/Closeout_Template.md
