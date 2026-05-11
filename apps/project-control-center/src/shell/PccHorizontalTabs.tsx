@@ -346,6 +346,7 @@ export const PccHorizontalTabs: FC<PccHorizontalTabsProps> = ({
           aria-expanded={isMenuOpen ? 'true' : 'false'}
           aria-controls={menuIdForTab(tab.id)}
           data-pcc-nav-toggle={tab.id}
+          data-pcc-tab-launcher-button={tab.id}
           onClick={() => handleToggleClick(tab.id)}
           onKeyDown={(event) => handleToggleKey(event, tab.id)}
         >
@@ -356,6 +357,7 @@ export const PccHorizontalTabs: FC<PccHorizontalTabsProps> = ({
             id={menuIdForTab(tab.id)}
             role="menu"
             data-pcc-module-menu={tab.id}
+            data-pcc-module-menu-density={isCompact ? 'compact' : 'comfortable'}
             className={styles.moduleMenu}
           >
             {getModulesForPrimaryTab(tab.id).map((module) => renderModuleItem(module))}

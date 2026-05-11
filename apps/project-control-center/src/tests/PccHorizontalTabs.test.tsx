@@ -711,4 +711,58 @@ describe('PccHorizontalTabs — Phase 05 grouped primary tab + module dropdowns'
       'at least one selectable module must exist across the Phase 05 registry; a registry mutation to all-deferred would silently void this guard',
     ).toBeGreaterThan(0);
   });
+
+  // Phase 08 Prompt 06 — Tab and Module Launcher Enhancement.
+  // Additive evidence/test markers introduced alongside the bounded
+  // visual refinement (active-module accent rail + module-menu top
+  // accent stripe). Existing markers are preserved as legacy anchors.
+
+  it('every dropdown toggle exposes both the legacy nav-toggle marker and the product-named launcher-button marker', () => {
+    const { container } = renderTabs();
+    for (const id of PCC_PRIMARY_TAB_IDS) {
+      const legacyToggle = container.querySelector(`[data-pcc-nav-toggle="${id}"]`);
+      const launcherButton = container.querySelector(`[data-pcc-tab-launcher-button="${id}"]`);
+      expect(legacyToggle, `nav-toggle marker for ${id}`).not.toBeNull();
+      expect(launcherButton, `tab-launcher-button marker for ${id}`).not.toBeNull();
+      // Both markers must resolve to the same element so callers can
+      // adopt the new product-named selector without duplicating the
+      // toggle button.
+      expect(launcherButton).toBe(legacyToggle);
+    }
+  });
+
+  it('open module menu carries a density marker matching the active responsive mode', () => {
+    const onSelectPrimarySurface = vi.fn();
+    const onSelectModule = vi.fn();
+
+    const comfortable = render(
+      <PccHorizontalTabs
+        mode="standardLaptop"
+        activePrimaryTabId="project-home"
+        onSelectPrimarySurface={onSelectPrimarySurface}
+        onSelectModule={onSelectModule}
+        panelId="pcc-active-panel"
+      />,
+    );
+    fireEvent.click(getToggle(comfortable.container, 'documents'));
+    const comfortableMenu = getMenu(comfortable.container, 'documents');
+    expect(comfortableMenu).not.toBeNull();
+    expect(comfortableMenu!.getAttribute('data-pcc-module-menu-density')).toBe('comfortable');
+    comfortable.unmount();
+    cleanup();
+
+    const compact = render(
+      <PccHorizontalTabs
+        mode="phone"
+        activePrimaryTabId="project-home"
+        onSelectPrimarySurface={onSelectPrimarySurface}
+        onSelectModule={onSelectModule}
+        panelId="pcc-active-panel"
+      />,
+    );
+    fireEvent.click(getToggle(compact.container, 'documents'));
+    const compactMenu = getMenu(compact.container, 'documents');
+    expect(compactMenu).not.toBeNull();
+    expect(compactMenu!.getAttribute('data-pcc-module-menu-density')).toBe('compact');
+  });
 });

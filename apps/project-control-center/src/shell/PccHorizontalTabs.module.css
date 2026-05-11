@@ -178,6 +178,7 @@
   padding: var(--pcc-space-sm);
   background: var(--pcc-color-card);
   border: 1px solid var(--pcc-color-border);
+  border-top: 3px solid var(--pcc-color-rail-accent);
   border-radius: var(--pcc-radius-md);
   box-shadow: var(--pcc-elevation-card);
 }
@@ -189,6 +190,7 @@
   gap: 2px;
   padding: var(--pcc-space-sm) var(--pcc-space-md);
   border: 0;
+  border-inline-start: 3px solid transparent;
   border-radius: var(--pcc-radius-sm);
   background: transparent;
   color: var(--pcc-color-rail-text);
@@ -212,6 +214,7 @@
 .moduleItem[data-pcc-module-active='true'] {
   color: var(--pcc-color-rail-accent);
   background: var(--pcc-color-rail-hover);
+  border-inline-start-color: var(--pcc-color-rail-accent);
 }
 
 .moduleItem[data-pcc-module-selectable='false'] {
