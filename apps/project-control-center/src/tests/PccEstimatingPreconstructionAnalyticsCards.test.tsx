@@ -132,13 +132,12 @@ describe('Estimating & Preconstruction analytics — title rendering', () => {
   });
 });
 
-describe('Estimating & Preconstruction analytics — exact 5-card direct order', () => {
-  it('renders Estimating & Preconstruction → Module status → 2 analytics → Select a module when no module is active', () => {
+describe('Estimating & Preconstruction analytics — exact 4-card direct order', () => {
+  it('renders Module status → 2 analytics → Select a module when no module is active', () => {
     const { container } = renderEstimating();
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const titles = readDirectCardTitlesInOrder(grid);
     expect(titles).toEqual([
-      'Estimating & Preconstruction',
       'Module status',
       'Handoff Continuity Preview',
       'Estimate Exposure Preview',
@@ -148,19 +147,20 @@ describe('Estimating & Preconstruction analytics — exact 5-card direct order',
 });
 
 describe('Estimating & Preconstruction analytics — unrelated dashboards remain unchanged', () => {
-  // Phase 06 Prompt 11 — systems-administration now renders 6 cards (3 of
-  // its own analytics). core-tools is the only remaining primary dashboard
-  // that uses PccPrimaryDashboardSurface and still renders the unchanged
-  // 3-card baseline.
+  // Phase 07 Prompt 02 removed the generic Dashboard hero card from the
+  // six shared primary-dashboard surfaces. core-tools is the only
+  // remaining primary dashboard that uses PccPrimaryDashboardSurface
+  // without analytics and now renders the 2-card baseline
+  // (Module status + Selected module).
   for (const tabId of ['core-tools'] as const) {
-    it(`'${tabId}' renders zero estimating analytics cards and exactly 3 direct dashboard cards`, () => {
+    it(`'${tabId}' renders zero estimating analytics cards and exactly 2 direct dashboard cards`, () => {
       const { container } = renderOtherTab(tabId);
       const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
       const directCards = Array.from(grid.children).filter(
         (child): child is HTMLElement =>
           child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
       );
-      expect(directCards).toHaveLength(3);
+      expect(directCards).toHaveLength(2);
       expect(grid.querySelectorAll('[data-pcc-analytics-card]')).toHaveLength(0);
       expect(grid.textContent).not.toContain('Handoff Continuity Preview');
       expect(grid.textContent).not.toContain('Estimate Exposure Preview');

@@ -3,7 +3,6 @@ import {
   PCC_MODULE_STATE_COPY,
   getModule,
   getModulesForPrimaryTab,
-  getPrimaryNavigationTab,
   type PccModuleId,
   type PccNavigationModule,
   type PccPrimaryTabId,
@@ -36,9 +35,6 @@ export interface PccPrimaryDashboardSurfaceProps {
   activePrimaryTabId: PccPrimaryTabId;
   activeModuleId?: PccModuleId;
 }
-
-const NO_WRITEBACK_POSTURE =
-  'Read-only project dashboard. PCC does not write back to source systems from this view.';
 
 const SELECT_MODULE_HINT = 'Open the menu on this tab to review a project module in context.';
 
@@ -228,33 +224,12 @@ export const PccPrimaryDashboardSurface: FC<PccPrimaryDashboardSurfaceProps> = (
   activePrimaryTabId,
   activeModuleId,
 }) => {
-  const tab = getPrimaryNavigationTab(activePrimaryTabId);
   const modules = getModulesForPrimaryTab(activePrimaryTabId);
   const contextModule = resolveContextModule(activePrimaryTabId, activeModuleId);
   const postureNote = PRIMARY_TAB_POSTURE_NOTE[activePrimaryTabId];
 
   return (
     <Fragment>
-      <PccDashboardCard
-        footprint="hero"
-        hierarchy="primary"
-        tier="tier1"
-        region="command"
-        eyebrow="Dashboard"
-        title={tab.dashboardTitle}
-      >
-        <p className={styles.overviewBody}>{tab.dashboardDescription}</p>
-        <p className={styles.overviewPosture}>{NO_WRITEBACK_POSTURE}</p>
-        {postureNote ? (
-          <p
-            className={styles.overviewBookOfRecord}
-            data-pcc-dashboard-book-of-record={activePrimaryTabId}
-          >
-            {postureNote}
-          </p>
-        ) : null}
-      </PccDashboardCard>
-
       <PccDashboardCard
         footprint="wide"
         hierarchy="standard"
@@ -285,6 +260,14 @@ export const PccPrimaryDashboardSurface: FC<PccPrimaryDashboardSurfaceProps> = (
             </div>
           ))}
         </dl>
+        {postureNote ? (
+          <p
+            className={styles.overviewBookOfRecord}
+            data-pcc-dashboard-book-of-record={activePrimaryTabId}
+          >
+            {postureNote}
+          </p>
+        ) : null}
       </PccDashboardCard>
 
       {renderPrimaryDashboardAnalytics(activePrimaryTabId)}

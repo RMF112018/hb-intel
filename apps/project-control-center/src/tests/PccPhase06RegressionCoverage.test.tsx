@@ -209,21 +209,26 @@ describe('PccPhase06RegressionCoverage — Project Home gateways are buttons, ne
  * 3. Phase 06 unified surface sweep
  *
  * Mirror of EXPECTED_DIRECT_CARD_COUNT_BY_TAB in
- * `PccSurfaceRouter.phase05.test.tsx:109–118` (canonical anchor). The
- * duplicate is intentional so a future cardinality drift fails two
- * tests simultaneously. Document Control is its own surface
+ * `PccSurfaceRouter.phase05.test.tsx` (canonical anchor). The duplicate
+ * is intentional so a future cardinality drift fails two tests
+ * simultaneously. Document Control is its own surface
  * (PccDocumentsSurface) and intentionally absent from this matrix.
+ *
+ * Phase 07 Prompt 02 intentionally removes the Phase 05-regressed
+ * generic Dashboard/title-description card from the six shared
+ * primary-dashboard surfaces, dropping each count by one. Project Home
+ * fixture/read-model counts (12 / 18) remain governed by Phase 06.
  * ------------------------------------------------------------------------- */
 
 type PccDashboardPrimaryTabId = Exclude<PccPrimaryTabId, 'project-home' | 'documents'>;
 
 const PHASE_06_PRIMARY_DASHBOARD_CARD_COUNTS: Readonly<Record<PccDashboardPrimaryTabId, number>> = {
-  'core-tools': 3,
-  'estimating-preconstruction': 5,
-  'startup-closeout': 6,
-  'project-controls': 6,
-  'cost-time': 6,
-  'systems-administration': 6,
+  'core-tools': 2,
+  'estimating-preconstruction': 4,
+  'startup-closeout': 5,
+  'project-controls': 5,
+  'cost-time': 5,
+  'systems-administration': 5,
 };
 
 const PRIMARY_DASHBOARD_TABS: readonly PccDashboardPrimaryTabId[] = [

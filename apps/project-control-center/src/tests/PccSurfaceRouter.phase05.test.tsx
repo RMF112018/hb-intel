@@ -90,45 +90,48 @@ describe('PccSurfaceRouter — Phase 05 primary-tab routing', () => {
 });
 
 describe('PccSurfaceRouter — Phase 05 reusable PccPrimaryDashboardSurface', () => {
-  // Phase 06 Prompts 07 + 08 + 09 + 10 + 11 — five primary tabs insert
-  // preview analytics cards into the shared PccPrimaryDashboardSurface:
-  //   - `estimating-preconstruction` (Prompt 07): hero + Module status +
-  //     2 analytics + Selected module = 5 direct cards;
-  //   - `startup-closeout` (Prompt 08): hero + Module status + 3 analytics
-  //     + Selected module = 6 direct cards;
-  //   - `project-controls` (Prompt 09): hero + Module status + 3 analytics
-  //     + Selected module = 6 direct cards;
-  //   - `cost-time` (Prompt 10): hero + Module status + 3 analytics +
-  //     Selected module = 6 direct cards;
-  //   - `systems-administration` (Prompt 11): hero + Module status +
-  //     3 analytics + Selected module = 6 direct cards.
-  // `core-tools` is now the only remaining primary dashboard that uses
-  // PccPrimaryDashboardSurface and still renders exactly 3 direct cards.
+  // Phase 07 Prompt 02 removed the Phase 05-regressed generic
+  // Dashboard/title-description hero card from PccPrimaryDashboardSurface
+  // on the six shared primary-dashboard surfaces, dropping each count by
+  // one. The shared dashboards now begin with `Module status`:
+  //   - `core-tools`: Module status + Selected module = 2 direct cards;
+  //   - `estimating-preconstruction` (Phase 06 Prompt 07 analytics):
+  //     Module status + 2 analytics + Selected module = 4 direct cards;
+  //   - `startup-closeout` (Phase 06 Prompt 08 analytics):
+  //     Module status + 3 analytics + Selected module = 5 direct cards;
+  //   - `project-controls` (Phase 06 Prompt 09 analytics):
+  //     Module status + 3 analytics + Selected module = 5 direct cards;
+  //   - `cost-time` (Phase 06 Prompt 10 analytics):
+  //     Module status + 3 analytics + Selected module = 5 direct cards;
+  //   - `systems-administration` (Phase 06 Prompt 11 analytics):
+  //     Module status + 3 analytics + Selected module = 5 direct cards.
+  // The Cost & Time Sage book-of-record cue was relocated into the
+  // `Module status` card and remains scoped to `cost-time` only.
   // `project-home` and `documents` continue to use their own surfaces
   // (PccProjectHome and PccDocumentsSurface) and are not iterated here.
   const EXPECTED_DIRECT_CARD_COUNT_BY_TAB: Readonly<Record<PccPrimaryTabId, number>> = {
     'project-home': 3, // not iterated below; PccPrimaryDashboardSurface is not used for project-home
-    'core-tools': 3,
+    'core-tools': 2,
     documents: 3, // not iterated below; PccDocumentsSurface is used for documents
-    'estimating-preconstruction': 5,
-    'startup-closeout': 6,
-    'project-controls': 6,
-    'cost-time': 6,
-    'systems-administration': 6,
+    'estimating-preconstruction': 4,
+    'startup-closeout': 5,
+    'project-controls': 5,
+    'cost-time': 5,
+    'systems-administration': 5,
   };
   const CARD_SUMMARY_BY_TAB: Readonly<Record<PccPrimaryTabId, string>> = {
     'project-home': 'three direct bento children (hero + Module status + Selected module)',
-    'core-tools': 'three direct bento children (hero + Module status + Selected module)',
+    'core-tools': 'two direct bento children (Module status + Selected module)',
     documents: 'three direct bento children (hero + Module status + Selected module)',
     'estimating-preconstruction':
-      'five direct bento children (hero + Module status + 2 analytics + Selected module)',
+      'four direct bento children (Module status + 2 analytics + Selected module)',
     'startup-closeout':
-      'six direct bento children (hero + Module status + 3 analytics + Selected module)',
+      'five direct bento children (Module status + 3 analytics + Selected module)',
     'project-controls':
-      'six direct bento children (hero + Module status + 3 analytics + Selected module)',
-    'cost-time': 'six direct bento children (hero + Module status + 3 analytics + Selected module)',
+      'five direct bento children (Module status + 3 analytics + Selected module)',
+    'cost-time': 'five direct bento children (Module status + 3 analytics + Selected module)',
     'systems-administration':
-      'six direct bento children (hero + Module status + 3 analytics + Selected module)',
+      'five direct bento children (Module status + 3 analytics + Selected module)',
   };
   for (const tabId of NEW_DASHBOARD_PRIMARY_TABS) {
     it(`'${tabId}' renders ${CARD_SUMMARY_BY_TAB[tabId]}`, () => {

@@ -158,13 +158,12 @@ describe('Cost & Time analytics — title rendering', () => {
   });
 });
 
-describe('Cost & Time analytics — exact 6-card direct order', () => {
-  it('renders Cost & Time → Module status → 3 analytics → Select a module when no module is active', () => {
+describe('Cost & Time analytics — exact 5-card direct order', () => {
+  it('renders Module status → 3 analytics → Select a module when no module is active', () => {
     const { container } = renderCostTime();
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const titles = readDirectCardTitlesInOrder(grid);
     expect(titles).toEqual([
-      'Cost & Time',
       'Module status',
       'Schedule Milestone Posture',
       'Procurement / Buyout Exposure',
@@ -175,19 +174,20 @@ describe('Cost & Time analytics — exact 6-card direct order', () => {
 });
 
 describe('Cost & Time analytics — unrelated dashboards remain unchanged', () => {
-  // Phase 06 Prompt 11 — systems-administration now renders 6 cards (3 of
-  // its own analytics). core-tools is the only remaining primary dashboard
-  // that uses PccPrimaryDashboardSurface and still renders the unchanged
-  // 3-card baseline.
+  // Phase 07 Prompt 02 removed the generic Dashboard hero card from the
+  // six shared primary-dashboard surfaces. core-tools is the only
+  // remaining primary dashboard that uses PccPrimaryDashboardSurface
+  // without analytics and now renders the 2-card baseline
+  // (Module status + Selected module).
   for (const tabId of ['core-tools'] as const) {
-    it(`'${tabId}' renders zero cost-time analytics cards and exactly 3 direct dashboard cards`, () => {
+    it(`'${tabId}' renders zero cost-time analytics cards and exactly 2 direct dashboard cards`, () => {
       const { container } = renderOtherTab(tabId);
       const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
       const directCards = Array.from(grid.children).filter(
         (child): child is HTMLElement =>
           child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
       );
-      expect(directCards).toHaveLength(3);
+      expect(directCards).toHaveLength(2);
       for (const key of ANALYTICS_KEYS) {
         expect(grid.textContent).not.toContain(ANALYTICS_TITLE_BY_KEY[key]);
       }
@@ -196,14 +196,14 @@ describe('Cost & Time analytics — unrelated dashboards remain unchanged', () =
 });
 
 describe('Cost & Time analytics — Prompt 07 Estimating cross-conditional regression lock', () => {
-  it("'estimating-preconstruction' still renders exactly 5 direct cards with both Estimating titles and zero Cost & Time analytics titles", () => {
+  it("'estimating-preconstruction' still renders exactly 4 direct cards with both Estimating titles and zero Cost & Time analytics titles", () => {
     const { container } = renderOtherTab('estimating-preconstruction');
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const directCards = Array.from(grid.children).filter(
       (child): child is HTMLElement =>
         child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
     );
-    expect(directCards).toHaveLength(5);
+    expect(directCards).toHaveLength(4);
     expect(grid.textContent).toContain('Handoff Continuity Preview');
     expect(grid.textContent).toContain('Estimate Exposure Preview');
     for (const key of ANALYTICS_KEYS) {
