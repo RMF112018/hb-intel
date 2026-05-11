@@ -1,4 +1,4 @@
-# Prompt 02 — PCC Phase 06 Screenshot Reliability Rerun and Closeout — Updated for Prompt 1B
+# Prompt 02 — PCC Phase 06 Screenshot Reliability Rerun and Closeout — Updated for Prompt 1B and PCC 1.0.0.219
 
 ## Role
 
@@ -33,6 +33,12 @@ The required Prompt 1B source-fix commit is:
 ```text
 00eb1d1748081f36cdffe542bd0aacd8f70e16d7
 test(pcc-live): preserve segment scroll state in screenshot diagnostics
+```
+
+Expected deployed PCC package version for this rerun:
+
+```text
+1.0.0.219
 ```
 
 The current source must include the Prompt 1B sequencing pattern:
@@ -93,6 +99,12 @@ Expected lockfile md5:
 7c19ccfa8718a42f7f55ce178a626996
 ```
 
+Important version posture:
+
+- The live deployed PCC package expected by this prompt is `1.0.0.219`.
+- If local `package-solution.json` still shows `1.0.0.218`, do not edit it in this prompt unless the current repo-truth explicitly includes a package-bump commit. Report the local package-solution version separately from the live deployed version.
+- The evidence root and closeout must use `1.0.0.219` because that is the deployed package being validated.
+
 Run source-state guards:
 
 ```bash
@@ -137,13 +149,22 @@ The screenshot spec result must be interpreted carefully:
 If the live lane is ready, run the screenshot spec against this focused evidence root:
 
 ```bash
-PCC_EVIDENCE_OUTPUT_DIR="docs/architecture/evidence/pcc-live/phase-06-v1.0.0.218-screenshot-reliability-rerun" pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.screenshot.spec.ts
+PCC_EVIDENCE_OUTPUT_DIR="docs/architecture/evidence/pcc-live/phase-06-v1.0.0.219-screenshot-reliability-rerun" pnpm exec playwright test --config=playwright.pcc-live.config.ts e2e/pcc-live/pcc-live.screenshot.spec.ts
 ```
 
 If this root already exists from a previous attempt, do not overwrite useful evidence silently. Either:
 
 - remove only the incomplete/uncommitted failed attempt after confirming it is safe and unrelated raw artifacts are absent, or
 - use a timestamped subfolder beneath the same named root and document the path used.
+
+If the live lane is ready, the evidence must target the deployed PCC package version `1.0.0.219`.
+
+If the live environment, test output, or generated evidence reports an expected/deployed package version other than `1.0.0.219`:
+
+- stop and classify the run as `BLOCKED — package version mismatch`;
+- do not reuse the artifact set as proof of the 1.0.0.219 deployed posture;
+- report the observed version and the expected version;
+- do not fabricate or relabel evidence.
 
 If the live lane is not ready:
 
@@ -316,7 +337,7 @@ Do not claim full UI polish approval. This visual review is limited to capture r
 Create:
 
 ```text
-docs/architecture/evidence/pcc-live/phase-06-v1.0.0.218-screenshot-reliability-rerun/SCREENSHOT_CAPTURE_RELIABILITY_CLOSEOUT.md
+docs/architecture/evidence/pcc-live/phase-06-v1.0.0.219-screenshot-reliability-rerun/SCREENSHOT_CAPTURE_RELIABILITY_CLOSEOUT.md
 ```
 
 The closeout must include:
@@ -329,8 +350,10 @@ The closeout must include:
 - HEAD after:
 - Prompt 1B source commit:
 - Prompt 1B ancestor present:
-- package version:
-- feature version:
+- expected deployed PCC package version: 1.0.0.219
+- observed deployed PCC package version:
+- package-solution solution.version:
+- package-solution feature version:
 - lockfile md5 before:
 - lockfile md5 after:
 
@@ -395,7 +418,7 @@ The closeout must include:
 
 Use these definitions exactly:
 
-- `PASS`: live evidence generated, JSON hard gates pass, focused screenshot review finds no capture-reliability defect, no sensitive artifacts visible, no remaining capture-reliability concern.
+- `PASS`: live evidence generated against deployed PCC package `1.0.0.219`, JSON hard gates pass, focused screenshot review finds no capture-reliability defect, no sensitive artifacts visible, no remaining capture-reliability concern.
 - `PASS WITH OPERATOR-PENDING`: live evidence generated and source/data gates mostly pass, but screenshot visual review, duplicate segment review, or environmental interpretation still needs operator signoff.
 - `BLOCKED`: live lane or browser/runtime was not available; no live screenshots generated; do not claim evidence proof.
 - `FAIL`: source-state guard fails, validation fails, JSON hard gates fail, Cost & Time or Systems Administration clipping persists, actual-scroll mismatch persists, or unsafe artifacts are present.
@@ -422,7 +445,7 @@ Before staging, run:
 
 ```bash
 git status --short
-find docs/architecture/evidence/pcc-live/phase-06-v1.0.0.218-screenshot-reliability-rerun -type f | sort
+find docs/architecture/evidence/pcc-live/phase-06-v1.0.0.219-screenshot-reliability-rerun -type f | sort
 git diff --check
 ```
 
@@ -482,7 +505,7 @@ Prompt 02 is complete only if one of the following is true:
 
 1. `PASS` or `PASS WITH OPERATOR-PENDING`:
    - Prompt 1B source-state guard passes;
-   - live evidence rerun succeeds;
+   - live evidence rerun succeeds against deployed PCC package `1.0.0.219`;
    - evidence root is generated from this rerun;
    - JSON hard gates are checked and reported;
    - Cost & Time and Systems Administration clipping gates are explicitly evaluated;

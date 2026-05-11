@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-project-control-center",
     "id": "1bfcc4f0-d947-42d2-81c7-c6c2f2ab5923",
-    "version": "1.0.0.218",
+    "version": "1.0.0.219",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
