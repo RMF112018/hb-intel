@@ -1,28 +1,17 @@
-# Phase 08 Prompt 04 — Command Header / Hero Enhancement — UPDATED
+# Phase 08 Prompt 04 — Unified Command Surface / Hero Enhancement — FOLEON DIRECTION UPDATE
 
 ## Objective
 
-Enhance `PccProjectHeroBand` into the primary PCC command-context surface with stronger hierarchy, clearer project identity, surface-specific posture, and a Project Home “Today’s Focus” summary while preserving the current Phase 05/06/07 shell architecture, Prompt 03 host-fit work, preview-only command-search posture, and no-writeback guardrails.
+Refactor and refine the PCC command header so the primary tab bar and `PccProjectHeroBand` read as one unified, premium **PCC Command Surface**. The result should borrow the polish principles from the Foleon Company Pulse experience — layered gradients, strong hierarchy, rounded/elevated surfaces, and intentional section composition — while preserving PCC's operational tone, SharePoint host fit, preview-only command search, and no-writeback guardrails.
 
-This is a bounded runtime enhancement prompt. It is not a redesign of the tab bar, module launcher, bento grid, dashboard cards, analytics, or source-system integrations.
+This prompt **does authorize a narrow shell composition change**: wrapping the existing tabs and hero in a shared command-surface container above `main[role="tabpanel"]`. This wrapper is above the bento grid and must not affect the bento direct-child invariant.
 
-## Current Execution Baseline
 
-Use the current committed and pushed Phase 08 baseline unless local repo truth proves newer safe forward drift:
+## Required Precondition Before Execution
 
-```text
-Branch: main
-Expected baseline HEAD: bc545d568b8a652f17171cd3325ac3f5445e2b6d
-Prompt 03 status: committed and pushed
-Package / manifest version: 1.0.0.219
-Expected lockfile md5: 7c19ccfa8718a42f7f55ce178a626996
-```
+Prompt 08 was previously audited as blocked because commit `c40296bca0ca7207b5e7126a0b750eeaad02823a` introduced unauthorized version changes and package/manifest misalignment. Before executing this prompt, verify that a corrective commit has been pushed and audited, or that the operator has explicitly authorized a complete, aligned package-version posture.
 
-Historical package-generation baseline `7d8bae430ab999d4fb38abe8de6689b89d8f4d27` is reference context only. Do not roll back, overwrite, or discount the Prompt 01, Prompt 02, or Prompt 03 commits.
-
-## Required Pre-Edit Repo-Truth Gate
-
-Before editing, run and record:
+Pre-edit gate:
 
 ```bash
 git status --short
@@ -35,265 +24,183 @@ md5 pnpm-lock.yaml || md5sum pnpm-lock.yaml
 
 Proceed only if:
 
-1. Branch is `main`.
-2. HEAD is `bc545d568b8a652f17171cd3325ac3f5445e2b6d` or safe forward-only drift.
-3. `origin/main` is aligned or drift is clearly docs-only/operator-owned and not conflicting.
-4. Working tree is clean except operator-owned prompt WIP explicitly identified before editing.
-5. Lockfile md5 remains `7c19ccfa8718a42f7f55ce178a626996`.
+- branch is `main`;
+- working tree is clean except explicitly operator-owned prompt WIP;
+- package/manifest versions are aligned across all PCC package loci;
+- `pnpm-lock.yaml` md5 is unchanged unless dependency work was explicitly authorized;
+- any drift is forward-only, operator-owned, and does not conflict with this prompt.
 
-If unrelated runtime, package, manifest, lockfile, evidence, or operator-owned WIP is present, stop and report before editing.
 
-## Global Execution Rules
+## Design Direction Overlay — Foleon-Inspired PCC Polish
 
-These rules apply to this prompt and every later Phase 08 prompt.
+The operator has approved a revised visual direction based on the `apps/hb-intel-foleon` / Company Pulse presentation quality. Translate the **principles** into PCC; do not copy the Foleon implementation literally.
 
-1. Work in the `RMF112018/hb-intel` repo.
-2. Treat this phase as **PCC Product Experience Enhancement**, not a CSS-only polish pass.
-3. Preserve the current Phase 05/06/07 runtime architecture unless this prompt explicitly authorizes a narrow change.
-4. Preserve the current eight primary-tab model:
-   - `project-home`
-   - `core-tools`
-   - `documents`
-   - `estimating-preconstruction`
-   - `startup-closeout`
-   - `project-controls`
-   - `cost-time`
-   - `systems-administration`
-5. Do not reintroduce a permanent PCC sidebar, rail, drawer, or left navigation.
-6. Do not move `data-pcc-active-surface-panel` back to a card. It must remain shell-owned on `main[role="tabpanel"]`.
-7. Preserve the bento direct-child invariant. Do not add wrappers between `PccBentoGrid` and `PccDashboardCard`.
-8. Do not add dependencies. Do not add `echarts-for-react`. `echarts` direct usage remains the approved analytics approach.
-9. Do not create live SharePoint, Graph, Procore, Sage, Azure, tenant, or app-catalog mutations.
-10. Preserve read-only / preview / launch-only / no-writeback posture.
-11. Do not introduce fake affordances. A non-working search/action/control must not appear live without clear preview or disabled state.
-12. Do not put developer copy in the UI. Avoid end-user-visible words like `mock`, `placeholder`, `TODO`, `fixture`, or `demo` unless a governed preview/sample label already exists and is intentionally user-facing.
-13. Do not weaken tests to pass. Update tests only when the expected product contract has intentionally changed.
-14. Use stable `[data-*]` markers and semantic roles for tests. Do not test CSS module class names as behavior contracts.
-15. Do not re-read files that are still within the current context or memory. Only open files needed to verify current repo truth, inspect drift, or make the scoped change.
-16. Do not use `git add .`.
-17. Do not commit unless the operator explicitly requests a commit after closeout.
-18. Do not regenerate hosted / tenant / Playwright evidence unless explicitly authorized by the operator.
+Required design principles:
+
+1. **Unified command surface** — the PCC tab bar and hero must read as one composed command/header surface, not two disconnected elements.
+2. **Layered gradient field** — use a restrained PCC token-driven gradient field, with subtle radial highlights and a linear surface transition. The treatment should feel operational and premium, not editorial/orange-heavy.
+3. **Clear first-fold hierarchy** — active tab, surface title, project facts, command search preview, hero highlights, and governance microcopy must feel intentionally arranged inside one surface.
+4. **Foleon-grade card polish** — rounded slabs, stronger hierarchy, subtle inset/accent treatments, and clear CTAs/action states should inform PCC components where appropriate.
+5. **Token discipline** — PCC implementation must use existing PCC theme variables and `color-mix(...)`. Do not introduce raw hex/rgb/rgba/hsl colors copied from Foleon.
+6. **Truthful affordances** — preview-only, read-only, launch-only, disabled, and no-writeback states must remain explicit.
+7. **No host takeover** — the design must still feel native inside SharePoint and must not introduce fixed/sticky takeover behavior, sidebars, portals, or global resets.
+
+Visual target:
+
+- The command surface should sit below SharePoint chrome as a single premium PCC slab.
+- The tab bar should appear embedded into the top of that slab.
+- The hero should continue the same background field below the tabs.
+- The command search preview should feel like an intentional glass/card capsule inside the hero, not a disconnected box.
+- Cards below the command surface should use consistent rounded/elevated/inset accent language, but remain operational and data-forward.
+
+
+## Global Guardrails
+
+1. Work in `RMF112018/hb-intel`.
+2. Treat this as **PCC Product Experience Enhancement**, not a CSS-only polish pass.
+3. Preserve the eight primary-tab model exactly: `project-home`, `core-tools`, `documents`, `estimating-preconstruction`, `startup-closeout`, `project-controls`, `cost-time`, `systems-administration`.
+4. Do not reintroduce a permanent PCC sidebar, rail, drawer, or left navigation.
+5. Do not move `data-pcc-active-surface-panel` back to a card. It must remain shell-owned on `main[role="tabpanel"]`.
+6. Preserve the bento direct-child invariant. Do not add wrappers between `PccBentoGrid` and `PccDashboardCard`.
+7. Do not add dependencies. Do not add `echarts-for-react`.
+8. Do not create live SharePoint, Graph, Procore, Sage, Azure, tenant, app-catalog, or source-system mutations.
+9. Preserve read-only / preview / launch-only / no-writeback posture.
+10. Do not introduce fake affordances. Non-working search/action/control elements must be visibly preview-only, disabled, or non-interactive.
+11. Do not use end-user-visible developer copy: `mock`, `placeholder`, `TODO`, `fixture`, `demo`, prompt numbers, wave names, repo terms, or implementation sequencing.
+12. Do not weaken tests to pass. Update tests only when the expected product contract intentionally changes.
+13. Use stable `[data-*]` markers and semantic roles for tests. Do not test CSS module class names as behavior contracts.
+14. Do not re-read files still in current context or memory. Open only files needed to verify repo truth, inspect drift, or make the scoped change.
+15. Do not run `git add .`. Do not commit or push unless the operator explicitly instructs you.
+16. Do not regenerate hosted/tenant/Playwright evidence unless the operator explicitly authorizes it.
+
 
 ## Current Repo-Truth to Respect
 
-At the Prompt 03 baseline, the hero already includes:
+The current PCC shell renders tabs, hero, and `main` in this order. `PccHorizontalTabs` is a standalone rail, and `PccProjectHeroBand` is a separate card-like hero slab. The visual gap is that they read as two disconnected page elements.
 
-- `PccShell.tsx` rendering order: tabs → `PccProjectHeroBand` → `main[role="tabpanel"][data-pcc-active-surface-panel]`.
-- `PccProjectHeroBand.tsx` rendering:
-  - primary title;
-  - active-surface secondary title;
-  - surface description;
-  - project facts row;
-  - `heroHighlights`;
-  - `governanceMicrocopy`;
-  - preview-only command search slot.
-- `projectShellViewModel.ts` deriving hero data from `PCC_SHELL_SURFACE_HEADER_METADATA`.
-- `surfaceHeaderMetadata.ts` keyed to all eight primary tabs with existing `heroHighlights` and `governanceMicrocopy`.
-- `PccProjectHeroBand.test.tsx` locking:
-  - primary title;
-  - active primary-tab secondary title;
-  - all eight local surface descriptions;
-  - project facts;
-  - preview-only command search;
-  - facts → highlights → microcopy DOM order;
-  - responsive mode/density markers;
-  - all eight `heroHighlights` and `governanceMicrocopy` rows;
-  - no source-confidence markers;
-  - no generic pill-row markers;
-  - no interactive descendants in hero highlight/governance zones.
+Preserve these existing contracts:
 
-Do not duplicate these structures. Refine and extend them deliberately.
-
-## Planning Inputs
-
-Use these repo-local artifacts as governing references:
-
-```text
-docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15A/wave-b13/00_PCC_Phase_08_Product_Experience_Enhancement_Plan.md
-docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15A/wave-b13/01_Screenshot_Baseline_Findings.md
-docs/architecture/plans/MASTER/spfx/pcc/phase-03/wave-15A/wave-b13/README.md
-```
-
-Minimum findings to address from the Prompt 02 matrix:
-
-- shell/hero should read as a command surface, not a flat information strip;
-- surface context should be clearer and more useful at first fold;
-- Project Home needs a clearer current-focus / today-focus posture;
-- source/trust/no-writeback posture must remain visible without looking like developer scaffolding;
-- command search must remain a clear preview/disabled affordance, not a fake action.
-
-## Scope
-
-Improve the command header / hero only.
-
-Authorized scope:
-
-1. Strengthen visual hierarchy within `PccProjectHeroBand`.
-2. Improve layout separation between:
-   - project identity;
-   - command search preview;
-   - project facts;
-   - surface posture / current focus;
-   - governance/read-only microcopy.
-3. Refine existing `heroHighlights` into a more premium posture-summary treatment without introducing forbidden pill-row/source-confidence markers.
-4. Add or adjust Project Home metadata so it clearly presents a “Today’s Focus” style summary using deterministic existing PCC context only.
-5. Improve compact responsive behavior so the hero remains readable and does not clip.
-6. Add or update tests for the new hero contract.
-
-Out of scope:
-
-- tab bar redesign;
-- module launcher redesign;
-- command search implementation or live behavior;
-- analytics cards;
-- dashboard card taxonomy;
-- bento grid changes;
-- shell host-fit CSS changes already completed in Prompt 03;
-- surface body/content changes;
-- live data, source mutations, writeback, or new API calls;
-- package, manifest, dependency, lockfile, or evidence changes.
+- tab bar renders before hero;
+- hero renders before `main[role="tabpanel"]`;
+- `main[role="tabpanel"]` retains `data-pcc-active-surface-panel`;
+- hero keeps primary title, secondary title, surface description, project facts, `heroHighlights`, `governanceMicrocopy`, and preview-only command search;
+- command search remains non-interactive;
+- no wrappers are added between `PccBentoGrid` and `PccDashboardCard`.
 
 ## Expected File Targets
 
 Primary targets:
 
 ```text
+apps/project-control-center/src/shell/PccShell.tsx
+apps/project-control-center/src/shell/PccShell.module.css
 apps/project-control-center/src/shell/PccProjectHeroBand.tsx
 apps/project-control-center/src/shell/PccProjectHeroBand.module.css
 apps/project-control-center/src/shell/surfaceHeaderMetadata.ts
-apps/project-control-center/src/preview/projectShellViewModel.ts
+apps/project-control-center/src/tests/PccShell.hostFit.test.tsx
 apps/project-control-center/src/tests/PccProjectHeroBand.test.tsx
-apps/project-control-center/src/tests/projectShellViewModel.test.ts
 apps/project-control-center/src/tests/*Shell*
 ```
 
-Only touch a listed file if necessary. If the final solution does not require `projectShellViewModel.ts`, do not edit it.
-
-Do not edit:
-
-```text
-apps/project-control-center/src/shell/PccShell.tsx
-apps/project-control-center/src/shell/PccShell.module.css
-apps/project-control-center/src/layout/*
-apps/project-control-center/src/surfaces/*
-apps/project-control-center/src/cards/*
-package.json
-pnpm-lock.yaml
-**/package-solution.json
-**/*.manifest.json
-docs/architecture/evidence/**
-```
-
-unless a required validation failure proves a narrow in-scope update is necessary and the closeout explicitly justifies it.
+Only touch a listed file if necessary. Do not edit package/manifest/lockfile/evidence files.
 
 ## Required Implementation Direction
 
-### 1. Preserve Existing Hero Contract
+### 1. Create the PCC Command Surface wrapper
 
-Keep the current high-level hero content model unless a specific test is intentionally updated:
+In `PccShell.tsx`, wrap the existing tab bar and hero in one container:
 
-- primary title remains `Project Control Center`;
-- secondary title remains active primary-tab label;
-- surface description remains local surface copy;
-- global facts remain visible:
-  - Client;
-  - Location;
-  - Estimated value;
-  - Scheduled completion;
-  - Project stage;
-- command search remains preview-only/non-interactive;
-- all eight surfaces retain metadata-backed posture and governance copy;
-- `role="region"` and accessible label remain intact.
+```tsx
+<section data-pcc-command-surface="" className={styles.commandSurface}>
+  <PccHorizontalTabs ... />
+  <PccProjectHeroBand ... />
+</section>
+<main role="tabpanel" data-pcc-active-surface-panel={activePrimaryTabId}>...</main>
+```
 
-### 2. Improve Visual Hierarchy
+Exact class/prop names may vary based on current repo truth, but the structural contract must be:
 
-Refine the hero CSS using existing PCC tokens only.
+- one wrapper above `main`;
+- tabs first, hero second;
+- `main` third;
+- active-panel marker stays on `main`;
+- wrapper is not a bento child and does not contain the bento grid.
 
-Allowed CSS refinements:
+Add stable evidence markers:
 
-- improve identity block emphasis;
-- use existing tokens for border, elevation, spacing, radius, background, and status colors;
-- make highlight/posture cells read more like intentional command-surface summaries;
-- improve separation between facts, posture, and governance without adding clutter;
-- improve compact/phone behavior with existing responsive markers;
-- add stable data markers only where they improve testability/evidence.
+```text
+data-pcc-command-surface=""
+data-pcc-command-surface-variant="unified-gradient"
+```
 
-Prohibited CSS refinements:
+### 2. Apply Foleon-inspired PCC gradient field
 
-- no raw colors;
-- no new design tokens;
-- no global CSS resets;
-- no heavy shadows;
-- no sticky/fixed positioning;
-- no sidebar/rail/drawer;
-- no broad layout restructuring that risks host-fit;
-- no decorative effects that are not token-justified.
+In `PccShell.module.css`, style the command surface as a single integrated slab:
 
-### 3. Surface-Specific Posture / “Today’s Focus”
+- use existing PCC variables only;
+- use `color-mix(in srgb, ...)` with existing PCC tokens;
+- use subtle radial gradients plus a linear gradient;
+- use existing radius/elevation/border tokens;
+- do not use raw Foleon colors;
+- do not use fixed/sticky positioning;
+- keep horizontal clipping controlled.
 
-Refine `surfaceHeaderMetadata.ts` rather than hardcoding tab-specific text in the component.
+The command surface should visually connect the tabs and hero. It should not feel like a separate marketing banner.
 
-Requirements:
+### 3. Convert hero surface to participate in the unified field
 
-- Every primary tab must retain three useful `heroHighlights` unless there is a tested reason to change the count.
-- Project Home must include an explicit `Today’s Focus` or equivalent current-focus highlight.
-- Project Home focus text must be deterministic and must not depend on the live system date, tenant data, source calls, or hidden runtime state.
-- Cost & Time must preserve the Sage book-of-record / no-writeback posture.
-- Core Tools must preserve HBI advisory/no-authority posture.
-- Documents must preserve Project Record / source-boundary posture.
-- Systems Administration must preserve governed-administrator / no tenant mutation posture.
-- Avoid end-user-visible `mock`, `fixture`, `TODO`, `placeholder`, `demo`, prompt, phase, or wave language.
+In `PccProjectHeroBand.module.css`:
 
-### 4. Command Search Preview
+- remove or soften the hero's standalone card-slab feel where it conflicts with the new command surface;
+- make `.heroSurface` visually transparent or semi-layered relative to the wrapper gradient, using PCC tokens only;
+- preserve facts/highlights/governance structure;
+- preserve compact/phone behavior;
+- maintain readable contrast;
+- avoid making the hero oversized.
 
-Do not make command search interactive in this prompt.
+### 4. Project Home “Today’s Focus” remains required
 
-Requirements:
+If not already present in current repo truth, update `surfaceHeaderMetadata.ts` so Project Home includes a deterministic `Today’s Focus` highlight.
 
-- no `input`, `button`, live search field, executable command menu, or keyboard-focusable fake action inside the hero command search slot;
-- existing preview-state marker remains;
-- visible copy must make the preview/unavailable state clear;
-- no implication that HBI/search can execute actions, make decisions, approve items, or write to source systems.
+Do not introduce live date logic, tenant calls, or source-system calls.
 
-### 5. Accessibility and Responsive Behavior
+### 5. Tests
 
-Requirements:
+Add/update tests proving:
 
-- preserve semantic region behavior;
-- preserve logical DOM order;
-- ensure facts/highlights/governance remain readable in compact modes;
-- do not remove focus visibility;
-- do not add animations/transitions unless reduced-motion behavior is explicitly handled;
-- do not rely on color alone for meaning;
-- maintain no interactive descendants in posture/governance zones.
+- one `[data-pcc-command-surface]` exists;
+- command surface contains the tablist before the hero region;
+- `main[role="tabpanel"][data-pcc-active-surface-panel]` remains outside and after the command surface;
+- bento grid remains inside `main`, not inside the command surface;
+- no sidebar/rail/drawer/complementary region is introduced;
+- hero still renders all required facts/highlights/governance;
+- Project Home still renders Today’s Focus;
+- command search remains preview-only and non-interactive.
 
-### 6. Testing Requirements
+## Prohibited Changes
 
-Update or add tests so the new contract is locked:
+- Do not redesign module launcher behavior.
+- Do not make command search interactive.
+- Do not edit surface body cards.
+- Do not edit analytics.
+- Do not change package/manifest/lockfile.
+- Do not add raw colors copied from Foleon.
+- Do not remove no-writeback/governance microcopy.
 
-Required assertions:
+## Acceptance Criteria
 
-- all eight primary tabs still render:
-  - active label as secondary title;
-  - local surface description;
-  - hero highlights;
-  - governance microcopy;
-- Project Home renders `Today’s Focus` or the chosen current-focus label;
-- Project Home focus highlight is deterministic and present in the metadata-derived view model;
-- Cost & Time still renders Sage book-of-record / no-writeback copy;
-- Core Tools still renders HBI advisory/no-authority copy;
-- command search remains preview-only and non-interactive;
-- no source-confidence markers are introduced;
-- no generic pill-row markers are introduced unless the architecture contract is intentionally revised, which this prompt does not authorize;
-- facts → highlights/posture → governance DOM order remains logical;
-- responsive mode/density markers remain correct;
-- no forbidden UI literals appear.
+- Tabs and hero read as one unified PCC command surface.
+- The header has Foleon-grade polish translated into PCC tokens.
+- The command surface remains native inside SharePoint.
+- The hero is visually stronger but not oversized.
+- Project facts and surface posture remain visible.
+- Command search remains clearly preview-only.
+- Tests lock the new command-surface ownership and order contract.
 
-Use explicit cleanup per existing test convention.
 
 ## Required Validation
 
-Run:
+Run after edits:
 
 ```bash
 git status --short
@@ -306,48 +213,10 @@ md5 pnpm-lock.yaml || md5sum pnpm-lock.yaml
 git status --short
 ```
 
-If Prettier fails, run targeted `pnpm exec prettier --write <changed-files>` only, then rerun `--check`.
+If Prettier fails, run targeted `pnpm exec prettier --write <changed-files>` only, then rerun `prettier --check` and rerun tests after formatting touches runtime/test files.
 
-Do not run broad formatters across unrelated files.
+Do not broad-format unrelated files.
 
-## Manual Diff Review Before Closeout
-
-Confirm:
-
-- no dependency, lockfile, package, or manifest drift;
-- no sidebar, rail, drawer, or host-takeover positioning;
-- no active-panel ownership change;
-- no bento/layout/card/surface body changes;
-- no live data call;
-- no writeback or source mutation implication;
-- no fake command/search/action behavior;
-- no end-user-facing developer copy;
-- no raw one-off colors or new design tokens;
-- no removal of valuable project facts unless equivalent value is visibly preserved;
-- no weakening of existing negative hero tests;
-- no screenshot/evidence directories touched.
-
-## Acceptance Criteria
-
-- Hero reads as the primary PCC command-context surface.
-- Header is visually stronger but not oversized.
-- Header content remains surface-specific for all eight primary tabs.
-- Project Home includes a clear current-focus / “Today’s Focus” posture summary.
-- Source/trust/no-writeback posture remains visible and end-user appropriate.
-- Command search remains clearly preview-only and non-interactive.
-- Responsive hero does not clip or overflow.
-- Existing governance, accessibility, and no-false-affordance contracts remain intact.
-- All required validations pass.
-
-## Evidence
-
-Do not regenerate screenshots or hosted evidence in this prompt unless explicitly authorized.
-
-Closeout should state:
-
-- evidence not generated because Prompt 04 is a runtime/test prompt;
-- visual effect must be captured in later evidence work, especially Prompt 17;
-- operator visual review remains required before any flagship-complete claim.
 
 ## Closeout Requirements
 
@@ -360,11 +229,11 @@ Include:
 - branch;
 - starting and ending HEAD;
 - local drift classification;
-- package / manifest version;
+- package / manifest version posture;
 - lockfile md5 before/after;
 - files changed with summaries;
 - tests run and results;
 - evidence generated or blocked reason;
 - guardrails confirmed;
-- residual risks / follow-up;
-- commit summary and description only if the operator explicitly requested a commit and a commit was actually authored.
+- visual-review watchpoints for Prompt 17;
+- commit summary/description only if the operator explicitly requested a commit and a commit was actually authored.
