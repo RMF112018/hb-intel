@@ -169,7 +169,10 @@ describe('Project Startup & Closeout analytics — exact 6-card direct order', (
 });
 
 describe('Project Startup & Closeout analytics — unrelated dashboards remain unchanged', () => {
-  for (const tabId of ['core-tools', 'project-controls'] as const) {
+  // Phase 06 Prompt 09 — project-controls now renders 6 cards (3 of its
+  // own analytics), so it's no longer an "unrelated 3-card" tab. Swap to
+  // cost-time, which still renders the unchanged 3-card baseline.
+  for (const tabId of ['core-tools', 'cost-time'] as const) {
     it(`'${tabId}' renders zero startup analytics cards and exactly 3 direct dashboard cards`, () => {
       const { container } = renderOtherTab(tabId);
       const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;

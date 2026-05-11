@@ -15,6 +15,10 @@ import {
   ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS,
 } from './estimatingPreconstructionAnalytics';
 import {
+  PROJECT_CONTROLS_ANALYTICS_SPAN_OVERRIDES,
+  PROJECT_CONTROLS_ANALYTICS_VIEW_MODELS,
+} from './projectControlsAnalytics';
+import {
   STARTUP_CLOSEOUT_ANALYTICS_SPAN_OVERRIDES,
   STARTUP_CLOSEOUT_ANALYTICS_VIEW_MODELS,
 } from './startupCloseoutAnalytics';
@@ -51,10 +55,11 @@ function resolveContextModule(
 }
 
 /**
- * Phase 06 Prompts 07 + 08 — preview analytics insertion for the shared
- * primary dashboard surface. Routes:
+ * Phase 06 Prompts 07 + 08 + 09 — preview analytics insertion for the
+ * shared primary dashboard surface. Routes:
  *   - `estimating-preconstruction` → 2 Estimating cards (Prompt 07);
  *   - `startup-closeout` → 3 Startup & Closeout cards (Prompt 08);
+ *   - `project-controls` → 3 Project Controls cards (Prompt 09);
  *   - all other primary tabs → null.
  *
  * Renders between `Module status` and the selected-module card so analytics
@@ -110,6 +115,34 @@ function renderPrimaryDashboardAnalytics(activePrimaryTabId: PccPrimaryTabId): R
           tier="tier2"
           region="operational"
           spanOverrides={STARTUP_CLOSEOUT_ANALYTICS_SPAN_OVERRIDES.closeoutWarrantyReadiness}
+        />
+      </>
+    );
+  }
+
+  if (activePrimaryTabId === 'project-controls') {
+    return (
+      <>
+        <PccAnalyticsCard
+          viewModel={PROJECT_CONTROLS_ANALYTICS_VIEW_MODELS.constraintsAging}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={PROJECT_CONTROLS_ANALYTICS_SPAN_OVERRIDES.constraintsAging}
+        />
+        <PccAnalyticsCard
+          viewModel={PROJECT_CONTROLS_ANALYTICS_VIEW_MODELS.permitInspectionReadiness}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={PROJECT_CONTROLS_ANALYTICS_SPAN_OVERRIDES.permitInspectionReadiness}
+        />
+        <PccAnalyticsCard
+          viewModel={PROJECT_CONTROLS_ANALYTICS_VIEW_MODELS.riskIssueSeverityDistribution}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={PROJECT_CONTROLS_ANALYTICS_SPAN_OVERRIDES.riskIssueSeverityDistribution}
         />
       </>
     );

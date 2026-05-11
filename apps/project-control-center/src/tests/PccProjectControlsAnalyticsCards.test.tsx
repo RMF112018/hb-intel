@@ -1,15 +1,17 @@
 /**
- * Phase 06 Prompt 07 — Estimating & Preconstruction analytics card contract.
+ * Phase 06 Prompt 09 — Project Controls analytics card contract.
  *
- * Locks the two preview analytics cards inserted into the
- * Estimating & Preconstruction primary dashboard: estimating-only
- * rendering, exact 5-card direct-child order, per-card markers, verbatim
- * preview-copy strings, source-label override, fallback summary outside
- * the chart canvas, span overrides at four 12-/10-column modes plus
- * tabletLandscape footprint-fallback, registry-driven module rows still
- * visible, no Project Intelligence regression, zero card-level active-
- * panel marker, and the static `echarts-for-react`-not-imported guard
- * scoped to PCC analytics + the Phase 05 dashboard surface.
+ * Locks the three preview analytics cards inserted into the Project
+ * Controls primary dashboard: project-controls-only rendering, exact
+ * 6-card direct-child order, Prompt 07 Estimating + Prompt 08 Startup
+ * & Closeout cross-conditional regression locks, per-card markers,
+ * verbatim preview-copy strings, source-label override, fallback
+ * summary outside the chart canvas, span overrides at four 12-/10-column
+ * modes plus tabletLandscape footprint-fallback, all seven registry-
+ * driven module rows visible (5 deferred / 2 preview-selectable), no
+ * Project Intelligence regression, zero card-level active-panel marker,
+ * and the static `echarts-for-react`-not-imported guard scoped to PCC
+ * analytics + the Phase 05 dashboard surface.
  *
  * Mocks `echarts/core` so jsdom doesn't spin up real ECharts during the
  * dashboard renders.
@@ -53,9 +55,9 @@ import {
   PCC_ANALYTICS_PREVIEW_LABEL,
 } from '../analytics/pccAnalyticsA11y';
 import {
-  ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS,
-  type PccEstimatingPreconstructionAnalyticsCardKey,
-} from '../surfaces/phase05Dashboard/estimatingPreconstructionAnalytics';
+  PROJECT_CONTROLS_ANALYTICS_VIEW_MODELS,
+  type PccProjectControlsAnalyticsCardKey,
+} from '../surfaces/phase05Dashboard/projectControlsAnalytics';
 import type { PccPrimaryTabId } from '@hbc/models/pcc';
 import type { PccResponsiveMode } from '../layout/footprints';
 
@@ -65,30 +67,50 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const ANALYTICS_KEYS: readonly PccEstimatingPreconstructionAnalyticsCardKey[] = [
-  'handoffContinuityPreview',
-  'estimateExposurePreview',
+const ANALYTICS_KEYS: readonly PccProjectControlsAnalyticsCardKey[] = [
+  'constraintsAging',
+  'permitInspectionReadiness',
+  'riskIssueSeverityDistribution',
 ];
 
-const ANALYTICS_TITLE_BY_KEY: Readonly<
-  Record<PccEstimatingPreconstructionAnalyticsCardKey, string>
-> = {
-  handoffContinuityPreview: 'Handoff Continuity Preview',
-  estimateExposurePreview: 'Estimate Exposure Preview',
+const ANALYTICS_TITLE_BY_KEY: Readonly<Record<PccProjectControlsAnalyticsCardKey, string>> = {
+  constraintsAging: 'Constraints Aging',
+  permitInspectionReadiness: 'Permit / Inspection Readiness',
+  riskIssueSeverityDistribution: 'Risk / Issue Severity Distribution',
 };
 
-const ANALYTICS_ID_BY_KEY: Readonly<Record<PccEstimatingPreconstructionAnalyticsCardKey, string>> =
-  {
-    handoffContinuityPreview: 'pcc-estimating-handoff-continuity-preview',
-    estimateExposurePreview: 'pcc-estimating-estimate-exposure-preview',
-  };
+const ANALYTICS_ID_BY_KEY: Readonly<Record<PccProjectControlsAnalyticsCardKey, string>> = {
+  constraintsAging: 'pcc-project-controls-constraints-aging',
+  permitInspectionReadiness: 'pcc-project-controls-permit-inspection-readiness',
+  riskIssueSeverityDistribution: 'pcc-project-controls-risk-issue-severity-distribution',
+};
 
-const SAMPLE_SOURCE_LABEL = 'Source: deterministic preconstruction sample';
+const SAMPLE_SOURCE_LABEL = 'Source: deterministic project controls sample';
 
-function renderEstimating(mode: PccResponsiveMode = 'desktop') {
+const PROJECT_CONTROLS_MODULE_LABELS_VISIBLE = [
+  'Project Controls',
+  'Permits & Inspections',
+  'Contract & Compliance',
+  'Risk / Issues / Decisions',
+  'Constraints Log',
+  'Field Operations',
+  'Meeting & Communication',
+] as const;
+
+const DEFERRED_MODULE_IDS = [
+  'project-controls-center',
+  'contract-compliance',
+  'risk-issues-decisions',
+  'field-operations',
+  'meeting-communication',
+] as const;
+
+const PREVIEW_SELECTABLE_MODULE_IDS = ['permits-inspections', 'constraints-log'] as const;
+
+function renderProjectControls(mode: PccResponsiveMode = 'desktop') {
   return render(
     <PccBentoGrid forceMode={mode}>
-      <PccPrimaryDashboardSurface activePrimaryTabId="estimating-preconstruction" />
+      <PccPrimaryDashboardSurface activePrimaryTabId="project-controls" />
     </PccBentoGrid>,
   );
 }
@@ -122,37 +144,36 @@ function getCardArticle(container: HTMLElement, id: string): HTMLElement {
   return article;
 }
 
-describe('Estimating & Preconstruction analytics — title rendering', () => {
-  it('renders both analytics card titles in the bento grid', () => {
-    const { container } = renderEstimating();
+describe('Project Controls analytics — title rendering', () => {
+  it('renders all three analytics card titles in the bento grid', () => {
+    const { container } = renderProjectControls();
     const grid = container.querySelector('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
-    expect(grid!.textContent).toContain(ANALYTICS_TITLE_BY_KEY.handoffContinuityPreview);
-    expect(grid!.textContent).toContain(ANALYTICS_TITLE_BY_KEY.estimateExposurePreview);
+    for (const key of ANALYTICS_KEYS) {
+      expect(grid!.textContent).toContain(ANALYTICS_TITLE_BY_KEY[key]);
+    }
   });
 });
 
-describe('Estimating & Preconstruction analytics — exact 5-card direct order', () => {
-  it('renders Estimating & Preconstruction → Module status → 2 analytics → Select a module when no module is active', () => {
-    const { container } = renderEstimating();
+describe('Project Controls analytics — exact 6-card direct order', () => {
+  it('renders Project Controls → Module status → 3 analytics → Select a module when no module is active', () => {
+    const { container } = renderProjectControls();
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const titles = readDirectCardTitlesInOrder(grid);
     expect(titles).toEqual([
-      'Estimating & Preconstruction',
+      'Project Controls',
       'Module status',
-      'Handoff Continuity Preview',
-      'Estimate Exposure Preview',
+      'Constraints Aging',
+      'Permit / Inspection Readiness',
+      'Risk / Issue Severity Distribution',
       'Select a module',
     ]);
   });
 });
 
-describe('Estimating & Preconstruction analytics — unrelated dashboards remain unchanged', () => {
-  // Phase 06 Prompt 09 — project-controls now renders 6 cards (3 of its
-  // own analytics), so it's no longer an "unrelated 3-card" tab. Swap to
-  // cost-time, which still renders the unchanged 3-card baseline.
+describe('Project Controls analytics — unrelated dashboards remain unchanged', () => {
   for (const tabId of ['core-tools', 'cost-time'] as const) {
-    it(`'${tabId}' renders zero estimating analytics cards and exactly 3 direct dashboard cards`, () => {
+    it(`'${tabId}' renders zero project-controls analytics cards and exactly 3 direct dashboard cards`, () => {
       const { container } = renderOtherTab(tabId);
       const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
       const directCards = Array.from(grid.children).filter(
@@ -160,16 +181,51 @@ describe('Estimating & Preconstruction analytics — unrelated dashboards remain
           child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
       );
       expect(directCards).toHaveLength(3);
-      expect(grid.querySelectorAll('[data-pcc-analytics-card]')).toHaveLength(0);
-      expect(grid.textContent).not.toContain('Handoff Continuity Preview');
-      expect(grid.textContent).not.toContain('Estimate Exposure Preview');
+      for (const key of ANALYTICS_KEYS) {
+        expect(grid.textContent).not.toContain(ANALYTICS_TITLE_BY_KEY[key]);
+      }
     });
   }
 });
 
-describe('Estimating & Preconstruction analytics — per-card markers', () => {
-  it('emits the canonical analytics card markers for each Estimating analytics card', () => {
-    const { container } = renderEstimating();
+describe('Project Controls analytics — Prompt 07 Estimating cross-conditional regression lock', () => {
+  it("'estimating-preconstruction' still renders exactly 5 direct cards with both Estimating titles and zero Project Controls analytics titles", () => {
+    const { container } = renderOtherTab('estimating-preconstruction');
+    const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
+    const directCards = Array.from(grid.children).filter(
+      (child): child is HTMLElement =>
+        child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
+    );
+    expect(directCards).toHaveLength(5);
+    expect(grid.textContent).toContain('Handoff Continuity Preview');
+    expect(grid.textContent).toContain('Estimate Exposure Preview');
+    for (const key of ANALYTICS_KEYS) {
+      expect(grid.textContent).not.toContain(ANALYTICS_TITLE_BY_KEY[key]);
+    }
+  });
+});
+
+describe('Project Controls analytics — Prompt 08 Startup & Closeout cross-conditional regression lock', () => {
+  it("'startup-closeout' still renders exactly 6 direct cards with all three Startup & Closeout titles and zero Project Controls analytics titles", () => {
+    const { container } = renderOtherTab('startup-closeout');
+    const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
+    const directCards = Array.from(grid.children).filter(
+      (child): child is HTMLElement =>
+        child instanceof HTMLElement && child.hasAttribute('data-pcc-card'),
+    );
+    expect(directCards).toHaveLength(6);
+    expect(grid.textContent).toContain('Startup Readiness Completion');
+    expect(grid.textContent).toContain('Responsibility Coverage');
+    expect(grid.textContent).toContain('Closeout & Warranty Readiness');
+    for (const key of ANALYTICS_KEYS) {
+      expect(grid.textContent).not.toContain(ANALYTICS_TITLE_BY_KEY[key]);
+    }
+  });
+});
+
+describe('Project Controls analytics — per-card markers', () => {
+  it('emits the canonical analytics card markers for each Project Controls analytics card', () => {
+    const { container } = renderProjectControls();
     for (const key of ANALYTICS_KEYS) {
       const id = ANALYTICS_ID_BY_KEY[key];
       const body = container.querySelector(`[data-pcc-analytics-card="${id}"]`);
@@ -183,9 +239,9 @@ describe('Estimating & Preconstruction analytics — per-card markers', () => {
   });
 });
 
-describe('Estimating & Preconstruction analytics — verbatim preview copy and source label', () => {
+describe('Project Controls analytics — verbatim preview copy and source label', () => {
   it('renders the verbatim preview-copy strings inside each analytics card explanation', () => {
-    const { container } = renderEstimating();
+    const { container } = renderProjectControls();
     for (const key of ANALYTICS_KEYS) {
       const id = ANALYTICS_ID_BY_KEY[key];
       const body = container.querySelector(`[data-pcc-analytics-card="${id}"]`);
@@ -196,8 +252,8 @@ describe('Estimating & Preconstruction analytics — verbatim preview copy and s
     }
   });
 
-  it('overrides the source label to "Source: deterministic preconstruction sample" on each analytics card', () => {
-    const { container } = renderEstimating();
+  it('overrides the source label to "Source: deterministic project controls sample" on each analytics card', () => {
+    const { container } = renderProjectControls();
     for (const key of ANALYTICS_KEYS) {
       const id = ANALYTICS_ID_BY_KEY[key];
       const body = container.querySelector(`[data-pcc-analytics-card="${id}"]`);
@@ -207,15 +263,15 @@ describe('Estimating & Preconstruction analytics — verbatim preview copy and s
   });
 });
 
-describe('Estimating & Preconstruction analytics — fallback summary outside chart and direct-child invariant', () => {
+describe('Project Controls analytics — fallback summary outside chart and direct-child invariant', () => {
   it('renders the summary list with no row nested inside the chart canvas', () => {
-    const { container } = renderEstimating();
+    const { container } = renderProjectControls();
     for (const key of ANALYTICS_KEYS) {
       const id = ANALYTICS_ID_BY_KEY[key];
       const body = container.querySelector(`[data-pcc-analytics-card="${id}"]`);
       const summaryRows = body!.querySelectorAll('[data-pcc-analytics-card-summary-row]');
       expect(summaryRows.length, `${id} should have summary rows`).toBe(
-        ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS[key].summary.length,
+        PROJECT_CONTROLS_ANALYTICS_VIEW_MODELS[key].summary.length,
       );
       for (const row of Array.from(summaryRows)) {
         expect(row.closest('[data-pcc-analytics-chart]')).toBeNull();
@@ -224,7 +280,7 @@ describe('Estimating & Preconstruction analytics — fallback summary outside ch
   });
 
   it('every analytics card article is a direct child of [data-pcc-bento-grid]', () => {
-    const { container } = renderEstimating();
+    const { container } = renderProjectControls();
     const grid = container.querySelector('[data-pcc-bento-grid]');
     for (const key of ANALYTICS_KEYS) {
       const article = getCardArticle(container, ANALYTICS_ID_BY_KEY[key]);
@@ -233,23 +289,23 @@ describe('Estimating & Preconstruction analytics — fallback summary outside ch
   });
 });
 
-describe('Estimating & Preconstruction analytics — span overrides', () => {
-  const TWELVE_COL_SPAN: Readonly<Record<PccEstimatingPreconstructionAnalyticsCardKey, number>> = {
-    handoffContinuityPreview: 6,
-    estimateExposurePreview: 6,
+describe('Project Controls analytics — span overrides', () => {
+  const TWELVE_COL_SPAN: Readonly<Record<PccProjectControlsAnalyticsCardKey, number>> = {
+    constraintsAging: 4,
+    permitInspectionReadiness: 4,
+    riskIssueSeverityDistribution: 4,
   };
-  const STANDARD_LAPTOP_SPAN: Readonly<
-    Record<PccEstimatingPreconstructionAnalyticsCardKey, number>
-  > = {
-    handoffContinuityPreview: 5,
-    estimateExposurePreview: 5,
+  const STANDARD_LAPTOP_SPAN: Readonly<Record<PccProjectControlsAnalyticsCardKey, number>> = {
+    constraintsAging: 3,
+    permitInspectionReadiness: 4,
+    riskIssueSeverityDistribution: 3,
   };
 
   function assertOverrides(
-    expectedByKey: Readonly<Record<PccEstimatingPreconstructionAnalyticsCardKey, number>>,
+    expectedByKey: Readonly<Record<PccProjectControlsAnalyticsCardKey, number>>,
     mode: PccResponsiveMode,
   ): void {
-    const { container } = renderEstimating(mode);
+    const { container } = renderProjectControls(mode);
     for (const key of ANALYTICS_KEYS) {
       const article = getCardArticle(container, ANALYTICS_ID_BY_KEY[key]);
       expect(article.getAttribute('data-pcc-column-span'), `${key} column span at ${mode}`).toBe(
@@ -276,8 +332,8 @@ describe('Estimating & Preconstruction analytics — span overrides', () => {
     assertOverrides(STANDARD_LAPTOP_SPAN, 'standardLaptop');
   });
 
-  it('falls back to footprint behavior at tabletLandscape (no estimating analytics override declared)', () => {
-    const { container } = renderEstimating('tabletLandscape');
+  it('falls back to footprint behavior at tabletLandscape (no project-controls analytics override declared)', () => {
+    const { container } = renderProjectControls('tabletLandscape');
     for (const key of ANALYTICS_KEYS) {
       const article = getCardArticle(container, ANALYTICS_ID_BY_KEY[key]);
       expect(article.getAttribute('data-pcc-span-source')).toBe('footprint');
@@ -286,22 +342,42 @@ describe('Estimating & Preconstruction analytics — span overrides', () => {
   });
 });
 
-describe('Estimating & Preconstruction analytics — registry rows preserved and posture invariants', () => {
-  it('keeps the existing Estimating module rows visible (registry unchanged)', () => {
-    const { container } = renderEstimating();
-    expect(container.textContent).toContain('Future estimating modules');
-    expect(container.textContent).toContain('Preconstruction Handoff');
-    expect(container.textContent).toContain('Estimate Assumptions / Alternates / Exclusions');
+describe('Project Controls analytics — registry rows preserved and posture invariants', () => {
+  it('keeps all seven Project Controls module rows visible (registry unchanged)', () => {
+    const { container } = renderProjectControls();
+    for (const label of PROJECT_CONTROLS_MODULE_LABELS_VISIBLE) {
+      expect(container.textContent).toContain(label);
+    }
   });
 
-  it('does not contain "Project Intelligence" anywhere in the Estimating dashboard', () => {
-    const { container } = renderEstimating();
+  it('preserves deferred / non-selectable posture for project-controls-center, contract-compliance, risk-issues-decisions, field-operations, meeting-communication', () => {
+    const { container } = renderProjectControls();
+    for (const moduleId of DEFERRED_MODULE_IDS) {
+      const row = container.querySelector(`[data-pcc-dashboard-module-row="${moduleId}"]`);
+      expect(row, `module row for ${moduleId} should render`).not.toBeNull();
+      expect(row!.getAttribute('data-pcc-dashboard-module-selectable')).toBe('false');
+      expect(row!.getAttribute('data-pcc-dashboard-module-state')).toBe('deferred');
+    }
+  });
+
+  it('preserves preview / selectable posture for permits-inspections and constraints-log', () => {
+    const { container } = renderProjectControls();
+    for (const moduleId of PREVIEW_SELECTABLE_MODULE_IDS) {
+      const row = container.querySelector(`[data-pcc-dashboard-module-row="${moduleId}"]`);
+      expect(row, `module row for ${moduleId} should render`).not.toBeNull();
+      expect(row!.getAttribute('data-pcc-dashboard-module-selectable')).toBe('true');
+      expect(row!.getAttribute('data-pcc-dashboard-module-state')).toBe('preview');
+    }
+  });
+
+  it('does not contain "Project Intelligence" anywhere in the Project Controls dashboard', () => {
+    const { container } = renderProjectControls();
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     expect(grid.textContent ?? '').not.toContain('Project Intelligence');
   });
 
   it('renders zero card-level [data-pcc-active-surface-panel] markers (shell owns the active panel)', () => {
-    const { container } = renderEstimating();
+    const { container } = renderProjectControls();
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     expect(grid.querySelectorAll('[data-pcc-card][data-pcc-active-surface-panel]')).toHaveLength(0);
   });
