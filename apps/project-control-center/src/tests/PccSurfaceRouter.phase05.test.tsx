@@ -90,16 +90,18 @@ describe('PccSurfaceRouter — Phase 05 primary-tab routing', () => {
 });
 
 describe('PccSurfaceRouter — Phase 05 reusable PccPrimaryDashboardSurface', () => {
-  // Phase 06 Prompts 07 + 08 + 09 — three primary tabs insert preview
+  // Phase 06 Prompts 07 + 08 + 09 + 10 — four primary tabs insert preview
   // analytics cards into the shared PccPrimaryDashboardSurface:
   //   - `estimating-preconstruction` (Prompt 07): hero + Module status +
   //     2 analytics + Selected module = 5 direct cards;
   //   - `startup-closeout` (Prompt 08): hero + Module status + 3 analytics
   //     + Selected module = 6 direct cards;
   //   - `project-controls` (Prompt 09): hero + Module status + 3 analytics
-  //     + Selected module = 6 direct cards.
-  // All other primary dashboards (core-tools, cost-time,
-  // systems-administration) continue to render exactly 3 direct cards.
+  //     + Selected module = 6 direct cards;
+  //   - `cost-time` (Prompt 10): hero + Module status + 3 analytics +
+  //     Selected module = 6 direct cards.
+  // All other primary dashboards (core-tools, systems-administration)
+  // continue to render exactly 3 direct cards.
   const EXPECTED_DIRECT_CARD_COUNT_BY_TAB: Readonly<Record<PccPrimaryTabId, number>> = {
     'project-home': 3, // not iterated below; PccPrimaryDashboardSurface is not used for project-home
     'core-tools': 3,
@@ -107,7 +109,7 @@ describe('PccSurfaceRouter — Phase 05 reusable PccPrimaryDashboardSurface', ()
     'estimating-preconstruction': 5,
     'startup-closeout': 6,
     'project-controls': 6,
-    'cost-time': 3,
+    'cost-time': 6,
     'systems-administration': 3,
   };
   const CARD_SUMMARY_BY_TAB: Readonly<Record<PccPrimaryTabId, string>> = {
@@ -120,7 +122,7 @@ describe('PccSurfaceRouter — Phase 05 reusable PccPrimaryDashboardSurface', ()
       'six direct bento children (hero + Module status + 3 analytics + Selected module)',
     'project-controls':
       'six direct bento children (hero + Module status + 3 analytics + Selected module)',
-    'cost-time': 'three direct bento children (hero + Module status + Selected module)',
+    'cost-time': 'six direct bento children (hero + Module status + 3 analytics + Selected module)',
     'systems-administration':
       'three direct bento children (hero + Module status + Selected module)',
   };

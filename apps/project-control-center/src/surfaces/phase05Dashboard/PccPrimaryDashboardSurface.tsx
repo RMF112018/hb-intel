@@ -15,6 +15,10 @@ import {
   ESTIMATING_PRECONSTRUCTION_ANALYTICS_VIEW_MODELS,
 } from './estimatingPreconstructionAnalytics';
 import {
+  COST_TIME_ANALYTICS_SPAN_OVERRIDES,
+  COST_TIME_ANALYTICS_VIEW_MODELS,
+} from './costTimeAnalytics';
+import {
   PROJECT_CONTROLS_ANALYTICS_SPAN_OVERRIDES,
   PROJECT_CONTROLS_ANALYTICS_VIEW_MODELS,
 } from './projectControlsAnalytics';
@@ -55,11 +59,12 @@ function resolveContextModule(
 }
 
 /**
- * Phase 06 Prompts 07 + 08 + 09 — preview analytics insertion for the
+ * Phase 06 Prompts 07 + 08 + 09 + 10 — preview analytics insertion for the
  * shared primary dashboard surface. Routes:
  *   - `estimating-preconstruction` → 2 Estimating cards (Prompt 07);
  *   - `startup-closeout` → 3 Startup & Closeout cards (Prompt 08);
  *   - `project-controls` → 3 Project Controls cards (Prompt 09);
+ *   - `cost-time` → 3 Cost & Time cards (Prompt 10);
  *   - all other primary tabs → null.
  *
  * Renders between `Module status` and the selected-module card so analytics
@@ -143,6 +148,34 @@ function renderPrimaryDashboardAnalytics(activePrimaryTabId: PccPrimaryTabId): R
           tier="tier2"
           region="operational"
           spanOverrides={PROJECT_CONTROLS_ANALYTICS_SPAN_OVERRIDES.riskIssueSeverityDistribution}
+        />
+      </>
+    );
+  }
+
+  if (activePrimaryTabId === 'cost-time') {
+    return (
+      <>
+        <PccAnalyticsCard
+          viewModel={COST_TIME_ANALYTICS_VIEW_MODELS.scheduleMilestonePosture}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={COST_TIME_ANALYTICS_SPAN_OVERRIDES.scheduleMilestonePosture}
+        />
+        <PccAnalyticsCard
+          viewModel={COST_TIME_ANALYTICS_VIEW_MODELS.procurementBuyoutExposure}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={COST_TIME_ANALYTICS_SPAN_OVERRIDES.procurementBuyoutExposure}
+        />
+        <PccAnalyticsCard
+          viewModel={COST_TIME_ANALYTICS_VIEW_MODELS.commitmentCostExposurePreview}
+          footprint="standard"
+          tier="tier2"
+          region="operational"
+          spanOverrides={COST_TIME_ANALYTICS_SPAN_OVERRIDES.commitmentCostExposurePreview}
         />
       </>
     );

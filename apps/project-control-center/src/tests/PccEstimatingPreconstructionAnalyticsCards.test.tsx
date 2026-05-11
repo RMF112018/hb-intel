@@ -148,10 +148,10 @@ describe('Estimating & Preconstruction analytics — exact 5-card direct order',
 });
 
 describe('Estimating & Preconstruction analytics — unrelated dashboards remain unchanged', () => {
-  // Phase 06 Prompt 09 — project-controls now renders 6 cards (3 of its
-  // own analytics), so it's no longer an "unrelated 3-card" tab. Swap to
-  // cost-time, which still renders the unchanged 3-card baseline.
-  for (const tabId of ['core-tools', 'cost-time'] as const) {
+  // Phase 06 Prompt 10 — cost-time now renders 6 cards (3 of its own
+  // analytics). The remaining unrelated 3-card primary dashboards are
+  // core-tools and systems-administration. Iterate those.
+  for (const tabId of ['core-tools', 'systems-administration'] as const) {
     it(`'${tabId}' renders zero estimating analytics cards and exactly 3 direct dashboard cards`, () => {
       const { container } = renderOtherTab(tabId);
       const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
