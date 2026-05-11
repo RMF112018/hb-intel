@@ -1,0 +1,129 @@
+{
+  "runId": "conditional-1778491315945",
+  "generatedAtIso": "2026-05-11T09:21:55.945Z",
+  "tenantSiteUrl": "https://hedrickbrotherscom.sharepoint.[redacted-blob]",
+  "tenantPageUrl": "https://hedrickbrotherscom.sharepoint.[redacted-blob].aspx",
+  "expectedPackageVersion": "1.0.0.218",
+  "selfSkipped": false,
+  "runState": "operator-pending",
+  "evRefs": [
+    "EV-57",
+    "EV-67",
+    "EV-68",
+    "EV-82",
+    "EV-94",
+    "EV-96",
+    "EV-102",
+    "EV-93",
+    "EV-95",
+    "EV-97",
+    "EV-98",
+    "EV-99",
+    "EV-100",
+    "EV-101",
+    "EV-103",
+    "EV-104",
+    "EV-105",
+    "EV-106"
+  ],
+  "setup": [
+    {
+      "laneId": "edit-mode",
+      "status": "not-configured",
+      "configured": false,
+      "attempted": false,
+      "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+      "evRefs": [
+        "EV-57",
+        "EV-94",
+        "EV-96",
+        "EV-102"
+      ]
+    },
+    {
+      "laneId": "high-zoom",
+      "status": "operator-pending",
+      "configured": false,
+      "attempted": false,
+      "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+      "evRefs": [
+        "EV-67",
+        "EV-68"
+      ]
+    },
+    {
+      "laneId": "short-height",
+      "status": "operator-pending",
+      "configured": false,
+      "attempted": false,
+      "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+      "evRefs": [
+        "EV-67",
+        "EV-68"
+      ]
+    },
+    {
+      "laneId": "drawer-modal",
+      "status": "operator-pending",
+      "configured": false,
+      "attempted": false,
+      "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+      "evRefs": [
+        "EV-82"
+      ]
+    },
+    {
+      "laneId": "unauthorized",
+      "status": "not-configured",
+      "configured": false,
+      "attempted": false,
+      "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+      "evRefs": [
+        "EV-96",
+        "EV-102"
+      ]
+    },
+    {
+      "laneId": "special-state",
+      "status": "operator-pending",
+      "configured": false,
+      "attempted": false,
+      "reason": "Conditional gate disabled; lane marked operator-pending until enabled.",
+      "evRefs": [
+        "EV-57",
+        "EV-67",
+        "EV-68",
+        "EV-82",
+        "EV-94",
+        "EV-96",
+        "EV-102"
+      ]
+    }
+  ],
+  "stateObservations": [],
+  "layoutObservations": [],
+  "focusObservations": [],
+  "authObservations": [],
+  "warnings": [],
+  "summary": {
+    "totalLanes": 6,
+    "completedLanes": 0,
+    "operatorPendingLanes": 4,
+    "notConfiguredLanes": 2,
+    "stateObservationCount": 0,
+    "layoutObservationCount": 0,
+    "focusObservationCount": 0,
+    "authObservationCount": 0,
+    "needsReviewCount": 0,
+    "warningCount": 0
+  },
+  "disclaimer": "This output is conditional edit-mode, high-zoom, drawer/modal, unauthorized, and special-state evidence support for EV-57, EV-67, EV-68, EV-82, EV-94, EV-96, EV-102, and related state/source EVs only. It is not a final scorecard result and does not mark any EV captured without operator review.",
+  "artifactPaths": [
+    "docs/architecture/evidence/pcc-live/phase-06-v1.0.0.218-final/conditional-1778491315945/pcc-live-conditional-evidence.json",
+    "docs/architecture/evidence/pcc-live/phase-06-v1.0.0.218-final/conditional-1778491315945/pcc-live-conditional-evidence.md",
+    "docs/architecture/evidence/pcc-live/phase-06-v1.0.0.218-final/conditional-1778491315945/pcc-live-conditional-setup-summary.json",
+    "docs/architecture/evidence/pcc-live/phase-06-v1.0.0.218-final/conditional-1778491315945/pcc-live-conditional-state-summary.json",
+    "docs/architecture/evidence/pcc-live/phase-06-v1.0.0.218-final/conditional-1778491315945/pcc-live-conditional-layout-summary.json",
+    "docs/architecture/evidence/pcc-live/phase-06-v1.0.0.218-final/conditional-1778491315945/pcc-live-conditional-focus-summary.json"
+  ]
+}

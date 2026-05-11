@@ -1,0 +1,356 @@
+[
+  {
+    "surfaceId": "project-home",
+    "ruleId": "aria-allowed-role",
+    "impact": "minor",
+    "count": 1,
+    "help": "ARIA role should be appropriate for the element",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-allowed-role",
+    "tags": [
+      "cat.aria",
+      "best-practice"
+    ],
+    "sanitizedTargets": [
+      "#pcc-active-surface-panel"
+    ]
+  },
+  {
+    "surfaceId": "project-home",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 102,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "._row_nb4be_80[data-pcc-priority-rail-action-tone=\"high\"]:nth-child(1) > ._rowMain_nb4be_104 > ._rowSummary_nb4be_119",
+      "._row_nb4be_80[data-pcc-priority-rail-action-tone=\"high\"]:nth-child(1) > ._rowMain_nb4be_104 > ._rowMeta_nb4be_125 > ._rowToneLabel_nb4be_136[data-pcc-priority-rail-tone-label=\"high\"]",
+      "._row_nb4be_80[data-pcc-priority-rail-action-tone=\"high\"]:nth-child(1) > ._rowMain_nb4be_104 > ._rowMeta_nb4be_125 > ._rowMetaSep_nb4be_153:nth-child(2)",
+      "._row_nb4be_80[data-pcc-priority-rail-action-tone=\"high\"]:nth-child(1) > ._rowMain_nb4be_104 > ._rowMeta_nb4be_125 > ._rowMetaSep_nb4be_153:nth-child(3)",
+      "._row_nb4be_80[data-pcc-priority-rail-action-tone=\"high\"]:nth-child(1) > ._rowMain_nb4be_104 > ._rowMeta_nb4be_125 > ._rowMetaSep_nb4be_153:nth-child(4)",
+      "._row_nb4be_80[data-pcc-priority-rail-action-tone=\"high\"]:nth-child(1) > ._rowMain_nb4be_104 > ._rowMeta_nb4be_125 > ._rowMetaSep_nb4be_153:nth-child(5)",
+      "._row_nb4be_80[data-pcc-priority-rail-action-tone=\"high\"]:nth-child(1) > ._rowAffordance_nb4be_163[data-pcc-priority-rail-disabled-action=\"\"]",
+      "li[data-pcc-priority-rail-action-id=\"fixture-pa-permit-expired-001\"] > ._rowMain_nb4be_104 > ._rowSummary_nb4be_119",
+      "li[data-pcc-priority-rail-action-id=\"fixture-pa-permit-expired-001\"] > ._rowMain_nb4be_104 > ._rowMeta_nb4be_125 > ._rowToneLabel_nb4be_136[data-pcc-priority-rail-tone-label=\"high\"]",
+      "li[data-pcc-priority-rail-action-id=\"fixture-pa-permit-expired-001\"] > ._rowMain_nb4be_104 > ._rowMeta_nb4be_125 > ._rowMetaSep_nb4be_153:nth-child(2)"
+    ]
+  },
+  {
+    "surfaceId": "core-tools",
+    "ruleId": "aria-allowed-role",
+    "impact": "minor",
+    "count": 1,
+    "help": "ARIA role should be appropriate for the element",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-allowed-role",
+    "tags": [
+      "cat.aria",
+      "best-practice"
+    ],
+    "sanitizedTargets": [
+      "#pcc-active-surface-panel"
+    ]
+  },
+  {
+    "surfaceId": "core-tools",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 2,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "article[data-pcc-footprint=\"standard\"] > ._body_1oyxb_23 > header > ._titleStack_1oyxb_49 > ._eyebrow_1oyxb_56",
+      "._activeModuleEmptyHint_4gvzo_154"
+    ]
+  },
+  {
+    "surfaceId": "documents",
+    "ruleId": "aria-allowed-role",
+    "impact": "minor",
+    "count": 1,
+    "help": "ARIA role should be appropriate for the element",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-allowed-role",
+    "tags": [
+      "cat.aria",
+      "best-practice"
+    ],
+    "sanitizedTargets": [
+      "#pcc-active-surface-panel"
+    ]
+  },
+  {
+    "surfaceId": "documents",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 3,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "span[data-pcc-doc-source-health-message=\"warning\"]",
+      "span[data-pcc-doc-source-disabled=\"true\"]",
+      "p[data-pcc-doc-lane-action-reason=\"external-systems\"]"
+    ]
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "ruleId": "aria-allowed-role",
+    "impact": "minor",
+    "count": 1,
+    "help": "ARIA role should be appropriate for the element",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-allowed-role",
+    "tags": [
+      "cat.aria",
+      "best-practice"
+    ],
+    "sanitizedTargets": [
+      "#pcc-active-surface-panel"
+    ]
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 7,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "article[aria-labelledby=\":r1d:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanatio",
+      "._summaryRow_131x3_68[data-pcc-analytics-card-summary-row=\"\"]:nth-child(1) > ._summaryValue_131x3_80[data-pcc-analytics-card-summary-tone=\"info\"]",
+      "._summaryRow_131x3_68[data-pcc-analytics-card-summary-row=\"\"]:nth-child(2) > ._summaryValue_131x3_80[data-pcc-analytics-card-summary-tone=\"warning\"]",
+      "._summaryRow_131x3_68[data-pcc-analytics-card-summary-row=\"\"]:nth-child(3) > ._summaryValue_131x3_80[data-pcc-analytics-card-summary-tone=\"warning\"]",
+      "article[aria-labelledby=\":r1e:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanatio",
+      "article[data-pcc-card-hierarchy=\"supporting\"] > ._body_1oyxb_23 > header > ._titleStack_1oyxb_49 > ._eyebrow_1oyxb_56",
+      "._activeModuleEmptyHint_4gvzo_154"
+    ]
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "ruleId": "aria-allowed-role",
+    "impact": "minor",
+    "count": 1,
+    "help": "ARIA role should be appropriate for the element",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-allowed-role",
+    "tags": [
+      "cat.aria",
+      "best-practice"
+    ],
+    "sanitizedTargets": [
+      "#pcc-active-surface-panel"
+    ]
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 12,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "article[aria-labelledby=\":r1d:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanatio",
+      "article[aria-labelledby=\":r1d:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summa",
+      "._summaryRow_131x3_68[data-pcc-analytics-card-summary-row=\"\"]:nth-child(2) > ._summaryValue_131x3_80[data-pcc-analytics-card-summary-tone=\"info\"]",
+      "article[aria-labelledby=\":r1d:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summa",
+      "article[data-pcc-column-span=\"4\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanati",
+      "article[data-pcc-column-span=\"4\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summ",
+      "article[data-pcc-column-span=\"4\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summ",
+      "article[data-pcc-column-span=\"4\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summ",
+      "article[aria-labelledby=\":r1g:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanatio",
+      "article[aria-labelledby=\":r1g:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summa"
+    ]
+  },
+  {
+    "surfaceId": "project-controls",
+    "ruleId": "aria-allowed-role",
+    "impact": "minor",
+    "count": 1,
+    "help": "ARIA role should be appropriate for the element",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-allowed-role",
+    "tags": [
+      "cat.aria",
+      "best-practice"
+    ],
+    "sanitizedTargets": [
+      "#pcc-active-surface-panel"
+    ]
+  },
+  {
+    "surfaceId": "project-controls",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 8,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "article[aria-labelledby=\":r1d:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanatio",
+      "._summaryRow_131x3_68[data-pcc-analytics-card-summary-row=\"\"]:nth-child(1) > ._summaryValue_131x3_80[data-pcc-analytics-card-summary-tone=\"warning\"]",
+      "span[data-pcc-analytics-card-summary-tone=\"success\"]",
+      "article[data-pcc-column-span=\"4\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanati",
+      "._summaryRow_131x3_68[data-pcc-analytics-card-summary-row=\"\"]:nth-child(1) > ._summaryValue_131x3_80[data-pcc-analytics-card-summary-tone=\"info\"]",
+      "article[aria-labelledby=\":r1g:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanatio",
+      "article[data-pcc-card-hierarchy=\"supporting\"] > ._body_1oyxb_23 > header > ._titleStack_1oyxb_49 > ._eyebrow_1oyxb_56",
+      "._activeModuleEmptyHint_4gvzo_154"
+    ]
+  },
+  {
+    "surfaceId": "cost-time",
+    "ruleId": "aria-allowed-role",
+    "impact": "minor",
+    "count": 1,
+    "help": "ARIA role should be appropriate for the element",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-allowed-role",
+    "tags": [
+      "cat.aria",
+      "best-practice"
+    ],
+    "sanitizedTargets": [
+      "#pcc-active-surface-panel"
+    ]
+  },
+  {
+    "surfaceId": "cost-time",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 10,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "article[aria-labelledby=\":r1d:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanatio",
+      "article[aria-labelledby=\":r1d:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summa",
+      "article[data-pcc-column-span=\"4\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanati",
+      "article[data-pcc-column-span=\"4\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summ",
+      "article[data-pcc-column-span=\"4\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summ",
+      "span[data-pcc-analytics-card-summary-tone=\"danger\"]",
+      "article[aria-labelledby=\":r1g:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanatio",
+      "article[aria-labelledby=\":r1g:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summa",
+      "article[data-pcc-card-hierarchy=\"supporting\"] > ._body_1oyxb_23 > header > ._titleStack_1oyxb_49 > ._eyebrow_1oyxb_56",
+      "._activeModuleEmptyHint_4gvzo_154"
+    ]
+  },
+  {
+    "surfaceId": "systems-administration",
+    "ruleId": "aria-allowed-role",
+    "impact": "minor",
+    "count": 1,
+    "help": "ARIA role should be appropriate for the element",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/aria-allowed-role",
+    "tags": [
+      "cat.aria",
+      "best-practice"
+    ],
+    "sanitizedTargets": [
+      "#pcc-active-surface-panel"
+    ]
+  },
+  {
+    "surfaceId": "systems-administration",
+    "ruleId": "color-contrast",
+    "impact": "serious",
+    "count": 8,
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "sanitizedTargets": [
+      "article[aria-labelledby=\":r1d:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanatio",
+      "article[data-pcc-column-span=\"4\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanati",
+      "article[data-pcc-column-span=\"4\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summ",
+      "span[data-pcc-analytics-card-summary-tone=\"info\"]",
+      "article[aria-labelledby=\":r1g:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._explanation_131x3_30[data-pcc-analytics-card-sample-explanatio",
+      "article[aria-labelledby=\":r1g:\"] > ._body_1oyxb_23 > ._content_1oyxb_78 > ._body_131x3_3[data-pcc-analytics-card-state=\"preview\"][data-pcc-analytics-card-sample-data=\"true\"] > ._summary_131x3_59[data-pcc-analytics-card-summary=\"\"] > ._summa",
+      "article[data-pcc-card-hierarchy=\"supporting\"] > ._body_1oyxb_23 > header > ._titleStack_1oyxb_49 > ._eyebrow_1oyxb_56",
+      "._activeModuleEmptyHint_4gvzo_154"
+    ]
+  }
+]

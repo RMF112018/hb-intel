@@ -1,0 +1,3202 @@
+[
+  {
+    "surfaceId": "project-home",
+    "focusStep": 1,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 2,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 3,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 4,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 5,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 6,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 7,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 8,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 9,
+    "tagName": "button",
+    "selector": "header > div > span > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 141.765625,
+    "boundingHeight": 25
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 10,
+    "tagName": "button",
+    "selector": "div > div > section > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": false,
+    "boundingWidth": 208.890625,
+    "boundingHeight": 23
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 11,
+    "tagName": "button",
+    "selector": "header > div > span > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 125.625,
+    "boundingHeight": 25
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 12,
+    "tagName": "button",
+    "selector": "header > div > span > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 168.203125,
+    "boundingHeight": 25
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 13,
+    "tagName": "button",
+    "selector": "header > div > span > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 148.328125,
+    "boundingHeight": 25
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 14,
+    "tagName": "button",
+    "selector": "header > div > span > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 119.875,
+    "boundingHeight": 25
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 15,
+    "tagName": "button",
+    "selector": "header > div > span > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 110.078125,
+    "boundingHeight": 25
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 16,
+    "tagName": "button",
+    "selector": "header > div > span > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 169.890625,
+    "boundingHeight": 25
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 17,
+    "tagName": "button",
+    "selector": "header > div > span > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 149.75,
+    "boundingHeight": 25
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 18,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 264.90625,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 19,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 172.546875,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 20,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 244.578125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 21,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 328.09375,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 22,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 23,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 24,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 25,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 26,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 27,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 28,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 29,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 30,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 31,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 32,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 33,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 34,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 35,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 36,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 37,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 38,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 39,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "project-home",
+    "focusStep": 40,
+    "tagName": "button",
+    "selector": "section > ul > li > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 202.203125,
+    "boundingHeight": 25.59375
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 1,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 2,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 3,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 4,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 5,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 6,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 7,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 8,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 9,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 10,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 11,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 12,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 13,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 14,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 15,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 16,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 17,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 18,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 19,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 20,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 21,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 22,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 23,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 24,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 25,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 26,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 27,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 28,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 29,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 30,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 31,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 32,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 33,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 34,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 35,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 36,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 37,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 38,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 39,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "core-tools",
+    "focusStep": 40,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 1,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 2,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 3,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 4,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 5,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 6,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 7,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 8,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 9,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 10,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 11,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 12,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 13,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 14,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 15,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 16,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 17,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 18,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 19,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 20,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 21,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 22,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 23,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 24,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 25,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 26,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 27,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 28,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 29,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 30,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 31,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 32,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 33,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 34,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 35,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 36,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 37,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 38,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 39,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "documents",
+    "focusStep": 40,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 1,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 2,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 3,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 4,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 5,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 6,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 7,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 8,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 9,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 10,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 11,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 12,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 13,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 14,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 15,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 16,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 17,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 18,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 19,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 20,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 21,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 22,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 23,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 24,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 25,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 26,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 27,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 28,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 29,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 30,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 31,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 32,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 33,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 34,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 35,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 36,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 37,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 38,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 39,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "estimating-preconstruction",
+    "focusStep": 40,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 1,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 2,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 3,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 4,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 5,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 6,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 7,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 8,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 9,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 10,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 11,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 12,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 13,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 14,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 15,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 16,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 17,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 18,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 19,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 20,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 21,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 22,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 23,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 24,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 25,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 26,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 27,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 28,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 29,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 30,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 31,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 32,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 33,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 34,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 35,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 36,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 37,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 38,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 39,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "startup-closeout",
+    "focusStep": 40,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 1,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 2,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 3,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 4,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 5,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 6,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 7,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 8,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 9,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 10,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 11,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 12,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 13,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 14,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 15,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 16,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 17,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 18,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 19,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 20,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 21,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 22,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 23,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 24,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 25,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 26,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 27,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 28,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 29,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 30,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 31,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 32,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 33,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 34,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 35,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 36,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 37,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 38,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 39,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "project-controls",
+    "focusStep": 40,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 1,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 2,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 3,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 4,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 5,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 6,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 7,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 8,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 9,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 10,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 11,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 12,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 13,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 14,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 15,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 16,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 17,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 18,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 19,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 20,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 21,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 22,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 23,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 24,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 25,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 26,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 27,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 28,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 29,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 30,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 31,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 32,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 33,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 34,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 35,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 36,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 37,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 38,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 39,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "cost-time",
+    "focusStep": 40,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 1,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 2,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 3,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 4,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 5,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 6,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 7,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 8,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 9,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 10,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 11,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 12,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 13,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 14,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 15,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 16,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 17,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 18,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 19,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 20,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 21,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 22,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 23,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 24,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 25,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 26,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 27,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 28,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 29,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 30,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 31,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 32,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 33,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 34,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 35,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 36,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 37,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 38,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 39,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  },
+  {
+    "surfaceId": "systems-administration",
+    "focusStep": 40,
+    "tagName": "button",
+    "selector": "div > div[role=\"tablist\"] > div > button",
+    "hasAccessibleName": true,
+    "hasVisibleFocusIndicator": true,
+    "boundingWidth": 28,
+    "boundingHeight": 40
+  }
+]
