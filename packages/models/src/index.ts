@@ -90,3 +90,6 @@ export * from './api-schemas/index.js';
 
 // ─── PCC (Project Control Center shared foundations) ─────────────────────────
 export * from './pcc/index.js';
+
+// ─── My Work (personal work shell navigation and state) ──────────────────────
+export * from './myWork/index.js';
