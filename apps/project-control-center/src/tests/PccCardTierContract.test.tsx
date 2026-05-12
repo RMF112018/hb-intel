@@ -387,16 +387,17 @@ describe('PCC card-tier contract — External Systems reference cards', () => {
   });
 });
 
-describe('PCC card-tier contract — Documents external-systems lane is deferred', () => {
-  it('Documents external-systems lane has region=deferred', () => {
+describe('PCC card-tier contract — Documents Explorer ready-path card is operational/tier1 (Prompt 10C)', () => {
+  it('Documents Explorer card has region=operational and tier=tier1 with footprint=full', () => {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccDocumentsSurface />
       </PccBentoGrid>,
     );
-    const card = findCardByDescendant(container, '[data-pcc-doc-lane="external-systems"]');
-    expect(card.getAttribute('data-pcc-card-region')).toBe('deferred');
-    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier3');
+    const card = findCardByDescendant(container, '[data-pcc-doc-explorer="true"]');
+    expect(card.getAttribute('data-pcc-card-region')).toBe('operational');
+    expect(card.getAttribute('data-pcc-card-tier')).toBe('tier1');
+    expect(card.getAttribute('data-pcc-footprint')).toBe('full');
   });
 });
 

@@ -1,60 +1,26 @@
 import { Fragment, type FC } from 'react';
+import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccDocumentControlStateCard } from './PccDocumentControlStateCard';
-import { PccDocumentControlLaneCard } from './PccDocumentControlLaneCard';
-import { PccDocumentControlPermissionsCard } from './PccDocumentControlPermissionsCard';
-import { PccDocumentControlReviewsCard } from './PccDocumentControlReviewsCard';
 import { PccDocumentControlReadModelContent } from './PccDocumentControlReadModelContent';
-import {
-  WAVE7_LANE_ORDER,
-  WAVE7_LANE_TITLES,
-  WAVE7_LANE_DESCRIPTIONS,
-  MY_PROJECT_FILES_WARNING_TEXT,
-  type DocumentControlWave7LaneId,
-  type IPccDocumentControlLaneViewModel,
-  type IPccDocumentsReadModelClient,
-} from './documentControlViewModel';
+import { PccDocumentControlExplorerShell } from './PccDocumentControlExplorerShell';
+import { type IPccDocumentsReadModelClient } from './documentControlViewModel';
 
 /**
- * Wave 7 / Prompt 03B — HB Document Control Center surface.
+ * Phase 08 wave-b13 Prompt 10C — Document Control surface entry point.
  *
- * Three-lane shell driven by the document-control read model:
+ * Read-model client supplied  → `PccDocumentControlReadModelContent` owns
+ *   preview / loading / error branching.
+ * No client supplied          → render the source-unavailable state card
+ *   + a single full-width Document Control Explorer card. The legacy
+ *   lane / permissions / reviews composition has moved off the ready
+ *   path; legacy components remain on disk for Prompt 10F reconciliation.
  *
- *   1. Project Record — SharePoint project-site libraries (formal record)
- *   2. My Project Files — current user’s project working folder only
- *   3. External Systems — Procore / Document Crunch / Adobe Sign
- *      visibility and launch metadata only (no writeback / sync / mirror)
- *
- * When `readModelClient` is provided, the surface delegates to
- * `PccDocumentControlReadModelContent` which fetches the envelope and
- * builds a filtered view model. When omitted, the surface renders the
- * same three-lane shell with safe-empty content. Returns a Fragment so
- * each card stays a direct DOM child of `[data-pcc-bento-grid]`.
- *
- * Wave 15A wave-b9 Prompt 4B-09 — `PccDocumentsHeaderCard` was removed
- * (it was the duplicate page-title first card carrying the only
- * branch-spanning `dataActiveSurfacePanel="documents"` marker). The
- * non-ready state copies are now carried by `PccDocumentControlStateCard`
- * (state-aware seam, tier=state / region=state, no active-panel
- * marker). The no-client fallback path uses the state card with
- * `sourceStatus="source-unavailable"` to preserve the prior visible
- * "No document control sources are available for this project."
- * posture. Documents joined `SURFACES_WITH_SHELL_ONLY_PANEL`; the shell
- * `<main role="tabpanel">` is the sole semantic owner of the
- * active-panel marker.
+ * Shell-owned active-panel posture is preserved: this surface emits no
+ * `data-pcc-active-surface-panel` marker; the shell `<main role="tabpanel">`
+ * remains the sole carrier.
  */
 export interface PccDocumentsSurfaceProps {
   readonly readModelClient?: IPccDocumentsReadModelClient;
-}
-
-function safeEmptyLane(laneId: DocumentControlWave7LaneId): IPccDocumentControlLaneViewModel {
-  return {
-    laneId,
-    title: WAVE7_LANE_TITLES[laneId],
-    description: WAVE7_LANE_DESCRIPTIONS[laneId],
-    entries: [],
-    health: [],
-    warningText: laneId === 'my-project-files' ? MY_PROJECT_FILES_WARNING_TEXT : undefined,
-  };
 }
 
 export const PccDocumentsSurface: FC<PccDocumentsSurfaceProps> = ({ readModelClient }) => {
@@ -64,11 +30,15 @@ export const PccDocumentsSurface: FC<PccDocumentsSurfaceProps> = ({ readModelCli
   return (
     <Fragment>
       <PccDocumentControlStateCard readModelStatus="preview" sourceStatus="source-unavailable" />
-      {WAVE7_LANE_ORDER.map((laneId) => (
-        <PccDocumentControlLaneCard key={laneId} laneViewModel={safeEmptyLane(laneId)} />
-      ))}
-      <PccDocumentControlPermissionsCard />
-      <PccDocumentControlReviewsCard viewModel={undefined} />
+      <PccDashboardCard
+        footprint="full"
+        tier="tier1"
+        region="operational"
+        title="Document Control Explorer"
+        headingLevel={2}
+      >
+        <PccDocumentControlExplorerShell />
+      </PccDashboardCard>
     </Fragment>
   );
 };

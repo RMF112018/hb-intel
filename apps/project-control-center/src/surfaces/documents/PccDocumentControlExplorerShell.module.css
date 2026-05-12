@@ -1,0 +1,290 @@
+/*
+ * Phase 08 wave-b13 Prompt 10C — Document Control Explorer Shell styling.
+ *
+ * Token-only declarations. Two-region layout: source rail (rail column)
+ * + main pane (flexible). Collapses to a vertical stack at constrained
+ * widths. Active rail button uses rail-hover background + accent border
+ * per the PCC selected-tab treatment doctrine.
+ */
+
+.shell {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) 1fr;
+  gap: var(--pcc-space-md);
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sourceRail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sourceRailList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sourceRailItem {
+  margin: 0;
+  padding: 0;
+}
+
+.sourceRailButton {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: var(--pcc-radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--pcc-color-text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+.sourceRailButton:hover {
+  background: var(--pcc-color-canvas-muted, var(--pcc-color-canvas));
+}
+
+.sourceRailButton:focus-visible {
+  outline: 2px solid var(--pcc-status-info);
+  outline-offset: 2px;
+}
+
+.sourceRailButton[data-pcc-doc-explorer-source-selected='true'] {
+  background: var(--pcc-color-canvas-muted, var(--pcc-color-canvas));
+  border-color: var(--pcc-color-accent, var(--pcc-status-info));
+  color: var(--pcc-color-accent, var(--pcc-color-text-primary));
+  font-weight: 700;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-sm);
+  min-width: 0;
+}
+
+.contextHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+}
+
+.contextHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pcc-space-sm);
+  flex-wrap: wrap;
+}
+
+.contextHeaderTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--pcc-color-text-primary);
+  line-height: 1.3;
+}
+
+.posturePill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--pcc-color-border);
+  background: var(--pcc-color-canvas);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+}
+
+.contextHeaderSummary {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pcc-color-text-primary);
+  line-height: 1.45;
+}
+
+.contextHeaderCue {
+  margin: 0;
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.breadcrumbBand {
+  display: flex;
+}
+
+.breadcrumbList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+}
+
+.breadcrumbItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumbSegment {
+  font-weight: 500;
+  color: var(--pcc-color-text-muted);
+}
+
+.breadcrumbSegment[data-pcc-doc-explorer-breadcrumb-current='true'] {
+  color: var(--pcc-color-text-primary);
+  font-weight: 700;
+}
+
+.breadcrumbSeparator {
+  color: var(--pcc-color-text-muted);
+  opacity: 0.7;
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-sm);
+  min-width: 0;
+}
+
+.paneIntro {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pcc-color-text-primary);
+  line-height: 1.5;
+}
+
+.destinationList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--pcc-space-sm);
+}
+
+.destinationItem {
+  margin: 0;
+  padding: 0;
+}
+
+.destinationTile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: var(--pcc-radius-sm);
+  border: 1px solid var(--pcc-color-border);
+  background: var(--pcc-color-canvas);
+  cursor: pointer;
+  box-shadow: var(--pcc-elevation-card);
+}
+
+.destinationTile:hover {
+  border-color: var(--pcc-color-accent, var(--pcc-status-info));
+}
+
+.destinationTile:focus-visible {
+  outline: 2px solid var(--pcc-status-info);
+  outline-offset: 2px;
+}
+
+.destinationLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--pcc-color-text-primary);
+}
+
+.destinationSummary {
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  line-height: 1.4;
+}
+
+.rowList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pcc-space-sm);
+  padding: 8px 12px;
+  border-radius: var(--pcc-radius-sm);
+  border: 1px solid var(--pcc-color-border);
+  background: var(--pcc-color-canvas);
+}
+
+.rowLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pcc-color-text-primary);
+}
+
+.rowAffordance {
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+.mpfSafety {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+  padding: 12px 14px;
+  border-radius: var(--pcc-radius-sm);
+  border: 1px solid var(--pcc-color-border);
+  background: var(--pcc-color-canvas);
+}
+
+.mpfSafetySummary {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pcc-color-text-primary);
+  line-height: 1.45;
+}
+
+.mpfSafetyGuardrail {
+  margin: 0;
+  font-size: 12px;
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+  line-height: 1.45;
+}
