@@ -1,0 +1,23 @@
+{
+  "title": "HB Intel My Dashboard — B01 Implementation Prompt Package",
+  "version": "1.0.0",
+  "package": "my_dashboard_b01_implementation_prompt_package",
+  "generatedAt": "2026-05-12T00:00:00Z",
+  "repo": "RMF112018/hb-intel",
+  "scope": "Documentation and planning alignment prompts for B01 — My Dashboard foundation, scope, and repo-truth; no runtime implementation.",
+  "files": [
+    "README.md",
+    "manifest.json",
+    "00_B01_Implementation_Package_Overview.md",
+    "01_B01_Repo_Truth_Implementation_Plan.md",
+    "02_B01_Document_Authority_And_Cross_Reference_Map.md",
+    "03_B01_Validation_And_Closeout_Requirements.md",
+    "04_B01_Implementation_Gap_Register.md",
+    "05_B01_Targeted_Web_Verification_Notes.md",
+    "Prompt_01_Create_My_Dashboard_Dev_Plan_Readme_And_Authority_Index.md",
+    "Prompt_02_Update_My_Dashboard_Outline_For_Batch_Authority_And_Handoff.md",
+    "Prompt_03_Correct_My_Work_Authority_Drift_And_Legacy_Contract_References.md",
+    "Prompt_04_Correct_SF29_ADR_Reference_Drift.md",
+    "Prompt_05_Validate_B01_Documentation_Alignment_And_Closeout.md"
+  ]
+}

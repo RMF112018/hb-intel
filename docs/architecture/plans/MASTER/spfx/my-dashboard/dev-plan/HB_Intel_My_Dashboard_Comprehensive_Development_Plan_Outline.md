@@ -8,6 +8,24 @@
 
 ---
 
+# Batch Authority Posture
+
+This outline is an umbrella scaffold and full-plan topic map for HB Intel My Dashboard. It is not the detailed authority for sections that have been developed into batch artifacts. Where a batch artifact exists for a section, that batch artifact is the detailed authority; this outline retains the scaffold and the unfinished sections only.
+
+If implementation drift is observed between this outline, a batch artifact, and the current working tree, **live repo truth** (current files, manifests, exports, tests, configs, and canonical current-state documentation) outranks both this outline and the batch artifacts and must be reconciled into the plan, not the other way around.
+
+| Artifact | Developed authority |
+|---|---|
+| `B01_My_Dashboard_Foundation_Scope_And_Repo_Truth_Development.md` | Sections 0–5 |
+| `B02_My_Dashboard_Hosting_Packaging_Auth_And_Runtime_Development.md` | Sections 6, 7, 8, 14, and 19 |
+| This outline | Umbrella scaffold and full-plan topic map |
+
+**Precedence:** live repo truth > applicable detailed batch artifact > this outline > older or historical references. The outline cannot override a more detailed batch artifact for any section that batch has developed; later batches must explicitly acknowledge the closed decisions they inherit and must not silently re-litigate them.
+
+See the folder-level authority index at `docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/README.md` for the full reading order and the closed B01 foundation decisions that constrain every subsequent batch.
+
+---
+
 # 0. Document Control
 
 ## 0.1 Document Title
@@ -39,6 +57,7 @@ This plan governs:
 | Direct Adobe calls from SPFx | Prohibited |
 | In-HB signing/approval | Out of scope for MVP |
 | Webhook-backed synchronization | Deferred future enhancement |
+| Personal-work primitive compatibility | Closed — must preserve compatibility with existing `@hbc/my-work-feed` / Personal Work Hub; no competing cross-module personal-work primitive |
 
 ---
 
@@ -54,6 +73,7 @@ The first release should establish the reusable shell and integration pattern, n
 - **My Dashboard** = personal operating layer
 - **My Work shell** = reusable personal command experience inside My Dashboard
 - **Adobe Sign Action Queue** = first production-shaped user-specific external work queue
+- **Personal Work Hub / `@hbc/my-work-feed`** = existing HB Intel personal-work architecture that My Dashboard must align with and must not silently duplicate or contradict
 
 ## 1.3 MVP Outcome
 At completion of this initiative, a signed-in HB user should be able to:
@@ -220,6 +240,8 @@ The initiative includes:
 - Adobe Sign agreement search client
 - Hosted communication-site deployment validation
 - Testing and evidence documentation
+
+> **Personal-work primitive guardrail:** This initiative does not authorize a competing cross-module personal-work primitive beside `@hbc/my-work-feed` / Personal Work Hub. Later read-model and module decisions must preserve compatibility with the existing primitive or explicitly justify a constrained, narrowly-scoped boundary before implementation proceeds.
 
 ## 4.2 Out-of-Scope for MVP
 The following are explicitly out of scope:
