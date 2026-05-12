@@ -11,12 +11,14 @@
     "dev": "vite"
   },
   "dependencies": {
+    "@hbc/auth": "workspace:*",
     "@hbc/models": "workspace:*",
     "@hbc/ui-kit": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@microsoft/sp-webpart-base": "^1.18.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^15.0.7",
     "@types/react": "^18.3.0",
