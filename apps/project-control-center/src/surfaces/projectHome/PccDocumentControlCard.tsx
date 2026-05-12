@@ -1,164 +1,222 @@
-import { useId, type FC } from 'react';
+import { useId, useMemo, useRef, useState, type FC, type KeyboardEvent } from 'react';
 import {
-  DOCUMENT_CONTROL_ACTIONS,
-  DOCUMENT_CONTROL_LANES,
-  DOCUMENT_CONTROL_SOURCES,
-  DOCUMENT_CONTROL_SOURCE_IDS,
-  type DocumentControlLane,
-  type DocumentControlSourceId,
-  type IDocumentControlSource,
+  SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
+  type DocumentControlHomeFeedMode,
+  type IPccDocumentControlHomeFeed,
+  type IPccDocumentControlLatestChangeFeedItem,
+  type IPccDocumentControlRecentFeedItem,
 } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import { PccPreviewState } from '../../ui/PccPreviewState';
-import { PccStatusPill } from '../../ui/PccStatusPill';
 import { PccProjectHomeGatewayAction } from './PccProjectHomeGatewayAction';
 import type { PccProjectHomeCardProps } from './shared';
 import styles from './PccProjectHome.module.css';
 
 interface PccDocumentControlCardProps extends PccProjectHomeCardProps {
-  /**
-   * Optional read-model data. When supplied, lane tiles are rendered by
-   * filtering this list with `source.lane === lane`. When omitted, falls
-   * back to the canonical `DOCUMENT_CONTROL_SOURCE_IDS` taxonomy.
-   */
-  readonly sources?: readonly IDocumentControlSource[];
+  readonly homeFeed?: IPccDocumentControlHomeFeed;
 }
 
-function postureTone(posture: string): 'success' | 'info' | 'warning' | 'neutral' {
-  switch (posture) {
-    case 'mvp-required':
-      return 'success';
-    case 'mvp-optional':
-      return 'info';
-    case 'conditional':
-      return 'warning';
-    default:
-      return 'neutral';
+const FEED_TABS: readonly {
+  readonly mode: DocumentControlHomeFeedMode;
+  readonly label: string;
+}[] = [
+  { mode: 'my-recent-files', label: 'My Recent Files' },
+  { mode: 'latest-changes', label: 'Latest Changes' },
+] as const;
+
+const EMPTY_FEED_COPY = 'No items available in this view yet.';
+
+function formatUtcLabel(utc: string): string {
+  if (Number.isNaN(Date.parse(utc))) return utc;
+  return `${utc.slice(0, 16).replace('T', ' ')} UTC`;
+}
+
+function formatChangeKindLabel(changeKind: 'added' | 'updated'): 'Added' | 'Updated' {
+  return changeKind === 'added' ? 'Added' : 'Updated';
+}
+
+function resolveHomeFeed(homeFeed?: IPccDocumentControlHomeFeed): IPccDocumentControlHomeFeed {
+  return homeFeed ?? SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED;
+}
+
+const RecentFeedRow: FC<{ item: IPccDocumentControlRecentFeedItem }> = ({ item }) => (
+  <li
+    className={styles.documentFeedRow}
+    data-pcc-document-control-feed-item=""
+    data-pcc-document-control-feed-item-id={item.id}
+    data-pcc-document-control-feed-item-source={item.source}
+    data-pcc-document-control-feed-item-kind={item.kind}
+    data-pcc-document-control-feed-item-deep-link-posture={item.deepLinkPosture}
+  >
+    <p className={styles.documentFeedTitle}>{item.title}</p>
+    <p className={styles.documentFeedMeta}>
+      <span className={styles.documentFeedPill}>{item.source}</span>
+      <span>{item.kind}</span>
+      <span>{formatUtcLabel(item.accessedAtUtc)}</span>
+    </p>
+    <p className={styles.documentFeedContext}>{item.contextLabel}</p>
+  </li>
+);
+
+const LatestChangesFeedRow: FC<{ item: IPccDocumentControlLatestChangeFeedItem }> = ({ item }) => (
+  <li
+    className={styles.documentFeedRow}
+    data-pcc-document-control-feed-item=""
+    data-pcc-document-control-feed-item-id={item.id}
+    data-pcc-document-control-feed-item-source={item.source}
+    data-pcc-document-control-feed-item-kind={item.kind}
+    data-pcc-document-control-feed-item-deep-link-posture={item.deepLinkPosture}
+    data-pcc-document-control-feed-change-kind={item.changeKind}
+  >
+    <p className={styles.documentFeedTitle}>{item.title}</p>
+    <p className={styles.documentFeedMeta}>
+      <span className={styles.documentFeedPill}>{item.source}</span>
+      <span>{item.kind}</span>
+      <span className={styles.documentFeedChangeKind}>
+        {formatChangeKindLabel(item.changeKind)}
+      </span>
+      <span>{formatUtcLabel(item.changedAtUtc)}</span>
+    </p>
+    <p className={styles.documentFeedContext}>{item.contextLabel}</p>
+  </li>
+);
+
+const DocumentControlFeedBody: FC<{ homeFeed?: IPccDocumentControlHomeFeed }> = ({ homeFeed }) => {
+  const resolvedFeed = useMemo(() => resolveHomeFeed(homeFeed), [homeFeed]);
+  const [activeMode, setActiveMode] = useState<DocumentControlHomeFeedMode>('my-recent-files');
+  const [focusedIndex, setFocusedIndex] = useState(0);
+
+  const tabIdBase = useId();
+  const panelIdBase = useId();
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const tabToItems: Readonly<Record<DocumentControlHomeFeedMode, readonly unknown[]>> = {
+    'my-recent-files': resolvedFeed.myRecentFiles,
+    'latest-changes': resolvedFeed.latestChanges,
+  };
+
+  function focusTab(index: number): void {
+    const next = (index + FEED_TABS.length) % FEED_TABS.length;
+    setFocusedIndex(next);
+    tabRefs.current[next]?.focus();
   }
-}
 
-function laneLabel(lane: DocumentControlLane): string {
-  return lane === 'microsoft-files' ? 'Microsoft Files' : 'External Document Systems';
-}
+  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number): void {
+    switch (event.key) {
+      case 'ArrowRight':
+        event.preventDefault();
+        focusTab(index + 1);
+        return;
+      case 'ArrowLeft':
+        event.preventDefault();
+        focusTab(index - 1);
+        return;
+      case 'Home':
+        event.preventDefault();
+        focusTab(0);
+        return;
+      case 'End':
+        event.preventDefault();
+        focusTab(FEED_TABS.length - 1);
+        return;
+      case 'Enter':
+      case ' ': {
+        event.preventDefault();
+        const mode = FEED_TABS[focusedIndex]?.mode;
+        if (mode !== undefined) setActiveMode(mode);
+        return;
+      }
+      default:
+        return;
+    }
+  }
 
-function fixtureSourcesInLane(lane: DocumentControlLane): readonly IDocumentControlSource[] {
-  return DOCUMENT_CONTROL_SOURCE_IDS.filter(
-    (id: DocumentControlSourceId) => DOCUMENT_CONTROL_SOURCES[id].lane === lane,
-  ).map((id) => DOCUMENT_CONTROL_SOURCES[id]);
-}
-
-/**
- * Wave 2 / Prompt 06 — Project Home Document Control summary card.
- *
- * Compact two-lane summary that mirrors the dedicated Documents surface.
- * All taxonomy comes from canonical `@hbc/models/pcc` model metadata
- * (`DOCUMENT_CONTROL_LANES`, `DOCUMENT_CONTROL_ACTIONS`, the extended
- * `IDocumentControlSource` lane / capabilityPosture / sourceOfRecordLabel
- * fields). No app-local lane or action duplication.
- */
-/**
- * Per-source tile. Wave 15A wave-b6 Prompt 06 — `useId()` lives here, not
- * inside the lane `.map(...)`, so the rules of hooks are preserved (hooks
- * must not be called inside iteration callbacks). The generated id is
- * shared by the visible source-boundary reason node and every disabled
- * action button's `aria-describedby` attribute, so the reason is announced
- * by assistive tech and visible on screen — not tooltip-only.
- */
-const DocumentControlSourceTile: FC<{ source: IDocumentControlSource }> = ({ source }) => {
-  const reasonId = useId();
   return (
     <div
-      className={styles.sourceTile}
-      data-pcc-document-source-id={source.id}
-      data-pcc-document-posture={source.posture}
-      data-pcc-document-link-behavior={source.linkBehavior}
-      data-pcc-doc-lane={source.lane}
+      className={styles.documentFeedRoot}
+      data-pcc-document-control-card=""
+      data-pcc-document-control-feed-mode={activeMode}
     >
-      <span className={styles.sourceName}>{source.displayName}</span>
-      <PccStatusPill tone={postureTone(source.posture)}>{source.posture}</PccStatusPill>
-      <span className={styles.sourceMeta}>{source.sourceOfRecordLabel}</span>
-      {source.lane === 'microsoft-files' ? (
-        <>
-          <p id={reasonId} className={styles.contextNote} data-pcc-doc-action-reason="">
-            Preview only — complete document actions in Microsoft/SharePoint. PCC shows source
-            posture only.
-          </p>
-          <ul
-            className={styles.surfaceList}
-            data-pcc-doc-actions=""
-            style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--pcc-space-xs)' }}
+      {/* Prompt 09B keeps row-level deep links deferred until canonical path
+          resolution and authorization gates are approved in a later phase. */}
+      <div
+        className={styles.documentFeedTabs}
+        role="tablist"
+        aria-label="Document Control feed views"
+      >
+        {FEED_TABS.map(({ mode, label }, index) => {
+          const active = activeMode === mode;
+          const tabId = `${tabIdBase}-${mode}`;
+          const panelId = `${panelIdBase}-${mode}`;
+          return (
+            <button
+              key={mode}
+              ref={(el) => {
+                tabRefs.current[index] = el;
+              }}
+              type="button"
+              id={tabId}
+              role="tab"
+              aria-controls={panelId}
+              aria-selected={active ? 'true' : 'false'}
+              tabIndex={focusedIndex === index ? 0 : -1}
+              className={styles.documentFeedTab}
+              data-pcc-document-control-feed-tab={mode}
+              data-pcc-document-control-feed-tab-state={active ? 'active' : 'inactive'}
+              onClick={() => {
+                setFocusedIndex(index);
+                setActiveMode(mode);
+              }}
+              onKeyDown={(event) => onTabKeyDown(event, index)}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      {FEED_TABS.map(({ mode }) => {
+        const active = activeMode === mode;
+        const tabId = `${tabIdBase}-${mode}`;
+        const panelId = `${panelIdBase}-${mode}`;
+        const items = tabToItems[mode];
+
+        return (
+          <section
+            key={mode}
+            id={panelId}
+            role="tabpanel"
+            aria-labelledby={tabId}
+            hidden={!active}
+            className={styles.documentFeedPanel}
+            data-pcc-document-control-feed-panel={mode}
+            data-pcc-document-control-feed-panel-state={active ? 'active' : 'inactive'}
           >
-            {source.previewActionIds.map((actionId) => {
-              const action = DOCUMENT_CONTROL_ACTIONS[actionId];
-              return (
-                <li key={actionId} style={{ listStyle: 'none' }}>
-                  <button
-                    type="button"
-                    disabled
-                    aria-disabled="true"
-                    aria-describedby={reasonId}
-                    data-pcc-doc-action={actionId}
-                    data-pcc-doc-action-execution-state={action.executionState}
-                    title={`${action.description} · ${action.futureCapability}`}
-                    style={{
-                      padding: '2px 8px',
-                      fontSize: 11,
-                      borderRadius: 'var(--pcc-radius-sm)',
-                      border: '1px solid var(--pcc-color-border)',
-                      background: 'var(--pcc-color-canvas)',
-                      color: 'var(--pcc-color-text-muted)',
-                      cursor: 'not-allowed',
-                      opacity: 0.78,
-                    }}
-                  >
-                    {action.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      ) : (
-        <span data-pcc-doc-launch-cue className={styles.sourceMeta}>
-          Visibility only — open source systems outside PCC.
-        </span>
-      )}
+            {items.length === 0 ? (
+              <p className={styles.documentFeedEmpty}>{EMPTY_FEED_COPY}</p>
+            ) : mode === 'my-recent-files' ? (
+              <ul className={styles.documentFeedList}>
+                {resolvedFeed.myRecentFiles.map((item) => (
+                  <RecentFeedRow key={item.id} item={item} />
+                ))}
+              </ul>
+            ) : (
+              <ul className={styles.documentFeedList}>
+                {resolvedFeed.latestChanges.map((item) => (
+                  <LatestChangesFeedRow key={item.id} item={item} />
+                ))}
+              </ul>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 };
 
-const DocumentControlBody: FC<{ sources: readonly IDocumentControlSource[] }> = ({ sources }) => (
-  <div className={styles.sourceGrid} data-pcc-document-control-body="">
-    {DOCUMENT_CONTROL_LANES.map((lane) => (
-      <section key={lane} data-pcc-doc-lane={lane}>
-        <span
-          className={styles.metricLabel}
-          style={{ display: 'block', marginBottom: 'var(--pcc-space-xs)' }}
-        >
-          {laneLabel(lane)}
-        </span>
-        <div className={styles.sourceGrid}>
-          {sources
-            .filter((source) => source.lane === lane)
-            .map((source) => (
-              <DocumentControlSourceTile key={source.id} source={source} />
-            ))}
-        </div>
-      </section>
-    ))}
-  </div>
-);
-
-function resolveDocumentControlSources(
-  sources?: readonly IDocumentControlSource[],
-): readonly IDocumentControlSource[] {
-  if (sources !== undefined) return sources;
-  return DOCUMENT_CONTROL_LANES.flatMap((lane) => fixtureSourcesInLane(lane));
-}
-
 export const PccDocumentControlCard: FC<PccDocumentControlCardProps> = ({
   state = 'preview',
-  sources,
+  homeFeed,
   spanOverrides,
   gateway,
   onSelectModule,
@@ -177,7 +235,7 @@ export const PccDocumentControlCard: FC<PccDocumentControlCardProps> = ({
     }
   >
     {state === 'preview' ? (
-      <DocumentControlBody sources={resolveDocumentControlSources(sources)} />
+      <DocumentControlFeedBody homeFeed={homeFeed} />
     ) : (
       <PccPreviewState state={state} />
     )}

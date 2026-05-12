@@ -82,8 +82,8 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         onSelectModule={onSelectModule}
       />
       <PccDocumentControlCard
-        state={viewModel?.documentControl.state ?? 'preview'}
-        sources={viewModel?.documentControl.data}
+        state={viewModel?.documentControlHomeFeed.state ?? 'preview'}
+        homeFeed={viewModel?.documentControlHomeFeed.data}
         spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.documentControl}
         gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.documentControl}
         onSelectModule={onSelectModule}

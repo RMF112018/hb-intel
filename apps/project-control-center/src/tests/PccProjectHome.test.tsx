@@ -1,8 +1,8 @@
 import { afterEach, describe, it, expect } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import {
-  DOCUMENT_CONTROL_SOURCE_IDS,
   PRIORITY_ACTION_CATEGORY_LABELS,
+  SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
   SAMPLE_APPROVAL_CHECKPOINTS,
   SAMPLE_BUSINESS_AUDIT_EVENTS,
   SAMPLE_EXTERNAL_SYSTEM_LINKS,
@@ -359,65 +359,56 @@ describe('Project Home bento dashboard', () => {
 
   // ── Document Control ─────────────────────────────────────────────────
 
-  it('Document Control card renders one tile per DOCUMENT_CONTROL_SOURCE_IDS entry with posture metadata, grouped by canonical lane', () => {
+  it('Document Control card defaults to My Recent Files and renders five preview feed rows', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const body = container.querySelector('[data-pcc-document-control-body]');
-    expect(body).not.toBeNull();
-
-    // Two lane sections from the canonical DOCUMENT_CONTROL_LANES, scoped to this card body.
-    const microsoftLane = body!.querySelector('[data-pcc-doc-lane="microsoft-files"]');
-    const externalLane = body!.querySelector('[data-pcc-doc-lane="external-document-systems"]');
-    expect(microsoftLane, 'Microsoft Files lane section should render').not.toBeNull();
-    expect(externalLane, 'External Document Systems lane section should render').not.toBeNull();
-
-    // Tile counts derived from the canonical lane field on DOCUMENT_CONTROL_SOURCES.
-    const tiles = body!.querySelectorAll('[data-pcc-document-source-id]');
-    expect(tiles).toHaveLength(DOCUMENT_CONTROL_SOURCE_IDS.length);
-    for (const tile of tiles) {
-      expect(tile.getAttribute('data-pcc-document-posture')).not.toBeNull();
-      expect(tile.getAttribute('data-pcc-document-link-behavior')).not.toBeNull();
-      expect(tile.getAttribute('data-pcc-doc-lane')).not.toBeNull();
-    }
+    const card = container.querySelector('[data-pcc-document-control-card]');
+    expect(card).not.toBeNull();
+    expect(card!.getAttribute('data-pcc-document-control-feed-mode')).toBe('my-recent-files');
+    expect(
+      card!
+        .querySelector('[data-pcc-document-control-feed-tab-state="active"]')
+        ?.getAttribute('data-pcc-document-control-feed-tab'),
+    ).toBe('my-recent-files');
+    const activePanel = card!.querySelector(
+      '[data-pcc-document-control-feed-panel-state="active"]',
+    );
+    expect(activePanel).not.toBeNull();
+    const items = activePanel!.querySelectorAll('[data-pcc-document-control-feed-item]');
+    expect(items).toHaveLength(5);
   });
 
-  it('Document Control card Microsoft-lane action chips are disabled buttons with no executable handler or href', () => {
+  it('Document Control card switches to Latest Changes, keeps one visible panel, and rows remain inert', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const body = container.querySelector('[data-pcc-document-control-body]');
-    expect(body).not.toBeNull();
+    const card = container.querySelector('[data-pcc-document-control-card]');
+    expect(card).not.toBeNull();
 
-    const actionEls = body!.querySelectorAll('[data-pcc-doc-action]');
-    expect(
-      actionEls.length,
-      'at least one Microsoft-lane action chip should render',
-    ).toBeGreaterThan(0);
-    for (const el of actionEls) {
-      expect(el.tagName).toBe('BUTTON');
-      const button = el as HTMLButtonElement;
-      expect(
-        button.disabled,
-        `action chip ${button.getAttribute('data-pcc-doc-action')} must be disabled`,
-      ).toBe(true);
-      expect(button.getAttribute('aria-disabled')).toBe('true');
-      // No inline onclick attribute string.
-      expect(button.getAttribute('onclick')).toBeNull();
-      // executionState marker reflects the canonical preview-disabled posture.
-      expect(button.getAttribute('data-pcc-doc-action-execution-state')).toBe('preview-disabled');
+    const latestTab = card!.querySelector<HTMLButtonElement>(
+      '[data-pcc-document-control-feed-tab=\"latest-changes\"]',
+    );
+    expect(latestTab).not.toBeNull();
+    fireEvent.click(latestTab!);
+
+    expect(card!.getAttribute('data-pcc-document-control-feed-mode')).toBe('latest-changes');
+    const myRecentPanel = card!.querySelector<HTMLElement>(
+      '[data-pcc-document-control-feed-panel=\"my-recent-files\"]',
+    );
+    const latestPanel = card!.querySelector<HTMLElement>(
+      '[data-pcc-document-control-feed-panel=\"latest-changes\"]',
+    );
+    expect(myRecentPanel).not.toBeNull();
+    expect(latestPanel).not.toBeNull();
+    expect(myRecentPanel!.hasAttribute('hidden')).toBe(true);
+    expect(latestPanel!.hasAttribute('hidden')).toBe(false);
+
+    const latestRows = latestPanel!.querySelectorAll('[data-pcc-document-control-feed-item]');
+    expect(latestRows).toHaveLength(5);
+    for (const row of latestRows) {
+      expect(row.querySelectorAll('a').length).toBe(0);
+      expect(row.querySelectorAll('button').length).toBe(0);
+      expect(row.getAttribute('data-pcc-document-control-feed-change-kind')).toMatch(
+        /^(added|updated)$/,
+      );
     }
-
-    // No <a href="http(s)://"> launch behavior anywhere in the card body.
-    const anchors = body!.querySelectorAll('a[href]');
-    for (const a of anchors) {
-      const href = a.getAttribute('href') ?? '';
-      expect(href).not.toMatch(/^https?:\/\//);
-    }
-
-    // External-lane rows surface a launch/visibility cue and contain no action buttons.
-    const externalLane = body!.querySelector('[data-pcc-doc-lane="external-document-systems"]');
-    expect(externalLane).not.toBeNull();
-    const externalLaunchCues = externalLane!.querySelectorAll('[data-pcc-doc-launch-cue]');
-    expect(externalLaunchCues.length).toBeGreaterThan(0);
-    const externalActionButtons = externalLane!.querySelectorAll('[data-pcc-doc-action]');
-    expect(externalActionButtons.length).toBe(0);
   });
 
   // ── Project Readiness ────────────────────────────────────────────────
@@ -573,43 +564,80 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
-  it('Document Control Microsoft-lane disabled actions link to a visible source-boundary reason via aria-describedby', () => {
+  it('Document Control tabs expose correct tablist and tabpanel aria wiring with one active panel', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const microsoftLane = container.querySelector('[data-pcc-doc-lane="microsoft-files"]');
-    expect(microsoftLane).not.toBeNull();
-    const reasons = microsoftLane!.querySelectorAll<HTMLElement>('[data-pcc-doc-action-reason]');
-    expect(reasons.length).toBeGreaterThan(0);
-    for (const r of Array.from(reasons)) {
-      const txt = r.textContent ?? '';
-      expect(txt).toContain('Preview only');
-      expect(txt).toContain('Microsoft/SharePoint');
-      expect(txt).toContain('source posture');
+    const card = container.querySelector('[data-pcc-document-control-card]');
+    expect(card).not.toBeNull();
+    const tablist = card!.querySelector('[role=\"tablist\"]');
+    expect(tablist).not.toBeNull();
+    expect(tablist!.getAttribute('aria-label')).toBe('Document Control feed views');
+
+    const tabs = Array.from(card!.querySelectorAll<HTMLElement>('[role=\"tab\"]'));
+    const panels = Array.from(card!.querySelectorAll<HTMLElement>('[role=\"tabpanel\"]'));
+    expect(tabs).toHaveLength(2);
+    expect(panels).toHaveLength(2);
+
+    for (const tab of tabs) {
+      const controls = tab.getAttribute('aria-controls');
+      expect(controls).not.toBeNull();
+      const panel = card!.querySelector<HTMLElement>(`#${CSS.escape(controls!)}`);
+      expect(panel).not.toBeNull();
+      expect(panel!.getAttribute('aria-labelledby')).toBe(tab.id);
     }
-    const buttons = microsoftLane!.querySelectorAll<HTMLButtonElement>('[data-pcc-doc-action]');
-    expect(buttons.length).toBeGreaterThan(0);
-    for (const btn of Array.from(buttons)) {
-      expect(btn.disabled).toBe(true);
-      expect(btn.getAttribute('aria-disabled')).toBe('true');
-      expect(btn.getAttribute('href')).toBeNull();
-      expect(btn.getAttribute('onclick')).toBeNull();
-      const describedBy = btn.getAttribute('aria-describedby');
-      expect(describedBy, 'disabled action button must link to a reason node').not.toBeNull();
-      expect(microsoftLane!.querySelector(`#${CSS.escape(describedBy!)}`)).not.toBeNull();
-    }
+
+    expect(tabs.filter((tab) => tab.getAttribute('aria-selected') === 'true')).toHaveLength(1);
+    expect(panels.filter((panel) => !panel.hasAttribute('hidden'))).toHaveLength(1);
+    expect(panels.filter((panel) => panel.hasAttribute('hidden'))).toHaveLength(1);
   });
 
-  it('Document Control external-lane launch cue is bounded "Visibility only — open source systems outside PCC."', () => {
+  it('Document Control tab keyboard behavior uses manual activation', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
-    const externalLane = container.querySelector('[data-pcc-doc-lane="external-document-systems"]');
-    expect(externalLane).not.toBeNull();
-    const cues = externalLane!.querySelectorAll<HTMLElement>('[data-pcc-doc-launch-cue]');
-    expect(cues.length).toBeGreaterThan(0);
-    for (const cue of Array.from(cues)) {
-      expect(cue.textContent).toContain('Visibility only');
-      expect(cue.textContent).toContain('outside PCC');
+    const card = container.querySelector('[data-pcc-document-control-card]');
+    expect(card).not.toBeNull();
+    const tabs = Array.from(card!.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    expect(tabs).toHaveLength(2);
+
+    tabs[0]!.focus();
+    fireEvent.keyDown(tabs[0]!, { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(tabs[1]);
+    expect(tabs[0]!.getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.keyDown(tabs[1]!, { key: 'Enter' });
+    expect(tabs[1]!.getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.keyDown(tabs[1]!, { key: 'Home' });
+    expect(document.activeElement).toBe(tabs[0]);
+    expect(tabs[1]!.getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.keyDown(tabs[0]!, { key: ' ' });
+    expect(tabs[0]!.getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.keyDown(tabs[0]!, { key: 'End' });
+    expect(document.activeElement).toBe(tabs[1]);
+    fireEvent.keyDown(tabs[1]!, { key: 'ArrowLeft' });
+    expect(document.activeElement).toBe(tabs[0]);
+  });
+
+  it('Document Control feed rows emit item markers and fallback to sample feed when no homeFeed prop is provided', () => {
+    const { container } = render(<PccApp forceMode="desktop" />);
+    const card = container.querySelector('[data-pcc-document-control-card]');
+    expect(card).not.toBeNull();
+    const activePanel = card!.querySelector(
+      '[data-pcc-document-control-feed-panel-state="active"]',
+    );
+    expect(activePanel).not.toBeNull();
+    const rows = activePanel!.querySelectorAll('[data-pcc-document-control-feed-item]');
+    expect(rows).toHaveLength(SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED.myRecentFiles.length);
+    for (const row of rows) {
+      expect(row.getAttribute('data-pcc-document-control-feed-item-id')).toBeTruthy();
+      expect(row.getAttribute('data-pcc-document-control-feed-item-source')).toMatch(
+        /^(sharepoint|onedrive|procore)$/,
+      );
+      expect(row.getAttribute('data-pcc-document-control-feed-item-kind')).toBeTruthy();
+      expect(row.getAttribute('data-pcc-document-control-feed-item-deep-link-posture')).toMatch(
+        /^(preview-only|future-deep-link)$/,
+      );
     }
-    expect(externalLane!.querySelectorAll('[data-pcc-doc-action]')).toHaveLength(0);
-    expect(externalLane!.querySelectorAll('a[href]')).toHaveLength(0);
   });
 
   it('Procore snapshot card renders the source-boundary line on the read-model path', async () => {

@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('PccProjectHomeReadModelContent document-control seam regression', () => {
-  it('keeps PccDocumentControlCard wired to viewModel?.documentControl.data (Prompt 09A no-retarget guard)', () => {
+  it('wires PccDocumentControlCard to viewModel?.documentControlHomeFeed.data (Prompt 09B retarget guard)', () => {
     const filePath = resolve(
       process.cwd(),
       'src/surfaces/projectHome/PccProjectHomeReadModelContent.tsx',
@@ -11,9 +11,12 @@ describe('PccProjectHomeReadModelContent document-control seam regression', () =
     const source = readFileSync(filePath, 'utf8');
 
     expect(source).toMatch(
-      /<PccDocumentControlCard[\s\S]*sources=\{viewModel\?\.documentControl\.data\}/,
+      /<PccDocumentControlCard[\s\S]*state=\{viewModel\?\.documentControlHomeFeed\.state \?\? 'preview'\}/,
     );
-    expect(source).not.toMatch(/<PccDocumentControlCard[\s\S]*documentControlHomeFeed/);
-    expect(source).not.toMatch(/sources=\{viewModel\?\.documentControlHomeFeed\.data\}/);
+    expect(source).toMatch(
+      /<PccDocumentControlCard[\s\S]*homeFeed=\{viewModel\?\.documentControlHomeFeed\.data\}/,
+    );
+    expect(source).not.toMatch(/sources=\{viewModel\?\.documentControl\.data\}/);
+    expect(source).not.toMatch(/homeFeed=\{viewModel\?\.documentControl\.data\}/);
   });
 });
