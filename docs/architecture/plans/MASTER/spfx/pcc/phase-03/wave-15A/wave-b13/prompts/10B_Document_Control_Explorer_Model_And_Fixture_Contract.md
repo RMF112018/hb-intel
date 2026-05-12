@@ -77,6 +77,7 @@ If shared files show parallel Project Home drift, preserve them and proceed arou
 Before edits:
 
 1. Run:
+
    ```bash
    git status --short
    git rev-parse --abbrev-ref HEAD
@@ -192,21 +193,14 @@ Use immutable / readonly types where consistent with current repo conventions.
 
 ## 3. Project Record fixture contract
 
-The Project Record reference package is not a toy sample. It represents a deterministic folder hierarchy with:
+The Project Record reference package is not a toy sample. It represents a deterministic folder hierarchy whose totals and top-level section set are governed by the live on-disk contents of `docs/reference/example/ComDir/` at prompt execution time:
 
-- `233` directory paths including the source root;
-- `232` relative paths beneath the source root;
-- maximum relative folder depth of `5`;
-- the locked top-level sections:
-  - `00_Project_Admin`
-  - `10_Preconstruction`
-  - `20_Construction`
-  - `30_Financials`
-  - `40_Closeout`
-  - `50_3rd_Party`
-  - `60_Media`.
+- total directory count (including the source root) — derive from `find docs/reference/example/ComDir -type d | wc -l`;
+- relative directory count beneath the source root — derive from `find docs/reference/example/ComDir -mindepth 1 -type d | wc -l`;
+- maximum relative folder depth — derive from a path-component depth measurement of the same find output;
+- the top-level section set — derive from `find docs/reference/example/ComDir -mindepth 1 -maxdepth 1 -type d | sort` and lock the discovered names verbatim, in the deterministic order produced by the chosen ordering rule.
 
-Prompt 10B must preserve that full represented hierarchy.
+Prompt 10B must preserve the full represented hierarchy discovered on disk. Do not rely on prior ZIP-summary figures or any inline enumeration; the on-disk ComDir contents control.
 
 ### Required normalization rules
 
@@ -231,7 +225,7 @@ docs/reference/example/ComDir/
 
 is a design-time source anchor, **not** an additional visible first-level Explorer folder beneath `Project Record`.
 
-The later Explorer UI should open `Project Record` directly to the seven locked top-level folders above, not to a redundant intermediate row named `ComDir`.
+The later Explorer UI should open `Project Record` directly to the discovered top-level folders found under `docs/reference/example/ComDir/`, not to a redundant intermediate row named `ComDir`.
 
 Implement the model/tree accordingly.
 
@@ -241,7 +235,7 @@ Preserve deterministic ordering.
 
 Preferred posture:
 
-- top-level `Project Record` children follow the locked top-level order stated in this prompt;
+- top-level `Project Record` children follow the discovered top-level set under `docs/reference/example/ComDir/` in a deliberate, locked deterministic order (e.g., ascending lexicographic on folder name);
 - nested sibling ordering should be deterministic and derived from a deliberate rule applied during translation of `docs/reference/example/ComDir/`, not from incidental filesystem enumeration, object-key iteration, or locale-sensitive runtime sorting.
 
 Document the chosen deterministic ordering rule in code comments or closeout where helpful.
@@ -334,16 +328,16 @@ Prompt 10B should prepare a **pure, Documents-local, side-effect-free mapping he
 
 Use the Prompt 10D deterministic mapping:
 
-| Document module id | Explorer focus target |
-|---|---|
-| `primary-documents` | `Document Control Home` |
-| `document-control-center` | `Document Control Home` |
-| `sharepoint-project-record` | `Project Record` root |
-| `my-project-files` | `My Project Files` root |
-| `procore-documents` | `Procore > Documents` |
-| `document-crunch` | no Explorer source-root focus; preserve external-reference posture |
-| `adobe-sign` | no Explorer source-root focus; preserve external-reference posture |
-| `drawing-model-center` | no fabricated Explorer focus; preserve deferred posture |
+| Document module id          | Explorer focus target                                              |
+| --------------------------- | ------------------------------------------------------------------ |
+| `primary-documents`         | `Document Control Home`                                            |
+| `document-control-center`   | `Document Control Home`                                            |
+| `sharepoint-project-record` | `Project Record` root                                              |
+| `my-project-files`          | `My Project Files` root                                            |
+| `procore-documents`         | `Procore > Documents`                                              |
+| `document-crunch`           | no Explorer source-root focus; preserve external-reference posture |
+| `adobe-sign`                | no Explorer source-root focus; preserve external-reference posture |
+| `drawing-model-center`      | no fabricated Explorer focus; preserve deferred posture            |
 
 ### Hard boundary
 
@@ -412,6 +406,7 @@ Add or update focused tests that verify all of the following.
 ### A. Explorer vocabulary
 
 1. Source-root vocabulary is deterministic and exactly:
+
    ```text
    home
    project-record
@@ -423,19 +418,14 @@ Add or update focused tests that verify all of the following.
 
 ### B. Project Record fixture completeness and normalization
 
-3. Project Record root children are exactly the seven locked top-level sections derived from the proposed `ComDir` structure:
-   - `00_Project_Admin`
-   - `10_Preconstruction`
-   - `20_Construction`
-   - `30_Financials`
-   - `40_Closeout`
-   - `50_3rd_Party`
-   - `60_Media`
+3. Project Record root children are exactly the top-level set discovered under `docs/reference/example/ComDir/` in deterministic order. The agent must derive that set at execution time from a fresh `find docs/reference/example/ComDir -mindepth 1 -maxdepth 1 -type d | sort` and lock it as the test assertion. Do not rely on any inline enumeration of section names.
 
 4. The design-time source root:
+
    ```text
    docs/reference/example/ComDir/
    ```
+
    is not represented as an extra visible first-level folder beneath `Project Record`.
 
 5. The typed Project Record fixture preserves the full hierarchy discovered under `docs/reference/example/ComDir/`. The implementation must:
