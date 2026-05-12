@@ -2,7 +2,7 @@
   display: block;
   background: var(--pcc-color-card);
   border: 1px solid var(--pcc-color-border);
-  border-radius: var(--pcc-radius-md);
+  border-radius: var(--pcc-radius-lg);
   box-shadow: var(--pcc-elevation-card);
   overflow: hidden;
   min-width: 0;
@@ -55,8 +55,8 @@
 
 .eyebrow {
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--pcc-color-text-muted);
 }
@@ -99,14 +99,21 @@
   border-color: color-mix(in srgb, var(--pcc-color-rail-accent) 62%, var(--pcc-color-border));
   border-top-width: 3px;
   border-top-color: color-mix(in srgb, var(--pcc-color-rail-accent) 78%, var(--pcc-color-border));
-  box-shadow: 0 16px 32px rgba(16, 24, 40, 0.12);
+  /* Dual-shadow stack: top inset surface highlight + base card elevation.
+     Replaces a prior raw `rgba(...)` shadow so tier1 elevation stays on the
+     shared `--pcc-elevation-card` token while gaining a subtle Foleon-grade
+     gloss along the top edge. `box-shadow` is replacement, not additive, so
+     the stack is explicit. */
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, var(--pcc-color-card) 30%, transparent),
+    var(--pcc-elevation-card);
 }
 
 .card[data-pcc-card-tier='tier1'] .title {
   font-size: clamp(18px, 1.4vw, 22px);
   line-height: 1.2;
   font-weight: 700;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
 }
 
 .card[data-pcc-card-tier='tier1'] .eyebrow {
@@ -143,6 +150,11 @@
 
 .card[data-pcc-card-region='command'] {
   background:
+    radial-gradient(
+      circle at 92% 8%,
+      color-mix(in srgb, var(--pcc-color-rail-accent) 6%, transparent),
+      transparent 46%
+    ),
     linear-gradient(
       135deg,
       color-mix(in srgb, var(--pcc-color-rail-accent) 8%, transparent),
