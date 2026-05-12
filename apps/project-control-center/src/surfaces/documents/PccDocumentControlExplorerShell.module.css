@@ -344,3 +344,80 @@
   font-style: italic;
   line-height: 1.45;
 }
+
+.linkedRecordRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pcc-space-sm);
+  padding: 8px 12px;
+  border-radius: var(--pcc-radius-sm);
+  border: 1px solid var(--pcc-color-border);
+  background: var(--pcc-color-canvas);
+  flex-wrap: wrap;
+}
+
+.linkedRecordChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--pcc-color-border);
+  background: var(--pcc-color-canvas);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+}
+
+.procorePostureCue {
+  margin: 0 0 var(--pcc-space-xs) 0;
+  font-size: 11px;
+  color: var(--pcc-color-text-muted);
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.externalReferencesSection {
+  margin-top: var(--pcc-space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pcc-space-xs);
+}
+
+.externalReferencesHeading {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pcc-color-text-muted);
+}
+
+.externalReferenceList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.externalReferenceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pcc-space-sm);
+  padding: 8px 12px;
+  border-radius: var(--pcc-radius-sm);
+  border: 1px solid var(--pcc-color-border);
+  background: var(--pcc-color-canvas);
+  flex-wrap: wrap;
+}
+
+.externalReferenceName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pcc-color-text-primary);
+}

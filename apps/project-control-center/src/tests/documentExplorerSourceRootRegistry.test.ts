@@ -40,11 +40,20 @@ describe('documentExplorerSourceRoots — unified registry', () => {
     expect(MY_PROJECT_FILES_SOURCE_ROOT_NODE.children).toBeUndefined();
   });
 
-  it('procore root references the locked category nodes as children', () => {
+  it('procore root composes the locked category nodes as children with linked-record grandchildren (Prompt 10E)', () => {
     expect(PROCORE_SOURCE_ROOT_NODE.nodeKind).toBe('source-root');
     expect(PROCORE_SOURCE_ROOT_NODE.sourceId).toBe('procore');
     expect(PROCORE_SOURCE_ROOT_NODE.posture).toBe('launch-only');
     expect(PROCORE_SOURCE_ROOT_NODE.hasChildren).toBe(true);
-    expect(PROCORE_SOURCE_ROOT_NODE.children).toBe(PROCORE_CATEGORY_DIRECTORY_NODES);
+    // Content equality, not referential identity: the composed Procore root
+    // exposes the same category nodeIds in the same order as the bare 10B
+    // list, AND every composed category now carries linked-record children
+    // for the 10E directory experience.
+    const composedNodeIds = (PROCORE_SOURCE_ROOT_NODE.children ?? []).map((c) => c.nodeId);
+    const bareNodeIds = PROCORE_CATEGORY_DIRECTORY_NODES.map((c) => c.nodeId);
+    expect(composedNodeIds).toEqual(bareNodeIds);
+    expect(
+      (PROCORE_SOURCE_ROOT_NODE.children ?? []).every((c) => (c.children?.length ?? 0) > 0),
+    ).toBe(true);
   });
 });

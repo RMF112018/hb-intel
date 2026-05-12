@@ -185,7 +185,7 @@ describe('PccDocumentControlExplorerShell — breadcrumb band', () => {
 });
 
 describe('PccDocumentControlExplorerShell — Home pane', () => {
-  it('renders three destination tiles for Project Record / My Project Files / Procore (no Document Crunch / Adobe Sign)', async () => {
+  it('renders three destination tiles for Project Record / My Project Files / Procore (Document Crunch / Adobe Sign live in External References, not as tiles — Prompt 10E)', async () => {
     const { container } = await renderShell();
     const tiles = container.querySelectorAll('[data-pcc-doc-explorer-destination]');
     const tileIds = Array.from(tiles).map((t) =>
@@ -194,9 +194,13 @@ describe('PccDocumentControlExplorerShell — Home pane', () => {
     expect(tileIds).toEqual(['project-record', 'my-project-files', 'procore']);
     expect(tileIds).not.toContain('document-crunch');
     expect(tileIds).not.toContain('adobe-sign');
-    const text = container.querySelector('[data-pcc-doc-explorer-pane="home"]')?.textContent ?? '';
-    expect(text).not.toContain('Document Crunch');
-    expect(text).not.toContain('Adobe Sign');
+    // Tile text content does not mention DC/AS — those systems render in the
+    // External References section below the tile grid (verified separately).
+    const tileText = Array.from(tiles)
+      .map((t) => t.textContent ?? '')
+      .join(' ');
+    expect(tileText).not.toContain('Document Crunch');
+    expect(tileText).not.toContain('Adobe Sign');
   });
 
   it('clicking a destination tile switches the active source', async () => {
@@ -286,7 +290,7 @@ describe('PccDocumentControlExplorerShell — Procore pane', () => {
     expect(pane.querySelectorAll('a[href]')).toHaveLength(0);
   });
 
-  it('does not introduce Document Crunch / Adobe Sign rows (Prompt 10E scope)', async () => {
+  it('Procore pane never carries Document Crunch / Adobe Sign rows (those live in Home External References only — Prompt 10E)', async () => {
     const { container } = await renderShell();
     fireEvent.click(railButton(container as HTMLElement, 'procore'));
     const text =
@@ -372,8 +376,8 @@ describe('PccDocumentControlExplorerShell — Prompt 10D Project Record drill-do
   });
 });
 
-describe('PccDocumentControlExplorerShell — Prompt 10D Procore category drill-down', () => {
-  it('clicking a Procore category drills in and renders the empty-state marker (10E scope populates rows)', async () => {
+describe('PccDocumentControlExplorerShell — Prompt 10D Procore category drill-down (Prompt 10E linked-record content)', () => {
+  it('clicking a Procore category drills in, updates the breadcrumb, and renders linked-record rows (no empty-state marker after 10E)', async () => {
     const { container } = await renderShell();
     fireEvent.click(railButton(container as HTMLElement, 'procore'));
     fireEvent.click(categoryRow(container as HTMLElement, 'Documents'));
@@ -383,7 +387,9 @@ describe('PccDocumentControlExplorerShell — Prompt 10D Procore category drill-
       'Documents',
     ]);
     const pane = container.querySelector('[data-pcc-doc-explorer-pane="procore"]')!;
-    expect(pane.querySelector('[data-pcc-doc-explorer-empty="true"]')).not.toBeNull();
+    expect(pane.querySelector('[data-pcc-doc-explorer-empty="true"]')).toBeNull();
+    const linkedRows = pane.querySelectorAll('[data-pcc-doc-explorer-row-kind="linked-record"]');
+    expect(linkedRows.length).toBeGreaterThan(0);
   });
 });
 
@@ -512,5 +518,112 @@ describe('PccDocumentControlExplorerShell — Prompt 10D activeModuleId mapping 
       ).toBe('true');
       expect(container.querySelector('[data-pcc-doc-explorer-pane="home"]')).not.toBeNull();
     }
+  });
+});
+
+// ───────────────────────────────────────────────────────────────────────
+// Prompt 10E — Procore linked-record directory + External References
+
+describe('PccDocumentControlExplorerShell — Prompt 10E Procore linked-record drill-down', () => {
+  it('renders linked-record rows inside a drilled Procore category pane with disabled launch affordances', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'procore'));
+    fireEvent.click(categoryRow(container as HTMLElement, 'Documents'));
+    const pane = container.querySelector('[data-pcc-doc-explorer-pane="procore"]')!;
+    const linkedRows = pane.querySelectorAll('[data-pcc-doc-explorer-row-kind="linked-record"]');
+    expect(linkedRows.length).toBeGreaterThan(0);
+    // Each linked-record row exposes a label and an inert disabled affordance
+    // with the locked launch-reason copy.
+    for (const row of linkedRows) {
+      const label = row.querySelector('span')?.textContent ?? '';
+      expect(label.length).toBeGreaterThan(0);
+      const reason = row.querySelector('[data-pcc-disabled-affordance-reason]')?.textContent ?? '';
+      expect(reason).toMatch(/Direct launch is not available/);
+    }
+    // No live external anchors anywhere in the pane.
+    expect(pane.querySelectorAll('a[href]')).toHaveLength(0);
+  });
+});
+
+describe('PccDocumentControlExplorerShell — Prompt 10E Procore category-pane posture cue', () => {
+  it('renders the posture cue when drilled into a Procore category', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'procore'));
+    fireEvent.click(categoryRow(container as HTMLElement, 'Documents'));
+    const cue = container.querySelector('[data-pcc-doc-explorer-procore-posture="true"]');
+    expect(cue).not.toBeNull();
+    expect(cue!.textContent ?? '').toMatch(/Procore is the source system/);
+    expect(cue!.textContent ?? '').toMatch(/does not mirror, sync, or write back/);
+  });
+
+  it('does NOT render the posture cue at Procore root (no drill-in)', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'procore'));
+    expect(container.querySelector('[data-pcc-doc-explorer-procore-posture="true"]')).toBeNull();
+  });
+});
+
+describe('PccDocumentControlExplorerShell — Prompt 10E linked-record rows are structurally inert', () => {
+  it('inside a drilled Procore category pane, linked-record rows are <li> (not <button>), carry no drill-down <button> wrapping, no <a href> anchor, and the breadcrumb depth stays at the category', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'procore'));
+    fireEvent.click(categoryRow(container as HTMLElement, 'Documents'));
+    const pane = container.querySelector('[data-pcc-doc-explorer-pane="procore"]')!;
+    const linkedRows = pane.querySelectorAll('[data-pcc-doc-explorer-row-kind="linked-record"]');
+    expect(linkedRows.length).toBeGreaterThan(0);
+    for (const row of linkedRows) {
+      // The row itself is an <li>, not a <button>.
+      expect(row.tagName).toBe('LI');
+      // No descendant drill-down button (a button that carries the row marker).
+      expect(row.querySelectorAll('button[data-pcc-doc-explorer-row]')).toHaveLength(0);
+      // No external anchor inside the row.
+      expect(row.querySelectorAll('a[href]')).toHaveLength(0);
+    }
+    // Breadcrumb depth remains at the category segment count (Home / Procore /
+    // Documents = 3). Linked-record rows do not introduce a further drill.
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Procore',
+      'Documents',
+    ]);
+  });
+});
+
+describe('PccDocumentControlExplorerShell — Prompt 10E External References on Home', () => {
+  it('no-client fallback omits the External References section (empty references prop)', () => {
+    const utils = render(
+      <PccBentoGrid forceMode="desktop">
+        <PccDocumentsSurface />
+      </PccBentoGrid>,
+    );
+    expect(
+      utils.container.querySelector('[data-pcc-doc-explorer-external-references="true"]'),
+    ).toBeNull();
+    cleanup();
+  });
+
+  it('with fixture read-model, renders Document Crunch + Adobe Sign rows in the External References section (not as destination tiles)', async () => {
+    const { container } = await renderShell();
+    const section = container.querySelector('[data-pcc-doc-explorer-external-references="true"]');
+    expect(section).not.toBeNull();
+    const dc = section!.querySelector(
+      '[data-pcc-doc-explorer-external-reference="document-crunch"]',
+    );
+    const adobe = section!.querySelector('[data-pcc-doc-explorer-external-reference="adobe-sign"]');
+    expect(dc, 'Document Crunch external-reference row must render').not.toBeNull();
+    expect(adobe, 'Adobe Sign external-reference row must render').not.toBeNull();
+    expect(dc!.textContent ?? '').toContain('Document Crunch');
+    expect(adobe!.textContent ?? '').toContain('Adobe Sign');
+    // Each row exposes a disabled-affordance with a product-safe reason.
+    expect(dc!.querySelector('[data-pcc-disabled-affordance-reason]')).not.toBeNull();
+    expect(adobe!.querySelector('[data-pcc-disabled-affordance-reason]')).not.toBeNull();
+    // No live external anchors.
+    expect(section!.querySelectorAll('a[href]')).toHaveLength(0);
+    // Document Crunch / Adobe Sign are NOT destination tiles.
+    const tileIds = Array.from(
+      container.querySelectorAll('[data-pcc-doc-explorer-destination]'),
+    ).map((t) => t.getAttribute('data-pcc-doc-explorer-destination'));
+    expect(tileIds).not.toContain('document-crunch');
+    expect(tileIds).not.toContain('adobe-sign');
   });
 });

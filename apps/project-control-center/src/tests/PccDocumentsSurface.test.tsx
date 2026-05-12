@@ -246,6 +246,21 @@ describe('PccDocumentsSurface — Prompt 10C branch composition', () => {
       }
     }
   });
+
+  it('Prompt 10E — read-model branch threads External References into the Home pane (Document Crunch + Adobe Sign)', async () => {
+    const { container } = await renderWithClient(fixtureClient());
+    const section = container.querySelector('[data-pcc-doc-explorer-external-references="true"]');
+    expect(
+      section,
+      'External References section must render under the read-model branch',
+    ).not.toBeNull();
+    expect(
+      section!.querySelector('[data-pcc-doc-explorer-external-reference="document-crunch"]'),
+    ).not.toBeNull();
+    expect(
+      section!.querySelector('[data-pcc-doc-explorer-external-reference="adobe-sign"]'),
+    ).not.toBeNull();
+  });
 });
 
 // ───────────────────────────────────────────────────────────────────────

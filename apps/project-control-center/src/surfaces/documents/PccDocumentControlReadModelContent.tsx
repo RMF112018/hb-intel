@@ -26,6 +26,7 @@ import {
 } from './PccDocumentControlStateCard';
 import { PccDocumentControlExplorerShell } from './PccDocumentControlExplorerShell';
 import { useDocumentControlReadModel } from './useDocumentControlReadModel';
+import { buildExternalReferencesFromViewModel } from './documentExplorerExternalReferences';
 import type { IPccDocumentsReadModelClient } from './documentControlViewModel';
 
 export interface PccDocumentControlReadModelContentProps {
@@ -45,6 +46,7 @@ export const PccDocumentControlReadModelContent: FC<PccDocumentControlReadModelC
   }
 
   const stateKind = resolveDocumentControlStateKind(status, result.sourceStatus);
+  const externalReferences = buildExternalReferencesFromViewModel(result.viewModel);
   return (
     <Fragment>
       {stateKind !== null && (
@@ -57,7 +59,10 @@ export const PccDocumentControlReadModelContent: FC<PccDocumentControlReadModelC
         title="Document Control Explorer"
         headingLevel={2}
       >
-        <PccDocumentControlExplorerShell activeModuleId={activeModuleId} />
+        <PccDocumentControlExplorerShell
+          activeModuleId={activeModuleId}
+          externalReferences={externalReferences}
+        />
       </PccDashboardCard>
     </Fragment>
   );

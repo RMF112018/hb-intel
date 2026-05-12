@@ -20,7 +20,11 @@ import {
   type IDocumentExplorerNode,
 } from './documentExplorerModel';
 import { PROJECT_RECORD_TREE_ROOT } from './documentExplorerProjectRecordTree';
-import { PROCORE_CATEGORY_DIRECTORY_NODES } from './documentExplorerProcoreCategories';
+import {
+  PROCORE_CATEGORY_DIRECTORY_NODES,
+  type ProcoreCategoryId,
+} from './documentExplorerProcoreCategories';
+import { PROCORE_LINKED_RECORDS_BY_CATEGORY } from './documentExplorerProcoreLinkedRecords';
 
 /**
  * Document Control Home destination shell node. Children are empty in
@@ -56,17 +60,33 @@ export const MY_PROJECT_FILES_SOURCE_ROOT_NODE: IDocumentExplorerNode = {
 };
 
 /**
- * Procore Explorer root with the locked 11 category nodes as children.
- * Linked-record rows under each category are Prompt 10E scope.
+ * Phase 08 wave-b13 Prompt 10E — Procore source root composes the bare
+ * 10B category nodes (preserved in `PROCORE_CATEGORY_DIRECTORY_NODES`
+ * for unit tests) with linked-record grandchildren. Each composed
+ * category carries its locked linked-record list under `children`, so
+ * the 10D `findNodeByPathSegments`-driven shell renders linked records
+ * when the user drills into a category — no parallel navigation
+ * system.
  */
+export const PROCORE_CATEGORY_DIRECTORY_NODES_WITH_LINKED_RECORDS: readonly IDocumentExplorerNode[] =
+  PROCORE_CATEGORY_DIRECTORY_NODES.map((category) => {
+    const linkedRecords =
+      PROCORE_LINKED_RECORDS_BY_CATEGORY[category.relativePathSegments[0] as ProcoreCategoryId];
+    return {
+      ...category,
+      hasChildren: linkedRecords.length > 0,
+      ...(linkedRecords.length > 0 ? { children: linkedRecords } : {}),
+    };
+  });
+
 export const PROCORE_SOURCE_ROOT_NODE: IDocumentExplorerNode = {
   nodeId: 'procore',
   displayLabel: DOCUMENT_EXPLORER_SOURCE_ROOTS.procore.label,
   sourceId: 'procore',
   nodeKind: 'source-root',
   relativePathSegments: [],
-  children: PROCORE_CATEGORY_DIRECTORY_NODES,
-  hasChildren: PROCORE_CATEGORY_DIRECTORY_NODES.length > 0,
+  children: PROCORE_CATEGORY_DIRECTORY_NODES_WITH_LINKED_RECORDS,
+  hasChildren: PROCORE_CATEGORY_DIRECTORY_NODES_WITH_LINKED_RECORDS.length > 0,
   posture: DOCUMENT_EXPLORER_SOURCE_ROOTS.procore.posture,
 };
 

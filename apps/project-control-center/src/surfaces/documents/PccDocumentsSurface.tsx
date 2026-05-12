@@ -53,7 +53,7 @@ export const PccDocumentsSurface: FC<PccDocumentsSurfaceProps> = ({
         title="Document Control Explorer"
         headingLevel={2}
       >
-        <PccDocumentControlExplorerShell activeModuleId={activeModuleId} />
+        <PccDocumentControlExplorerShell activeModuleId={activeModuleId} externalReferences={[]} />
       </PccDashboardCard>
     </Fragment>
   );

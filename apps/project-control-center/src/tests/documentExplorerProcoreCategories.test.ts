@@ -72,7 +72,7 @@ describe('documentExplorerProcoreCategories — directory nodes', () => {
     }
   });
 
-  it('no linked-record preview rows are populated (Prompt 10E scope)', () => {
+  it('bare PROCORE_CATEGORY_DIRECTORY_NODES has no linked-record children (10B unit-level contract; 10E composes linked records at the source-roots registry, not on the bare list)', () => {
     for (const node of PROCORE_CATEGORY_DIRECTORY_NODES) {
       expect(node.children).toBeUndefined();
       expect(node.hasChildren).toBe(false);
