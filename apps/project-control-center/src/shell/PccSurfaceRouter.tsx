@@ -56,8 +56,10 @@ export interface PccSurfaceRouterProps {
  *
  * - `project-home` → existing `PccProjectHome` (10-card preview / read-model
  *   bento dashboard).
- * - `documents` → existing `PccDocumentsSurface` (Document Control lane
- *   bento dashboard).
+ * - `documents` → `PccDocumentsSurface` (Document Control Explorer
+ *   single-card bento with root-level source rail and folder / category
+ *   drill-down; receives optional `activeModuleId` for module-focus
+ *   mapping via `resolveExplorerFocusTarget`).
  * - `core-tools`, `estimating-preconstruction`, `startup-closeout`,
  *   `project-controls`, `cost-time`, `systems-administration` → reusable
  *   `PccPrimaryDashboardSurface` (overview + module status + selected
@@ -81,7 +83,9 @@ export const PccSurfaceRouter: FC<PccSurfaceRouterProps> = ({
     case 'project-home':
       return <PccProjectHome readModelClient={readModelClient} onSelectModule={onSelectModule} />;
     case 'documents':
-      return <PccDocumentsSurface readModelClient={readModelClient} />;
+      return (
+        <PccDocumentsSurface readModelClient={readModelClient} activeModuleId={activeModuleId} />
+      );
     case 'core-tools':
     case 'estimating-preconstruction':
     case 'startup-closeout':

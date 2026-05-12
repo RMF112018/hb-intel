@@ -314,3 +314,71 @@ describe('PccSurfaceRouter — Prompt 05 Cost & Time Sage book-of-record line', 
     }
   });
 });
+
+// ───────────────────────────────────────────────────────────────────────
+// Phase 08 wave-b13 Prompt 10D — Documents activeModuleId router seam.
+//
+// Proves that the router actually threads `activeModuleId` through to
+// `PccDocumentsSurface` and that the Explorer shell resolves the locked
+// module-focus mapping on initial render.
+
+function railButtonForSource(container: HTMLElement, sourceId: string): HTMLButtonElement | null {
+  return container.querySelector(
+    `[data-pcc-doc-explorer-source-rail="true"] [data-pcc-doc-explorer-source-id="${sourceId}"]`,
+  );
+}
+
+function breadcrumbLabels(container: HTMLElement): readonly string[] {
+  const band = container.querySelector('[data-pcc-doc-explorer-breadcrumbs="true"]');
+  if (!band) return [];
+  return Array.from(band.querySelectorAll('[data-pcc-doc-explorer-breadcrumb]')).map(
+    (n) => n.textContent?.trim() ?? '',
+  );
+}
+
+describe('PccSurfaceRouter — Prompt 10D Documents activeModuleId seam', () => {
+  it('routes documents with activeModuleId="sharepoint-project-record" → Explorer initial focus is Project Record root', () => {
+    const { container } = renderRouter('documents', 'sharepoint-project-record');
+    const projectRecord = railButtonForSource(container as HTMLElement, 'project-record');
+    expect(projectRecord).not.toBeNull();
+    expect(projectRecord!.getAttribute('data-pcc-doc-explorer-source-selected')).toBe('true');
+    expect(container.querySelector('[data-pcc-doc-explorer-pane="project-record"]')).not.toBeNull();
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Project Record',
+    ]);
+  });
+
+  it('routes documents with activeModuleId="procore-documents" → Explorer initial focus is Procore at the Documents category', () => {
+    const { container } = renderRouter('documents', 'procore-documents');
+    const procore = railButtonForSource(container as HTMLElement, 'procore');
+    expect(procore).not.toBeNull();
+    expect(procore!.getAttribute('data-pcc-doc-explorer-source-selected')).toBe('true');
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Procore',
+      'Documents',
+    ]);
+  });
+
+  it('routes documents with no activeModuleId → Explorer initial focus is Home', () => {
+    const { container } = renderRouter('documents');
+    const home = railButtonForSource(container as HTMLElement, 'home');
+    expect(home).not.toBeNull();
+    expect(home!.getAttribute('data-pcc-doc-explorer-source-selected')).toBe('true');
+    expect(container.querySelector('[data-pcc-doc-explorer-pane="home"]')).not.toBeNull();
+  });
+
+  it('routes documents with external-reference / deferred activeModuleId → Explorer falls back to Home', () => {
+    for (const moduleId of ['document-crunch', 'adobe-sign', 'drawing-model-center'] as const) {
+      const { container } = renderRouter('documents', moduleId);
+      const home = railButtonForSource(container as HTMLElement, 'home');
+      expect(
+        home,
+        `documents with activeModuleId='${moduleId}' must still render the Explorer shell`,
+      ).not.toBeNull();
+      expect(home!.getAttribute('data-pcc-doc-explorer-source-selected')).toBe('true');
+      cleanup();
+    }
+  });
+});

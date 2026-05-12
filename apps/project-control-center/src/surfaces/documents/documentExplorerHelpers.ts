@@ -9,6 +9,7 @@
  */
 
 import {
+  DOCUMENT_EXPLORER_SOURCE_ROOTS,
   type DocumentExplorerSourceId,
   type IDocumentExplorerBreadcrumbSegment,
   type IDocumentExplorerNode,
@@ -84,4 +85,89 @@ export function normalizeProjectRecordRelativePath(
 ): readonly string[] {
   const raw = typeof input === 'string' ? input.split('/') : input;
   return raw.map((segment) => segment.trim()).filter((segment) => segment.length > 0);
+}
+
+/**
+ * Phase 08 wave-b13 Prompt 10D — path-segment-based tree traversal.
+ *
+ * Walks the tree by matching each `child.relativePathSegments[last]`
+ * against the supplied segment. This works for Project Record (where
+ * the segment equals the `displayLabel`) AND for Procore categories
+ * (where the segment is a stable kebab-case `categoryId` that differs
+ * from the user-facing `displayLabel`). The label-based
+ * `findNodeByRelativePath` above remains intact for callers that key
+ * by display label.
+ */
+export function findNodeByPathSegments(
+  root: IDocumentExplorerNode,
+  segments: readonly string[],
+): IDocumentExplorerNode | undefined {
+  let current: IDocumentExplorerNode = root;
+  for (const segment of segments) {
+    const next = (current.children ?? []).find((child) => {
+      const childSegments = child.relativePathSegments;
+      const tail = childSegments[childSegments.length - 1];
+      return tail === segment;
+    });
+    if (!next) return undefined;
+    current = next;
+  }
+  return current;
+}
+
+/**
+ * Phase 08 wave-b13 Prompt 10D — Explorer-shell-aware breadcrumb
+ * builder.
+ *
+ * Produces the breadcrumb segments visible to the user in the Explorer
+ * shell:
+ *   - Home segment is always present.
+ *   - When `activeSourceId !== 'home'`, a source-root segment follows.
+ *   - One segment per path level inside the active source, resolved by
+ *     `findNodeByPathSegments`.
+ *
+ * Each segment's `nodeId` uses the existing Explorer node-id contract
+ * already emitted by `IDocumentExplorerNode.nodeId`
+ * (`<sourceId>(/<segment1>/<segment2>...)`), so click handlers in the
+ * shell can derive both `sourceId` and `currentPath` directly from the
+ * `nodeId` without a parallel id schema.
+ */
+export function buildExplorerBreadcrumb(
+  activeSourceId: DocumentExplorerSourceId,
+  currentPath: readonly string[],
+): readonly IDocumentExplorerBreadcrumbSegment[] {
+  const segments: IDocumentExplorerBreadcrumbSegment[] = [
+    {
+      label: DOCUMENT_EXPLORER_SOURCE_ROOTS.home.label,
+      nodeId: 'home',
+      isCurrent: activeSourceId === 'home',
+    },
+  ];
+  if (activeSourceId === 'home') return segments;
+
+  const sourceRoot = DOCUMENT_EXPLORER_SOURCE_ROOT_NODE_MAP[activeSourceId];
+  segments.push({
+    label: sourceRoot.displayLabel,
+    nodeId: sourceRoot.nodeId,
+    isCurrent: currentPath.length === 0,
+  });
+
+  let cursor: IDocumentExplorerNode = sourceRoot;
+  for (let i = 0; i < currentPath.length; i += 1) {
+    const segment = currentPath[i]!;
+    const next = (cursor.children ?? []).find((child) => {
+      const childSegments = child.relativePathSegments;
+      const tail = childSegments[childSegments.length - 1];
+      return tail === segment;
+    });
+    if (!next) break;
+    cursor = next;
+    segments.push({
+      label: cursor.displayLabel,
+      nodeId: cursor.nodeId,
+      isCurrent: i === currentPath.length - 1,
+    });
+  }
+
+  return segments;
 }

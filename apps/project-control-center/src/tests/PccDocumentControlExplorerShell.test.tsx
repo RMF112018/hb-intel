@@ -1,12 +1,14 @@
 /**
- * Phase 08 wave-b13 Prompt 10C — Document Control Explorer shell
- * behavior coverage: source rail, breadcrumb, root-level source
- * selection, per-pane rendering, non-affordance guarantees, and bento
- * direct-child invariant.
+ * Phase 08 wave-b13 Prompt 10C/10D — Document Control Explorer shell
+ * behavior coverage: source rail, breadcrumb (display + click-back),
+ * root-level source selection, per-pane rendering, drill-down
+ * navigation, mounted per-source path retention, `activeModuleId`
+ * module-focus mapping, and bento direct-child invariant.
  */
 
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import type { PccModuleId } from '@hbc/models/pcc';
 import { PccBentoGrid } from '../layout/PccBentoGrid';
 import { PccDocumentsSurface } from '../surfaces/documents/PccDocumentsSurface';
 import { DOCUMENT_EXPLORER_SOURCE_ID_ORDER } from '../surfaces/documents/documentExplorerModel';
@@ -26,10 +28,10 @@ function fixtureClient(): IPccDocumentsReadModelClient {
   };
 }
 
-async function renderShell() {
+async function renderShell(activeModuleId?: PccModuleId) {
   const utils = render(
     <PccBentoGrid forceMode="desktop">
-      <PccDocumentsSurface readModelClient={fixtureClient()} />
+      <PccDocumentsSurface readModelClient={fixtureClient()} activeModuleId={activeModuleId} />
     </PccBentoGrid>,
   );
   await waitFor(() => {
@@ -161,12 +163,24 @@ describe('PccDocumentControlExplorerShell — breadcrumb band', () => {
     expect(segments[1]!.textContent).toBe('Project Record');
   });
 
-  it('breadcrumb segments are display-only (no <button> or <a href>)', async () => {
+  it('non-current breadcrumb segments are interactive buttons; the current segment stays a span (Prompt 10D click-back)', async () => {
     const { container } = await renderShell();
     fireEvent.click(railButton(container as HTMLElement, 'procore'));
     const band = container.querySelector('[data-pcc-doc-explorer-breadcrumbs="true"]')!;
-    expect(band.querySelectorAll('button')).toHaveLength(0);
+    // No external anchors anywhere in the breadcrumb band.
     expect(band.querySelectorAll('a[href]')).toHaveLength(0);
+    // Non-current segments are buttons (the home segment when procore is active).
+    const nonCurrent = band.querySelector(
+      '[data-pcc-doc-explorer-breadcrumb="home"][data-pcc-doc-explorer-breadcrumb-current="false"]',
+    );
+    expect(nonCurrent).not.toBeNull();
+    expect(nonCurrent!.tagName).toBe('BUTTON');
+    // The current segment (procore) is not a button.
+    const current = band.querySelector(
+      '[data-pcc-doc-explorer-breadcrumb="procore"][data-pcc-doc-explorer-breadcrumb-current="true"]',
+    );
+    expect(current).not.toBeNull();
+    expect(current!.tagName).toBe('SPAN');
   });
 });
 
@@ -218,11 +232,15 @@ describe('PccDocumentControlExplorerShell — Project Record pane', () => {
     }
   });
 
-  it('folder rows are non-interactive (no <button>, no <a href> inside the pane)', async () => {
+  it('folder rows are interactive <button type="button"> drill-down controls with no external anchors (Prompt 10D)', async () => {
     const { container } = await renderShell();
     fireEvent.click(railButton(container as HTMLElement, 'project-record'));
     const pane = container.querySelector('[data-pcc-doc-explorer-pane="project-record"]')!;
-    expect(pane.querySelectorAll('button')).toHaveLength(0);
+    const rowButtons = pane.querySelectorAll('button[data-pcc-doc-explorer-row]');
+    expect(rowButtons.length).toBeGreaterThan(0);
+    for (const btn of rowButtons) {
+      expect((btn as HTMLButtonElement).getAttribute('type')).toBe('button');
+    }
     expect(pane.querySelectorAll('a[href]')).toHaveLength(0);
   });
 });
@@ -256,11 +274,15 @@ describe('PccDocumentControlExplorerShell — Procore pane', () => {
     }
   });
 
-  it('category rows are non-interactive (no <button>, no <a href> inside the pane)', async () => {
+  it('category rows are interactive <button type="button"> drill-down controls with no external anchors (Prompt 10D)', async () => {
     const { container } = await renderShell();
     fireEvent.click(railButton(container as HTMLElement, 'procore'));
     const pane = container.querySelector('[data-pcc-doc-explorer-pane="procore"]')!;
-    expect(pane.querySelectorAll('button')).toHaveLength(0);
+    const rowButtons = pane.querySelectorAll('button[data-pcc-doc-explorer-row]');
+    expect(rowButtons.length).toBeGreaterThan(0);
+    for (const btn of rowButtons) {
+      expect((btn as HTMLButtonElement).getAttribute('type')).toBe('button');
+    }
     expect(pane.querySelectorAll('a[href]')).toHaveLength(0);
   });
 
@@ -271,5 +293,224 @@ describe('PccDocumentControlExplorerShell — Procore pane', () => {
       container.querySelector('[data-pcc-doc-explorer-pane="procore"]')?.textContent ?? '';
     expect(text).not.toContain('Document Crunch');
     expect(text).not.toContain('Adobe Sign');
+  });
+});
+
+// ───────────────────────────────────────────────────────────────────────
+// Prompt 10D — navigation state, drill-down, breadcrumb back, source
+// switching from depth, mounted per-source path retention, Home reset,
+// and `activeModuleId` mapping.
+
+function folderRow(container: HTMLElement, label: string): HTMLButtonElement {
+  const buttons = Array.from(
+    container.querySelectorAll<HTMLButtonElement>('button[data-pcc-doc-explorer-row]'),
+  );
+  const match = buttons.find((b) => b.querySelector('span')?.textContent === label);
+  expect(match, `folder row '${label}' must render`).toBeDefined();
+  return match!;
+}
+
+function categoryRow(container: HTMLElement, label: string): HTMLButtonElement {
+  return folderRow(container, label);
+}
+
+function breadcrumbLabels(container: HTMLElement): readonly string[] {
+  const band = container.querySelector('[data-pcc-doc-explorer-breadcrumbs="true"]')!;
+  return Array.from(band.querySelectorAll('[data-pcc-doc-explorer-breadcrumb]')).map(
+    (n) => n.textContent?.trim() ?? '',
+  );
+}
+
+describe('PccDocumentControlExplorerShell — Prompt 10D Project Record drill-down', () => {
+  it('clicking a folder row updates the current path and renders its children', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'project-record'));
+    fireEvent.click(folderRow(container as HTMLElement, '07-RFI'));
+    const pane = container.querySelector('[data-pcc-doc-explorer-pane="project-record"]')!;
+    const rows = pane.querySelectorAll('button[data-pcc-doc-explorer-row]');
+    expect(rows.length).toBeGreaterThan(0);
+    const labels = Array.from(rows).map((r) => r.querySelector('span')?.textContent ?? '');
+    expect(labels).toContain('001.Description.R');
+  });
+
+  it('breadcrumb gains a third segment matching the drilled folder label', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'project-record'));
+    fireEvent.click(folderRow(container as HTMLElement, '07-RFI'));
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Project Record',
+      '07-RFI',
+    ]);
+    const band = container.querySelector('[data-pcc-doc-explorer-breadcrumbs="true"]')!;
+    const current = band.querySelector('[data-pcc-doc-explorer-breadcrumb-current="true"]');
+    expect(current!.getAttribute('data-pcc-doc-explorer-breadcrumb')).toBe('project-record/07-RFI');
+  });
+
+  it('clicking a parent breadcrumb segment navigates upward', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'project-record'));
+    fireEvent.click(folderRow(container as HTMLElement, '07-RFI'));
+    fireEvent.click(folderRow(container as HTMLElement, '001.Description.R'));
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Project Record',
+      '07-RFI',
+      '001.Description.R',
+    ]);
+    // Click the middle 07-RFI segment to navigate up one level.
+    const upButton = container.querySelector(
+      'button[data-pcc-doc-explorer-breadcrumb="project-record/07-RFI"]',
+    );
+    expect(upButton).not.toBeNull();
+    fireEvent.click(upButton!);
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Project Record',
+      '07-RFI',
+    ]);
+  });
+});
+
+describe('PccDocumentControlExplorerShell — Prompt 10D Procore category drill-down', () => {
+  it('clicking a Procore category drills in and renders the empty-state marker (10E scope populates rows)', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'procore'));
+    fireEvent.click(categoryRow(container as HTMLElement, 'Documents'));
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Procore',
+      'Documents',
+    ]);
+    const pane = container.querySelector('[data-pcc-doc-explorer-pane="procore"]')!;
+    expect(pane.querySelector('[data-pcc-doc-explorer-empty="true"]')).not.toBeNull();
+  });
+});
+
+describe('PccDocumentControlExplorerShell — Prompt 10D one-click source switching from depth', () => {
+  it('from a deep Project Record path, clicking Procore in the rail switches in one action', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'project-record'));
+    fireEvent.click(folderRow(container as HTMLElement, '12-Accounting'));
+    fireEvent.click(folderRow(container as HTMLElement, 'PayApp'));
+    fireEvent.click(folderRow(container as HTMLElement, 'Sub'));
+    // From depth, click Procore in the source rail in one action.
+    fireEvent.click(railButton(container as HTMLElement, 'procore'));
+    expect(
+      railButton(container as HTMLElement, 'procore').getAttribute(
+        'data-pcc-doc-explorer-source-selected',
+      ),
+    ).toBe('true');
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Procore',
+    ]);
+  });
+});
+
+describe('PccDocumentControlExplorerShell — Prompt 10D mounted per-source path retention', () => {
+  it('switching away from a drilled Project Record path and back restores the same path', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'project-record'));
+    fireEvent.click(folderRow(container as HTMLElement, '12-Accounting'));
+    fireEvent.click(folderRow(container as HTMLElement, 'PayApp'));
+    fireEvent.click(folderRow(container as HTMLElement, 'Sub'));
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Project Record',
+      '12-Accounting',
+      'PayApp',
+      'Sub',
+    ]);
+    // Switch to Procore, then back to Project Record.
+    fireEvent.click(railButton(container as HTMLElement, 'procore'));
+    fireEvent.click(railButton(container as HTMLElement, 'project-record'));
+    // Path restored.
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Project Record',
+      '12-Accounting',
+      'PayApp',
+      'Sub',
+    ]);
+  });
+});
+
+describe('PccDocumentControlExplorerShell — Prompt 10D Home reset', () => {
+  it('clicking Home in the rail returns to the home pane and a single-segment breadcrumb', async () => {
+    const { container } = await renderShell();
+    fireEvent.click(railButton(container as HTMLElement, 'project-record'));
+    fireEvent.click(folderRow(container as HTMLElement, '07-RFI'));
+    fireEvent.click(railButton(container as HTMLElement, 'home'));
+    expect(container.querySelector('[data-pcc-doc-explorer-pane="home"]')).not.toBeNull();
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual(['Document Control Home']);
+  });
+});
+
+describe('PccDocumentControlExplorerShell — Prompt 10D activeModuleId mapping (locked table)', () => {
+  it('sharepoint-project-record → initial focus is Project Record root', async () => {
+    const { container } = await renderShell('sharepoint-project-record');
+    expect(
+      railButton(container as HTMLElement, 'project-record').getAttribute(
+        'data-pcc-doc-explorer-source-selected',
+      ),
+    ).toBe('true');
+    expect(container.querySelector('[data-pcc-doc-explorer-pane="project-record"]')).not.toBeNull();
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Project Record',
+    ]);
+  });
+
+  it('procore-documents → initial focus is Procore at the Documents category', async () => {
+    const { container } = await renderShell('procore-documents');
+    expect(
+      railButton(container as HTMLElement, 'procore').getAttribute(
+        'data-pcc-doc-explorer-source-selected',
+      ),
+    ).toBe('true');
+    expect(breadcrumbLabels(container as HTMLElement)).toEqual([
+      'Document Control Home',
+      'Procore',
+      'Documents',
+    ]);
+  });
+
+  it('my-project-files → initial focus is the My Project Files pane', async () => {
+    const { container } = await renderShell('my-project-files');
+    expect(
+      railButton(container as HTMLElement, 'my-project-files').getAttribute(
+        'data-pcc-doc-explorer-source-selected',
+      ),
+    ).toBe('true');
+    expect(
+      container.querySelector('[data-pcc-doc-explorer-pane="my-project-files"]'),
+    ).not.toBeNull();
+  });
+
+  it('primary-documents and document-control-center map to Home', async () => {
+    for (const id of ['primary-documents', 'document-control-center'] as const) {
+      cleanup();
+      const { container } = await renderShell(id);
+      expect(
+        railButton(container as HTMLElement, 'home').getAttribute(
+          'data-pcc-doc-explorer-source-selected',
+        ),
+      ).toBe('true');
+      expect(container.querySelector('[data-pcc-doc-explorer-pane="home"]')).not.toBeNull();
+    }
+  });
+
+  it('external-reference and deferred module ids fall back to Home on initial render', async () => {
+    for (const id of ['document-crunch', 'adobe-sign', 'drawing-model-center'] as const) {
+      cleanup();
+      const { container } = await renderShell(id);
+      expect(
+        railButton(container as HTMLElement, 'home').getAttribute(
+          'data-pcc-doc-explorer-source-selected',
+        ),
+      ).toBe('true');
+      expect(container.querySelector('[data-pcc-doc-explorer-pane="home"]')).not.toBeNull();
+    }
   });
 });

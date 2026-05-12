@@ -1,16 +1,13 @@
 /**
- * Phase 08 wave-b13 Prompt 10C — Document Control Explorer Shell.
+ * Phase 08 wave-b13 Prompt 10D — Document Control Explorer Shell.
  *
- * Replaces the legacy lane / permissions / reviews ready-path
- * composition with a single full-width Explorer shell. Scope is
- * **shell + root-level source selection only**. Folder/category
- * drill-down, breadcrumb traversal, mounted path retention,
- * `activeModuleId` router pass-through, and Procore linked-record
- * rows are correctly deferred (10D / 10E).
+ * Adds navigation state + drill-down + breadcrumb traversal + mounted
+ * per-source path retention to the 10C Explorer shell, and consumes
+ * `activeModuleId` for deterministic module-focus mapping.
  *
- * Data source: Prompt 10B model foundation
- * (`documentExplorerModel`, `documentExplorerSourceRoots`,
- * `documentExplorerProjectRecordTree`, `documentExplorerProcoreCategories`).
+ * Local state: `activeSourceId` + per-source `currentPaths`. Switching
+ * sources only changes `activeSourceId`; the per-source path is retained
+ * while the explorer instance remains mounted (no browser storage).
  *
  * Marker contract (stable for tests):
  *   data-pcc-doc-explorer="true"
@@ -20,16 +17,18 @@
  *   data-pcc-doc-explorer-header="<source-id>"
  *   data-pcc-doc-explorer-source-posture="<posture>"
  *   data-pcc-doc-explorer-breadcrumbs="true"
- *   data-pcc-doc-explorer-breadcrumb="<segment-id>"
+ *   data-pcc-doc-explorer-breadcrumb="<node-id>"
  *   data-pcc-doc-explorer-breadcrumb-current="<true|false>"
  *   data-pcc-doc-explorer-pane="<source-id>"
  *   data-pcc-doc-explorer-destination="<source-id>"
  *   data-pcc-doc-explorer-row="<node-id>"
  *   data-pcc-doc-explorer-row-kind="folder|category"
+ *   data-pcc-doc-explorer-empty="true"  (10D: rendered when current node has no children)
  *   data-pcc-doc-explorer-mpf-safety="true"
  */
 
-import { useState, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
+import { type PccModuleId } from '@hbc/models/pcc';
 import {
   DOCUMENT_EXPLORER_SOURCE_ID_ORDER,
   DOCUMENT_EXPLORER_SOURCE_ROOTS,
@@ -41,6 +40,8 @@ import {
   PROCORE_SOURCE_ROOT_NODE,
 } from './documentExplorerSourceRoots';
 import { PROJECT_RECORD_TREE_ROOT } from './documentExplorerProjectRecordTree';
+import { buildExplorerBreadcrumb, findNodeByPathSegments } from './documentExplorerHelpers';
+import { resolveExplorerFocusTarget } from './documentExplorerModuleFocus';
 import styles from './PccDocumentControlExplorerShell.module.css';
 
 const DESTINATION_ORDER: readonly DocumentExplorerSourceId[] = [
@@ -48,6 +49,52 @@ const DESTINATION_ORDER: readonly DocumentExplorerSourceId[] = [
   'my-project-files',
   'procore',
 ];
+
+const EMPTY_PATH: readonly string[] = [];
+
+interface ExplorerNavState {
+  readonly activeSourceId: DocumentExplorerSourceId;
+  readonly currentPaths: Readonly<Record<DocumentExplorerSourceId, readonly string[]>>;
+}
+
+function defaultNavState(): ExplorerNavState {
+  return {
+    activeSourceId: 'home',
+    currentPaths: {
+      home: EMPTY_PATH,
+      'project-record': EMPTY_PATH,
+      'my-project-files': EMPTY_PATH,
+      procore: EMPTY_PATH,
+    },
+  };
+}
+
+function initialNavStateForModule(activeModuleId: PccModuleId | undefined): ExplorerNavState {
+  const base = defaultNavState();
+  if (!activeModuleId) return base;
+  const target = resolveExplorerFocusTarget(activeModuleId);
+  if (target?.kind !== 'explorer-source') return base;
+  return {
+    activeSourceId: target.sourceId,
+    currentPaths: {
+      ...base.currentPaths,
+      [target.sourceId]: target.initialRelativePath ? [...target.initialRelativePath] : EMPTY_PATH,
+    },
+  };
+}
+
+function parseNodeIdToNav(nodeId: string): {
+  sourceId: DocumentExplorerSourceId;
+  segments: readonly string[];
+} {
+  if (nodeId === 'home') {
+    return { sourceId: 'home', segments: EMPTY_PATH };
+  }
+  const parts = nodeId.split('/');
+  const sourceId = parts[0] as DocumentExplorerSourceId;
+  const segments = parts.slice(1);
+  return { sourceId, segments };
+}
 
 interface SourceRailProps {
   readonly activeSourceId: DocumentExplorerSourceId;
@@ -107,12 +154,16 @@ const ContextHeader: FC<ContextHeaderProps> = ({ activeSourceId }) => {
 
 interface BreadcrumbBandProps {
   readonly activeSourceId: DocumentExplorerSourceId;
+  readonly currentPath: readonly string[];
+  readonly onNavigateToNodeId: (nodeId: string) => void;
 }
 
-const BreadcrumbBand: FC<BreadcrumbBandProps> = ({ activeSourceId }) => {
-  const isHome = activeSourceId === 'home';
-  const homeMeta = DOCUMENT_EXPLORER_SOURCE_ROOTS.home;
-  const activeMeta = DOCUMENT_EXPLORER_SOURCE_ROOTS[activeSourceId];
+const BreadcrumbBand: FC<BreadcrumbBandProps> = ({
+  activeSourceId,
+  currentPath,
+  onNavigateToNodeId,
+}) => {
+  const segments = buildExplorerBreadcrumb(activeSourceId, currentPath);
   return (
     <nav
       className={styles.breadcrumbBand}
@@ -120,29 +171,34 @@ const BreadcrumbBand: FC<BreadcrumbBandProps> = ({ activeSourceId }) => {
       data-pcc-doc-explorer-breadcrumbs="true"
     >
       <ol className={styles.breadcrumbList}>
-        <li className={styles.breadcrumbItem}>
-          <span
-            className={styles.breadcrumbSegment}
-            data-pcc-doc-explorer-breadcrumb="home"
-            data-pcc-doc-explorer-breadcrumb-current={isHome ? 'true' : 'false'}
-          >
-            {homeMeta.label}
-          </span>
-        </li>
-        {!isHome ? (
-          <li className={styles.breadcrumbItem}>
-            <span aria-hidden="true" className={styles.breadcrumbSeparator}>
-              /
-            </span>
-            <span
-              className={styles.breadcrumbSegment}
-              data-pcc-doc-explorer-breadcrumb={activeSourceId}
-              data-pcc-doc-explorer-breadcrumb-current="true"
-            >
-              {activeMeta.label}
-            </span>
+        {segments.map((segment, index) => (
+          <li key={segment.nodeId} className={styles.breadcrumbItem}>
+            {index > 0 ? (
+              <span aria-hidden="true" className={styles.breadcrumbSeparator}>
+                /
+              </span>
+            ) : null}
+            {segment.isCurrent ? (
+              <span
+                className={styles.breadcrumbSegment}
+                data-pcc-doc-explorer-breadcrumb={segment.nodeId}
+                data-pcc-doc-explorer-breadcrumb-current="true"
+              >
+                {segment.label}
+              </span>
+            ) : (
+              <button
+                type="button"
+                className={styles.breadcrumbButton}
+                data-pcc-doc-explorer-breadcrumb={segment.nodeId}
+                data-pcc-doc-explorer-breadcrumb-current="false"
+                onClick={() => onNavigateToNodeId(segment.nodeId)}
+              >
+                {segment.label}
+              </button>
+            )}
           </li>
-        ) : null}
+        ))}
       </ol>
     </nav>
   );
@@ -180,30 +236,52 @@ const HomePane: FC<HomePaneProps> = ({ onSelect }) => (
   </section>
 );
 
-interface FolderListPaneProps {
+interface PathAwarePaneProps {
   readonly sourceId: DocumentExplorerSourceId;
   readonly rowKind: 'folder' | 'category';
-  readonly nodes: readonly IDocumentExplorerNode[];
+  readonly sourceRoot: IDocumentExplorerNode;
+  readonly currentPath: readonly string[];
   readonly affordanceHint: string;
+  readonly onDrillInto: (segments: readonly string[]) => void;
 }
 
-const FolderListPane: FC<FolderListPaneProps> = ({ sourceId, rowKind, nodes, affordanceHint }) => (
-  <section className={styles.pane} data-pcc-doc-explorer-pane={sourceId}>
-    <ul className={styles.rowList}>
-      {nodes.map((node) => (
-        <li
-          key={node.nodeId}
-          className={styles.row}
-          data-pcc-doc-explorer-row={node.nodeId}
-          data-pcc-doc-explorer-row-kind={rowKind}
-        >
-          <span className={styles.rowLabel}>{node.displayLabel}</span>
-          <span className={styles.rowAffordance}>{affordanceHint}</span>
-        </li>
-      ))}
-    </ul>
-  </section>
-);
+const PathAwarePane: FC<PathAwarePaneProps> = ({
+  sourceId,
+  rowKind,
+  sourceRoot,
+  currentPath,
+  affordanceHint,
+  onDrillInto,
+}) => {
+  const currentNode = findNodeByPathSegments(sourceRoot, currentPath) ?? sourceRoot;
+  const children = currentNode.children ?? [];
+  return (
+    <section className={styles.pane} data-pcc-doc-explorer-pane={sourceId}>
+      {children.length === 0 ? (
+        <p className={styles.emptyState} data-pcc-doc-explorer-empty="true">
+          No items at this location.
+        </p>
+      ) : (
+        <ul className={styles.rowList}>
+          {children.map((node) => (
+            <li key={node.nodeId} className={styles.rowItem}>
+              <button
+                type="button"
+                className={styles.rowButton}
+                data-pcc-doc-explorer-row={node.nodeId}
+                data-pcc-doc-explorer-row-kind={rowKind}
+                onClick={() => onDrillInto(node.relativePathSegments)}
+              >
+                <span className={styles.rowLabel}>{node.displayLabel}</span>
+                <span className={styles.rowAffordance}>{affordanceHint}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+};
 
 const MyProjectFilesPane: FC = () => {
   const meta = DOCUMENT_EXPLORER_SOURCE_ROOTS['my-project-files'];
@@ -219,52 +297,109 @@ const MyProjectFilesPane: FC = () => {
   );
 };
 
-export const PccDocumentControlExplorerShell: FC = () => {
-  const [activeSourceId, setActiveSourceId] = useState<DocumentExplorerSourceId>('home');
+export interface PccDocumentControlExplorerShellProps {
+  readonly activeModuleId?: PccModuleId;
+}
+
+export const PccDocumentControlExplorerShell: FC<PccDocumentControlExplorerShellProps> = ({
+  activeModuleId,
+}) => {
+  const [navState, setNavState] = useState<ExplorerNavState>(() =>
+    initialNavStateForModule(activeModuleId),
+  );
+
+  // Reapply module-focus when `activeModuleId` changes. Early-return for
+  // external-reference / deferred targets so they never reset an
+  // already-mounted user navigation state.
+  useEffect(() => {
+    if (!activeModuleId) return;
+    const target = resolveExplorerFocusTarget(activeModuleId);
+    if (target?.kind !== 'explorer-source') return;
+    const targetSourceId = target.sourceId;
+    const targetPath = target.initialRelativePath ? [...target.initialRelativePath] : EMPTY_PATH;
+    setNavState((prev) => ({
+      activeSourceId: targetSourceId,
+      currentPaths: { ...prev.currentPaths, [targetSourceId]: targetPath },
+    }));
+  }, [activeModuleId]);
+
+  const switchToSource = (id: DocumentExplorerSourceId): void => {
+    setNavState((prev) => ({ ...prev, activeSourceId: id }));
+  };
+
+  const setCurrentPath = (
+    sourceId: DocumentExplorerSourceId,
+    segments: readonly string[],
+  ): void => {
+    setNavState((prev) => ({
+      ...prev,
+      currentPaths: { ...prev.currentPaths, [sourceId]: segments },
+    }));
+  };
+
+  const navigateToNodeId = (nodeId: string): void => {
+    const { sourceId, segments } = parseNodeIdToNav(nodeId);
+    setNavState((prev) => ({
+      activeSourceId: sourceId,
+      currentPaths: { ...prev.currentPaths, [sourceId]: segments },
+    }));
+  };
+
+  const drillIntoActiveSource = (segments: readonly string[]): void => {
+    setCurrentPath(navState.activeSourceId, segments);
+  };
 
   const renderPane = (): JSX.Element => {
-    switch (activeSourceId) {
+    switch (navState.activeSourceId) {
       case 'home':
-        return <HomePane onSelect={setActiveSourceId} />;
+        return <HomePane onSelect={switchToSource} />;
       case 'project-record':
         return (
-          <FolderListPane
+          <PathAwarePane
             sourceId="project-record"
             rowKind="folder"
-            nodes={PROJECT_RECORD_TREE_ROOT.children ?? []}
+            sourceRoot={PROJECT_RECORD_TREE_ROOT}
+            currentPath={navState.currentPaths['project-record']}
             affordanceHint="Folder"
+            onDrillInto={drillIntoActiveSource}
           />
         );
       case 'my-project-files':
         return <MyProjectFilesPane />;
       case 'procore':
         return (
-          <FolderListPane
+          <PathAwarePane
             sourceId="procore"
             rowKind="category"
-            nodes={PROCORE_SOURCE_ROOT_NODE.children ?? []}
+            sourceRoot={PROCORE_SOURCE_ROOT_NODE}
+            currentPath={navState.currentPaths.procore}
             affordanceHint="Procore category"
+            onDrillInto={drillIntoActiveSource}
           />
         );
       default: {
-        // exhaustive
-        const exhaustive: never = activeSourceId;
+        const exhaustive: never = navState.activeSourceId;
         void exhaustive;
-        return <HomePane onSelect={setActiveSourceId} />;
+        return <HomePane onSelect={switchToSource} />;
       }
     }
   };
 
   // Helper used only to ensure the source-root registry stays consumed
-  // by this shell; supports future 10D consumers reading the full map.
+  // by this shell; supports future 10E/10F consumers reading the full
+  // map.
   void DOCUMENT_EXPLORER_SOURCE_ROOT_NODE_MAP;
 
   return (
     <div className={styles.shell} data-pcc-doc-explorer="true">
-      <SourceRail activeSourceId={activeSourceId} onSelect={setActiveSourceId} />
+      <SourceRail activeSourceId={navState.activeSourceId} onSelect={switchToSource} />
       <div className={styles.main}>
-        <ContextHeader activeSourceId={activeSourceId} />
-        <BreadcrumbBand activeSourceId={activeSourceId} />
+        <ContextHeader activeSourceId={navState.activeSourceId} />
+        <BreadcrumbBand
+          activeSourceId={navState.activeSourceId}
+          currentPath={navState.currentPaths[navState.activeSourceId]}
+          onNavigateToNodeId={navigateToNodeId}
+        />
         {renderPane()}
       </div>
     </div>

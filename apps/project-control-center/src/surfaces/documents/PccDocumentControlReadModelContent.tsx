@@ -1,5 +1,5 @@
 /**
- * Phase 08 wave-b13 Prompt 10C — Document Control read-model content
+ * Phase 08 wave-b13 Prompt 10D — Document Control read-model content
  * dispatcher.
  *
  * Branch behavior (preserved verbatim from Prompt 4B-09 hook contract):
@@ -9,18 +9,16 @@
  *   status === 'preview' && (stateKind === null)    → 1 Explorer card
  *   status === 'preview' && (stateKind !== null)    → 1 state card + 1 Explorer card
  *
- * Prompt 10C replaces the legacy lane / permissions / reviews composition
- * with a single full-width Document Control Explorer card. The Explorer
- * shell carries its own internal structure (rail, header, breadcrumb,
- * panes). Legacy ready-path content cards are no longer rendered here;
- * the legacy component files remain on disk for Prompt 10F.
+ * Prompt 10D additionally forwards `activeModuleId` into the Explorer
+ * shell so module-focus mapping resolves to a deterministic initial
+ * explorer focus.
  *
  * Each direct bento child remains an `<article data-pcc-card>` so the
  * bento direct-child invariant is preserved.
  */
 
 import { Fragment, type FC } from 'react';
-import { SAMPLE_PROJECT_PROFILE } from '@hbc/models/pcc';
+import { SAMPLE_PROJECT_PROFILE, type PccModuleId } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
 import {
   PccDocumentControlStateCard,
@@ -32,10 +30,12 @@ import type { IPccDocumentsReadModelClient } from './documentControlViewModel';
 
 export interface PccDocumentControlReadModelContentProps {
   readonly client: IPccDocumentsReadModelClient;
+  readonly activeModuleId?: PccModuleId;
 }
 
 export const PccDocumentControlReadModelContent: FC<PccDocumentControlReadModelContentProps> = ({
   client,
+  activeModuleId,
 }) => {
   const result = useDocumentControlReadModel(client, SAMPLE_PROJECT_PROFILE.projectId);
   const status: 'loading' | 'preview' | 'error' = result.status;
@@ -57,7 +57,7 @@ export const PccDocumentControlReadModelContent: FC<PccDocumentControlReadModelC
         title="Document Control Explorer"
         headingLevel={2}
       >
-        <PccDocumentControlExplorerShell />
+        <PccDocumentControlExplorerShell activeModuleId={activeModuleId} />
       </PccDashboardCard>
     </Fragment>
   );
