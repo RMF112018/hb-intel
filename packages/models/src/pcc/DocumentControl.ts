@@ -56,10 +56,7 @@ export type DocumentControlLinkBehavior = 'browse-in-place' | 'launch-link';
 
 // ── Two-lane product model (Wave 2 / Prompt 06) ─────────────────────────
 
-export const DOCUMENT_CONTROL_LANES = [
-  'microsoft-files',
-  'external-document-systems',
-] as const;
+export const DOCUMENT_CONTROL_LANES = ['microsoft-files', 'external-document-systems'] as const;
 
 export type DocumentControlLane = (typeof DOCUMENT_CONTROL_LANES)[number];
 
@@ -168,10 +165,11 @@ export interface IDocumentControlSource {
   guardrail: string;
 }
 
-const ALL_FILE_MANAGEMENT_ACTIONS: readonly DocumentControlActionId[] =
-  DOCUMENT_CONTROL_ACTION_IDS;
+const ALL_FILE_MANAGEMENT_ACTIONS: readonly DocumentControlActionId[] = DOCUMENT_CONTROL_ACTION_IDS;
 
-export const DOCUMENT_CONTROL_SOURCES: Readonly<Record<DocumentControlSourceId, IDocumentControlSource>> = {
+export const DOCUMENT_CONTROL_SOURCES: Readonly<
+  Record<DocumentControlSourceId, IDocumentControlSource>
+> = {
   'sharepoint-drive': {
     id: 'sharepoint-drive',
     displayName: 'SharePoint Drive',
@@ -183,7 +181,7 @@ export const DOCUMENT_CONTROL_SOURCES: Readonly<Record<DocumentControlSourceId, 
     sourceOfRecordLabel: 'Microsoft 365 (SharePoint)',
     guardrail: 'PCC does not duplicate Microsoft files into a separate store.',
   },
-  'onedrive': {
+  onedrive: {
     id: 'onedrive',
     displayName: 'OneDrive',
     posture: 'mvp-required',
@@ -203,7 +201,8 @@ export const DOCUMENT_CONTROL_SOURCES: Readonly<Record<DocumentControlSourceId, 
     previewActionIds: [],
     capabilityPosture: 'launch-link-visibility-only',
     sourceOfRecordLabel: 'Procore',
-    guardrail: 'Access depends on your permissions in Procore. PCC does not mirror, sync, or write back.',
+    guardrail:
+      'Access depends on your permissions in Procore. PCC does not mirror, sync, or write back.',
   },
   'document-crunch': {
     id: 'document-crunch',
@@ -214,7 +213,8 @@ export const DOCUMENT_CONTROL_SOURCES: Readonly<Record<DocumentControlSourceId, 
     previewActionIds: [],
     capabilityPosture: 'launch-link-visibility-only',
     sourceOfRecordLabel: 'Document Crunch',
-    guardrail: 'Access depends on your permissions in Document Crunch. PCC does not mirror, sync, or write back.',
+    guardrail:
+      'Access depends on your permissions in Document Crunch. PCC does not mirror, sync, or write back.',
   },
   'adobe-sign': {
     id: 'adobe-sign',
@@ -225,7 +225,8 @@ export const DOCUMENT_CONTROL_SOURCES: Readonly<Record<DocumentControlSourceId, 
     previewActionIds: [],
     capabilityPosture: 'launch-link-visibility-only',
     sourceOfRecordLabel: 'Adobe Sign',
-    guardrail: 'Access depends on your permissions in Adobe Sign. PCC does not mirror, sync, or write back.',
+    guardrail:
+      'Access depends on your permissions in Adobe Sign. PCC does not mirror, sync, or write back.',
   },
 };
 
@@ -275,8 +276,7 @@ export const DOCUMENT_CONTROL_EXTERNAL_SYSTEM_IDS = [
   'adobe-sign',
   'future-approved-system',
 ] as const;
-export type DocumentControlExternalSystemId =
-  (typeof DOCUMENT_CONTROL_EXTERNAL_SYSTEM_IDS)[number];
+export type DocumentControlExternalSystemId = (typeof DOCUMENT_CONTROL_EXTERNAL_SYSTEM_IDS)[number];
 
 export interface ISharePointBinding {
   kind: 'sharepoint-library' | 'sharepoint-drive';
@@ -358,11 +358,36 @@ export interface IDocumentControlActionCode {
 }
 
 export const DOCUMENT_CONTROL_ACTION_CODES: readonly IDocumentControlActionCode[] = [
-  { code: 'PR01', family: 'PR', label: 'Browse Project Record', description: 'Browse project record libraries.' },
-  { code: 'MP01', family: 'MP', label: 'Browse My Project Files Folder', description: 'Browse current user project folder only.' },
-  { code: 'SB01', family: 'SB', label: 'View Source Binding', description: 'View source binding metadata and status.' },
-  { code: 'EX01', family: 'EX', label: 'Open External Source', description: 'Launch configured external source deep link.' },
-  { code: 'WF01', family: 'WF', label: 'Set Review State', description: 'Set document review state per workflow posture.' },
+  {
+    code: 'PR01',
+    family: 'PR',
+    label: 'Browse Project Record',
+    description: 'Browse project record libraries.',
+  },
+  {
+    code: 'MP01',
+    family: 'MP',
+    label: 'Browse My Project Files Folder',
+    description: 'Browse current user project folder only.',
+  },
+  {
+    code: 'SB01',
+    family: 'SB',
+    label: 'View Source Binding',
+    description: 'View source binding metadata and status.',
+  },
+  {
+    code: 'EX01',
+    family: 'EX',
+    label: 'Open External Source',
+    description: 'Launch configured external source deep link.',
+  },
+  {
+    code: 'WF01',
+    family: 'WF',
+    label: 'Set Review State',
+    description: 'Set document review state per workflow posture.',
+  },
 ] as const;
 
 export const DOCUMENT_CONTROL_ROLE_CODES = [
@@ -450,6 +475,77 @@ export const DOCUMENT_CONTROL_REVIEW_TYPES = [
 ] as const;
 export type DocumentControlReviewType = (typeof DOCUMENT_CONTROL_REVIEW_TYPES)[number];
 
+// ── Project Home Document Control summary feed (Phase 08 / Prompt 09A) ─────
+//
+// This vocabulary is intentionally scoped to the Project Home summary card
+// feed and does NOT replace the dedicated Documents surface contracts
+// (`sources`, source registry, source health, review queue, hard-no rules).
+//
+// Deep-link execution is intentionally deferred:
+// - item-level SharePoint/OneDrive/Procore route resolution is a later phase;
+// - runtime launch behavior is blocked until canonical path + authorization
+//   gates are approved.
+// Prompt 09A therefore carries posture metadata only (preview/read-model), not
+// executable navigation behavior.
+
+export const DOCUMENT_CONTROL_HOME_FEED_MODES = ['my-recent-files', 'latest-changes'] as const;
+export type DocumentControlHomeFeedMode = (typeof DOCUMENT_CONTROL_HOME_FEED_MODES)[number];
+
+export const DOCUMENT_CONTROL_HOME_FEED_SOURCES = ['sharepoint', 'onedrive', 'procore'] as const;
+export type DocumentControlHomeFeedSource = (typeof DOCUMENT_CONTROL_HOME_FEED_SOURCES)[number];
+
+export const DOCUMENT_CONTROL_HOME_FEED_ITEM_KINDS = [
+  'file',
+  'drawing',
+  'specification',
+  'rfi',
+  'submittal',
+  'change-order',
+  'commitment',
+  'change-event',
+  'inspection',
+  'observation',
+  'punch-list',
+] as const;
+export type DocumentControlHomeFeedItemKind =
+  (typeof DOCUMENT_CONTROL_HOME_FEED_ITEM_KINDS)[number];
+
+export const DOCUMENT_CONTROL_HOME_FEED_CHANGE_KINDS = ['added', 'updated'] as const;
+export type DocumentControlHomeFeedChangeKind =
+  (typeof DOCUMENT_CONTROL_HOME_FEED_CHANGE_KINDS)[number];
+
+export type DocumentControlHomeFeedDeepLinkPosture = 'preview-only' | 'future-deep-link';
+export type DocumentControlHomeFeedPermissionPosture = 'viewer-authorized-preview';
+
+export interface IPccDocumentControlHomeFeedBaseItem {
+  readonly id: string;
+  readonly title: string;
+  readonly source: DocumentControlHomeFeedSource;
+  readonly kind: DocumentControlHomeFeedItemKind;
+  readonly contextLabel: string;
+  /** Prompt 09A guardrail: metadata-only, no runtime launch behavior. */
+  readonly deepLinkPosture: DocumentControlHomeFeedDeepLinkPosture;
+  /**
+   * Display/read-model posture metadata only.
+   * Not a runtime authorization or enforcement decision.
+   */
+  readonly permissionPosture: DocumentControlHomeFeedPermissionPosture;
+}
+
+export interface IPccDocumentControlRecentFeedItem extends IPccDocumentControlHomeFeedBaseItem {
+  readonly accessedAtUtc: string;
+}
+
+export interface IPccDocumentControlLatestChangeFeedItem extends IPccDocumentControlHomeFeedBaseItem {
+  readonly changedAtUtc: string;
+  readonly changeKind: DocumentControlHomeFeedChangeKind;
+}
+
+export interface IPccDocumentControlHomeFeed {
+  readonly myRecentFiles: readonly IPccDocumentControlRecentFeedItem[];
+  readonly latestChanges: readonly IPccDocumentControlLatestChangeFeedItem[];
+}
+
 export interface IDocumentControlUniversalHardNoRule {
   id: string;
   title: string;
@@ -461,14 +557,12 @@ export const DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES: readonly IDocumentControl
     {
       id: 'HN-01',
       title: 'No My Project Files root browsing in project-site UI',
-      description:
-        "Project-site instances must not expose the full 'My Project Files' root.",
+      description: "Project-site instances must not expose the full 'My Project Files' root.",
     },
     {
       id: 'HN-02',
       title: 'No other-project folder browsing in project-site UI',
-      description:
-        'Project-site instances must not expose folders mapped to other projects.',
+      description: 'Project-site instances must not expose folders mapped to other projects.',
     },
     {
       id: 'HN-03',

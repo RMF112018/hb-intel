@@ -18,6 +18,7 @@
  */
 
 import { mapPccSourceStatusToPreviewState } from '../../api/pccReadModelStateMapping.js';
+import { EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED } from '@hbc/models/pcc';
 import type { PccPreviewStateKind } from '../../ui/PccPreviewState';
 import type {
   PccApprovalsReadModel,
@@ -163,8 +164,7 @@ export function buildPccProjectHomeViewModel(
   const procoreSnapshotData = buildPccProcoreSurfaceViewModel({
     projectId: input.projectId,
     mapping: input.procoreProjectMapping ?? syntheticDegradedMappingEnvelope(input.projectId),
-    syncHealth:
-      input.procoreSyncHealth ?? syntheticDegradedSyncHealthEnvelope(input.projectId),
+    syncHealth: input.procoreSyncHealth ?? syntheticDegradedSyncHealthEnvelope(input.projectId),
   });
   // Wave 13 Prompt 13E — Procore priority-action signals flow into the
   // existing Priority Actions Rail via category 'procore-sync', which the
@@ -214,6 +214,10 @@ export function buildPccProjectHomeViewModel(
     priorityActions: priorityActionsSlot,
     siteHealth: slot(homeStatus, homeData?.siteHealth),
     documentControl: slot(docStatus, docs?.sources ?? []),
+    documentControlHomeFeed: slot(
+      docStatus,
+      docs?.homeFeed ?? EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED,
+    ),
     missingConfigurations: slot(homeStatus, homeData?.missingConfigurations ?? []),
     procoreSnapshot: slot(procoreSlotStatus, procoreSnapshotData),
     approvalsCard,

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import {
   DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES,
   DOCUMENT_CONTROL_WAVE7_LANES,
+  SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
   PCC_READ_MODEL_MODES,
   PCC_READ_MODEL_SOURCE_STATUSES,
   type PccReadModelEnvelope,
@@ -581,6 +582,7 @@ describe('PccReadModels exports and typing', () => {
 
     const wave7Additive: PccDocumentControlReadModel = {
       sources: [],
+      homeFeed: SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
       wave7LaneVocabulary: DOCUMENT_CONTROL_WAVE7_LANES,
       sourceRegistry: [],
       sourceHealth: [],
@@ -594,6 +596,7 @@ describe('PccReadModels exports and typing', () => {
     const decoded = JSON.parse(encoded) as PccDocumentControlReadModel;
     expect(decoded.wave7LaneVocabulary).toEqual(DOCUMENT_CONTROL_WAVE7_LANES);
     expect(decoded.hardNoRules).toEqual(DOCUMENT_CONTROL_UNIVERSAL_HARD_NO_RULES);
+    expect(decoded.homeFeed).toEqual(SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED);
   });
 });
 

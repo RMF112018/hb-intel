@@ -17,6 +17,7 @@ import type {
   DocumentControlRoleCode,
   DocumentControlReviewState,
   DocumentControlReviewType,
+  IPccDocumentControlHomeFeed,
   IDocumentControlSource,
   IDocumentControlUniversalHardNoRule,
   IProjectDocumentSourceHealth,
@@ -125,6 +126,7 @@ export interface PccPriorityActionsReadModel {
 
 export interface PccDocumentControlReadModel {
   sources: readonly IDocumentControlSource[];
+  homeFeed?: IPccDocumentControlHomeFeed;
   wave7LaneVocabulary?: readonly DocumentControlWave7Lane[];
   sourceRegistry?: readonly IProjectDocumentSourceRegistryEntry[];
   sourceHealth?: readonly IProjectDocumentSourceHealth[];

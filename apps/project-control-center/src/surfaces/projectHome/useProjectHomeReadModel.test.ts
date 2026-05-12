@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import {
+  EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED,
+  SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROJECT_PROFILE,
@@ -61,6 +63,8 @@ describe('useProjectHomeReadModel', () => {
     expect(vm?.siteHealth.data).toEqual(SAMPLE_SITE_HEALTH_SUMMARY);
     expect(vm?.missingConfigurations.data).toEqual(SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS);
     expect(vm?.documentControl.state).toBe('preview');
+    expect(vm?.documentControlHomeFeed.state).toBe('preview');
+    expect(vm?.documentControlHomeFeed.data).toEqual(SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED);
   });
 
   it('reports error state for every slot when simulateBackendUnavailable is set', async () => {
@@ -74,6 +78,7 @@ describe('useProjectHomeReadModel', () => {
       'priorityActions',
       'siteHealth',
       'documentControl',
+      'documentControlHomeFeed',
       'missingConfigurations',
     ] as const) {
       expect(vm?.[key].state).toBe('error');
@@ -170,6 +175,7 @@ describe('useProjectHomeReadModel', () => {
     expect(vm?.intelligence.state).toBe('preview');
     expect(vm?.siteHealth.state).toBe('preview');
     expect(vm?.documentControl.state).toBe('preview');
+    expect(vm?.documentControlHomeFeed.state).toBe('preview');
     expect(vm?.missingConfigurations.state).toBe('preview');
   });
 
@@ -273,6 +279,7 @@ describe('useProjectHomeReadModel', () => {
       'intelligence',
       'siteHealth',
       'documentControl',
+      'documentControlHomeFeed',
       'missingConfigurations',
       'priorityActions',
       'procoreSnapshot',
@@ -282,6 +289,7 @@ describe('useProjectHomeReadModel', () => {
     expect(vm?.intelligence.data).toBeUndefined();
     expect(vm?.siteHealth.data).toBeUndefined();
     expect(vm?.documentControl.data).toEqual([]);
+    expect(vm?.documentControlHomeFeed.data).toEqual(EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED);
     expect(vm?.missingConfigurations.data).toEqual([]);
     expect(vm?.priorityActions.data).toEqual([]);
     // Approvals card view-model is omitted when the approvals envelope is

@@ -14,6 +14,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED,
+  SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROJECT_PROFILE,
   SAMPLE_TEAM_ACCESS_PREVIEW_MODEL,
@@ -133,6 +135,7 @@ describe('PccMockReadModelProvider — unknown project returns source-unavailabl
 
     const docControl = await provider.getDocumentControl(UNKNOWN_PROJECT_ID);
     expect(docControl.data.sources).toEqual([]);
+    expect(docControl.data.homeFeed).toEqual(EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED);
     expect(docControl.data.sourceRegistry).toEqual([]);
     expect(docControl.data.roleActionAvailability).toEqual([]);
     expect(docControl.data.reviewQueueSample).toEqual([]);
@@ -167,6 +170,16 @@ describe('PccMockReadModelProvider — backend-unavailable simulation', () => {
       expect(env.warnings.some((w) => w.code === 'backend-unavailable')).toBe(true);
       expect(env.readOnly).toBe(true);
     }
+  });
+
+  it('uses the empty Project Home document-control home feed in backend-unavailable mode', async () => {
+    const provider = new PccMockReadModelProvider({
+      ...PROVIDER_OPTS,
+      simulateBackendUnavailable: true,
+    });
+    const env = await provider.getDocumentControl(KNOWN_PROJECT_ID);
+    expect(env.sourceStatus).toBe('backend-unavailable');
+    expect(env.data.homeFeed).toEqual(EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED);
   });
 });
 
@@ -266,15 +279,18 @@ describe('PccMockReadModelProvider — determinism', () => {
     const data = env.data;
 
     expect(data.sources.length).toBeGreaterThan(0);
+    expect(data.homeFeed).toEqual(SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED);
+    expect(data.homeFeed?.myRecentFiles).toHaveLength(5);
+    expect(data.homeFeed?.latestChanges).toHaveLength(5);
     expect(data.wave7LaneVocabulary).toEqual([
       'project-record',
       'my-project-files',
       'external-systems',
     ]);
     expect(data.sourceRegistry?.length).toBeGreaterThan(0);
-    expect(
-      data.sourceRegistry?.some((entry) => entry.notes?.includes('procoreProjectId=')),
-    ).toBe(true);
+    expect(data.sourceRegistry?.some((entry) => entry.notes?.includes('procoreProjectId='))).toBe(
+      true,
+    );
 
     const myProjectFiles = data.sourceRegistry?.find(
       (entry) => entry.wave7Lane === 'my-project-files',
@@ -289,11 +305,11 @@ describe('PccMockReadModelProvider — determinism', () => {
     }
 
     expect(
-      data.roleActionAvailability?.some((row) => row.actionCode === 'EX04' && row.availability === 'Y'),
+      data.roleActionAvailability?.some(
+        (row) => row.actionCode === 'EX04' && row.availability === 'Y',
+      ),
     ).toBe(false);
-    expect(
-      data.roleActionAvailability?.some((row) => row.roleCode === 'R14'),
-    ).toBe(true);
+    expect(data.roleActionAvailability?.some((row) => row.roleCode === 'R14')).toBe(true);
 
     const serialized = JSON.stringify(data);
     expect(serialized.includes('Project Engineer')).toBe(false);

@@ -64,6 +64,8 @@ import {
   SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
   SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
   SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL,
+  SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
+  EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED,
   SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL,
   SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL,
 } from '@hbc/models/pcc';
@@ -224,6 +226,7 @@ function buildWave7DocumentControlReadModel(
   if (!known) {
     return {
       sources: [],
+      homeFeed: EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED,
       wave7LaneVocabulary: WAVE7_LANES,
       sourceRegistry: [],
       sourceHealth: [WAVE7_SOURCE_WARNING],
@@ -243,6 +246,7 @@ function buildWave7DocumentControlReadModel(
 
   return {
     sources: DOCUMENT_CONTROL_SOURCES_ORDERED,
+    homeFeed: SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
     wave7LaneVocabulary: WAVE7_LANES,
     sourceRegistry: [
       {

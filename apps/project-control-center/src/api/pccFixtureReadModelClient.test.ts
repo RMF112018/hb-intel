@@ -13,6 +13,8 @@ import {
   SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_BACKEND_UNAVAILABLE,
   SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_KNOWN_PROJECT,
   SAMPLE_PCC_EXTERNAL_SYSTEMS_LAUNCH_PAD_READ_MODEL_UNKNOWN_PROJECT,
+  SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
+  EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED,
   SAMPLE_PCC_HBI_SOURCE_LINEAGE_READ_MODEL,
   SAMPLE_PCC_PROJECT_EXTERNAL_LAUNCH_LINKS_READ_MODEL,
   SAMPLE_PCC_PROJECT_EXTERNAL_SYSTEM_MAPPINGS_READ_MODEL,
@@ -604,6 +606,9 @@ describe('createPccFixtureReadModelClient — getDocumentControl wave 7 shape', 
     const env = await client.getDocumentControl(KNOWN_PROJECT_ID);
     expect(env.sourceStatus).toBe('available');
     expect(env.data.sources.length).toBeGreaterThan(0);
+    expect(env.data.homeFeed).toEqual(SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED);
+    expect(env.data.homeFeed?.myRecentFiles).toHaveLength(5);
+    expect(env.data.homeFeed?.latestChanges).toHaveLength(5);
   });
 
   it('returns the three Wave 7 lanes', async () => {
@@ -704,6 +709,7 @@ describe('createPccFixtureReadModelClient — getDocumentControl wave 7 shape', 
     expect(env.sourceStatus).toBe('backend-unavailable');
     expect(env.readOnly).toBe(true);
     expect(env.data.sources).toEqual([]);
+    expect(env.data.homeFeed).toEqual(EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED);
     expect(env.data.sourceRegistry).toEqual([]);
     expect(env.data.roleActionAvailability).toEqual([]);
   });
@@ -713,6 +719,7 @@ describe('createPccFixtureReadModelClient — getDocumentControl wave 7 shape', 
     expect(env.sourceStatus).toBe('source-unavailable');
     expect(env.readOnly).toBe(true);
     expect(env.data.sources).toEqual([]);
+    expect(env.data.homeFeed).toEqual(EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED);
     expect(env.data.sourceRegistry).toEqual([]);
     expect(env.data.roleActionAvailability).toEqual([]);
   });

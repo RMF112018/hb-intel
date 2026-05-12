@@ -49,6 +49,8 @@ import {
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_LAUNCH_LINKS,
   SAMPLE_DOCUMENT_CONTROL_SOURCE_IDS,
+  SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
+  EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED,
   SAMPLE_TEAM_ACCESS_MEMBERS,
   SAMPLE_TEAM_ACCESS_VIEWER_LANE,
   SAMPLE_TEAM_ACCESS_PERMISSION_REQUEST_LANE,
@@ -171,6 +173,8 @@ const NAMED_FIXTURES: ReadonlyArray<readonly [string, unknown]> = [
   ['SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS', SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS],
   ['SAMPLE_LAUNCH_LINKS', SAMPLE_LAUNCH_LINKS],
   ['SAMPLE_DOCUMENT_CONTROL_SOURCE_IDS', SAMPLE_DOCUMENT_CONTROL_SOURCE_IDS],
+  ['SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED', SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED],
+  ['EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED', EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED],
   ['SAMPLE_EXTERNAL_SYSTEM_DEFINITIONS', SAMPLE_EXTERNAL_SYSTEM_DEFINITIONS],
   [
     'SAMPLE_PROJECT_EXTERNAL_LAUNCH_LINKS_KNOWN_PROJECT',
@@ -337,6 +341,46 @@ describe('PCC fixtures', () => {
     for (const state of LAUNCH_LINK_STATES) {
       expect(observed.has(state)).toBe(true);
     }
+  });
+
+  it('Document Control Project Home feed fixture has deterministic top-five cardinality and ordering', () => {
+    const feed = SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED;
+    expect(feed.myRecentFiles).toHaveLength(5);
+    expect(feed.latestChanges).toHaveLength(5);
+
+    for (let i = 1; i < feed.myRecentFiles.length; i += 1) {
+      const prev = Date.parse(feed.myRecentFiles[i - 1]!.accessedAtUtc);
+      const next = Date.parse(feed.myRecentFiles[i]!.accessedAtUtc);
+      expect(Number.isNaN(prev)).toBe(false);
+      expect(Number.isNaN(next)).toBe(false);
+      expect(prev).toBeGreaterThanOrEqual(next);
+    }
+
+    for (let i = 1; i < feed.latestChanges.length; i += 1) {
+      const prev = Date.parse(feed.latestChanges[i - 1]!.changedAtUtc);
+      const next = Date.parse(feed.latestChanges[i]!.changedAtUtc);
+      expect(Number.isNaN(prev)).toBe(false);
+      expect(Number.isNaN(next)).toBe(false);
+      expect(prev).toBeGreaterThanOrEqual(next);
+    }
+  });
+
+  it('Document Control Project Home feed fixture sources are sharepoint/onedrive/procore only', () => {
+    const allowed = new Set(['sharepoint', 'onedrive', 'procore']);
+    for (const item of SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED.myRecentFiles) {
+      expect(allowed.has(item.source)).toBe(true);
+      expect(item.deepLinkPosture).toBe('preview-only');
+      expect(item.permissionPosture).toBe('viewer-authorized-preview');
+    }
+    for (const item of SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED.latestChanges) {
+      expect(allowed.has(item.source)).toBe(true);
+      expect(item.deepLinkPosture).toBe('preview-only');
+      expect(item.permissionPosture).toBe('viewer-authorized-preview');
+    }
+    expect(EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED).toEqual({
+      myRecentFiles: [],
+      latestChanges: [],
+    });
   });
 
   it('SAMPLE_BUSINESS_AUDIT_EVENTS covers both source-context branches', () => {

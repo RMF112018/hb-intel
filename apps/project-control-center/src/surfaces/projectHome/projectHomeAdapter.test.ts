@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   DOCUMENT_CONTROL_SOURCES,
   DOCUMENT_CONTROL_SOURCE_IDS,
+  EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED,
+  SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED,
   SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS,
   SAMPLE_PRIORITY_ACTIONS,
   SAMPLE_PROCORE_PROJECT_MAPPING_READ_MODEL,
@@ -105,6 +107,7 @@ const SLOT_KEYS = [
   'priorityActions',
   'siteHealth',
   'documentControl',
+  'documentControlHomeFeed',
   'missingConfigurations',
 ] as const;
 type SlotKey = (typeof SLOT_KEYS)[number];
@@ -161,6 +164,8 @@ describe('buildPccProjectHomeViewModel — mixed envelope statuses', () => {
     expect(viewModel.missingConfigurations.state).toBe('preview');
     expect(viewModel.documentControl.state).toBe('error');
     expect(viewModel.documentControl.sourceStatus).toBe('backend-unavailable');
+    expect(viewModel.documentControlHomeFeed.state).toBe('error');
+    expect(viewModel.documentControlHomeFeed.sourceStatus).toBe('backend-unavailable');
   });
 
   it('home=unauthorized + documentControl=available: home-derived slots unauthorized-persona, doc slot preview', () => {
@@ -176,6 +181,7 @@ describe('buildPccProjectHomeViewModel — mixed envelope statuses', () => {
     expect(viewModel.siteHealth.state).toBe('unauthorized-persona');
     expect(viewModel.missingConfigurations.state).toBe('unauthorized-persona');
     expect(viewModel.documentControl.state).toBe('preview');
+    expect(viewModel.documentControlHomeFeed.state).toBe('preview');
   });
 });
 
@@ -211,6 +217,7 @@ describe('buildPccProjectHomeViewModel — fixture equivalence', () => {
     expect(viewModel.siteHealth.data).toEqual(SAMPLE_SITE_HEALTH_SUMMARY);
     expect(viewModel.missingConfigurations.data).toEqual(SAMPLE_EXTERNAL_SYSTEM_MISSING_CONFIGS);
     expect(viewModel.documentControl.data).toEqual(ORDERED_DOC_SOURCES);
+    expect(viewModel.documentControlHomeFeed.data).toEqual(SAMPLE_PCC_DOCUMENT_CONTROL_HOME_FEED);
 
     for (const key of SLOT_KEYS) {
       expect(viewModel[key as SlotKey].state).toBe('preview');
@@ -333,6 +340,7 @@ describe('buildPccProjectHomeViewModel — defaults for missing data', () => {
     expect(viewModel.priorityActions.data).toEqual([]);
     expect(viewModel.missingConfigurations.data).toEqual([]);
     expect(viewModel.documentControl.data).toEqual([]);
+    expect(viewModel.documentControlHomeFeed.data).toEqual(EMPTY_PCC_DOCUMENT_CONTROL_HOME_FEED);
     expect(viewModel.siteHealth.data).toBeUndefined();
   });
 });

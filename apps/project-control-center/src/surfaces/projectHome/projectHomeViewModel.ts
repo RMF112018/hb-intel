@@ -13,6 +13,7 @@
 
 import type {
   IDocumentControlSource,
+  IPccDocumentControlHomeFeed,
   IExternalSystemMissingConfig,
   IPriorityAction,
   IProjectProfile,
@@ -136,6 +137,7 @@ export interface IPccProjectHomeViewModel {
   readonly priorityActions: IPccProjectHomeViewModelSlot<readonly IPriorityAction[]>;
   readonly siteHealth: IPccProjectHomeViewModelSlot<ISiteHealthSummary | undefined>;
   readonly documentControl: IPccProjectHomeViewModelSlot<readonly IDocumentControlSource[]>;
+  readonly documentControlHomeFeed: IPccProjectHomeViewModelSlot<IPccDocumentControlHomeFeed>;
   readonly missingConfigurations: IPccProjectHomeViewModelSlot<
     readonly IExternalSystemMissingConfig[]
   >;
