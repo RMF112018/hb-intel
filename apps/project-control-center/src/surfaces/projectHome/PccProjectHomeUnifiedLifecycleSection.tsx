@@ -36,6 +36,7 @@ import {
   type IPccUnifiedLifecycleReadModelClient,
   type IUseUnifiedLifecycleReadModelState,
 } from '../unifiedLifecycle/index.js';
+import { PROJECT_HOME_TAIL_SPAN_OVERRIDES } from './projectHomeTailChoreography';
 
 export interface IPccProjectHomeUnifiedLifecycleSectionProps {
   readonly client: IPccUnifiedLifecycleReadModelClient;
@@ -63,6 +64,7 @@ export const PccProjectHomeUnifiedLifecycleSection: FC<
         region="detail"
         eyebrow="Project lifecycle"
         title="Lifecycle Timeline"
+        spanOverrides={PROJECT_HOME_TAIL_SPAN_OVERRIDES.lifecycleTimeline}
       >
         {renderLifecycleTimeline(state)}
       </PccDashboardCard>
@@ -73,17 +75,9 @@ export const PccProjectHomeUnifiedLifecycleSection: FC<
         region="reference"
         eyebrow="Project memory"
         title="Project Memory"
+        spanOverrides={PROJECT_HOME_TAIL_SPAN_OVERRIDES.projectMemory}
       >
         {renderProjectMemory(state)}
-      </PccDashboardCard>
-      <PccDashboardCard
-        footprint="rail"
-        tier="tier3"
-        region="rail"
-        eyebrow="Lenses"
-        title="Project Lens"
-      >
-        {renderProjectLens(state)}
       </PccDashboardCard>
       <PccDashboardCard
         footprint="detail"
@@ -91,8 +85,19 @@ export const PccProjectHomeUnifiedLifecycleSection: FC<
         region="detail"
         eyebrow="Traceability"
         title="Related Records"
+        spanOverrides={PROJECT_HOME_TAIL_SPAN_OVERRIDES.relatedRecords}
       >
         {renderRelatedRecords(state)}
+      </PccDashboardCard>
+      <PccDashboardCard
+        footprint="rail"
+        tier="tier3"
+        region="rail"
+        eyebrow="Lenses"
+        title="Project Lens"
+        spanOverrides={PROJECT_HOME_TAIL_SPAN_OVERRIDES.projectLens}
+      >
+        {renderProjectLens(state)}
       </PccDashboardCard>
     </Fragment>
   );

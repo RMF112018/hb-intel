@@ -58,16 +58,16 @@ const FIXTURE_EXPECTED_ORDER = [
 ] as const;
 
 // Read-model path is the twelve-card fixture order followed by
-// Lifecycle Timeline + Ask HBI + Procore Snapshot (inside
-// renderAfterTimeline) + Project Memory + Project Lens + Related Records.
+// Lifecycle Timeline + Procore Snapshot + Ask HBI (inside
+// renderAfterTimeline) + Project Memory + Related Records + Project Lens.
 const READ_MODEL_EXPECTED_ORDER = [
   ...FIXTURE_EXPECTED_ORDER,
   'Lifecycle Timeline',
-  'Ask HBI — Grounded Project Answers',
   'Procore snapshot',
+  'Ask HBI — Grounded Project Answers',
   'Project Memory',
-  'Project Lens',
   'Related Records',
+  'Project Lens',
 ] as const;
 
 describe('Project Home — first-impression composition order', () => {

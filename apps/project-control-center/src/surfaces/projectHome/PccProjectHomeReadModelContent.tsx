@@ -16,11 +16,11 @@
  * Readiness, Document Control Center, Site Health Summary,
  * Approvals & Checkpoints, Missing Configurations, External Platforms,
  * Team Snapshot, Recent Activity), with the three preview analytics
- * cards interleaved. Lifecycle / Ask HBI / Procore Snapshot / Project
- * Memory / Project Lens / Related Records render after the spine via
+ * cards interleaved. Lifecycle / Procore Snapshot / Ask HBI / Project
+ * Memory / Related Records / Project Lens render after the spine via
  * `PccProjectHomeUnifiedLifecycleSection` (Lifecycle Timeline →
- * Ask HBI + Procore Snapshot inside `renderAfterTimeline` → Project
- * Memory → Project Lens → Related Records).
+ * Procore Snapshot + Ask HBI inside `renderAfterTimeline` → Project
+ * Memory → Related Records → Project Lens).
  *
  * TODO(post-mvp): When Project Home read-model envelopes include project
  * stage, lifecycle phase, role/persona lens, readiness blockers, source
@@ -53,6 +53,7 @@ import {
   PROJECT_HOME_OPERATIONAL_GATEWAYS,
   PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES,
 } from './projectHomeChoreography';
+import { PROJECT_HOME_TAIL_SPAN_OVERRIDES } from './projectHomeTailChoreography';
 import { useProjectHomeReadModel } from './useProjectHomeReadModel';
 import type { IPccProjectHomeReadModelClient } from './projectHomeViewModel';
 
@@ -149,13 +150,15 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         projectId={SAMPLE_PROJECT_PROFILE.projectId}
         renderAfterTimeline={
           <>
-            <PccProjectHomeAskHbiSection
-              client={client}
-              projectId={SAMPLE_PROJECT_PROFILE.projectId}
-            />
             <PccProjectHomeProcoreSnapshotCard
               state={viewModel?.procoreSnapshot.state ?? 'preview'}
               snapshot={viewModel?.procoreSnapshot.data}
+              spanOverrides={PROJECT_HOME_TAIL_SPAN_OVERRIDES.procoreSnapshot}
+            />
+            <PccProjectHomeAskHbiSection
+              client={client}
+              projectId={SAMPLE_PROJECT_PROFILE.projectId}
+              spanOverrides={PROJECT_HOME_TAIL_SPAN_OVERRIDES.askHbiGrounding}
             />
           </>
         }

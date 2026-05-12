@@ -65,11 +65,11 @@ const PROJECT_HOME_FIXTURE_ORDER: readonly string[] = [
 const READ_MODEL_FULL_ORDER: readonly string[] = [
   ...PROJECT_HOME_FIXTURE_ORDER,
   'Lifecycle Timeline',
-  'Ask HBI — Grounded Project Answers',
   'Procore snapshot',
+  'Ask HBI — Grounded Project Answers',
   'Project Memory',
-  'Project Lens',
   'Related Records',
+  'Project Lens',
 ];
 
 function getCardTitles(grid: HTMLElement): readonly string[] {
@@ -154,7 +154,7 @@ describe('Project Home Phase 06 composition — fixture path', () => {
 });
 
 describe('Project Home Phase 06 composition — read-model path', () => {
-  it('renders the Phase 08 Prompt 09 canonical Project Home twelve-card spine+analytics first, then lifecycle / Ask HBI / Procore / Memory / Lens / Related Records', async () => {
+  it('renders the Phase 08 Prompt 09 canonical Project Home twelve-card spine+analytics first, then lifecycle / Procore / Ask HBI / Memory / Related Records / Lens', async () => {
     const client = createPccFixtureReadModelClient();
     const { container, findByText } = render(
       <PccBentoGrid forceMode="desktop">

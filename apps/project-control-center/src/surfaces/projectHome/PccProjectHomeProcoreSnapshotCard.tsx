@@ -12,6 +12,7 @@
 
 import type { FC } from 'react';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
+import type { PccCardSpanOverrides } from '../../layout/footprints';
 import { PccPreviewState } from '../../ui/PccPreviewState';
 import { PccStatusPill } from '../../ui/PccStatusPill';
 import type { IPccProcoreSurfaceViewModel } from '../../viewModels/procoreSurfaceAdapter';
@@ -21,6 +22,7 @@ import styles from './PccProjectHome.module.css';
 export interface PccProjectHomeProcoreSnapshotCardProps {
   readonly state?: PccCardState;
   readonly snapshot?: IPccProcoreSurfaceViewModel;
+  readonly spanOverrides?: PccCardSpanOverrides;
 }
 
 const MAPPING_STATE_LABELS: Readonly<Record<string, string>> = {
@@ -45,6 +47,7 @@ const DEGRADED_LABELS: Readonly<Record<string, string>> = {
 export const PccProjectHomeProcoreSnapshotCard: FC<PccProjectHomeProcoreSnapshotCardProps> = ({
   state = 'preview',
   snapshot,
+  spanOverrides,
 }) => {
   const degradedStateId = snapshot?.degradedStateId ?? null;
   const headlineLabel =
@@ -57,6 +60,7 @@ export const PccProjectHomeProcoreSnapshotCard: FC<PccProjectHomeProcoreSnapshot
       region="deferred"
       eyebrow="Procore"
       title="Procore snapshot"
+      spanOverrides={spanOverrides}
     >
       <div
         data-pcc-card-id="procore-snapshot"

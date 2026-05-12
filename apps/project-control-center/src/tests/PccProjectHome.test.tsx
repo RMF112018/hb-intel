@@ -74,8 +74,8 @@ const REQUIRED_CARD_TITLES = [
 const UNIFIED_LIFECYCLE_CARD_TITLES = [
   'Lifecycle Timeline',
   'Project Memory',
-  'Project Lens',
   'Related Records',
+  'Project Lens',
 ] as const;
 
 // Wave 99 / Prompt 06C — Ask HBI is integrated as one additional card on
@@ -477,7 +477,7 @@ describe('Project Home bento dashboard', () => {
   // ── Wave 15A wave-b6 Prompt 04 — core operational cluster order ──────
 
   // Wave 15A wave-b6 Prompt 05 — Lifecycle / HBI promotion on the read-model path.
-  it('read-model path promotes Lifecycle Timeline and Ask HBI above Procore/reference and keeps lower-detail lifecycle cards at the tail', async () => {
+  it('read-model path promotes Lifecycle Timeline before Procore and Ask HBI, then keeps the lower-detail lifecycle tail in memory -> records -> lens order', async () => {
     const { container } = render(
       <PccApp forceMode="desktop" readModelClient={createPccFixtureReadModelClient()} />,
     );
@@ -509,13 +509,12 @@ describe('Project Home bento dashboard', () => {
       // unified-lifecycle section's renderAfterTimeline slot.
       expect(idx('Lifecycle Timeline')).toBeLessThan(idx('Ask HBI — Grounded Project Answers'));
       expect(idx('Lifecycle Timeline')).toBeLessThan(idx('Procore snapshot'));
-      // Ask HBI sits inside renderAfterTimeline (above Procore snapshot).
-      expect(idx('Ask HBI — Grounded Project Answers')).toBeLessThan(idx('Procore snapshot'));
-      // Lower-detail lifecycle cards remain at the tail (after Procore
-      // snapshot, which is the last node inside renderAfterTimeline).
-      expect(idx('Project Memory')).toBeGreaterThan(idx('Procore snapshot'));
-      expect(idx('Project Lens')).toBeGreaterThan(idx('Procore snapshot'));
-      expect(idx('Related Records')).toBeGreaterThan(idx('Procore snapshot'));
+      // Procore now precedes Ask HBI in renderAfterTimeline.
+      expect(idx('Procore snapshot')).toBeLessThan(idx('Ask HBI — Grounded Project Answers'));
+      // Lower-detail lifecycle cards remain at the tail after Ask HBI.
+      expect(idx('Ask HBI — Grounded Project Answers')).toBeLessThan(idx('Project Memory'));
+      expect(idx('Project Memory')).toBeLessThan(idx('Related Records'));
+      expect(idx('Related Records')).toBeLessThan(idx('Project Lens'));
     });
 
     // Bento direct-child invariant. After Wave 15A wave-b9 Prompt 4B-01 the

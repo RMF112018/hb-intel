@@ -26,6 +26,7 @@
 import { type FC } from 'react';
 import type { PccPersona, PccProjectId } from '@hbc/models/pcc';
 import { PccDashboardCard } from '../../layout/PccDashboardCard';
+import type { PccCardSpanOverrides } from '../../layout/footprints';
 import {
   AskHbiGroundingPreviewPanel,
   type IPccUnifiedSearchReadModelClient,
@@ -35,12 +36,14 @@ export interface IPccProjectHomeAskHbiSectionProps {
   readonly client: IPccUnifiedSearchReadModelClient;
   readonly projectId: PccProjectId;
   readonly viewerPersona?: PccPersona;
+  readonly spanOverrides?: PccCardSpanOverrides;
 }
 
 export const PccProjectHomeAskHbiSection: FC<IPccProjectHomeAskHbiSectionProps> = ({
   client,
   projectId,
   viewerPersona,
+  spanOverrides,
 }) => (
   <PccDashboardCard
     footprint="detail"
@@ -48,6 +51,7 @@ export const PccProjectHomeAskHbiSection: FC<IPccProjectHomeAskHbiSectionProps> 
     region="detail"
     eyebrow="Ask HBI"
     title="Ask HBI — Grounded Project Answers"
+    spanOverrides={spanOverrides}
   >
     <AskHbiGroundingPreviewPanel
       client={client}
