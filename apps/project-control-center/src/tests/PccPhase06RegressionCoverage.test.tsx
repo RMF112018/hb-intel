@@ -103,9 +103,15 @@ void disposeMock;
  * `PccProjectHome.phase06Composition.test.tsx:209–300` (canonical).
  * ------------------------------------------------------------------------- */
 
+// Phase 08 Prompt 09 — re-centered Project Home row choreography.
+// Row 1: Priority Actions (5) + Project Readiness (3) + Document Control Center (4) = 12.
+// Row 2: Site Health Summary (4) + Action Exposure Mix (4) + Project Health Trend (4) = 12.
+// Row 3: Approvals & Checkpoints (4) + Readiness / Approval Rollup (4) + Missing Configurations (4) = 12.
+// Row 4: External Platforms (4) + Team Snapshot (3) + Recent Activity (5) = 12.
+// 10-column rows (standardLaptop) follow the same composition, summing to 10.
 const ROW_LABELS_IN_ORDER: readonly (readonly string[])[] = [
-  ['Priority Actions', 'Site Health Summary', 'Document Control Center'],
-  ['Action Exposure Mix', 'Project Health Trend', 'Project Readiness'],
+  ['Priority Actions', 'Project Readiness', 'Document Control Center'],
+  ['Site Health Summary', 'Action Exposure Mix', 'Project Health Trend'],
   ['Approvals & Checkpoints', 'Readiness / Approval Rollup', 'Missing Configurations'],
   ['External Platforms', 'Team Snapshot', 'Recent Activity'],
 ];

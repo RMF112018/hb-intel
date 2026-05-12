@@ -31,7 +31,7 @@ export const PccPriorityActionsCard: FC<PccPriorityActionsCardProps> = ({
 }) => (
   <PccDashboardCard
     footprint="wide"
-    tier="tier2"
+    tier="tier1"
     region="operational"
     eyebrow="Today"
     title="Priority Actions"

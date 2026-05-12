@@ -11,12 +11,13 @@
  * matching the Wave 2 visual baseline. After the microtask resolves,
  * cards re-render with envelope-derived state and data.
  *
- * Phase 06 Prompt 02 — the nine-card operational spine renders first in
- * the canonical Phase 06 order (Priority Actions, Site Health Summary,
- * Document Control Center, Project Readiness, Approvals & Checkpoints,
- * Missing Configurations, External Platforms, Team Snapshot, Recent
- * Activity). Lifecycle / Ask HBI / Procore Snapshot / Project Memory /
- * Project Lens / Related Records render after the spine via
+ * Phase 06 Prompt 02 → Phase 08 Prompt 09 — the nine-card operational
+ * spine renders first in the canonical order (Priority Actions, Project
+ * Readiness, Document Control Center, Site Health Summary,
+ * Approvals & Checkpoints, Missing Configurations, External Platforms,
+ * Team Snapshot, Recent Activity), with the three preview analytics
+ * cards interleaved. Lifecycle / Ask HBI / Procore Snapshot / Project
+ * Memory / Project Lens / Related Records render after the spine via
  * `PccProjectHomeUnifiedLifecycleSection` (Lifecycle Timeline →
  * Ask HBI + Procore Snapshot inside `renderAfterTimeline` → Project
  * Memory → Project Lens → Related Records).
@@ -75,11 +76,9 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.priorityActions}
         onSelectModule={onSelectModule}
       />
-      <PccSiteHealthSummaryCard
-        state={viewModel?.siteHealth.state ?? 'preview'}
-        summary={viewModel?.siteHealth.data}
-        spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.siteHealthSummary}
-        gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.siteHealthSummary}
+      <PccProjectReadinessCard
+        spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.projectReadiness}
+        gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.projectReadiness}
         onSelectModule={onSelectModule}
       />
       <PccDocumentControlCard
@@ -87,6 +86,13 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         sources={viewModel?.documentControl.data}
         spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.documentControl}
         gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.documentControl}
+        onSelectModule={onSelectModule}
+      />
+      <PccSiteHealthSummaryCard
+        state={viewModel?.siteHealth.state ?? 'preview'}
+        summary={viewModel?.siteHealth.data}
+        spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.siteHealthSummary}
+        gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.siteHealthSummary}
         onSelectModule={onSelectModule}
       />
       <PccAnalyticsCard
@@ -102,11 +108,6 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         tier="tier2"
         region="operational"
         spanOverrides={PROJECT_HOME_ANALYTICS_SPAN_OVERRIDES.projectHealthTrend}
-      />
-      <PccProjectReadinessCard
-        spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.projectReadiness}
-        gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.projectReadiness}
-        onSelectModule={onSelectModule}
       />
       <PccApprovalsCheckpointsCard
         viewModel={viewModel?.approvalsCard}

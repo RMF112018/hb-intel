@@ -45,19 +45,20 @@ const SUPPRESSED_FIXTURES = SAMPLE_PRIORITY_ACTIONS.filter((a) =>
 // tests, so the card-level `[data-pcc-active-surface-panel="project-home"]`
 // compatibility marker is no longer rendered (the shell `<main>` carries
 // the marker on its own).
-// Phase 06 Prompt 04 — REQUIRED_CARD_TITLES is the canonical 12-card
-// fixture order: the Prompt 02 nine-card operational spine with three
-// preview analytics cards interleaved (Action Exposure Mix +
-// Project Health Trend after Document Control Center;
-// Readiness / Approval Rollup between Approvals & Checkpoints and
-// Missing Configurations).
+// Phase 08 Prompt 09 — REQUIRED_CARD_TITLES is the canonical 12-card
+// Project Home fixture order: Priority Actions dominates the first
+// fold; Project Readiness and Document Control Center are the headline
+// support cards; Site Health Summary moves into the second row with the
+// two leading analytics cards (Action Exposure Mix + Project Health
+// Trend). Readiness / Approval Rollup sits between Approvals & Checkpoints
+// and Missing Configurations.
 const REQUIRED_CARD_TITLES = [
   'Priority Actions',
-  'Site Health Summary',
+  'Project Readiness',
   'Document Control Center',
+  'Site Health Summary',
   'Action Exposure Mix',
   'Project Health Trend',
-  'Project Readiness',
   'Approvals & Checkpoints',
   'Readiness / Approval Rollup',
   'Missing Configurations',
@@ -139,7 +140,7 @@ describe('Project Home bento dashboard', () => {
     }
   });
 
-  it('promotes Priority Actions to the first bento card as Tier 2 operational and renders no in-grid project-home compatibility marker (Wave 15A wave-b9 Prompt 4B-01)', () => {
+  it('promotes Priority Actions to the first bento card as Tier 1 operational and renders no in-grid project-home compatibility marker (Wave 15A wave-b9 Prompt 4B-01 → Phase 08 Prompt 09)', () => {
     // Prompt 4B-01 removed `PccProjectIntelligenceCard` — Project Home
     // moved to SURFACES_WITH_SHELL_ONLY_PANEL across the contract/smoke
     // tests. The shell `<main>` continues to carry the
@@ -160,7 +161,7 @@ describe('Project Home bento dashboard', () => {
     expect(firstHeading).toBe('Priority Actions');
     expect(firstCard.getAttribute('data-pcc-footprint')).toBe('wide');
     expect(firstCard.getAttribute('data-pcc-card-hierarchy')).toBe('standard');
-    expect(firstCard.getAttribute('data-pcc-card-tier')).toBe('tier2');
+    expect(firstCard.getAttribute('data-pcc-card-tier')).toBe('tier1');
     expect(firstCard.getAttribute('data-pcc-card-region')).toBe('operational');
     expect(firstCard.hasAttribute('data-pcc-active-surface-panel')).toBe(false);
 
@@ -673,13 +674,13 @@ describe('Project Home bento dashboard', () => {
       expect(i, `card '${t}' should appear`).toBeGreaterThanOrEqual(0);
       return i;
     };
-    // Phase 06 Prompt 02 — canonical operational spine order:
-    // Priority Actions → Site Health Summary → Document Control Center →
-    // Project Readiness → Approvals & Checkpoints → Missing Configurations
-    // → External Platforms.
-    expect(idx('Site Health Summary')).toBeLessThan(idx('Document Control Center'));
-    expect(idx('Document Control Center')).toBeLessThan(idx('Project Readiness'));
-    expect(idx('Project Readiness')).toBeLessThan(idx('Approvals & Checkpoints'));
+    // Phase 08 Prompt 09 — canonical operational spine order:
+    // Priority Actions → Project Readiness → Document Control Center →
+    // Site Health Summary → Approvals & Checkpoints →
+    // Missing Configurations → External Platforms.
+    expect(idx('Project Readiness')).toBeLessThan(idx('Document Control Center'));
+    expect(idx('Document Control Center')).toBeLessThan(idx('Site Health Summary'));
+    expect(idx('Site Health Summary')).toBeLessThan(idx('Approvals & Checkpoints'));
     expect(idx('Approvals & Checkpoints')).toBeLessThan(idx('Missing Configurations'));
     expect(idx('Missing Configurations')).toBeLessThan(idx('External Platforms'));
   });

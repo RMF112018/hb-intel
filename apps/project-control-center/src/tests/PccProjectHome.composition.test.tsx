@@ -1,9 +1,13 @@
 /**
  * Project Home composition order — first-impression hierarchy contract.
  *
- * Asserts the locked Wave 15A wave-b6 Prompt 04 card sequence on both
- * render paths using the direct-child bento card list (not nested
- * heading scans) so card-body content cannot contaminate the order.
+ * Asserts the canonical Project Home card sequence on both render paths
+ * (Phase 06 Prompt 04 introduced the 12-card spine+analytics composition;
+ * Phase 08 Prompt 09 re-centered the first fold around Priority Actions →
+ * Project Readiness → Document Control Center, repositioning Site Health
+ * Summary into the second row alongside the two leading analytics cards).
+ * The direct-child bento card list (not nested heading scans) is used so
+ * card-body content cannot contaminate the order.
  *
  * Read-model order asserts inside `waitFor` so both async hooks
  * (`useProjectHomeReadModel` and `useUnifiedLifecycleReadModel`) settle
@@ -30,18 +34,21 @@ function readDirectCardTitlesInOrder(grid: Element): string[] {
     .map((card) => card.querySelector('h2,h3,h4')?.textContent?.trim() ?? '(untitled)');
 }
 
-// Phase 06 Prompt 04 — canonical twelve-card fixture order: the Prompt 02
-// nine-card operational spine with three preview analytics cards
-// interleaved (Action Exposure Mix + Project Health Trend after Document
-// Control Center; Readiness / Approval Rollup between Approvals &
-// Checkpoints and Missing Configurations).
+// Phase 08 Prompt 09 — canonical twelve-card Project Home fixture order:
+// the re-centered nine-card operational spine (Priority Actions, Project
+// Readiness, Document Control Center, Site Health Summary, Approvals &
+// Checkpoints, Missing Configurations, External Platforms, Team Snapshot,
+// Recent Activity) with three preview analytics cards interleaved
+// (Action Exposure Mix + Project Health Trend after Site Health Summary;
+// Readiness / Approval Rollup between Approvals & Checkpoints and
+// Missing Configurations).
 const FIXTURE_EXPECTED_ORDER = [
   'Priority Actions',
-  'Site Health Summary',
+  'Project Readiness',
   'Document Control Center',
+  'Site Health Summary',
   'Action Exposure Mix',
   'Project Health Trend',
-  'Project Readiness',
   'Approvals & Checkpoints',
   'Readiness / Approval Rollup',
   'Missing Configurations',
@@ -50,8 +57,8 @@ const FIXTURE_EXPECTED_ORDER = [
   'Recent Activity',
 ] as const;
 
-// Phase 06 Prompt 04 — read-model path is the twelve-card fixture order
-// followed by Lifecycle Timeline + Ask HBI + Procore Snapshot (inside
+// Read-model path is the twelve-card fixture order followed by
+// Lifecycle Timeline + Ask HBI + Procore Snapshot (inside
 // renderAfterTimeline) + Project Memory + Project Lens + Related Records.
 const READ_MODEL_EXPECTED_ORDER = [
   ...FIXTURE_EXPECTED_ORDER,
@@ -65,7 +72,7 @@ const READ_MODEL_EXPECTED_ORDER = [
 
 describe('Project Home — first-impression composition order', () => {
   describe('fixture path', () => {
-    it('renders the Phase 06 Prompt 04 twelve-card fixture order as direct bento children', () => {
+    it('renders the Phase 08 Prompt 09 twelve-card Project Home fixture order as direct bento children', () => {
       const { container } = render(<PccApp forceMode="desktop" />);
       const grid = container.querySelector('[data-pcc-bento-grid]');
       expect(grid, 'bento grid should render').not.toBeNull();
@@ -100,7 +107,7 @@ describe('Project Home — first-impression composition order', () => {
   });
 
   describe('read-model path', () => {
-    it('renders the Phase 06 Prompt 04 18-card sequence (waits for both async hooks to settle)', async () => {
+    it('renders the Phase 08 Prompt 09 18-card sequence (waits for both async hooks to settle)', async () => {
       const client = createPccFixtureReadModelClient();
       const { container } = render(<PccApp forceMode="desktop" readModelClient={client} />);
 

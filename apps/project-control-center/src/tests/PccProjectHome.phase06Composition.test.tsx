@@ -15,24 +15,28 @@ afterEach(() => {
 });
 
 /**
- * Phase 06 Prompt 02 — Project Home choreography contract.
+ * Project Home choreography contract — established in Phase 06 Prompt 02,
+ * extended in Phase 06 Prompt 04 (preview analytics interleave), and
+ * re-centered in Phase 08 Prompt 09 (Project Readiness + Document Control
+ * become the headline support cards; Site Health Summary moves into the
+ * second row).
  *
  * Locks:
  *   - the canonical nine-card operational spine on the fixture path;
  *   - the same spine + lifecycle/HBI/Procore/detail tail on the read-model
- *     path (15 direct children total);
+ *     path (18 direct children total);
  *   - per-card `data-pcc-column-span` + `data-pcc-span-source` at the
  *     four 12-/10-column modes;
  *   - footprint-fallback behavior at smaller modes.
  */
 
-// Prompt 02 nine-card operational spine — preserved for the
-// "operational-only filtered sequence" assertion.
+// Operational-only filtered spine — the nine operational cards in their
+// rendered order (analytics filtered out).
 const SPINE_TITLES_IN_ORDER: readonly string[] = [
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.priorityActions,
-  PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary,
-  PROJECT_HOME_OPERATIONAL_CARD_TITLES.documentControl,
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness,
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.documentControl,
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary,
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.approvalsCheckpoints,
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.missingConfigurations,
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.externalPlatforms,
@@ -40,15 +44,16 @@ const SPINE_TITLES_IN_ORDER: readonly string[] = [
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.recentActivity,
 ];
 
-// Prompt 04 canonical 12-card fixture order — three preview analytics
-// cards interleaved into the operational spine.
-const PROMPT_04_FIXTURE_ORDER: readonly string[] = [
+// Phase 08 Prompt 09 canonical 12-card Project Home fixture order — the
+// nine-card operational spine with three preview analytics cards
+// interleaved into the second-row analytics pair and the rollup slot.
+const PROJECT_HOME_FIXTURE_ORDER: readonly string[] = [
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.priorityActions,
-  PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary,
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness,
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.documentControl,
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary,
   'Action Exposure Mix',
   'Project Health Trend',
-  PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness,
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.approvalsCheckpoints,
   'Readiness / Approval Rollup',
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.missingConfigurations,
@@ -58,7 +63,7 @@ const PROMPT_04_FIXTURE_ORDER: readonly string[] = [
 ];
 
 const READ_MODEL_FULL_ORDER: readonly string[] = [
-  ...PROMPT_04_FIXTURE_ORDER,
+  ...PROJECT_HOME_FIXTURE_ORDER,
   'Lifecycle Timeline',
   'Ask HBI — Grounded Project Answers',
   'Procore snapshot',
@@ -96,7 +101,7 @@ function getCardByTitle(grid: HTMLElement, title: string): HTMLElement {
 }
 
 describe('Project Home Phase 06 composition — fixture path', () => {
-  it('renders the Prompt 04 canonical twelve-card fixture order (operational spine + three analytics cards)', () => {
+  it('renders the Phase 08 Prompt 09 canonical Project Home twelve-card order (operational spine + three analytics cards)', () => {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectHome />
@@ -104,10 +109,12 @@ describe('Project Home Phase 06 composition — fixture path', () => {
     );
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]');
     expect(grid).not.toBeNull();
-    expect(getCardTitles(grid!)).toEqual(PROMPT_04_FIXTURE_ORDER);
+    expect(getCardTitles(grid!)).toEqual(PROJECT_HOME_FIXTURE_ORDER);
   });
 
   it('renders exactly twelve direct bento children, all data-pcc-card articles', () => {
+    // Cardinality (12) is governed by Phase 06 Prompt 04 and unchanged by
+    // Phase 08 Prompt 09; only the order shifted.
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectHome />
@@ -123,7 +130,7 @@ describe('Project Home Phase 06 composition — fixture path', () => {
     ).toBe(true);
   });
 
-  it('the operational-only filtered sequence still equals the Prompt 02 nine-card spine', () => {
+  it('the operational-only filtered sequence equals the Phase 08 Prompt 09 nine-card spine', () => {
     const { container } = render(
       <PccBentoGrid forceMode="desktop">
         <PccProjectHome />
@@ -147,7 +154,7 @@ describe('Project Home Phase 06 composition — fixture path', () => {
 });
 
 describe('Project Home Phase 06 composition — read-model path', () => {
-  it('renders the Prompt 04 canonical twelve-card spine+analytics first, then lifecycle / Ask HBI / Procore / Memory / Lens / Related Records', async () => {
+  it('renders the Phase 08 Prompt 09 canonical Project Home twelve-card spine+analytics first, then lifecycle / Ask HBI / Procore / Memory / Lens / Related Records', async () => {
     const client = createPccFixtureReadModelClient();
     const { container, findByText } = render(
       <PccBentoGrid forceMode="desktop">
@@ -164,7 +171,7 @@ describe('Project Home Phase 06 composition — read-model path', () => {
     });
   });
 
-  it('first twelve direct cards exactly match the Prompt 04 fixture order on the read-model path', async () => {
+  it('first twelve direct cards exactly match the Phase 08 Prompt 09 Project Home fixture order on the read-model path', async () => {
     const client = createPccFixtureReadModelClient();
     const { container, findByText } = render(
       <PccBentoGrid forceMode="desktop">
@@ -174,7 +181,7 @@ describe('Project Home Phase 06 composition — read-model path', () => {
     await findByText('Lifecycle Timeline');
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const titles = getCardTitles(grid);
-    expect(titles.slice(0, 12)).toEqual(PROMPT_04_FIXTURE_ORDER);
+    expect(titles.slice(0, 12)).toEqual(PROJECT_HOME_FIXTURE_ORDER);
   });
 
   it('every direct bento child is a [data-pcc-card] article on the read-model path', async () => {
@@ -209,9 +216,9 @@ describe('Project Home Phase 06 composition — read-model path', () => {
 describe('Project Home Phase 06 composition — span overrides', () => {
   const TWELVE_COL_SPAN_BY_TITLE: Readonly<Record<string, number>> = {
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.priorityActions]: 5,
-    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary]: 3,
+    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary]: 4,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.documentControl]: 4,
-    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness]: 4,
+    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness]: 3,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.approvalsCheckpoints]: 4,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.missingConfigurations]: 4,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.externalPlatforms]: 4,
@@ -221,9 +228,9 @@ describe('Project Home Phase 06 composition — span overrides', () => {
 
   const STANDARD_LAPTOP_SPAN_BY_TITLE: Readonly<Record<string, number>> = {
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.priorityActions]: 4,
-    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary]: 3,
+    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary]: 4,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.documentControl]: 3,
-    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness]: 4,
+    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness]: 3,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.approvalsCheckpoints]: 3,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.missingConfigurations]: 3,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.externalPlatforms]: 3,

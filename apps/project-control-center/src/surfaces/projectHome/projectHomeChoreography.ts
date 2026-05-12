@@ -1,10 +1,20 @@
 /**
- * Phase 06 Prompt 02 — Project Home choreography data.
+ * Project Home choreography data — established in Phase 06 Prompt 02 and
+ * re-centered in Phase 08 Prompt 09.
  *
- * Defines the canonical Phase 06 nine-card operational spine, the per-card
- * span override matrix consumed by Prompt 01's `PccDashboardCard`
- * `spanOverrides` prop, and the gateway-action mapping that wires each card
- * to a `PccModuleId` via `shell.selectModule`.
+ * Defines the canonical Project Home nine-card operational spine, the
+ * per-card span override matrix consumed by `PccDashboardCard`'s
+ * `spanOverrides` prop, and the gateway-action mapping that wires each
+ * card to a `PccModuleId` via `shell.selectModule`.
+ *
+ * Phase 08 Prompt 09 re-centered the first fold around Priority Actions →
+ * Project Readiness → Document Control Center, with Site Health Summary
+ * repositioned into the second row alongside the analytics pair. The
+ * operational-only filtered spine order is now:
+ *   Priority Actions → Project Readiness → Document Control Center →
+ *   Site Health Summary → Approvals & Checkpoints →
+ *   Missing Configurations → External Platforms → Team Snapshot →
+ *   Recent Activity.
  *
  * Project-Home-scoped data only. No layout primitive lives here.
  */
@@ -33,9 +43,9 @@ export type PccProjectHomeOperationalCardKey =
 
 export const PROJECT_HOME_OPERATIONAL_CARD_KEYS: readonly PccProjectHomeOperationalCardKey[] = [
   'priorityActions',
-  'siteHealthSummary',
-  'documentControl',
   'projectReadiness',
+  'documentControl',
+  'siteHealthSummary',
   'approvalsCheckpoints',
   'missingConfigurations',
   'externalPlatforms',
@@ -71,9 +81,9 @@ export const PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES: Readonly<
   Record<PccProjectHomeOperationalCardKey, PccCardSpanOverrides>
 > = {
   priorityActions: projectHomeSpan(5, 4),
-  siteHealthSummary: projectHomeSpan(3, 3),
+  siteHealthSummary: projectHomeSpan(4, 4),
   documentControl: projectHomeSpan(4, 3),
-  projectReadiness: projectHomeSpan(4, 4),
+  projectReadiness: projectHomeSpan(3, 3),
   approvalsCheckpoints: projectHomeSpan(4, 3),
   missingConfigurations: projectHomeSpan(4, 3),
   externalPlatforms: projectHomeSpan(4, 3),

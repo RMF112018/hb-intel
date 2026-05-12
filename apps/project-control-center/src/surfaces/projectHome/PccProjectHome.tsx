@@ -52,11 +52,14 @@ interface PccProjectHomeProps {
  *   - each card receives a non-zero `data-pcc-column-span` via the bento
  *     context.
  *
- * Phase 06 Prompt 02 — both render paths begin with the canonical nine-card
- * operational spine (Priority Actions, Site Health Summary, Document Control
- * Center, Project Readiness, Approvals & Checkpoints, Missing Configurations,
- * External Platforms, Team Snapshot, Recent Activity) and apply the approved
- * span override matrix at 12-column / 10-column modes. The read-model path
+ * Phase 06 Prompt 02 → Phase 08 Prompt 09 — both render paths begin with
+ * the canonical nine-card operational spine (Priority Actions, Project
+ * Readiness, Document Control Center, Site Health Summary,
+ * Approvals & Checkpoints, Missing Configurations, External Platforms,
+ * Team Snapshot, Recent Activity) and apply the approved span override
+ * matrix at 12-column / 10-column modes. Three preview analytics cards
+ * (Action Exposure Mix, Project Health Trend, Readiness / Approval
+ * Rollup) interleave inside the 12-card composition. The read-model path
  * additionally renders Lifecycle / Ask HBI / Procore / Memory / Lens /
  * Related Records below the spine, owned by `PccProjectHomeReadModelContent`.
  */
@@ -73,14 +76,19 @@ export const PccProjectHome: FC<PccProjectHomeProps> = ({ readModelClient, onSel
         gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.priorityActions}
         onSelectModule={onSelectModule}
       />
-      <PccSiteHealthSummaryCard
-        spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.siteHealthSummary}
-        gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.siteHealthSummary}
+      <PccProjectReadinessCard
+        spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.projectReadiness}
+        gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.projectReadiness}
         onSelectModule={onSelectModule}
       />
       <PccDocumentControlCard
         spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.documentControl}
         gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.documentControl}
+        onSelectModule={onSelectModule}
+      />
+      <PccSiteHealthSummaryCard
+        spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.siteHealthSummary}
+        gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.siteHealthSummary}
         onSelectModule={onSelectModule}
       />
       <PccAnalyticsCard
@@ -96,11 +104,6 @@ export const PccProjectHome: FC<PccProjectHomeProps> = ({ readModelClient, onSel
         tier="tier2"
         region="operational"
         spanOverrides={PROJECT_HOME_ANALYTICS_SPAN_OVERRIDES.projectHealthTrend}
-      />
-      <PccProjectReadinessCard
-        spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.projectReadiness}
-        gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.projectReadiness}
-        onSelectModule={onSelectModule}
       />
       <PccApprovalsCheckpointsCard
         spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.approvalsCheckpoints}

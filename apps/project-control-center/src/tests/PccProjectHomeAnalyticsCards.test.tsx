@@ -201,14 +201,14 @@ describe('Project Home analytics cards — adjacency in the bento grid', () => {
       .map((card) => card.querySelector('h2,h3,h4')?.textContent?.trim() ?? '');
   }
 
-  it('places Action Exposure Mix and Project Health Trend between Document Control Center and Project Readiness on the fixture path', () => {
+  it('places Action Exposure Mix and Project Health Trend between Site Health Summary and Approvals & Checkpoints on the fixture path (Phase 08 Prompt 09 re-centered second-row analytics pair)', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const titles = readDirectCardTitlesInOrder(grid);
     const idx = (t: string) => titles.indexOf(t);
-    expect(idx('Document Control Center')).toBeLessThan(idx('Action Exposure Mix'));
+    expect(idx('Site Health Summary')).toBeLessThan(idx('Action Exposure Mix'));
     expect(idx('Action Exposure Mix')).toBeLessThan(idx('Project Health Trend'));
-    expect(idx('Project Health Trend')).toBeLessThan(idx('Project Readiness'));
+    expect(idx('Project Health Trend')).toBeLessThan(idx('Approvals & Checkpoints'));
   });
 
   it('places Readiness / Approval Rollup between Approvals & Checkpoints and Missing Configurations on the fixture path', () => {
