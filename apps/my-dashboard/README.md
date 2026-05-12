@@ -48,7 +48,7 @@ once the runtime auth bootstrap lands in Prompt 03:
 
 | Resource | Scope |
 | --- | --- |
-| `hb-intel-api-production` | `access_as_user` |
+| `HB SharePoint Creator` | `access_as_user` |
 
 No live API call is issued from this app at B02 Prompt 01. Provider, token
 store, and bootstrap-time auth handshake land in later prompts of this
