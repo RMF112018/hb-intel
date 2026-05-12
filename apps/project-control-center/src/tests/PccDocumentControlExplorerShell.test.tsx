@@ -217,6 +217,23 @@ describe('PccDocumentControlExplorerShell — Home pane', () => {
     ).toBe('true');
     expect(container.querySelector('[data-pcc-doc-explorer-pane="project-record"]')).not.toBeNull();
   });
+
+  it('Prompt 10F — destination tile summaries surface read-only Project Record + project-scoped MPF + launch-only Procore guardrails', async () => {
+    const { container } = await renderShell();
+    const projectRecordTile = container.querySelector(
+      '[data-pcc-doc-explorer-destination="project-record"]',
+    );
+    const mpfTile = container.querySelector(
+      '[data-pcc-doc-explorer-destination="my-project-files"]',
+    );
+    const procoreTile = container.querySelector('[data-pcc-doc-explorer-destination="procore"]');
+    expect(projectRecordTile!.textContent ?? '').toMatch(/SharePoint/);
+    expect(projectRecordTile!.textContent ?? '').toMatch(/[Rr]ead-only/);
+    expect(mpfTile!.textContent ?? '').toMatch(/[Pp]roject-scoped/);
+    expect(mpfTile!.textContent ?? '').toMatch(/formal project record/);
+    expect(procoreTile!.textContent ?? '').toMatch(/[Ll]aunch-only|deep-link/);
+    expect(procoreTile!.textContent ?? '').toMatch(/does not write back to Procore/);
+  });
 });
 
 describe('PccDocumentControlExplorerShell — Project Record pane', () => {
