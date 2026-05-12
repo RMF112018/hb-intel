@@ -52,7 +52,7 @@ Patterns that indicate boundary drift — must be caught in code review.
 | `NotificationApi.send()` called from frontend surface for lifecycle events | Double-fires with backend dispatch | Backend fires all lifecycle notifications; frontend fires only UI-originated actions |
 | `if (tier === 'admin') show(...)` in JSX | Hardcoded role check bypasses complexity gating | Use `HbcComplexityGate minTier="expert"` |
 | Draft cleared before API call succeeds | Loses user data on API failure | Clear draft only on successful API response |
-| New `IMyWorkItem` aggregation surface in any G4/G5 app | Conflicts with future My Work implementation | Use BIC badges + notification center as interim; no custom work-item aggregation |
+| New `IMyWorkItem` aggregation surface in any G4/G5 app | Conflicts with implemented `@hbc/my-work-feed` ownership of cross-module work aggregation (ADR-0115) | Use BIC badges + notification center as interim; no custom work-item aggregation |
 | `useBicNextMove` config duplicated per surface | Multiple sources of truth for ownership semantics | Define config once, import everywhere |
 | Handoff notification sent independently by surface | Double-fires with workflow-handoff package dispatch | Let workflow-handoff package send its own notifications |
 
@@ -152,7 +152,7 @@ All T01–T07 code artifacts in `packages/provisioning/src/`:
 - [Clarification Re-entry Spec](clarification-reentry-spec.md) (T03)
 - [Setup Notification Registrations](setup-notification-registrations.md) (T04)
 - [Draft Key Registry](draft-key-registry.md) (T05)
-- [My Work Alignment Contract](my-work-alignment-contract.md) (T05)
+- [Legacy My Work Alignment Contract](my-work-alignment-contract.md) (T05) — superseded archival only; not current My Work Feed authority. See ADR-0115 and `@hbc/my-work-feed`.
 - [Complexity Gate Spec](complexity-gate-spec.md) (T06)
 
 *End of W0-G3-T07 — Shared Primitive Integration Checklist v1.0*

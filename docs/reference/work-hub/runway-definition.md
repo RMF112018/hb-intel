@@ -125,5 +125,5 @@ All surfaces share one computation. Badge count, panel count, and full feed coun
 - [Work Hub Interaction Contract](./interaction-contract.md) — data and interaction rules
 - [Leadership Visibility Model](./leadership-visibility-model.md) — role-aware leadership views
 - [Provisioning-to-Work-Hub Publication Contract](../provisioning/work-hub-publication-contract.md) — provisioning-specific publication
-- [My Work Alignment Contract](../workflow-experience/my-work-alignment-contract.md) — provisional alignment contract
+- [Legacy My Work Alignment Contract](../workflow-experience/my-work-alignment-contract.md) — superseded archival context only; current My Work Feed authority is ADR-0115 and `@hbc/my-work-feed`
 - [ADR-0115](../../architecture/adr/ADR-0115-my-work-feed-architecture.md) — architecture decisions

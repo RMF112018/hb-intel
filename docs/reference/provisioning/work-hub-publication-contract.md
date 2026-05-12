@@ -119,4 +119,5 @@ All display text is drawn from provisioning package registries. The Work Hub doe
 | `packages/my-work-feed/src/adapters/handoffAdapter.ts` | Handoff → work item adapter |
 | `packages/my-work-feed/src/adapters/notificationAdapter.ts` | Notification → work item adapter |
 | `packages/my-work-feed/src/types/IMyWorkItem.ts` | Work item domain model |
-| `docs/reference/workflow-experience/my-work-alignment-contract.md` | Alignment contract (provisional) |
+
+> **Note — Legacy My Work Alignment Contract:** `docs/reference/workflow-experience/my-work-alignment-contract.md` is **superseded archival** context only. It is not a current key source file. Current publication authority is the implemented My Work Feed architecture — see ADR-0115 and `@hbc/my-work-feed` (`packages/my-work-feed/`).

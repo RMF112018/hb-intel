@@ -1,7 +1,22 @@
 # My Work Alignment Contract
 
-> **Document Classification:** Canonical Normative Plan
+> **Document Classification:** Historical / Superseded (pre-SF29 alignment posture)
 > **Traceability:** W0-G3-T04
+
+---
+
+## Supersession notice — 2026-05-12
+
+This document preserves a pre-SF29 alignment posture and is retained only for historical provenance. It is **not** a current implementation authority.
+
+Current My Work Feed authority is established by:
+
+- `docs/architecture/adr/ADR-0115-my-work-feed-architecture.md`
+- `docs/architecture/plans/shared-features/SF29-My-Work-Feed.md`
+- `packages/my-work-feed/README.md`
+- `docs/reference/my-work-feed/api.md`
+
+Any statement below that `@hbc/my-work-feed` does not exist or remains research-stage only is **Superseded** and **Archived** for context only.
 
 ---
 
