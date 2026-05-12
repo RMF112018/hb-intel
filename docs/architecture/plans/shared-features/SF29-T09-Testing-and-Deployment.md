@@ -12,7 +12,7 @@
 
 ## Objective
 
-Finalize SF29 with closure requirements covering testing gates, ADR-0114, adoption/reference docs, boundary enforcement, index/state-map updates, and PH7 governance evidence.
+Finalize SF29 with closure requirements covering testing gates, ADR-0115, adoption/reference docs, boundary enforcement, index/state-map updates, and PH7 governance evidence.
 
 ---
 
@@ -20,7 +20,7 @@ Finalize SF29 with closure requirements covering testing gates, ADR-0114, adopti
 
 1. Complete runtime, surface, and offline validations at >=95% coverage.
 2. Pass architecture boundary and consistency enforcement across all My Work surfaces.
-3. Publish ADR-0114 and required docs/index/state-map updates with verification evidence.
+3. Confirm ADR-0115 and required docs/index/state-map updates with verification evidence.
 
 ---
 
@@ -62,18 +62,18 @@ Finalize SF29 with closure requirements covering testing gates, ADR-0114, adopti
 
 ### Documentation
 
-- [ ] `docs/architecture/adr/ADR-0114-my-work-feed.md` written and accepted
+- [ ] `docs/architecture/adr/ADR-0115-my-work-feed-architecture.md` written and accepted
 - [ ] `docs/how-to/developer/my-work-feed-adoption-guide.md` written
 - [ ] `docs/reference/my-work-feed/api.md` written
-- [ ] `docs/README.md` updated with ADR-0114 entries
-- [ ] `current-state-map.md §2` updated with SF29 and ADR-0114 linkage
+- [ ] `docs/README.md` updated with ADR-0115 entries
+- [ ] `current-state-map.md §2` updated with SF29 and ADR-0115 linkage
 - [ ] blueprint and foundation plan receive comment-only progress updates if implementation proceeds
 
 ---
 
-## ADR-0114: My Work Feed
+## ADR-0115: My Work Feed Architecture
 
-**File:** `docs/architecture/adr/ADR-0114-my-work-feed.md`
+**File:** `docs/architecture/adr/ADR-0115-my-work-feed-architecture.md`
 
 Must document:
 
@@ -94,5 +94,5 @@ pnpm turbo run build --filter @hbc/my-work-feed...
 pnpm turbo run lint --filter @hbc/my-work-feed...
 pnpm --filter @hbc/my-work-feed check-types
 pnpm --filter @hbc/my-work-feed test --coverage
-rg -n "L-01|L-02|L-03|L-04|L-05|L-06|L-07|L-08|L-09|L-10|ADR-0114|@hbc/my-work-feed|@hbc/ui-kit" docs/architecture/plans/shared-features/SF29*.md
+rg -n "L-01|L-02|L-03|L-04|L-05|L-06|L-07|L-08|L-09|L-10|ADR-0115|@hbc/my-work-feed|@hbc/ui-kit" docs/architecture/plans/shared-features/SF29*.md
 ```

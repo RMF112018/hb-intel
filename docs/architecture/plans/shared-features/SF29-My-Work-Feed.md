@@ -5,7 +5,7 @@
 **Source Spec:** `docs/explanation/feature-decisions/PH7-SF-29-Shared-Feature-My-Work-Feed.md`
 **Priority Tier:** 2 - Application Layer (shared package; cross-module personal work orchestration)
 **Estimated Effort:** 5-6 sprint-weeks
-**ADR Required:** `docs/architecture/adr/ADR-0114-my-work-feed.md`
+**Architecture ADR:** `docs/architecture/adr/ADR-0115-my-work-feed-architecture.md`
 
 > **Doc Classification:** Canonical Normative Plan - SF29 implementation master plan for My Work Feed; governs SF29-T01 through SF29-T09.
 
@@ -74,7 +74,7 @@ Design-system-grade primitives remain in `@hbc/ui-kit`; SF29 consumes them rathe
 - [ ] personal, delegated-by-me, my-team, and escalation-candidate views are documented as projections over one canonical model
 - [ ] My Work count semantics remain consistent across badge, launcher, tile, panel, and full feed
 - [ ] queue-health telemetry and trust diagnostics are documented
-- [ ] SF29-T09 includes ADR-0114, docs/index/state-map updates, and PH7 governance checks
+- [ ] SF29-T09 includes ADR-0115, docs/index/state-map updates, and PH7 governance checks
 
 ---
 
