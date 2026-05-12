@@ -31,7 +31,13 @@
   flex-wrap: nowrap;
   gap: var(--pcc-space-sm);
   padding: 0 var(--pcc-space-md);
-  border-bottom: 1px solid var(--pcc-color-border);
+  /* Phase 08 Prompt 06 (Foleon update) — the tab bar is the top band of
+     the unified PCC Command Surface gradient. The previous 1px bottom
+     seam disconnected the tabs from the hero below; removing it lets
+     the gradient flow uninterrupted. Active-tab 3px accent border-bottom
+     (`.primaryGroup[data-pcc-parent-active='true'] .tab`) still
+     anchors the active-tab affordance. */
+  border-bottom: none;
   overflow: visible;
 }
 
@@ -177,9 +183,14 @@
   gap: var(--pcc-space-xs);
   padding: var(--pcc-space-sm);
   background: var(--pcc-color-card);
-  border: 1px solid var(--pcc-color-border);
+  /* Phase 08 Prompt 06 (Foleon update) — module launcher panel edge
+     adopts the accent vocabulary used by the unified surface and the
+     Prompt 05 glass capsule (18% rail-accent mix); rounded slab radius
+     mirrors the glass-capsule treatment. The existing 3px top accent
+     stripe (`border-top`) still connects the panel to the active tab. */
+  border: 1px solid color-mix(in srgb, var(--pcc-color-rail-accent) 18%, var(--pcc-color-border));
   border-top: 3px solid var(--pcc-color-rail-accent);
-  border-radius: var(--pcc-radius-md);
+  border-radius: var(--pcc-radius-lg);
   box-shadow: var(--pcc-elevation-card);
 }
 
