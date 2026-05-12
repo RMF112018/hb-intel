@@ -48,16 +48,15 @@ const SUPPRESSED_FIXTURES = SAMPLE_PRIORITY_ACTIONS.filter((a) =>
 // Phase 08 Prompt 09 — REQUIRED_CARD_TITLES is the canonical 12-card
 // Project Home fixture order: Priority Actions dominates the first
 // fold; Project Readiness and Document Control Center are the headline
-// support cards; Site Health Summary moves into the second row with the
-// two leading analytics cards (Action Exposure Mix + Project Health
-// Trend). Readiness / Approval Rollup sits between Approvals & Checkpoints
-// and Missing Configurations.
+// support cards; Action Exposure Mix leads Row 2, followed by Site
+// Health Summary and Project Health Trend. Readiness / Approval Rollup
+// sits between Approvals & Checkpoints and Missing Configurations.
 const REQUIRED_CARD_TITLES = [
   'Priority Actions',
   'Project Readiness',
   'Document Control Center',
-  'Site Health Summary',
   'Action Exposure Mix',
+  'Site Health Summary',
   'Project Health Trend',
   'Approvals & Checkpoints',
   'Readiness / Approval Rollup',

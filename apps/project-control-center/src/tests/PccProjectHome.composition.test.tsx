@@ -39,15 +39,15 @@ function readDirectCardTitlesInOrder(grid: Element): string[] {
 // Readiness, Document Control Center, Site Health Summary, Approvals &
 // Checkpoints, Missing Configurations, External Platforms, Team Snapshot,
 // Recent Activity) with three preview analytics cards interleaved
-// (Action Exposure Mix + Project Health Trend after Site Health Summary;
+// (Action Exposure Mix before Site Health Summary, then Project Health Trend;
 // Readiness / Approval Rollup between Approvals & Checkpoints and
 // Missing Configurations).
 const FIXTURE_EXPECTED_ORDER = [
   'Priority Actions',
   'Project Readiness',
   'Document Control Center',
-  'Site Health Summary',
   'Action Exposure Mix',
+  'Site Health Summary',
   'Project Health Trend',
   'Approvals & Checkpoints',
   'Readiness / Approval Rollup',

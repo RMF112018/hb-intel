@@ -201,13 +201,13 @@ describe('Project Home analytics cards — adjacency in the bento grid', () => {
       .map((card) => card.querySelector('h2,h3,h4')?.textContent?.trim() ?? '');
   }
 
-  it('places Action Exposure Mix and Project Health Trend between Site Health Summary and Approvals & Checkpoints on the fixture path (Phase 08 Prompt 09 re-centered second-row analytics pair)', () => {
+  it('places the Row 2 analytics-operational sequence ahead of Approvals & Checkpoints on the fixture path', () => {
     const { container } = render(<PccApp forceMode="desktop" />);
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;
     const titles = readDirectCardTitlesInOrder(grid);
     const idx = (t: string) => titles.indexOf(t);
-    expect(idx('Site Health Summary')).toBeLessThan(idx('Action Exposure Mix'));
-    expect(idx('Action Exposure Mix')).toBeLessThan(idx('Project Health Trend'));
+    expect(idx('Action Exposure Mix')).toBeLessThan(idx('Site Health Summary'));
+    expect(idx('Site Health Summary')).toBeLessThan(idx('Project Health Trend'));
     expect(idx('Project Health Trend')).toBeLessThan(idx('Approvals & Checkpoints'));
   });
 
@@ -237,12 +237,12 @@ describe('Project Home analytics cards — adjacency in the bento grid', () => {
 
 describe('Project Home analytics cards — span overrides', () => {
   const TWELVE_COL_SPAN: Readonly<Record<PccProjectHomeAnalyticsCardKey, number>> = {
-    actionExposureMix: 4,
+    actionExposureMix: 5,
     projectHealthTrend: 4,
     readinessApprovalRollup: 4,
   };
   const STANDARD_LAPTOP_SPAN: Readonly<Record<PccProjectHomeAnalyticsCardKey, number>> = {
-    actionExposureMix: 3,
+    actionExposureMix: 4,
     projectHealthTrend: 3,
     readinessApprovalRollup: 4,
   };

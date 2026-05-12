@@ -81,7 +81,7 @@ export const PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES: Readonly<
   Record<PccProjectHomeOperationalCardKey, PccCardSpanOverrides>
 > = {
   priorityActions: projectHomeSpan(5, 4),
-  siteHealthSummary: projectHomeSpan(4, 4),
+  siteHealthSummary: projectHomeSpan(3, 3),
   documentControl: projectHomeSpan(4, 3),
   projectReadiness: projectHomeSpan(3, 3),
   approvalsCheckpoints: projectHomeSpan(4, 3),

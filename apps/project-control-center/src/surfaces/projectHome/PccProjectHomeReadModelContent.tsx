@@ -88,19 +88,19 @@ export const PccProjectHomeReadModelContent: FC<PccProjectHomeReadModelContentPr
         gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.documentControl}
         onSelectModule={onSelectModule}
       />
-      <PccSiteHealthSummaryCard
-        state={viewModel?.siteHealth.state ?? 'preview'}
-        summary={viewModel?.siteHealth.data}
-        spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.siteHealthSummary}
-        gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.siteHealthSummary}
-        onSelectModule={onSelectModule}
-      />
       <PccAnalyticsCard
         viewModel={PROJECT_HOME_ANALYTICS_VIEW_MODELS.actionExposureMix}
         footprint="standard"
         tier="tier2"
         region="operational"
         spanOverrides={PROJECT_HOME_ANALYTICS_SPAN_OVERRIDES.actionExposureMix}
+      />
+      <PccSiteHealthSummaryCard
+        state={viewModel?.siteHealth.state ?? 'preview'}
+        summary={viewModel?.siteHealth.data}
+        spanOverrides={PROJECT_HOME_OPERATIONAL_SPAN_OVERRIDES.siteHealthSummary}
+        gateway={PROJECT_HOME_OPERATIONAL_GATEWAYS.siteHealthSummary}
+        onSelectModule={onSelectModule}
       />
       <PccAnalyticsCard
         viewModel={PROJECT_HOME_ANALYTICS_VIEW_MODELS.projectHealthTrend}

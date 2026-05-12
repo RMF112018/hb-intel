@@ -56,7 +56,7 @@ const projectHomeAnalyticsSpan = (
 export const PROJECT_HOME_ANALYTICS_SPAN_OVERRIDES: Readonly<
   Record<PccProjectHomeAnalyticsCardKey, PccCardSpanOverrides>
 > = {
-  actionExposureMix: projectHomeAnalyticsSpan(4, 3),
+  actionExposureMix: projectHomeAnalyticsSpan(5, 4),
   projectHealthTrend: projectHomeAnalyticsSpan(4, 3),
   readinessApprovalRollup: projectHomeAnalyticsSpan(4, 4),
 };

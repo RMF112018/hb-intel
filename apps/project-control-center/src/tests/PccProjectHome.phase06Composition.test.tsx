@@ -51,8 +51,8 @@ const PROJECT_HOME_FIXTURE_ORDER: readonly string[] = [
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.priorityActions,
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness,
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.documentControl,
-  PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary,
   'Action Exposure Mix',
+  PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary,
   'Project Health Trend',
   PROJECT_HOME_OPERATIONAL_CARD_TITLES.approvalsCheckpoints,
   'Readiness / Approval Rollup',
@@ -216,7 +216,7 @@ describe('Project Home Phase 06 composition — read-model path', () => {
 describe('Project Home Phase 06 composition — span overrides', () => {
   const TWELVE_COL_SPAN_BY_TITLE: Readonly<Record<string, number>> = {
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.priorityActions]: 5,
-    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary]: 4,
+    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary]: 3,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.documentControl]: 4,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness]: 3,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.approvalsCheckpoints]: 4,
@@ -228,7 +228,7 @@ describe('Project Home Phase 06 composition — span overrides', () => {
 
   const STANDARD_LAPTOP_SPAN_BY_TITLE: Readonly<Record<string, number>> = {
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.priorityActions]: 4,
-    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary]: 4,
+    [PROJECT_HOME_OPERATIONAL_CARD_TITLES.siteHealthSummary]: 3,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.documentControl]: 3,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.projectReadiness]: 3,
     [PROJECT_HOME_OPERATIONAL_CARD_TITLES.approvalsCheckpoints]: 3,
