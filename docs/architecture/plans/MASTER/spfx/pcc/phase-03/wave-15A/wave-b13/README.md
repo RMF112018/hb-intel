@@ -39,6 +39,11 @@ prompts/
   07_Card_Taxonomy_and_Visual_System.md
   08_Gateway_Action_Enhancement.md
   09_Project_Home_Experience_Enhancement.md
+  09A_Document_Control_Home_Feed_Contract_Fixtures_Read_Model.md
+  09B_PccDocumentControlCard_Recent_Item_Feed_UI.md
+  09C_Project_Home_First_Fold_Bento_Rechoreography.md
+  09D_Project_Home_Read_Model_Tail_Bento_Rechoreography.md
+  09E_Prompt09_Follow_On_Regression_Visual_Evidence_Closeout.md
   10_Document_Control_Explorer_Target_Architecture_and_Implementation_Plan.md
   10A_Document_Control_Explorer_Repo_Truth_Gate.md
   10B_Document_Control_Explorer_Model_And_Fixture_Contract.md
@@ -57,6 +62,26 @@ prompts/
 ```
 
 The canonical Phase 08 plan is `00_PCC_Phase_08_Product_Experience_Enhancement_Plan.md`. The `_Implementation_Plan.md` file is the package's earlier predecessor and is retained for historical context only; it is not the governing plan for Phase 08 execution.
+
+### Prompt 09 Follow-On Refinement Note
+
+The original Prompt 09 Project Home experience enhancement has now been extended by a focused follow-on sequence based on tenant visual review after the intentional `1.0.0.222` deployment.
+
+Use the following Prompt 09 follow-on files before proceeding to Prompt 10 if the objective is to implement the refined Project Home composition:
+
+```text
+prompts/09A_Document_Control_Home_Feed_Contract_Fixtures_Read_Model.md
+prompts/09B_PccDocumentControlCard_Recent_Item_Feed_UI.md
+prompts/09C_Project_Home_First_Fold_Bento_Rechoreography.md
+prompts/09D_Project_Home_Read_Model_Tail_Bento_Rechoreography.md
+prompts/09E_Prompt09_Follow_On_Regression_Visual_Evidence_Closeout.md
+```
+
+This sequence:
+- redesigns only the Project Home `PccDocumentControlCard` into a compact recent-item feed;
+- preserves the dedicated Document Control surface for parallel Prompt 10 work;
+- documents future row-level deep-link implementation as deferred until canonical SharePoint / OneDrive / Procore item paths are established;
+- refines first-fold and read-model-tail bento choreography while preserving deterministic responsive layout guardrails.
 
 ### Prompt 10 Replacement Note
 
@@ -100,6 +125,11 @@ Execute prompts in numeric order. Do not skip Prompt 00.
 |     07 | Card taxonomy and visual system         | Runtime/CSS/tests               |
 |     08 | Gateway action enhancement              | Runtime/CSS/tests               |
 |     09 | Project Home experience enhancement     | Runtime/CSS/tests               |
+|    09A | Project Home Document Control home-feed contract / fixtures / adapter seam | Runtime/types/tests |
+|    09B | Project Home `PccDocumentControlCard` recent-item feed UI | Runtime/CSS/tests |
+|    09C | Project Home first-fold bento re-choreography and analytics adjacency | Runtime/tests |
+|    09D | Project Home read-model-tail bento re-choreography | Runtime/tests |
+|    09E | Prompt 09 follow-on regression, visual evidence, and closeout | Evidence/docs/tests/runtime fixes as needed |
 |     10 | Document Control Explorer target architecture / implementation plan | Docs / execution contract |
 |    10A | Document Control Explorer repo-truth gate | No code unless diagnostics only |
 |    10B | Explorer model and Project Record fixture contract | Runtime/types/tests |
@@ -131,6 +161,8 @@ Historical package baseline reference (do not use as execution baseline):
 ```
 
 The current execution baseline is two commits forward of the historical baseline; the forward commits add (a) Phase 06 v1.0.0.219 screenshot reliability rerun evidence, and (b) this wave-b13 plan package. Neither alters PCC runtime source, package/manifest versions, or `pnpm-lock.yaml`.
+
+Prompt 09 follow-on execution must start from the operator-approved **`1.0.0.222`** package / manifest posture and verify the actual current local HEAD before editing. The follow-on prompt files intentionally avoid asserting a newer commit SHA because this package is expected to run alongside parallel Document Control surface work and any subsequent operator-owned commits.
 
 The latest inspected baseline confirms:
 
@@ -235,6 +267,7 @@ When executing any prompt:
 6. Provide a closeout in the required format.
 7. During Prompt 10 execution, preserve parallel Project Home work and classify drift rather than overwriting it.
 8. Do not claim completion if validation or evidence is blocked.
+9. During Prompt 09A–09E execution, preserve parallel dedicated Document Control surface work; do not revert, normalize, or overwrite Documents-surface WIP while refining the Project Home card and Project Home bento choreography.
 
 ## Final Closeout Requirement
 
