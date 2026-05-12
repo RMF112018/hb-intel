@@ -1,51 +1,73 @@
-# Phase 08 Prompt 09C — Project Home First-Fold Bento Re-Choreography and Operational/Analytics Adjacency
+# Phase 08 Prompt 09C — Project Home Row-2 Bento Re-Choreography and Operational / Analytics Adjacency
 
 ## Role
-Act as the implementation owner for Phase 08 Prompt 09C. Execute this only after Prompt 09B lands and the `PccDocumentControlCard` has been materially compacted.
+Act as the implementation owner for **Phase 08 Prompt 09C** in the `RMF112018/hb-intel` repo. Execute this only after Prompt 09B is landed, validate the result, and return a concise but complete closeout.
+
+---
 
 ## Baseline / Preflight
 Before editing:
-1. Confirm Prompt 09B is present in HEAD.
-2. Confirm current branch / HEAD.
-3. Confirm current aligned package/manifest posture; the Prompt 09 package began from intentional `1.0.0.222`, but use the actual operator-approved current version at execution.
-4. Capture `git status --short`.
-5. Preserve operator WIP.
 
-Do **not** re-read files still within current context or memory unless local drift is suspected or an exact edit location is needed.
+1. Confirm the actual current local branch and HEAD.
+2. Confirm Prompt 09B is committed and present in local HEAD. The reviewed upstream baseline for this prompt is:
+   ```text
+   0159f408e3b81f223327afb84ce7d6624707dc52
+   pcc: redesign project-home document control card feed tabs
+   ```
+   If local HEAD has moved forward, classify the drift and proceed only if the Prompt 09C scope can be merged safely.
+3. Confirm the current aligned package / manifest posture remains operator-approved. The Prompt 09 follow-on sequence is still expected to begin from **`1.0.0.222`** unless newer intentional local drift has already been recorded.
+4. Capture:
+   ```bash
+   git rev-parse --abbrev-ref HEAD
+   git rev-parse HEAD
+   git status --short
+   md5 pnpm-lock.yaml || md5sum pnpm-lock.yaml
+   ```
+5. Preserve operator-owned WIP. Do not revert, normalize, restage, or clean up out-of-scope working-tree changes.
+6. Re-open only the prompt-relevant files you will edit immediately before patching.
 
-## Parallel Document Control Surface Safety — Mandatory
-Prompt 09C is a Project Home choreography prompt. Dedicated Document Control surface work is proceeding in parallel.
+Do **not** re-read files still within current context or memory unless local drift is suspected, an exact edit location is needed, or a validation failure requires re-verification.
+
+---
+
+## Parallel Dedicated Document Control Surface Safety — Mandatory
+Prompt 09C is a **Project Home choreography** prompt. Dedicated Document Control surface work may continue in parallel.
 
 Rules:
-- Do not edit any file under `apps/project-control-center/src/surfaces/documents/`.
-- Do not rework Prompt 09B `PccDocumentControlCard` information architecture unless a minimal span/order integration change is required.
-- Do not revert concurrent document-control model work.
+
+- Do **not** edit any file under:
+  ```text
+  apps/project-control-center/src/surfaces/documents/
+  ```
+- Do **not** touch the Prompt 09B `PccDocumentControlCard` feed UI body, tab behavior, feed markers, or CSS in this prompt. Prompt 09B is complete.
+- Do **not** revert concurrent Document Control model or Prompt 10 surface work.
 - If shared model files drifted from parallel work, this prompt should not touch them.
+- If local drift exists in Project Home files, merge only the precise Prompt 09C order/span changes into the latest local state and report the drift.
 
-## Objective
-Refine the **first 12 Project Home cards** so the bento grid makes better use of available space and operational cards sit nearer to related analytics.
+---
 
-The deployed screenshots showed:
-- excess dead space created by the pre-redesign tall Document Control card;
-- related analytics and operational cards not always reading as paired systems;
-- row composition that is semantically improving, but still not spatially optimized.
+## Current Repo-Truth Anchors
+Prompt 09C is **not** a broad first-fold redesign anymore. After Prompt 09B, the current Project Home implementation is already very close to the target. The remaining change is a focused **Row 2 re-choreography**.
 
-Prompt 09C should capitalize on the compact Prompt 09B Document Control card and re-choreograph the first-fold / operational-dashboard section.
+### Current first-12 card order
+Both `PccProjectHome.tsx` and `PccProjectHomeReadModelContent.tsx` currently render the first 12 cards in this order:
 
-## Dynamic-Best-Fit Definition — Closed
-The user wants the bento to be “as dynamic as is realistic,” with cards shifting based on best fit within defined choreography parameters.
+1. Priority Actions
+2. Project Readiness
+3. Document Control Center
+4. Site Health Summary
+5. Action Exposure Mix
+6. Project Health Trend
+7. Approvals & Checkpoints
+8. Readiness / Approval Rollup
+9. Missing Configurations
+10. External Platforms
+11. Team Snapshot
+12. Recent Activity
 
-For Prompt 09C, “dynamic” means:
-- responsive, deterministic span matrices by PCC responsive mode;
-- card order and adjacency designed to fit observed content heights;
-- cards may shift position/order within the Project Home operational/analytics block if that improves semantic clustering and utilization;
-- keep semantic DOM order aligned with the intended reading order;
-- do **not** introduce uncontrolled masonry, CSS `grid-auto-flow: dense`, absolute placement, or reading-order instability in this prompt.
+### Required Prompt 09C order
+Prompt 09C changes **only Row 2 ordering**, producing:
 
-If the agent believes dense/masonry behavior would be materially superior, record that as a **deferred architecture note**, not an implementation change.
-
-## Target First-12 Composition — Closed
-Keep the same 12-card universe:
 1. Priority Actions
 2. Project Readiness
 3. Document Control Center
@@ -59,148 +81,390 @@ Keep the same 12-card universe:
 11. Team Snapshot
 12. Recent Activity
 
-### Rationale
-- `Action Exposure Mix` should sit as close as practical to `Priority Actions`.
-- `Project Health Trend` should sit as close as practical to `Site Health Summary`.
-- `Readiness / Approval Rollup` should remain tightly associated with `Project Readiness` / `Approvals & Checkpoints`.
-- The newly compacted `Document Control Center` card remains a first-fold support card.
+Rows 1, 3, and 4 retain the same card membership and the same semantic order.
 
-## Target 12-Column Choreography
-At `largeLaptop`, `desktop`, and `ultrawide`, implement this row intent:
+### Current span state
+Current repo truth already matches the desired target **except** for the Row 2 span allocation:
 
-### Row 1
+#### Current 12-column Row 2
+- Site Health Summary — span **4**
+- Action Exposure Mix — span **4**
+- Project Health Trend — span **4**
+
+#### Target 12-column Row 2
+- Action Exposure Mix — span **5**
+- Site Health Summary — span **3**
+- Project Health Trend — span **4**
+
+#### Current 10-column Row 2
+- Site Health Summary — span **4**
+- Action Exposure Mix — span **3**
+- Project Health Trend — span **3**
+
+#### Target 10-column Row 2
+- Action Exposure Mix — span **4**
+- Site Health Summary — span **3**
+- Project Health Trend — span **3**
+
+Everything else in the Prompt 09 first-fold matrix is already aligned and must remain unchanged.
+
+---
+
+## Objective
+Refine the **first-fold / operational-dashboard section** of Project Home by:
+
+1. moving `Action Exposure Mix` ahead of `Site Health Summary` in both Project Home render paths;
+2. redistributing Row 2 spans so the analytics / operational pairing uses space more deliberately after the Prompt 09B Document Control compaction;
+3. preserving every other first-fold card, tail card, gateway, card identity, and surface-level invariant.
+
+This is a targeted **Row 2 adjacency + span** prompt, not a general bento rewrite.
+
+---
+
+## Product Decisions — Closed
+1. Same 12-card first-fold universe is preserved.
+2. Rows 1, 3, and 4 keep their existing card membership and existing span values.
+3. Row 2 becomes:
+   - `Action Exposure Mix`
+   - `Site Health Summary`
+   - `Project Health Trend`
+4. `Action Exposure Mix` becomes the leading Row 2 card because it remains conceptually closest to `Priority Actions` and receives the larger analytical span.
+5. `Site Health Summary` remains paired with `Project Health Trend` in the same row but narrows to a supporting operational-card span.
+6. `Readiness / Approval Rollup` remains between `Approvals & Checkpoints` and `Missing Configurations`.
+7. No read-model tail work lands here. Lifecycle / Ask HBI / Procore Snapshot / Project Memory / Project Lens / Related Records remain Prompt 09D territory.
+8. No dense grid / masonry behavior is introduced:
+   - no `grid-auto-flow: dense`;
+   - no absolute positioning;
+   - no reading-order instability;
+   - no uncontrolled masonry.
+9. If true masonry/dense behavior appears attractive during review, record it as a deferred architecture note only.
+
+---
+
+## Target Matrices
+
+### Target 12-column choreography
+At `largeLaptop`, `desktop`, and `ultrawide`:
+
+#### Row 1 — unchanged
 - Priority Actions — span 5
 - Project Readiness — span 3
 - Document Control Center — span 4
 
-### Row 2
+#### Row 2 — Prompt 09C change
 - Action Exposure Mix — span 5
 - Site Health Summary — span 3
 - Project Health Trend — span 4
 
-### Row 3
+#### Row 3 — unchanged
 - Approvals & Checkpoints — span 4
 - Readiness / Approval Rollup — span 4
 - Missing Configurations — span 4
 
-### Row 4
+#### Row 4 — unchanged
 - External Platforms — span 4
 - Team Snapshot — span 3
 - Recent Activity — span 5
 
 Each row sums to 12.
 
-## Target 10-Column Choreography
-At `standardLaptop`, implement:
+### Target 10-column choreography
+At `standardLaptop`:
 
-### Row 1
+#### Row 1 — unchanged
 - Priority Actions — span 4
 - Project Readiness — span 3
 - Document Control Center — span 3
 
-### Row 2
+#### Row 2 — Prompt 09C change
 - Action Exposure Mix — span 4
 - Site Health Summary — span 3
 - Project Health Trend — span 3
 
-### Row 3
+#### Row 3 — unchanged
 - Approvals & Checkpoints — span 3
 - Readiness / Approval Rollup — span 4
 - Missing Configurations — span 3
 
-### Row 4
+#### Row 4 — unchanged
 - External Platforms — span 3
 - Team Snapshot — span 3
 - Recent Activity — span 4
 
 Each row sums to 10.
 
-## Smaller Modes
-Do not introduce new span overrides for smaller footprints unless repo-truth demonstrates an existing supported policy. Retain footprint behavior at smaller modes.
+### Smaller modes
+Do not introduce new overrides for smaller responsive modes. Retain existing footprint behavior at smaller modes.
 
-## Required Implementation Areas
+---
 
-### 1. Update operational / analytics ordering
-Adjust both fixture and read-model Project Home render paths so the first 12 cards follow the target order above.
+## Required Implementation
 
-Expected files likely include:
-- `PccProjectHome.tsx`
-- `PccProjectHomeReadModelContent.tsx`
+### 1. Reorder only the Row 2 first-fold render sequence
+Update both:
 
-Update in-file comments/JSDoc that enumerate canonical order.
+```text
+apps/project-control-center/src/surfaces/projectHome/PccProjectHome.tsx
+apps/project-control-center/src/surfaces/projectHome/PccProjectHomeReadModelContent.tsx
+```
 
-### 2. Update span override matrices
-Update the operational and analytics span matrices so the new row groupings match the target.
+Retarget only the Row 2 ordering:
 
-Expected files likely include:
-- `projectHomeChoreography.ts`
-- `projectHomeAnalytics.ts`
+#### Before
+```text
+Site Health Summary
+Action Exposure Mix
+Project Health Trend
+```
 
-Do not mutate unrelated analytics chart content.
+#### After
+```text
+Action Exposure Mix
+Site Health Summary
+Project Health Trend
+```
 
-### 3. Preserve card identity and behavior
 Do not:
+- alter Row 1;
+- alter Rows 3 or 4;
+- alter lifecycle / read-model tail content;
+- alter card props, gateways, titles, or card state mapping.
+
+### 2. Update only the necessary span overrides
+#### In `projectHomeChoreography.ts`
+Change only:
+
+```ts
+siteHealthSummary: projectHomeSpan(4, 4)
+```
+
+to:
+
+```ts
+siteHealthSummary: projectHomeSpan(3, 3)
+```
+
+All other operational-card span overrides remain unchanged.
+
+#### In `projectHomeAnalytics.ts`
+Change only:
+
+```ts
+actionExposureMix: projectHomeAnalyticsSpan(4, 3)
+```
+
+to:
+
+```ts
+actionExposureMix: projectHomeAnalyticsSpan(5, 4)
+```
+
+All other analytics span overrides remain unchanged.
+
+Do not modify analytics view-model content, chart data, chart kinds, titles, summaries, source labels, or analytics sample copy.
+
+### 3. Update only stale order/span comments
+Refresh comments or JSDoc **only where Prompt 09 Row 2 ordering or span math is explicitly enumerated**.
+
+Expected candidates include:
+- Row-order comments in tests;
+- row-sum comments in `PccPhase06RegressionCoverage.test.tsx`;
+- any source comments that explicitly state the old Row 2 sequence.
+
+Do not churn unrelated commentary. The operational-only nine-card spine remains unchanged, so comments that describe only that filtered spine should not be rewritten merely for style.
+
+---
+
+## Test Updates — Required
+
+### A. Exact order and composition tests
+Update tests that lock the current first-12 order:
+
+```text
+apps/project-control-center/src/tests/PccProjectHome.phase06Composition.test.tsx
+```
+
+Required changes:
+- `PROJECT_HOME_FIXTURE_ORDER` row 2 becomes:
+  ```text
+  Action Exposure Mix
+  Site Health Summary
+  Project Health Trend
+  ```
+- `READ_MODEL_FULL_ORDER` updates automatically through the first-12 order but preserves the existing lifecycle / Ask HBI / Procore / Memory / Lens / Related Records tail.
+- Operational-only filtered spine remains unchanged.
+
+### B. Operational span assertions
+In `PccProjectHome.phase06Composition.test.tsx` update only:
+
+#### 12-column operational span map
+```text
+Site Health Summary: 4 -> 3
+```
+
+#### standardLaptop operational span map
+```text
+Site Health Summary: 4 -> 3
+```
+
+No other operational-card span values should change.
+
+### C. Analytics adjacency and analytics spans
+Update:
+
+```text
+apps/project-control-center/src/tests/PccProjectHomeAnalyticsCards.test.tsx
+```
+
+Required changes:
+
+1. Row 2 adjacency test must assert:
+   ```text
+   Action Exposure Mix
+   < Site Health Summary
+   < Project Health Trend
+   < Approvals & Checkpoints
+   ```
+   Retire the old assertion that placed `Site Health Summary` before `Action Exposure Mix`.
+
+2. Analytics span matrices:
+   - 12-column:
+     ```text
+     actionExposureMix: 4 -> 5
+     projectHealthTrend: 4 unchanged
+     readinessApprovalRollup: 4 unchanged
+     ```
+   - standardLaptop:
+     ```text
+     actionExposureMix: 3 -> 4
+     projectHealthTrend: 3 unchanged
+     readinessApprovalRollup: 4 unchanged
+     ```
+
+No analytics source-label, sample-state, chart-marker, or dependency-guard assertions should be weakened.
+
+### D. Row-sum regression coverage
+Update:
+
+```text
+apps/project-control-center/src/tests/PccPhase06RegressionCoverage.test.tsx
+```
+
+Required changes:
+- Row 2 label order:
+  ```text
+  ['Action Exposure Mix', 'Site Health Summary', 'Project Health Trend']
+  ```
+- Row 2 12-column comment:
+  ```text
+  Action Exposure Mix (5) + Site Health Summary (3) + Project Health Trend (4) = 12
+  ```
+- Row 2 10-column note remains same row membership, summing to 10 with:
+  ```text
+  4 + 3 + 3 = 10
+  ```
+
+Row-sum assertions must continue to pass at:
+- `ultrawide`
+- `desktop`
+- `largeLaptop`
+- `standardLaptop`
+
+### E. Additional tests that may require targeted updates
+Update only if they encode the prior first-12 row 2 sequence or span assumptions:
+
+```text
+apps/project-control-center/src/tests/PccProjectHome.test.tsx
+```
+
+If no first-12 order/span assertions in that file need adjustment, do not churn it.
+
+---
+
+## Hard Invariants to Preserve
+Do not:
+- edit `apps/project-control-center/src/surfaces/documents/`;
+- edit `PccDocumentControlCard.tsx`;
+- edit `PccProjectHome.module.css`;
+- edit `projectHomeViewModel.ts`;
+- edit `projectHomeAdapter.ts`;
+- edit backend/functions or shared PCC model files;
 - change card titles;
 - change gateway semantics;
 - change card state mapping;
-- add or remove cards;
-- change the read-model tail in this prompt.
+- add/remove cards;
+- alter read-model tail card composition;
+- add package / manifest / dependency / lockfile changes;
+- introduce `grid-auto-flow: dense`;
+- introduce new smaller-mode overrides;
+- change direct-child bento invariants;
+- change shell-owned active-panel marker ownership;
+- reintroduce `Project Intelligence`.
 
-### 4. Tests
-Update all order/span/row-sum/adjacency tests that encode the prior Prompt 09 composition.
+---
 
-Expected test surfaces likely include:
-- `PccProjectHome.test.tsx`
-- `PccProjectHome.composition.test.tsx`
-- `PccProjectHome.phase06Composition.test.tsx`
-- `PccProjectHomeAnalyticsCards.test.tsx`
-- `PccPhase06RegressionCoverage.test.tsx`
+## Expected File Scope
+Likely touched:
 
-Required test updates:
-1. Canonical fixture order.
-2. Canonical read-model first-12 order.
-3. Operational-only spine sequence if tested separately.
-4. Row-sum assertions for 12- and 10-column modes.
-5. Span matrices.
-6. Analytics adjacency:
-   - Priority Actions precedes / is near Action Exposure Mix in the sequence;
-   - Site Health Summary remains adjacent to Project Health Trend in the intended row;
-   - Readiness Rollup remains between Approvals / Missing Configurations.
-7. No Project Intelligence regression.
-8. Bento direct-child invariant retained.
-9. Shell-owned active panel marker retained.
-
-## Out of Scope / Hard Stops
-- No Documents surface edits.
-- No card-body redesign beyond Prompt 09B integration.
-- No read-model tail / Lifecycle / HBI / Memory / Lens / Related Records changes yet.
-- No package/manifest/version bump unless separately operator-owned.
-- No lockfile changes.
-- No dependency additions.
-- No `grid-auto-flow: dense`.
-- No global CSS/grid primitive rewrite.
-
-## Validation
-Run:
-```bash
-pnpm --filter @hbc/spfx-project-control-center check-types
-pnpm --filter @hbc/spfx-project-control-center test
-pnpm exec prettier --check <all prompt-touched files>
-git diff --check
+```text
+apps/project-control-center/src/surfaces/projectHome/PccProjectHome.tsx
+apps/project-control-center/src/surfaces/projectHome/PccProjectHomeReadModelContent.tsx
+apps/project-control-center/src/surfaces/projectHome/projectHomeChoreography.ts
+apps/project-control-center/src/surfaces/projectHome/projectHomeAnalytics.ts
+apps/project-control-center/src/tests/PccProjectHome.phase06Composition.test.tsx
+apps/project-control-center/src/tests/PccProjectHomeAnalyticsCards.test.tsx
+apps/project-control-center/src/tests/PccPhase06RegressionCoverage.test.tsx
 ```
 
-Record lockfile MD5 before/after.
+Possibly touched only if repo-truth shows row-order assumptions there:
+
+```text
+apps/project-control-center/src/tests/PccProjectHome.test.tsx
+```
+
+Do not touch Prompt 09B feed-card implementation or tests unless an unexpected compile failure demonstrates a truly necessary adjustment. If that occurs, classify it precisely in closeout.
+
+---
+
+## Validation
+Run at minimum:
+
+```bash
+git status --short
+md5 pnpm-lock.yaml || md5sum pnpm-lock.yaml
+pnpm --filter @hbc/spfx-project-control-center check-types
+pnpm --filter @hbc/spfx-project-control-center test
+pnpm exec prettier --check <all Prompt 09C touched files>
+git diff --check
+md5 pnpm-lock.yaml || md5sum pnpm-lock.yaml
+git status --short
+```
+
+If `git diff --check` is red due pre-existing unrelated operator-owned WIP, classify the exact file and state whether any Prompt 09C-touched file contributes to the failure. Do not claim a clean diff check when the command is red.
+
+---
 
 ## Closeout Format
 Return:
-1. Verdict
-2. Starting/ending HEAD
-3. Changed files
-4. Final 12-column row matrix
-5. Final 10-column row matrix
-6. Tests updated
-7. Validation results
-8. Explicit statement that Documents surface files were untouched
-9. Lockfile MD5 before/after
-10. Commit summary/description if committed
-11. Deferred architecture note if true masonry/dense behavior was considered but not implemented
+
+1. Verdict: `PASS` / `BLOCKED`
+2. Starting and ending HEAD
+3. Version posture observed
+4. Files changed
+5. Exact Prompt 09C delta summary:
+   - Row 2 order changed from `Site Health Summary -> Action Exposure Mix -> Project Health Trend`
+     to `Action Exposure Mix -> Site Health Summary -> Project Health Trend`;
+   - `Action Exposure Mix` span changed `4/3 -> 5/4`;
+   - `Site Health Summary` span changed `4/4 -> 3/3`;
+   - all other first-fold card spans unchanged.
+6. Final 12-column row matrix
+7. Final 10-column row matrix
+8. Tests updated
+9. Validation results
+10. Explicit statement that:
+    - dedicated Documents surface files were untouched;
+    - Prompt 09B `PccDocumentControlCard` feed UI files were untouched;
+    - read-model tail composition was untouched.
+11. Lockfile MD5 before/after
+12. Commit summary and description if committed
+13. Deferred architecture note only if dense/masonry behavior was considered but not implemented
