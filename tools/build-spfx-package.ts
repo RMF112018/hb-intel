@@ -222,6 +222,13 @@ const ALL_DOMAINS: DomainConfig[] = [
     freshBuildRequired: true,
   },
   {
+    dir: 'my-dashboard',
+    camel: 'myDashboard',
+    pascal: 'MyDashboard',
+    packagingModel: 'single',
+    freshBuildRequired: true,
+  },
+  {
     dir: 'hb-shell-extension',
     camel: 'hbShellExtension',
     pascal: 'HbShellExtension',
@@ -251,6 +258,7 @@ const HB_HOMEPAGE_WEBPART_ID = 'e0a11c44-e6d7-45d1-9af5-09ba0b68f5cf';
 const SAFETY_WEBPART_ID = 'ba2cd939-ed9e-4aea-bb8c-324ed1d67e9e';
 const HB_INTEL_FOLEON_WEBPART_ID = '2160edb3-675e-4451-92bb-8345f9d1c71e';
 const PROJECT_CONTROL_CENTER_WEBPART_ID = '6f5f3be4-6ec8-4b3f-8fd5-0f97d7612d27';
+const MY_DASHBOARD_WEBPART_ID = '412eb9fd-2eb2-4f7d-a4f1-7865e339a369';
 const DEFAULT_SUPPORTED_HOSTS = ['SharePointWebPart', 'TeamsPersonalApp'];
 
 // Critical runtime source files whose SHA-256 fingerprints anchor the
@@ -348,6 +356,15 @@ const PROJECT_CONTROL_CENTER_CRITICAL_RUNTIME_PATHS: readonly string[] = [
   'apps/project-control-center/vite.config.ts',
   'apps/project-control-center/package.json',
 ];
+const MY_DASHBOARD_CRITICAL_RUNTIME_PATHS: readonly string[] = [
+  'apps/my-dashboard/src/mount.tsx',
+  'apps/my-dashboard/src/MyDashboardApp.tsx',
+  'apps/my-dashboard/src/config/runtimeConfig.ts',
+  'apps/my-dashboard/src/config/productionReadiness.ts',
+  'apps/my-dashboard/src/webparts/myDashboard/MyDashboardWebPart.manifest.json',
+  'apps/my-dashboard/vite.config.ts',
+  'apps/my-dashboard/package.json',
+];
 
 const CRITICAL_RUNTIME_PATHS_BY_DOMAIN: Record<string, readonly string[]> = {
   safety: SAFETY_CRITICAL_RUNTIME_PATHS,
@@ -356,6 +373,7 @@ const CRITICAL_RUNTIME_PATHS_BY_DOMAIN: Record<string, readonly string[]> = {
   'hb-homepage': HB_HOMEPAGE_CRITICAL_RUNTIME_PATHS,
   'hb-intel-foleon': HB_INTEL_FOLEON_CRITICAL_RUNTIME_PATHS,
   'project-control-center': PROJECT_CONTROL_CENTER_CRITICAL_RUNTIME_PATHS,
+  'my-dashboard': MY_DASHBOARD_CRITICAL_RUNTIME_PATHS,
 };
 
 const HB_HOMEPAGE_CANONICAL_BANNER_FILES = [
@@ -403,6 +421,7 @@ const RUNTIME_MARKERS_BY_DOMAIN: Record<string, PackageRuntimeMarker> = {
     id: PROJECT_CONTROL_CENTER_WEBPART_ID,
     label: 'Project Control Center webpart',
   },
+  'my-dashboard': { id: MY_DASHBOARD_WEBPART_ID, label: 'My Dashboard webpart' },
 };
 // ── SPFx version baselines (governed, see docs/reference/developer/spfx-baseline.md) ──
 //
