@@ -162,7 +162,7 @@ describe('Project Home Phase 06 composition — read-model path', () => {
       </PccBentoGrid>,
     );
     // Wait for the lifecycle title to render; then assert the full
-    // 15-card sequence in a waitFor so the unified-lifecycle async
+    // 18-card sequence in a waitFor so the unified-lifecycle async
     // microtask can settle.
     await findByText('Lifecycle Timeline');
     const grid = container.querySelector<HTMLElement>('[data-pcc-bento-grid]')!;

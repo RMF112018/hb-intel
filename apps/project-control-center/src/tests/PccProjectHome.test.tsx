@@ -701,11 +701,13 @@ describe('Project Home bento dashboard', () => {
   // ── Wave 99 / Prompt 05B — unified lifecycle integration ─────────────
   //
   // Project Home has two render paths: fixture-only (no readModelClient,
-  // 9 cards after Wave 15A wave-b9 Prompt 4B-01 removed Project
-  // Intelligence) and read-model-driven (readModelClient supplied,
-  // 9 existing cards + 4 unified-lifecycle cards + Ask HBI + Procore =
-  // 15 cards). Each test below names which path it exercises and asserts
-  // the path-specific cardinality / content invariants.
+  // 12 cards — the Phase 06 Prompt 04 nine-card operational spine plus
+  // the three preview analytics cards, after Wave 15A wave-b9 Prompt
+  // 4B-01 removed Project Intelligence) and read-model-driven
+  // (readModelClient supplied, 12 spine+analytics cards + 4
+  // unified-lifecycle cards + Ask HBI + Procore = 18 cards). Each test
+  // below names which path it exercises and asserts the path-specific
+  // cardinality / content invariants.
 
   it('fixture-only fallback (no readModelClient) renders the Phase 06 Prompt 04 12-card baseline (9 operational + 3 analytics) and no unified-lifecycle titles', () => {
     const { container } = render(
