@@ -1,4 +1,7 @@
 {
+  "env": {
+    "HB_ALLOW_CANONICAL_PLAN_LIBRARY_WRITE": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(git status:*)",
@@ -6,8 +9,10 @@
       "Bash(git log:*)",
       "Bash(git show:*)",
       "Bash(git branch:*)",
-      "Bash(git rev-parse:*)"
+      "Bash(git rev-parse:*)",
+      "Bash(grep -n \"describe\\\\|^}\\);\\\\|^export\\\\|^}$\" apps/project-control-center/src/tests/PccDocumentsSurface.test.tsx)"
     ],
+    "deny": [],
     "ask": [
       "Edit",
       "Write",
@@ -17,10 +22,6 @@
       "Bash(npx:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)"
-    ],
-    "deny": []
-  },
-  "env": {
-    "HB_ALLOW_CANONICAL_PLAN_LIBRARY_WRITE": "1"
+    ]
   }
 }
