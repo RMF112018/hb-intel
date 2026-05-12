@@ -206,8 +206,8 @@ Home must not become a card-dashboard regression.
 Project Record uses the supporting fixture files derived from the uploaded directory archive:
 
 ```text
-supporting/10_Project_Record_Fixture_Summary.md
-supporting/10_Project_Record_Fixture_Folder_Paths.json
+reference/10_Project_Record_Fixture_Summary.md
+reference/10_Project_Record_Fixture_Folder_Paths.json
 ```
 
 Implementation requirements:

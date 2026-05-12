@@ -47,8 +47,8 @@ Before edits:
 Use the operator-supplied package support files:
 
 ```text
-supporting/10_Project_Record_Fixture_Summary.md
-supporting/10_Project_Record_Fixture_Folder_Paths.json
+reference/10_Project_Record_Fixture_Summary.md
+reference/10_Project_Record_Fixture_Folder_Paths.json
 ```
 
 Translate the support JSON into the repo’s preferred typed fixture/model implementation. Do not add the raw uploaded ZIP archive to runtime source.
