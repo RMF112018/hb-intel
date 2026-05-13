@@ -27,6 +27,7 @@ describe('My Work fixture read-model client — default posture', () => {
     expect(envelope).toEqual({
       ...MY_WORK_HOME_AVAILABLE,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
     });
   });
 
@@ -36,6 +37,7 @@ describe('My Work fixture read-model client — default posture', () => {
     expect(envelope).toEqual({
       ...ADOBE_SIGN_QUEUE_AVAILABLE,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
     });
   });
 
@@ -52,6 +54,7 @@ describe('My Work fixture read-model client — default posture', () => {
     expect(envelope).toEqual({
       ...MY_PROJECT_LINKS_AVAILABLE,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
     });
   });
 });
@@ -65,6 +68,7 @@ describe('My Work fixture read-model client — backend-unavailable posture', ()
     expect(envelope).toEqual({
       ...MY_WORK_HOME_BACKEND_UNAVAILABLE,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
     });
   });
 
@@ -79,10 +83,12 @@ describe('My Work fixture read-model client — backend-unavailable posture', ()
     expect(withoutCursor).toEqual({
       ...ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
     });
     expect(withCursor).toEqual({
       ...ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
     });
   });
 
@@ -94,6 +100,7 @@ describe('My Work fixture read-model client — backend-unavailable posture', ()
     expect(envelope).toEqual({
       ...MY_PROJECT_LINKS_BACKEND_UNAVAILABLE,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
     });
   });
 });
@@ -107,6 +114,7 @@ describe('My Work fixture read-model client — paged cursor handling', () => {
     expect(envelope).toEqual({
       ...ADOBE_SIGN_QUEUE_AVAILABLE_PAGED,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
     });
   });
 
@@ -130,6 +138,31 @@ describe('My Work fixture read-model client — clock override', () => {
     expect(queue.generatedAtUtc).toBe('2030-01-01T00:00:00.000Z');
     expect(projectLinks.generatedAtUtc).toBe('2030-01-01T00:00:00.000Z');
     expect(queue.data.freshness.generatedAtUtc).toBe(MY_WORK_FIXTURE_GENERATED_AT_UTC);
+  });
+});
+
+describe('My Work fixture read-model client — data-path classification', () => {
+  it('stamps fixture-ui-review by default on every route', async () => {
+    const client = createMyWorkFixtureReadModelClient();
+    const home = await client.getMyWorkHome();
+    const queue = await client.getAdobeSignActionQueue();
+    const projectLinks = await client.getMyProjectLinks();
+    expect(home.dataPath).toBe('fixture-ui-review');
+    expect(queue.dataPath).toBe('fixture-ui-review');
+    expect(projectLinks.dataPath).toBe('fixture-ui-review');
+  });
+
+  it('stamps the supplied dataPath on every route', async () => {
+    const client = createMyWorkFixtureReadModelClient({
+      simulateBackendUnavailable: true,
+      dataPath: 'backend-unavailable-fallback',
+    });
+    const home = await client.getMyWorkHome();
+    const queue = await client.getAdobeSignActionQueue();
+    const projectLinks = await client.getMyProjectLinks();
+    expect(home.dataPath).toBe('backend-unavailable-fallback');
+    expect(queue.dataPath).toBe('backend-unavailable-fallback');
+    expect(projectLinks.dataPath).toBe('backend-unavailable-fallback');
   });
 });
 

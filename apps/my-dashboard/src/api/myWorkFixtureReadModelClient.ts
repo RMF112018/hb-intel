@@ -18,6 +18,7 @@ import type {
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
   MyWorkHomeReadModel,
+  MyWorkReadModelDataPath,
   MyWorkReadModelEnvelope,
 } from '@hbc/models/myWork';
 import { MY_WORK_FIXTURE_GENERATED_AT_UTC, MY_WORK_FIXTURES } from '@hbc/models/myWork/fixtures';
@@ -31,22 +32,33 @@ import type {
 export interface MyWorkFixtureReadModelClientOptions {
   readonly simulateBackendUnavailable?: boolean;
   readonly now?: () => string;
+  /**
+   * Truthful data-path classification stamped on every envelope returned
+   * by this client. The factory passes `'backend-unavailable-fallback'`
+   * for production-posture fallbacks and `'fixture-ui-review'` for
+   * explicit ui-review usage. Direct test/preview callers default to
+   * `'fixture-ui-review'` — never to `'backend-live'` (only the backend
+   * client may stamp that).
+   */
+  readonly dataPath?: MyWorkReadModelDataPath;
 }
 
 class MyWorkFixtureReadModelClient implements IMyWorkReadModelClient {
   private readonly now: () => string;
   private readonly simulateBackendUnavailable: boolean;
+  private readonly dataPath: MyWorkReadModelDataPath;
 
   constructor(options: MyWorkFixtureReadModelClientOptions = {}) {
     this.now = options.now ?? (() => MY_WORK_FIXTURE_GENERATED_AT_UTC);
     this.simulateBackendUnavailable = options.simulateBackendUnavailable === true;
+    this.dataPath = options.dataPath ?? 'fixture-ui-review';
   }
 
   async getMyWorkHome(): Promise<MyWorkReadModelEnvelope<MyWorkHomeReadModel>> {
     const base = this.simulateBackendUnavailable
       ? MY_WORK_FIXTURES.home['backend-unavailable']
       : MY_WORK_FIXTURES.home.available;
-    return { ...base, generatedAtUtc: this.now() };
+    return { ...base, generatedAtUtc: this.now(), dataPath: this.dataPath };
   }
 
   async getAdobeSignActionQueue(
@@ -54,21 +66,21 @@ class MyWorkFixtureReadModelClient implements IMyWorkReadModelClient {
   ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>> {
     if (this.simulateBackendUnavailable) {
       const base = MY_WORK_FIXTURES['adobe-sign-action-queue']['backend-unavailable'];
-      return { ...base, generatedAtUtc: this.now() };
+      return { ...base, generatedAtUtc: this.now(), dataPath: this.dataPath };
     }
     const scenario =
       typeof query?.cursor === 'string' && query.cursor.length > 0
         ? 'available-paged'
         : 'available';
     const base = MY_WORK_FIXTURES['adobe-sign-action-queue'][scenario];
-    return { ...base, generatedAtUtc: this.now() };
+    return { ...base, generatedAtUtc: this.now(), dataPath: this.dataPath };
   }
 
   async getMyProjectLinks(): Promise<MyWorkReadModelEnvelope<MyProjectLinksReadModel>> {
     const base = this.simulateBackendUnavailable
       ? MY_WORK_FIXTURES['project-links']['backend-unavailable']
       : MY_WORK_FIXTURES['project-links'].available;
-    return { ...base, generatedAtUtc: this.now() };
+    return { ...base, generatedAtUtc: this.now(), dataPath: this.dataPath };
   }
 
   async startAdobeSignOAuth(

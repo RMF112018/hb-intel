@@ -14,6 +14,7 @@ import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
 import { AdobeSignCallbackBanner } from './AdobeSignCallbackBanner.js';
 import {
   MyWorkActiveEnvelopeProvider,
+  useMyWorkActiveEnvelopeDataPath,
   useMyWorkFocusedAdobeEnvelopeContext,
   useMyWorkHomeEnvelopeContext,
 } from './MyWorkActiveEnvelopeContext.js';
@@ -124,13 +125,7 @@ export function MyWorkShell({
           <MyWorkHeroBandAdapter mode={mode} activeModuleId={activeModuleId} />
         </section>
         <div className={styles.canvas} data-my-work-canvas="">
-          <main
-            id={MY_WORK_ACTIVE_PANEL_ID}
-            role="tabpanel"
-            aria-labelledby={tabId}
-            className={styles.activePanel}
-            data-my-work-active-surface-panel={activePrimarySurfaceId}
-          >
+          <MyWorkActiveSurfacePanel tabId={tabId} activePrimarySurfaceId={activePrimarySurfaceId}>
             <AdobeSignCallbackBanner />
             <MyWorkBentoGrid mode={mode}>
               <MyWorkSurfaceRouter
@@ -142,7 +137,7 @@ export function MyWorkShell({
               />
               {children}
             </MyWorkBentoGrid>
-          </main>
+          </MyWorkActiveSurfacePanel>
         </div>
       </MyWorkActiveEnvelopeProvider>
     </div>
@@ -178,6 +173,37 @@ function FocusedAdobeHeroBand({ mode }: { readonly mode: MyWorkResponsiveMode })
   const state = useMyWorkFocusedAdobeEnvelopeContext();
   const viewModel = useMemo(() => selectMyWorkFocusedAdobeHeroViewModel(state), [state]);
   return <MyWorkHeroBand mode={mode} viewModel={viewModel} />;
+}
+
+/**
+ * The `<main role="tabpanel">` for the active surface. Stamps the
+ * envelope's data-path classification (`backend-live`,
+ * `backend-unavailable-fallback`, `fixture-ui-review`, or `unknown`)
+ * alongside the existing surface-panel marker so hosted screenshots
+ * unambiguously prove the data path.
+ */
+function MyWorkActiveSurfacePanel({
+  tabId,
+  activePrimarySurfaceId,
+  children,
+}: {
+  readonly tabId: string;
+  readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
+  readonly children: ReactNode;
+}) {
+  const dataPath = useMyWorkActiveEnvelopeDataPath();
+  return (
+    <main
+      id={MY_WORK_ACTIVE_PANEL_ID}
+      role="tabpanel"
+      aria-labelledby={tabId}
+      className={styles.activePanel}
+      data-my-work-active-surface-panel={activePrimarySurfaceId}
+      data-my-work-data-path={dataPath}
+    >
+      {children}
+    </main>
+  );
 }
 
 export default MyWorkShell;

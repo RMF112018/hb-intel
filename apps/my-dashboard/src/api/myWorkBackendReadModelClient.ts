@@ -137,7 +137,10 @@ class MyWorkBackendReadModelClient implements IMyWorkReadModelClient {
       return fallback();
     }
     if (!isWrappedEnvelope<T>(body)) return fallback();
-    return body.data;
+    // Overwrite any dataPath the backend may have set; only this client
+    // is allowed to stamp 'backend-live', and operators must trust the
+    // SPFx-side classification rather than a backend-provided value.
+    return { ...body.data, dataPath: 'backend-live' };
   }
 
   async getMyWorkHome(): Promise<MyWorkReadModelEnvelope<MyWorkHomeReadModel>> {

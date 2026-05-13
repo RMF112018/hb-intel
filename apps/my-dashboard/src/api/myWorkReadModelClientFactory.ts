@@ -53,6 +53,7 @@ export function createMyWorkReadModelClient(
     return createMyWorkFixtureReadModelClient({
       now: config.now,
       simulateBackendUnavailable: config.simulateBackendUnavailable === true,
+      dataPath: 'fixture-ui-review',
     });
   }
 
@@ -61,12 +62,14 @@ export function createMyWorkReadModelClient(
     return createMyWorkFixtureReadModelClient({
       now: config.now,
       simulateBackendUnavailable: true,
+      dataPath: 'backend-unavailable-fallback',
     });
   }
 
   const fallback = createMyWorkFixtureReadModelClient({
     now: config.now,
     simulateBackendUnavailable: true,
+    dataPath: 'backend-unavailable-fallback',
   });
 
   return createMyWorkBackendReadModelClient({

@@ -27,6 +27,32 @@ export const MY_WORK_READ_MODEL_MODES = ['fixture', 'backend'] as const;
 
 export type MyWorkReadModelMode = (typeof MY_WORK_READ_MODEL_MODES)[number];
 
+/**
+ * Classification of how an envelope was produced. Distinguishes:
+ *
+ *   - `'backend-live'` — the protected backend was reached and returned this
+ *     envelope. Production-acceptable when paired with a non-fixture data
+ *     payload.
+ *   - `'backend-unavailable-fallback'` — production posture; the backend was
+ *     unreachable or misconfigured and the SPFx client substituted a
+ *     fixture envelope. Hosted screenshots showing this value indicate a
+ *     production-fallback condition, not real data.
+ *   - `'fixture-ui-review'` — explicit `ui-review` mode; fixture data is
+ *     intentional (visual review / preview). Never expected on a
+ *     production tenant.
+ *
+ * Optional on the envelope contract so backend producers and existing
+ * fixtures can omit it; the SPFx my-dashboard client tree stamps the
+ * correct value before surfaces consume the envelope.
+ */
+export const MY_WORK_READ_MODEL_DATA_PATHS = [
+  'backend-live',
+  'backend-unavailable-fallback',
+  'fixture-ui-review',
+] as const;
+
+export type MyWorkReadModelDataPath = (typeof MY_WORK_READ_MODEL_DATA_PATHS)[number];
+
 export const MY_WORK_READ_MODEL_SOURCE_STATUSES = [
   'available',
   'partial',
@@ -67,6 +93,13 @@ export interface MyWorkReadModelEnvelope<T> {
   readonly warnings: readonly MyWorkReadModelWarning[];
   readonly generatedAtUtc: string;
   readonly data: T;
+  /**
+   * SPFx-stamped data-path classification. Optional so backend responses
+   * and shared fixtures can omit it; the my-dashboard client tree
+   * overwrites this with the truthful classification before surfaces
+   * consume the envelope.
+   */
+  readonly dataPath?: MyWorkReadModelDataPath;
 }
 
 export interface MyWorkActorSummary {

@@ -7,7 +7,11 @@ import {
   MY_WORK_HOME_AUTHORIZATION_REQUIRED,
   MY_WORK_HOME_AVAILABLE,
 } from '@hbc/models/myWork/fixtures';
-import type { MyProjectLinksReadModel, MyWorkReadModelEnvelope } from '@hbc/models/myWork';
+import type {
+  MyProjectLinksReadModel,
+  MyWorkReadModelDataPath,
+  MyWorkReadModelEnvelope,
+} from '@hbc/models/myWork';
 import type { IMyWorkReadModelClient } from '../api/myWorkReadModelClient.js';
 import { MyWorkReadModelClientProvider } from '../runtime/MyWorkReadModelClientProvider.js';
 import { MY_WORK_ACTIVE_PANEL_ID, MyWorkShell } from './MyWorkShell.js';
@@ -66,6 +70,21 @@ function getHeroHighlightValue(container: HTMLElement, id: string): string | nul
   const node = container.querySelector(`[data-my-work-hero-highlight="${id}"]`);
   // The second span is the value (label is first).
   return node?.children[1]?.textContent ?? null;
+}
+
+function withDataPath<T>(
+  env: MyWorkReadModelEnvelope<T>,
+  dataPath: MyWorkReadModelDataPath,
+): MyWorkReadModelEnvelope<T> {
+  return { ...env, dataPath };
+}
+
+function getActivePanelDataPath(container: HTMLElement): string | null {
+  return (
+    container
+      .querySelector('[data-my-work-active-surface-panel]')
+      ?.getAttribute('data-my-work-data-path') ?? null
+  );
 }
 
 describe('MyWorkShell — composition and data-attribute contract', () => {
@@ -355,5 +374,79 @@ describe('MyWorkShell — envelope-derived hero band (Prompt 01 remediation)', (
     // Hero band and surface body share the focused Adobe envelope via the
     // provider context — exactly one fetch for the active focused route.
     expect(stub.getAdobeSignActionQueue).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('MyWorkShell — data-path DOM marker (Prompt 02 remediation)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('stamps data-my-work-data-path="unknown" before the envelope resolves', () => {
+    const stub = makeStubClient({
+      getMyWorkHome: vi.fn<IMyWorkReadModelClient['getMyWorkHome']>(() => new Promise(() => {})),
+    });
+    const { container } = renderShellWithStub(stub);
+    // Initial paint, before any envelope resolves.
+    expect(getActivePanelDataPath(container)).toBe('unknown');
+  });
+
+  it('stamps data-my-work-data-path="backend-live" when the home envelope arrives stamped backend-live', async () => {
+    const stub = makeStubClient({
+      getMyWorkHome: vi
+        .fn()
+        .mockResolvedValue(withDataPath(MY_WORK_HOME_AVAILABLE, 'backend-live')),
+    });
+    const { container } = renderShellWithStub(stub);
+    await waitFor(() => {
+      expect(getActivePanelDataPath(container)).toBe('backend-live');
+    });
+  });
+
+  it('stamps data-my-work-data-path="backend-unavailable-fallback" when the production fallback fixture is in play', async () => {
+    const stub = makeStubClient({
+      getMyWorkHome: vi
+        .fn()
+        .mockResolvedValue(
+          withDataPath(MY_WORK_HOME_AUTHORIZATION_REQUIRED, 'backend-unavailable-fallback'),
+        ),
+    });
+    const { container } = renderShellWithStub(stub);
+    await waitFor(() => {
+      expect(getActivePanelDataPath(container)).toBe('backend-unavailable-fallback');
+    });
+  });
+
+  it('stamps data-my-work-data-path="fixture-ui-review" when the explicit fixture posture envelope arrives', async () => {
+    const stub = makeStubClient({
+      getMyWorkHome: vi
+        .fn()
+        .mockResolvedValue(withDataPath(MY_WORK_HOME_AVAILABLE, 'fixture-ui-review')),
+    });
+    const { container } = renderShellWithStub(stub);
+    await waitFor(() => {
+      expect(getActivePanelDataPath(container)).toBe('fixture-ui-review');
+    });
+  });
+
+  it('flips the data-path marker when the focused Adobe route mounts and its envelope resolves', async () => {
+    const stub = makeStubClient({
+      getMyWorkHome: vi
+        .fn()
+        .mockResolvedValue(withDataPath(MY_WORK_HOME_AVAILABLE, 'backend-live')),
+      getAdobeSignActionQueue: vi
+        .fn()
+        .mockResolvedValue(
+          withDataPath(ADOBE_SIGN_QUEUE_AUTHORIZATION_REQUIRED, 'backend-unavailable-fallback'),
+        ),
+    });
+    const { container } = renderShellWithStub(stub);
+    await waitFor(() => {
+      expect(getActivePanelDataPath(container)).toBe('backend-live');
+    });
+    openAdobeFocusedModule(container);
+    await waitFor(() => {
+      expect(getActivePanelDataPath(container)).toBe('backend-unavailable-fallback');
+    });
   });
 });

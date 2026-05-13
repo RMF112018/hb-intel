@@ -22,7 +22,10 @@ const makeJsonResponse = (body: unknown, init: { status?: number } = {}): Respon
   });
 
 const makeBackendUnavailableFallback = () =>
-  createMyWorkFixtureReadModelClient({ simulateBackendUnavailable: true });
+  createMyWorkFixtureReadModelClient({
+    simulateBackendUnavailable: true,
+    dataPath: 'backend-unavailable-fallback',
+  });
 
 describe('normalizeBackendApiBaseUrl', () => {
   it('appends /api to a bare host', () => {
@@ -89,7 +92,7 @@ describe('My Work backend read-model client — happy path', () => {
 
     const envelope = await client.getMyWorkHome();
 
-    expect(envelope).toEqual(MY_WORK_HOME_AVAILABLE);
+    expect(envelope).toEqual({ ...MY_WORK_HOME_AVAILABLE, dataPath: 'backend-live' });
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const [url, init] = fetchSpy.mock.calls[0]!;
     expect(url).toBe('https://example.invalid/api/my-work/me/home');
@@ -218,10 +221,12 @@ describe('My Work backend read-model client — fallback paths', () => {
     readonly sourceStatus: string;
     readonly mode: string;
     readonly warnings: readonly { readonly code: string }[];
+    readonly dataPath?: string;
   }) => {
     expect(envelope.sourceStatus).toBe('backend-unavailable');
     expect(envelope.mode).toBe('fixture');
     expect(envelope.warnings[0]?.code).toBe('backend-unavailable');
+    expect(envelope.dataPath).toBe('backend-unavailable-fallback');
   };
 
   it('falls back when getApiToken rejects', async () => {
@@ -333,6 +338,49 @@ describe('My Work backend read-model client — fallback paths', () => {
     });
     const envelope = await client.getMyProjectLinks();
     assertBackendUnavailable(envelope);
+  });
+});
+
+describe('My Work backend read-model client — data-path stamping', () => {
+  it('stamps dataPath:"backend-live" on every successful response', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ data: MY_WORK_HOME_AVAILABLE }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    const home = await client.getMyWorkHome();
+    expect(home.dataPath).toBe('backend-live');
+  });
+
+  it('overwrites any backend-provided dataPath with backend-live so the backend cannot spoof another path', async () => {
+    const spoofed = { ...ADOBE_SIGN_QUEUE_AVAILABLE, dataPath: 'fixture-ui-review' as const };
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ data: spoofed }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    const queue = await client.getAdobeSignActionQueue();
+    expect(queue.dataPath).toBe('backend-live');
+  });
+
+  it('delegates to the fallback which stamps backend-unavailable-fallback on every failure mode', async () => {
+    const fetchSpy = vi.fn<MyWorkReadModelFetch>().mockRejectedValue(new Error('network down'));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    const home = await client.getMyWorkHome();
+    expect(home.dataPath).toBe('backend-unavailable-fallback');
   });
 });
 
