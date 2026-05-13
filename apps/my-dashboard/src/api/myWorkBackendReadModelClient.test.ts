@@ -335,3 +335,157 @@ describe('My Work backend read-model client — fallback paths', () => {
     assertBackendUnavailable(envelope);
   });
 });
+
+describe('My Work backend read-model client — startAdobeSignOAuth', () => {
+  const happyResponse = {
+    data: {
+      authorizationUrl: 'https://secure.adobesign.com/public/oauth/v2?state=opaque',
+      stateExpiresAtUtc: '2026-05-13T12:10:00.000Z',
+    },
+  };
+
+  it('POSTs to my-work/me/adobe-sign/oauth/start with bearer + JSON body + returns the inner data', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse(happyResponse));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+
+    const result = await client.startAdobeSignOAuth({ returnPath: '/SitePages/MyDashboard.aspx' });
+    expect(result).toEqual(happyResponse.data);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(url).toBe('https://example.invalid/api/my-work/me/adobe-sign/oauth/start');
+    expect(init.method).toBe('POST');
+    expect(init.headers.Authorization).toBe('Bearer tok');
+    expect(init.headers['Content-Type']).toBe('application/json');
+    expect(init.headers.Accept).toBe('application/json');
+    expect(JSON.parse(init.body as string)).toEqual({ returnPath: '/SitePages/MyDashboard.aspx' });
+  });
+
+  it('throws adobe-sign-oauth-start-unauthorized on 401', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ code: 'UNAUTHORIZED' }, { status: 401 }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.startAdobeSignOAuth({ returnPath: '/x' })).rejects.toThrow(
+      'adobe-sign-oauth-start-unauthorized',
+    );
+  });
+
+  it('throws adobe-sign-oauth-start-unauthorized on 403', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ code: 'PRINCIPAL_UNRESOLVED' }, { status: 403 }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.startAdobeSignOAuth({ returnPath: '/x' })).rejects.toThrow(
+      'adobe-sign-oauth-start-unauthorized',
+    );
+  });
+
+  it('throws adobe-sign-oauth-start-invalid-input on 400', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ code: 'INVALID_RETURN_PATH' }, { status: 400 }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(
+      client.startAdobeSignOAuth({ returnPath: 'https://evil.example.com' }),
+    ).rejects.toThrow('adobe-sign-oauth-start-invalid-input');
+  });
+
+  it('throws adobe-sign-oauth-start-configuration-required on 503', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ code: 'CONFIGURATION_REQUIRED' }, { status: 503 }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.startAdobeSignOAuth({ returnPath: '/x' })).rejects.toThrow(
+      'adobe-sign-oauth-start-configuration-required',
+    );
+  });
+
+  it('throws adobe-sign-oauth-start-unreachable when the fetch throws', async () => {
+    const fetchSpy = vi.fn<MyWorkReadModelFetch>().mockRejectedValue(new Error('network down'));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.startAdobeSignOAuth({ returnPath: '/x' })).rejects.toThrow(
+      'adobe-sign-oauth-start-unreachable',
+    );
+  });
+
+  it('throws adobe-sign-oauth-start-unreachable when the token-provider throws', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse(happyResponse));
+    const getApiToken: GetApiToken = async () => {
+      throw new Error('no token');
+    };
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken,
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.startAdobeSignOAuth({ returnPath: '/x' })).rejects.toThrow(
+      'adobe-sign-oauth-start-unreachable',
+    );
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('throws adobe-sign-oauth-start-unreachable on a malformed success body (missing data)', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ not_data: true }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.startAdobeSignOAuth({ returnPath: '/x' })).rejects.toThrow(
+      'adobe-sign-oauth-start-unreachable',
+    );
+  });
+
+  it('throws adobe-sign-oauth-start-unreachable on a malformed success body (missing fields)', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ data: { authorizationUrl: 'https://x' } }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.startAdobeSignOAuth({ returnPath: '/x' })).rejects.toThrow(
+      'adobe-sign-oauth-start-unreachable',
+    );
+  });
+});

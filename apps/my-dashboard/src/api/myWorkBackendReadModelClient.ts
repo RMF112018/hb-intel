@@ -23,6 +23,8 @@ import type {
 
 import {
   MY_WORK_READ_MODEL_ROUTE_PATHS,
+  type AdobeSignOAuthStartInput,
+  type AdobeSignOAuthStartResponse,
   type GetApiToken,
   type IMyWorkReadModelClient,
   type MyWorkReadModelRouteId,
@@ -30,8 +32,14 @@ import {
 
 export type MyWorkReadModelFetch = (
   input: string,
-  init: { method: 'GET'; headers: Record<string, string> },
+  init: {
+    method: 'GET' | 'POST';
+    headers: Record<string, string>;
+    body?: string;
+  },
 ) => Promise<Response>;
+
+const ADOBE_SIGN_OAUTH_START_ROUTE_PATH = 'my-work/me/adobe-sign/oauth/start' as const;
 
 export interface MyWorkBackendReadModelClientOptions {
   readonly backendBaseUrl: string;
@@ -148,6 +156,70 @@ class MyWorkBackendReadModelClient implements IMyWorkReadModelClient {
 
   async getMyProjectLinks(): Promise<MyWorkReadModelEnvelope<MyProjectLinksReadModel>> {
     return this.callBackend('project-links', () => this.fallback.getMyProjectLinks());
+  }
+
+  async startAdobeSignOAuth(input: AdobeSignOAuthStartInput): Promise<AdobeSignOAuthStartResponse> {
+    let token: string;
+    try {
+      token = await this.getApiToken();
+    } catch {
+      throw new Error('adobe-sign-oauth-start-unreachable');
+    }
+    if (!token || token.trim().length === 0) {
+      throw new Error('adobe-sign-oauth-start-unreachable');
+    }
+
+    const url = `${this.apiBaseUrl}/${ADOBE_SIGN_OAUTH_START_ROUTE_PATH}`;
+    let response: Response;
+    try {
+      response = await this.fetchImpl(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ returnPath: input.returnPath }),
+      });
+    } catch {
+      throw new Error('adobe-sign-oauth-start-unreachable');
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('adobe-sign-oauth-start-unauthorized');
+    }
+    if (response.status === 400) {
+      throw new Error('adobe-sign-oauth-start-invalid-input');
+    }
+    if (response.status === 503) {
+      throw new Error('adobe-sign-oauth-start-configuration-required');
+    }
+    if (!response.ok) {
+      throw new Error('adobe-sign-oauth-start-unreachable');
+    }
+
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      throw new Error('adobe-sign-oauth-start-unreachable');
+    }
+    if (typeof body !== 'object' || body === null) {
+      throw new Error('adobe-sign-oauth-start-unreachable');
+    }
+    const data = (body as { data?: unknown }).data;
+    if (
+      typeof data !== 'object' ||
+      data === null ||
+      typeof (data as Record<string, unknown>).authorizationUrl !== 'string' ||
+      typeof (data as Record<string, unknown>).stateExpiresAtUtc !== 'string'
+    ) {
+      throw new Error('adobe-sign-oauth-start-unreachable');
+    }
+    return {
+      authorizationUrl: (data as Record<string, string>).authorizationUrl,
+      stateExpiresAtUtc: (data as Record<string, string>).stateExpiresAtUtc,
+    };
   }
 }
 

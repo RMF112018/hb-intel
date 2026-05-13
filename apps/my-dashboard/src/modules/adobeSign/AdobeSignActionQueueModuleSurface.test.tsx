@@ -26,9 +26,11 @@ function getCardRoles(container: HTMLElement): string[] {
 }
 
 function spanOf(container: HTMLElement, role: string): string | null {
-  return container
-    .querySelector(`[data-my-work-card-role="${role}"]`)
-    ?.getAttribute('data-my-work-column-span') ?? null;
+  return (
+    container
+      .querySelector(`[data-my-work-card-role="${role}"]`)
+      ?.getAttribute('data-my-work-column-span') ?? null
+  );
 }
 
 describe('AdobeSignActionQueueModuleSurface — default (non-ready) variant', () => {
@@ -126,5 +128,29 @@ describe('AdobeSignActionQueueModuleSurface — copy posture', () => {
       unmount();
       cleanup();
     }
+  });
+});
+
+describe('AdobeSignActionQueueModuleSurface — onConnect forwarding', () => {
+  it('forwards onConnect to the connection guidance card on the non-ready variant', () => {
+    const onConnect = () => new Promise<void>(() => undefined);
+    const { container } = renderFocused({ onConnect });
+    const button = container.querySelector(
+      '[data-adobe-sign-connect-action="start"]',
+    ) as HTMLButtonElement | null;
+    expect(button).not.toBeNull();
+    expect(button?.textContent).toBe('Connect Adobe Sign');
+    expect(button?.getAttribute('data-adobe-sign-connect-state')).toBe('idle');
+  });
+
+  it('omits the Connect button on the non-ready variant when no onConnect is supplied', () => {
+    const { container } = renderFocused();
+    expect(container.querySelector('[data-adobe-sign-connect-action="start"]')).toBeNull();
+  });
+
+  it('does not render the Connect button on the ready variant even when onConnect is supplied', () => {
+    const onConnect = () => new Promise<void>(() => undefined);
+    const { container } = renderFocused({ readinessVariant: 'ready', onConnect });
+    expect(container.querySelector('[data-adobe-sign-connect-action="start"]')).toBeNull();
   });
 });

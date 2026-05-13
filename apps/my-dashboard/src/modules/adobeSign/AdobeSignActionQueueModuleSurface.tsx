@@ -9,6 +9,13 @@ export type MyWorkSurfaceReadinessVariant = 'ready' | 'non-ready';
 export interface AdobeSignActionQueueModuleSurfaceProps {
   /** Presentation-only readiness variant. Defaults to `'non-ready'`. */
   readonly readinessVariant?: MyWorkSurfaceReadinessVariant;
+  /**
+   * Optional consent-start callback. Forwarded to the connection
+   * guidance card on the non-ready variant; the ready variant ignores
+   * it. When absent, the connection card renders without the
+   * "Connect Adobe Sign" button.
+   */
+  readonly onConnect?: () => Promise<void>;
 }
 
 const FOCUSED_READY_QUEUE_SUMMARY_OVERRIDES: MyWorkCardSpanOverrides = {
@@ -34,6 +41,7 @@ const FOCUSED_NON_READY_GUIDANCE_OVERRIDES: MyWorkCardSpanOverrides = {
 
 export function AdobeSignActionQueueModuleSurface({
   readinessVariant = 'non-ready',
+  onConnect,
 }: AdobeSignActionQueueModuleSurfaceProps) {
   if (readinessVariant === 'ready') {
     return (
@@ -46,7 +54,10 @@ export function AdobeSignActionQueueModuleSurface({
   return (
     <>
       <AdobeSignQueueStateCard spanOverrides={FOCUSED_NON_READY_QUEUE_STATE_OVERRIDES} />
-      <AdobeSignConnectionGuidanceCard spanOverrides={FOCUSED_NON_READY_GUIDANCE_OVERRIDES} />
+      <AdobeSignConnectionGuidanceCard
+        spanOverrides={FOCUSED_NON_READY_GUIDANCE_OVERRIDES}
+        onConnect={onConnect}
+      />
     </>
   );
 }

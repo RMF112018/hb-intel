@@ -135,7 +135,10 @@ describe('My Work fixture read-model client — clock override', () => {
 
 describe('My Work fixture read-model client — contract purity', () => {
   it('contains no HTTP or auth primitives in source', () => {
-    const forbidden = ['fetch(', 'Authorization', 'Bearer', 'msal', 'pnpjs', 'oauth', 'getToken'];
+    // `'oauth'` is intentionally NOT in this list: `IMyWorkReadModelClient`
+    // now declares `startAdobeSignOAuth`, and the fixture must satisfy the
+    // signature (the implementation throws — no HTTP, no token-acquire).
+    const forbidden = ['fetch(', 'Authorization', 'Bearer', 'msal', 'pnpjs', 'getToken'];
     for (const needle of forbidden) {
       expect(moduleSourceCode.toLowerCase()).not.toContain(needle.toLowerCase());
     }

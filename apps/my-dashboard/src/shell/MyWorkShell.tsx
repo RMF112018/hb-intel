@@ -1,5 +1,6 @@
-import { useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
+import { createMyWorkReadModelClient } from '../api/myWorkReadModelClientFactory.js';
 import { useMyWorkShellState } from '../state/useMyWorkShellState.js';
 import { selectMyWorkHeroPreviewViewModel } from '../preview/myWorkHeroPreview.js';
 import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
@@ -52,19 +53,15 @@ const MY_WORK_THEME_VARS: CSSProperties = Object.freeze({
 
 export function MyWorkShell({
   spfxContext: _spfxContext,
-  getApiToken: _getApiToken,
+  getApiToken,
   forceMode,
   children,
 }: MyWorkShellProps) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const mode = useMyWorkContainerBreakpoint(shellRef, forceMode);
 
-  const {
-    activePrimarySurfaceId,
-    activeModuleId,
-    selectPrimarySurface,
-    selectModule,
-  } = useMyWorkShellState();
+  const { activePrimarySurfaceId, activeModuleId, selectPrimarySurface, selectModule } =
+    useMyWorkShellState();
 
   const viewState: 'home' | 'focused-module' = activeModuleId ? 'focused-module' : 'home';
   const tabId = `my-work-tab-${activePrimarySurfaceId satisfies MyWorkPrimarySurfaceId}`;
@@ -75,6 +72,27 @@ export function MyWorkShell({
     () => selectMyWorkHeroPreviewViewModel({ activePrimarySurfaceId, activeModuleId }),
     [activePrimarySurfaceId, activeModuleId],
   );
+
+  // Adobe Sign consent-start callback. Only wired in backend mode
+  // (a real bearer-token provider is present); fixture/test renders
+  // omit `getApiToken`, so the connection card stays button-less.
+  const onConnectAdobeSign = useCallback(async (): Promise<void> => {
+    if (typeof getApiToken !== 'function') {
+      throw new Error('adobe-sign-oauth-start-not-available-in-fixture-mode');
+    }
+    const client = createMyWorkReadModelClient({
+      readModelMode: 'backend',
+      getApiToken,
+    });
+    const returnPath =
+      typeof window !== 'undefined' && window.location ? window.location.pathname : '/';
+    const result = await client.startAdobeSignOAuth({ returnPath });
+    if (typeof window !== 'undefined' && window.location) {
+      window.location.assign(result.authorizationUrl);
+    }
+  }, [getApiToken]);
+
+  const handleConnectAdobeSign = typeof getApiToken === 'function' ? onConnectAdobeSign : undefined;
 
   return (
     <div
@@ -109,6 +127,7 @@ export function MyWorkShell({
               activePrimarySurfaceId={activePrimarySurfaceId}
               activeModuleId={activeModuleId}
               onSelectModule={selectModule}
+              onConnectAdobeSign={handleConnectAdobeSign}
             />
             {children}
           </MyWorkBentoGrid>

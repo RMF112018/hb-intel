@@ -22,7 +22,11 @@ import type {
 } from '@hbc/models/myWork';
 import { MY_WORK_FIXTURE_GENERATED_AT_UTC, MY_WORK_FIXTURES } from '@hbc/models/myWork/fixtures';
 
-import type { IMyWorkReadModelClient } from './myWorkReadModelClient.js';
+import type {
+  AdobeSignOAuthStartInput,
+  AdobeSignOAuthStartResponse,
+  IMyWorkReadModelClient,
+} from './myWorkReadModelClient.js';
 
 export interface MyWorkFixtureReadModelClientOptions {
   readonly simulateBackendUnavailable?: boolean;
@@ -65,6 +69,14 @@ class MyWorkFixtureReadModelClient implements IMyWorkReadModelClient {
       ? MY_WORK_FIXTURES['project-links']['backend-unavailable']
       : MY_WORK_FIXTURES['project-links'].available;
     return { ...base, generatedAtUtc: this.now() };
+  }
+
+  async startAdobeSignOAuth(
+    _input: AdobeSignOAuthStartInput,
+  ): Promise<AdobeSignOAuthStartResponse> {
+    // Fixture mode is deliberate-no-network; the consent flow can only run
+    // in backend mode. Parents must only call this in backend-mode contexts.
+    throw new Error('adobe-sign-oauth-start-not-available-in-fixture-mode');
   }
 }
 

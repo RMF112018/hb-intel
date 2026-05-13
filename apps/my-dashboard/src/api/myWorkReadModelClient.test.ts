@@ -42,16 +42,21 @@ describe('My Work read-model client — route ID surface', () => {
 });
 
 describe('My Work read-model client — interface conformance', () => {
-  it('accepts a stub conforming to IMyWorkReadModelClient with three methods', () => {
+  it('accepts a stub conforming to IMyWorkReadModelClient with read + OAuth-start methods', () => {
     const stub: IMyWorkReadModelClient = {
       getMyWorkHome: async () => MY_WORK_HOME_AVAILABLE,
       getAdobeSignActionQueue: async () => ADOBE_SIGN_QUEUE_AVAILABLE,
       getMyProjectLinks: async () => MY_PROJECT_LINKS_AVAILABLE,
+      startAdobeSignOAuth: async () => ({
+        authorizationUrl: 'https://secure.adobesign.com/public/oauth/v2?state=stub',
+        stateExpiresAtUtc: '2026-05-13T12:10:00.000Z',
+      }),
     };
     expect(Object.keys(stub).sort()).toEqual([
       'getAdobeSignActionQueue',
       'getMyProjectLinks',
       'getMyWorkHome',
+      'startAdobeSignOAuth',
     ]);
   });
 });

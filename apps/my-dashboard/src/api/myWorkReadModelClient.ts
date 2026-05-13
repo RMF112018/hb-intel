@@ -32,10 +32,42 @@ export type MyWorkReadModelMode = 'fixture' | 'backend';
 
 export type GetApiToken = () => Promise<string>;
 
+export interface AdobeSignOAuthStartInput {
+  /** Validated relative return path the callback should redirect to on completion. */
+  readonly returnPath: string;
+}
+
+export interface AdobeSignOAuthStartResponse {
+  /** Adobe-hosted consent URL the browser should navigate to. */
+  readonly authorizationUrl: string;
+  /** ISO-8601 UTC expiry of the issued OAuth state value. */
+  readonly stateExpiresAtUtc: string;
+}
+
 export interface IMyWorkReadModelClient {
   getMyWorkHome(): Promise<MyWorkReadModelEnvelope<MyWorkHomeReadModel>>;
   getAdobeSignActionQueue(
     query?: MyWorkAdobeSignActionQueueQuery,
   ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>>;
   getMyProjectLinks(): Promise<MyWorkReadModelEnvelope<MyProjectLinksReadModel>>;
+  /**
+   * Issue a fresh Adobe Sign OAuth `state` and return the
+   * Adobe-hosted authorization URL the browser should navigate to.
+   *
+   * Backend route: `POST /api/my-work/me/adobe-sign/oauth/start`
+   * (bearer-protected). The route validates the supplied
+   * `returnPath` against the canonical allow-list before issuing
+   * state.
+   *
+   * Throws closed-enum `Error` codes on failure:
+   *   - `'adobe-sign-oauth-start-unauthorized'`        — 401 / 403.
+   *   - `'adobe-sign-oauth-start-invalid-input'`       — 400.
+   *   - `'adobe-sign-oauth-start-configuration-required'` — 503.
+   *   - `'adobe-sign-oauth-start-unreachable'`         — network /
+   *     malformed body / token-acquire failure.
+   *
+   * Not available in fixture mode — the fixture client rejects with
+   * `'adobe-sign-oauth-start-not-available-in-fixture-mode'`.
+   */
+  startAdobeSignOAuth(input: AdobeSignOAuthStartInput): Promise<AdobeSignOAuthStartResponse>;
 }
