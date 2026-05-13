@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
+  MyProjectLinkItem,
   MyProjectLinksReadModel,
   MyWorkReadModelEnvelope,
   MyWorkReadModelSourceStatus,
 } from '@hbc/models/myWork';
+import { MY_PROJECT_ASSIGNMENT_ROLE_BY_ID } from '@hbc/models/myWork';
 import { createMyWorkReadModelClient } from '../../api/myWorkReadModelClientFactory.js';
 import { MyWorkCard } from '../../layout/MyWorkCard.js';
 import styles from './MyProjectsHomeCard.module.css';
@@ -26,33 +28,235 @@ const EMPTY_METRICS: MetricVm = Object.freeze({
   procoreReadyCount: 0,
 });
 
-const EMPTY_ITEMS: readonly unknown[] = Object.freeze([]);
+const EMPTY_ITEMS: readonly MyProjectLinkItem[] = Object.freeze([]);
+const INITIAL_VISIBLE_ROWS = 6;
 
-function selectBannerText(
-  sourceStatus: MyWorkReadModelSourceStatus,
-  warningCodes: readonly string[],
-): string | null {
-  if (sourceStatus === 'backend-unavailable') {
+function hasBoundedWarning(items: readonly MyProjectLinkItem[]): boolean {
+  return items.some((item) =>
+    item.warnings.some((warning) => warning.code === 'assignment-source-bounded'),
+  );
+}
+
+function selectBannerText(params: {
+  readonly sourceStatus: MyWorkReadModelSourceStatus;
+  readonly sourceReadiness: MyProjectLinksReadModel['sourceReadiness'] | null;
+  readonly items: readonly MyProjectLinkItem[];
+}): string | null {
+  if (params.sourceStatus === 'principal-unresolved') {
+    return 'We could not confirm your project assignment identity for this view.';
+  }
+  if (hasBoundedWarning(params.items)) {
+    return 'Your project list is available, but the source inventory exceeded the current review limit. Some assignments may not yet be shown.';
+  }
+  if (
+    params.sourceStatus === 'partial' ||
+    params.sourceReadiness?.projects === 'partial' ||
+    params.sourceReadiness?.legacyFallbackRegistry === 'partial'
+  ) {
+    return 'Your assigned projects are available. Some launch destinations could not be fully verified.';
+  }
+  if (
+    params.sourceStatus === 'source-unavailable' ||
+    params.sourceReadiness?.projects === 'source-unavailable' ||
+    params.sourceReadiness?.legacyFallbackRegistry === 'source-unavailable'
+  ) {
+    return 'Project launch sources are currently unavailable. Please try again shortly.';
+  }
+  if (params.sourceStatus === 'backend-unavailable') {
     return 'Project links are using fallback data while backend access is unavailable.';
   }
-  if (sourceStatus === 'principal-unresolved') {
-    return 'We could not resolve your user principal for project assignments.';
-  }
-  if (sourceStatus === 'partial' || sourceStatus === 'source-unavailable') {
-    return 'Project sources returned partial or unavailable data. Some launches may be missing.';
-  }
-  if (warningCodes.includes('assignment-source-bounded')) {
-    return 'Project source reads are bounded in this view; some assignments may be omitted.';
-  }
   return null;
+}
+
+function sourceBadgeLabel(source: MyProjectLinkItem['source']): string {
+  if (source === 'projects-only') return 'Project Site';
+  if (source === 'merged') return 'Site + Legacy';
+  return 'Legacy Folder';
+}
+
+function roleLabels(
+  roles: readonly MyProjectLinkItem['assignmentRoles'][number][],
+): readonly string[] {
+  return roles
+    .map((roleId) => MY_PROJECT_ASSIGNMENT_ROLE_BY_ID[roleId])
+    .sort((a, b) => a.priority - b.priority)
+    .map((definition) => definition.displayLabel);
+}
+
+function rowHasProcoreInvalidWarning(row: MyProjectLinkItem): boolean {
+  return row.warnings.some((warning) => warning.code === 'procore-project-invalid');
+}
+
+function ActionSlot({
+  area,
+  row,
+}: {
+  readonly area: 'sharepoint' | 'procore';
+  readonly row: MyProjectLinkItem;
+}) {
+  if (area === 'sharepoint') {
+    const action = row.sharePointAction;
+    if (action.state === 'available' && action.href) {
+      return (
+        <a
+          href={action.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.actionLink}
+          data-my-projects-action-slot="sharepoint"
+          data-my-projects-action-state="available"
+        >
+          {action.label}
+        </a>
+      );
+    }
+    return (
+      <span
+        className={styles.actionUnavailable}
+        data-my-projects-action-slot="sharepoint"
+        data-my-projects-action-state="unavailable"
+        aria-label="SharePoint unavailable for this project."
+      >
+        SharePoint unavailable
+      </span>
+    );
+  }
+
+  const action = row.procoreAction;
+  if (action.state === 'available' && action.href) {
+    return (
+      <a
+        href={action.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.actionLink}
+        data-my-projects-action-slot="procore"
+        data-my-projects-action-state="available"
+      >
+        Open Procore
+      </a>
+    );
+  }
+
+  const invalidToken = rowHasProcoreInvalidWarning(row);
+  const unavailableReason = invalidToken
+    ? 'Procore unavailable due to invalid project token.'
+    : 'Procore unavailable for this project.';
+  return (
+    <span
+      className={styles.actionUnavailable}
+      data-my-projects-action-slot="procore"
+      data-my-projects-action-state="unavailable"
+      aria-label={unavailableReason}
+    >
+      Procore unavailable
+    </span>
+  );
+}
+
+function RoleChips({
+  rowKey,
+  roles,
+}: {
+  readonly rowKey: string;
+  readonly roles: readonly MyProjectLinkItem['assignmentRoles'][number][];
+}) {
+  const labels = roleLabels(roles);
+  const inline = labels.slice(0, 2);
+  const overflow = labels.slice(2);
+  const [showOverflow, setShowOverflow] = useState(false);
+
+  return (
+    <div className={styles.roleZone} data-my-projects-role-zone="">
+      {inline.map((label) => (
+        <span key={`${rowKey}:${label}`} className={styles.roleChip} data-my-projects-role-chip="">
+          {label}
+        </span>
+      ))}
+      {overflow.length > 0 ? (
+        <>
+          <button
+            type="button"
+            className={styles.roleOverflowButton}
+            aria-expanded={showOverflow ? 'true' : 'false'}
+            aria-controls={`my-projects-overflow-roles-${rowKey}`}
+            onClick={() => setShowOverflow((current) => !current)}
+            data-my-projects-role-overflow-button=""
+          >
+            +{overflow.length}
+          </button>
+          <div
+            id={`my-projects-overflow-roles-${rowKey}`}
+            className={styles.roleOverflowDetails}
+            hidden={!showOverflow}
+            data-my-projects-role-overflow-details=""
+          >
+            {overflow.join(', ')}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
+function ProjectLaunchRow({ row }: { readonly row: MyProjectLinkItem }) {
+  return (
+    <li className={styles.row} data-my-projects-row={row.recordKey}>
+      <div className={styles.rowTop}>
+        <span className={styles.sourceBadge} data-my-projects-source-badge={row.source}>
+          {sourceBadgeLabel(row.source)}
+        </span>
+        <span className={styles.projectNumber}>{row.projectNumber}</span>
+      </div>
+      <p className={styles.projectName}>{row.projectName}</p>
+      {row.projectStage ? <p className={styles.projectStage}>{row.projectStage}</p> : null}
+
+      <RoleChips rowKey={row.recordKey} roles={row.assignmentRoles} />
+
+      <div className={styles.actionRail}>
+        <ActionSlot area="sharepoint" row={row} />
+        <ActionSlot area="procore" row={row} />
+      </div>
+    </li>
+  );
+}
+
+function rowSetDescription(items: readonly MyProjectLinkItem[]): string {
+  if (items.length === 0) {
+    return 'No assigned projects were found for your current project-role assignments.';
+  }
+  return `${items.length} project link records are loaded.`;
+}
+
+function hasDisclosure(items: readonly MyProjectLinkItem[]): boolean {
+  return items.length > INITIAL_VISIBLE_ROWS;
+}
+
+function visibleItems(
+  items: readonly MyProjectLinkItem[],
+  expanded: boolean,
+): readonly MyProjectLinkItem[] {
+  if (expanded) return items;
+  return items.slice(0, INITIAL_VISIBLE_ROWS);
+}
+
+function hasAnyUnavailableSharePoint(items: readonly MyProjectLinkItem[]): boolean {
+  return items.some((item) => item.sharePointAction.state === 'unavailable');
+}
+
+function hasAnyUnavailableProcore(items: readonly MyProjectLinkItem[]): boolean {
+  return items.some((item) => item.procoreAction.state === 'unavailable');
 }
 
 export function MyProjectsHomeCard({ getApiToken }: MyProjectsHomeCardProps) {
   const client = useMemo(() => createMyWorkReadModelClient({ getApiToken }), [getApiToken]);
   const [isLoading, setIsLoading] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [envelope, setEnvelope] = useState<MyWorkReadModelEnvelope<MyProjectLinksReadModel> | null>(
     null,
   );
+  const disclosureButtonRef = useRef<HTMLButtonElement | null>(null);
+  const restoreDisclosureFocusRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,8 +283,29 @@ export function MyProjectsHomeCard({ getApiToken }: MyProjectsHomeCardProps) {
   const sourceStatus: MyWorkReadModelSourceStatus = envelope?.sourceStatus ?? 'backend-unavailable';
   const summary = envelope?.data.summary ?? EMPTY_METRICS;
   const items = envelope?.data.items ?? EMPTY_ITEMS;
-  const warningCodes = envelope?.warnings.map((warning) => warning.code) ?? [];
-  const bannerText = selectBannerText(sourceStatus, warningCodes);
+  const sourceReadiness = envelope?.data.sourceReadiness ?? null;
+  const bannerText = selectBannerText({ sourceStatus, sourceReadiness, items });
+  const displayedItems = visibleItems(items, expanded);
+  const showRowDisclosure = hasDisclosure(items);
+  const showLaunchRows = !isLoading && items.length > 0;
+  const showEmpty = !isLoading && items.length === 0;
+
+  const handleToggleDisclosure = () => {
+    setExpanded((current) => {
+      const next = !current;
+      if (current === true && next === false) {
+        restoreDisclosureFocusRef.current = true;
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!expanded && restoreDisclosureFocusRef.current) {
+      disclosureButtonRef.current?.focus();
+      restoreDisclosureFocusRef.current = false;
+    }
+  }, [expanded]);
 
   return (
     <MyWorkCard
@@ -90,6 +315,7 @@ export function MyProjectsHomeCard({ getApiToken }: MyProjectsHomeCardProps) {
       title="My Projects"
       extraDataAttributes={{
         'data-my-project-links-source-status': sourceStatus,
+        'data-my-projects-visible-count': String(displayedItems.length),
       }}
     >
       <p className={styles.purpose}>
@@ -123,11 +349,41 @@ export function MyProjectsHomeCard({ getApiToken }: MyProjectsHomeCardProps) {
 
       <div className={styles.launchRegion} data-my-projects-launch-region="">
         <p className={styles.launchTitle}>Launch List</p>
-        <p className={styles.launchBody}>
-          {isLoading
-            ? 'Loading project launches…'
-            : `${items.length} project link records are loaded. Detailed row actions arrive in Prompt 13.`}
-        </p>
+        {isLoading ? <p className={styles.launchBody}>Loading project launches…</p> : null}
+        {showEmpty ? <p className={styles.launchBody}>{rowSetDescription(items)}</p> : null}
+        {showLaunchRows ? (
+          <>
+            <ul className={styles.rows} id="my-projects-row-list" data-my-projects-rows="">
+              {displayedItems.map((row) => (
+                <ProjectLaunchRow key={row.recordKey} row={row} />
+              ))}
+            </ul>
+            {showRowDisclosure ? (
+              <button
+                ref={disclosureButtonRef}
+                type="button"
+                className={styles.disclosure}
+                aria-expanded={expanded ? 'true' : 'false'}
+                aria-controls="my-projects-row-list"
+                onClick={handleToggleDisclosure}
+                data-my-projects-disclosure=""
+              >
+                {expanded ? 'Show fewer' : 'View all My Projects'}
+              </button>
+            ) : null}
+            <p className={styles.launchBody}>{rowSetDescription(items)}</p>
+          </>
+        ) : null}
+        {hasAnyUnavailableSharePoint(items) ? (
+          <p className={styles.assistiveHint}>
+            One or more projects do not currently have a SharePoint launch destination.
+          </p>
+        ) : null}
+        {hasAnyUnavailableProcore(items) ? (
+          <p className={styles.assistiveHint}>
+            One or more projects do not currently have a Procore launch destination.
+          </p>
+        ) : null}
       </div>
     </MyWorkCard>
   );
