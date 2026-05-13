@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "6f5f3be4-6ec8-4b3f-8fd5-0f97d7612d27",
+  "id": "412eb9fd-2eb2-4f7d-a4f1-7865e339a369",
   "alias": "ShellWebPart",
   "componentType": "WebPart",
   "version": "*",
@@ -18,10 +18,10 @@
         "default": "HB Intel"
       },
       "title": {
-        "default": "HB Intel Project Control Center"
+        "default": "HB Intel My Dashboard"
       },
       "description": {
-        "default": "Unified project operating layer for Project Control Center."
+        "default": "Personal dashboard surface for the HB Intel MyDashboard SharePoint communication site."
       },
       "officeFabricIconFontName": "Page",
       "hiddenFromToolbox": false,

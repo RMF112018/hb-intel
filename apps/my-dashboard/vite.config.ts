@@ -13,6 +13,10 @@ export default defineConfig(({ command }) => ({
       { find: '@hbc/ui-kit/theme', replacement: resolve(__dirname, '../../packages/ui-kit/src/theme/index.ts') },
       { find: '@hbc/ui-kit/icons', replacement: resolve(__dirname, '../../packages/ui-kit/src/icons/index.tsx') },
       { find: '@hbc/ui-kit', replacement: resolve(__dirname, '../../packages/ui-kit/src/index.ts') },
+      // Subpath alias must come before the root alias. Otherwise imports like
+      // `@hbc/models/myWork` can be concatenated onto `index.ts` as
+      // `.../index.ts/myWork`, which fails with ENOTDIR.
+      { find: /^@hbc\/models\/(.*)/, replacement: resolve(__dirname, '../../packages/models/src/$1/index.ts') },
       { find: '@hbc/models', replacement: resolve(__dirname, '../../packages/models/src/index.ts') },
     ],
   },
