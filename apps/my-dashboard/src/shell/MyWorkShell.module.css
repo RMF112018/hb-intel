@@ -1,0 +1,69 @@
+.shell {
+  background: var(--my-work-color-canvas);
+  color: var(--my-work-color-text-primary);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-shadow:
+    inset 0 0 0 1px var(--my-work-color-border),
+    var(--my-work-elevation-card);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  border-radius: var(--my-work-radius-lg);
+}
+
+.commandSurface {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--my-work-space-sm);
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--my-work-color-rail-accent) 8%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--my-work-color-card) 94%, var(--my-work-color-rail)),
+      var(--my-work-color-card)
+    );
+  border-top-left-radius: var(--my-work-radius-lg);
+  border-top-right-radius: var(--my-work-radius-lg);
+}
+
+.canvas {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--my-work-space-md) var(--my-work-space-lg);
+  display: block;
+  overflow-x: hidden;
+  background: var(--my-work-color-canvas);
+  border-top: 1px solid var(--my-work-color-border);
+  box-shadow: inset 0 1px 0 0 var(--my-work-color-card);
+}
+
+.activePanel {
+  display: block;
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .canvas {
+    padding: var(--my-work-space-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell,
+  .commandSurface,
+  .canvas {
+    transition: none;
+  }
+}

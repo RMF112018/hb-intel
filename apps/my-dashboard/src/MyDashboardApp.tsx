@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { MyWorkShell } from './shell/MyWorkShell.js';
 
 export interface MyDashboardAppProps {
   spfxContext?: { pageContext: { user: { loginName: string } } };
@@ -6,13 +7,10 @@ export interface MyDashboardAppProps {
   getApiToken?: () => Promise<string>;
 }
 
-export const MyDashboardApp: FC<MyDashboardAppProps> = ({
-  spfxContext: _spfxContext,
-  getApiToken: _getApiToken,
-}) => {
+export const MyDashboardApp: FC<MyDashboardAppProps> = ({ spfxContext, getApiToken }) => {
   return (
     <div data-my-dashboard-app-root="true">
-      My Dashboard runtime host (B02). Shell, navigation, queue UI, and read-model wiring land in later batches.
+      <MyWorkShell spfxContext={spfxContext} getApiToken={getApiToken} />
     </div>
   );
 };
