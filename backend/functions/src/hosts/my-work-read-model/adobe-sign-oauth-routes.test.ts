@@ -13,6 +13,11 @@ import type {
   IAdobeSignOAuthService,
   AdobeSignTokenExchangeResult,
 } from './read-models/adobe-sign/adobe-sign-oauth-service.js';
+import type { AdobeSignRefreshTokenCipher } from './read-models/adobe-sign/adobe-sign-refresh-token-crypto.js';
+import {
+  createDeterministicMockAdobeSignRefreshTokenStore,
+  type IAdobeSignRefreshTokenStore,
+} from './read-models/adobe-sign/adobe-sign-refresh-token-store.js';
 
 // ---------------------------------------------------------------------------
 // Mocks for app.http / withAuth / withTelemetry / request-id / logger so that
@@ -80,6 +85,11 @@ const FULL_CONFIG_ENV = {
   ADOBE_SIGN_OAUTH_SCOPES: 'agreement_read agreement_send',
   ADOBE_SIGN_TOKEN_STORE_MODE: 'table-storage',
   AZURE_TENANT_ID: TENANT_ID,
+  // Prompt-02 storage prerequisites — needed for config readiness to report 'ready'
+  // under table-storage mode. Tests inject store/cipher seams directly, so these
+  // env values only need to be non-empty.
+  AZURE_TABLE_ENDPOINT: 'https://example.table.core.windows.net',
+  ADOBE_SIGN_TOKEN_ENCRYPTION_KEY: 'aGFybmVzcy1jaXBoZXItc2VlbS1zZWFtLW5ldmVyLXJlYWQ=',
 };
 
 const FIXED_NOW = new Date('2026-05-13T12:00:00.000Z');
@@ -89,14 +99,37 @@ const fixedDeterministicBytes = (n: number) =>
 interface SeamHandles {
   stateStore: IAdobeSignOAuthStateStore;
   grantStore: IAdobeSignGrantStore;
+  refreshTokenStore: IAdobeSignRefreshTokenStore;
+  cipher: AdobeSignRefreshTokenCipher & { encryptCalls: string[] };
   service: IAdobeSignOAuthService;
 }
+
+const buildRecordingCipher = (): AdobeSignRefreshTokenCipher & { encryptCalls: string[] } => {
+  const encryptCalls: string[] = [];
+  return {
+    encryptCalls,
+    encrypt(plaintext) {
+      encryptCalls.push(plaintext);
+      return {
+        cipherVersion: 1,
+        iv: 'iv-fixture',
+        authTag: 'tag-fixture',
+        ciphertext: `ct:${plaintext}`,
+      };
+    },
+    decrypt(env) {
+      return env.ciphertext.startsWith('ct:') ? env.ciphertext.slice(3) : '';
+    },
+  };
+};
 
 const buildDeps = (
   overrides: Partial<Awaited<ReturnType<typeof importModule>>['createStartHandler']> = {} as any,
 ): { deps: any; seams: SeamHandles } => {
   const stateStore = createDeterministicMockOAuthStateStore();
   const grantStore = createDeterministicMockGrantStore();
+  const refreshTokenStore = createDeterministicMockAdobeSignRefreshTokenStore();
+  const cipher = buildRecordingCipher();
   const exchangeResult: AdobeSignTokenExchangeResult = {
     status: 'ok',
     refreshToken: 'rt-secret',
@@ -113,12 +146,14 @@ const buildDeps = (
       resolveConfigEnv: () => FULL_CONFIG_ENV,
       resolveStateStore: () => ({ readiness: 'ready', store: stateStore }),
       resolveGrantStore: () => ({ readiness: 'ready', store: grantStore }),
+      resolveRefreshTokenStore: () => ({ readiness: 'ready', store: refreshTokenStore }),
+      resolveRefreshTokenCipher: () => ({ readiness: 'ready', cipher }),
       oauthService: service,
       now: () => FIXED_NOW,
       randomBytes: fixedDeterministicBytes,
       ...overrides,
     },
-    seams: { stateStore, grantStore, service },
+    seams: { stateStore, grantStore, refreshTokenStore, cipher, service },
   };
 };
 
@@ -381,6 +416,14 @@ describe('callback handler', () => {
     expect(grant?.state).toBe('active');
     expect(grant?.grantedScopes).toEqual(['agreement_read', 'agreement_send']);
     expect(grant?.adobeApiAccessPoint).toBe('https://api.na1.adobesign.com');
+    // Real encrypted-refresh-token reference replaces the legacy pending-selection placeholder.
+    expect(grant?.encryptedRefreshTokenRef.storeKind).toBe('table-storage');
+    expect(grant?.encryptedRefreshTokenRef.address.length).toBeGreaterThan(0);
+    expect(grant?.encryptedRefreshTokenRef.lastPersistedAtUtc).toBeDefined();
+    // The refresh-token plaintext from the exchange is encrypted (and never stored as plaintext).
+    expect(seams.cipher.encryptCalls).toEqual(['rt-secret']);
+    const persisted = await seams.refreshTokenStore.getCiphertext(grant!.encryptedRefreshTokenRef);
+    expect(persisted?.ciphertext).toBe('ct:rt-secret');
   });
 
   it('rejects missing state with a redirect carrying invalid-state status (no exchange)', async () => {
@@ -417,7 +460,17 @@ describe('callback handler', () => {
     // Advance the clock past expiry for the callback.
     deps.now = () => new Date('2026-05-13T12:30:00.000Z');
     const callback = mod.createCallbackHandler(deps);
-    const response = await callback(callbackRequest({ state, code: 'c' }) as any, {} as any);
+    // Valid access points required to reach the state-validation branch — the
+    // Prompt-03 access-point allow-list pre-empts state consumption when forged.
+    const response = await callback(
+      callbackRequest({
+        state,
+        code: 'c',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
     expect(response.status).toBe(302);
     expect((response.headers as Record<string, string>).Location).toContain(
       'adobeSignAuthorization=expired-state',
@@ -501,6 +554,124 @@ describe('callback handler', () => {
     const location = (response.headers as Record<string, string>).Location;
     expect(location).not.toContain('sensitive-code-value');
     expect(location).not.toContain(state);
+  });
+
+  it('rejects a non-allow-listed api_access_point with invalid-state and never exchanges', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state,
+        code: 'c',
+        api_access_point: 'https://attacker.example.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+    expect((response.headers as Record<string, string>).Location).toContain(
+      'adobeSignAuthorization=invalid-state',
+    );
+    expect(seams.service.exchangeAuthorizationCode).not.toHaveBeenCalled();
+    expect(await seams.grantStore.findGrant(ACTOR_KEY)).toBeUndefined();
+    expect(seams.cipher.encryptCalls).toEqual([]);
+  });
+
+  it('rejects a non-HTTPS api_access_point with invalid-state and never exchanges', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state,
+        code: 'c',
+        api_access_point: 'http://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+    expect((response.headers as Record<string, string>).Location).toContain(
+      'adobeSignAuthorization=invalid-state',
+    );
+    expect(seams.service.exchangeAuthorizationCode).not.toHaveBeenCalled();
+  });
+
+  it('redirects configuration-required when the refresh-token store is not ready', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    deps.resolveRefreshTokenStore = () => ({
+      readiness: 'configuration-required',
+      reason: 'missing-table-endpoint',
+    });
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state: 'state-arbitrary',
+        code: 'c',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+    expect((response.headers as Record<string, string>).Location).toContain(
+      'adobeSignAuthorization=configuration-required',
+    );
+    expect(seams.service.exchangeAuthorizationCode).not.toHaveBeenCalled();
+  });
+
+  it('redirects configuration-required when the refresh-token cipher is not ready', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    deps.resolveRefreshTokenCipher = () => ({
+      readiness: 'configuration-required',
+      reason: 'missing-encryption-key',
+    });
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state: 'state-arbitrary',
+        code: 'c',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+    expect((response.headers as Record<string, string>).Location).toContain(
+      'adobeSignAuthorization=configuration-required',
+    );
+    expect(seams.service.exchangeAuthorizationCode).not.toHaveBeenCalled();
+  });
+
+  it('does not encrypt or persist anything when the code exchange fails', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    (seams.service.exchangeAuthorizationCode as any).mockResolvedValueOnce({
+      status: 'invalid-code',
+    });
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state,
+        code: 'bad-code',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+    expect((response.headers as Record<string, string>).Location).toContain(
+      'adobeSignAuthorization=invalid-grant',
+    );
+    expect(seams.cipher.encryptCalls).toEqual([]);
+    expect(await seams.grantStore.findGrant(ACTOR_KEY)).toBeUndefined();
+    expect(
+      await seams.refreshTokenStore.getCiphertext({
+        storeKind: 'table-storage',
+        address: ACTOR_KEY,
+      }),
+    ).toBeUndefined();
   });
 });
 

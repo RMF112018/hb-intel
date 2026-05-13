@@ -55,9 +55,22 @@ import type {
   IAdobeSignGrantRecord,
 } from './read-models/adobe-sign/adobe-sign-grant-record.js';
 import {
+  createAdobeSignLiveOAuthService,
+  isAllowedAdobeAccessPoint,
+} from './read-models/adobe-sign/adobe-sign-live-oauth-service.js';
+import {
   buildAdobeSignAuthorizationUrl,
   type IAdobeSignOAuthService,
 } from './read-models/adobe-sign/adobe-sign-oauth-service.js';
+import {
+  createAdobeSignRefreshTokenCipher,
+  resolveAdobeSignRefreshTokenCipherKey,
+  type AdobeSignRefreshTokenCipher,
+} from './read-models/adobe-sign/adobe-sign-refresh-token-crypto.js';
+import {
+  resolveAdobeSignRefreshTokenStore,
+  type IAdobeSignRefreshTokenStore,
+} from './read-models/adobe-sign/adobe-sign-refresh-token-store.js';
 import {
   ADOBE_SIGN_OAUTH_STATE_DEFAULT_TTL_SECONDS,
   createAdobeSignOAuthState,
@@ -101,6 +114,12 @@ export interface AdobeSignOAuthRouteDeps {
   readonly resolveGrantStore: () =>
     | { readonly readiness: 'ready'; readonly store: IAdobeSignGrantStore }
     | { readonly readiness: 'configuration-required'; readonly reason: string };
+  readonly resolveRefreshTokenStore: () =>
+    | { readonly readiness: 'ready'; readonly store: IAdobeSignRefreshTokenStore }
+    | { readonly readiness: 'configuration-required'; readonly reason: string };
+  readonly resolveRefreshTokenCipher: () =>
+    | { readonly readiness: 'ready'; readonly cipher: AdobeSignRefreshTokenCipher }
+    | { readonly readiness: 'configuration-required'; readonly reason: string };
   readonly oauthService: IAdobeSignOAuthService;
   readonly now: () => Date;
   readonly randomBytes: (n: number) => Uint8Array;
@@ -113,15 +132,26 @@ const defaultDeps = (): AdobeSignOAuthRouteDeps => ({
   resolveConfigEnv: () => process.env,
   resolveStateStore: () => resolveAdobeSignOAuthStateStore(process.env),
   resolveGrantStore: () => resolveAdobeSignGrantStore(process.env),
-  oauthService: {
-    async exchangeAuthorizationCode() {
-      // Production token-exchange lands in a later B05 prompt. Until then,
-      // any production reach into the service returns 'unreachable' so the
-      // callback degrades to a configuration-required UX status rather
-      // than silently appearing to succeed.
-      return { status: 'unreachable', reason: 'service-not-wired' };
-    },
+  resolveRefreshTokenStore: () => resolveAdobeSignRefreshTokenStore(process.env),
+  resolveRefreshTokenCipher: () => {
+    const keyResolution = resolveAdobeSignRefreshTokenCipherKey(process.env);
+    if (keyResolution.status === 'ok') {
+      return {
+        readiness: 'ready',
+        cipher: createAdobeSignRefreshTokenCipher(keyResolution.key),
+      };
+    }
+    return {
+      readiness: 'configuration-required',
+      reason:
+        keyResolution.status === 'configuration-required'
+          ? 'missing-encryption-key'
+          : `invalid-encryption-key:${keyResolution.reason}`,
+    };
   },
+  oauthService: createAdobeSignLiveOAuthService({
+    governedScopes: parseAdobeSignScopes(process.env.ADOBE_SIGN_OAUTH_SCOPES),
+  }),
   now: () => new Date(),
   randomBytes: defaultRandomBytes,
 });
@@ -318,16 +348,36 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
 
     const stateStore = deps.resolveStateStore();
     const grantStore = deps.resolveGrantStore();
-    if (stateStore.readiness !== 'ready' || grantStore.readiness !== 'ready') {
+    const refreshTokenStore = deps.resolveRefreshTokenStore();
+    const refreshTokenCipher = deps.resolveRefreshTokenCipher();
+    if (
+      stateStore.readiness !== 'ready' ||
+      grantStore.readiness !== 'ready' ||
+      refreshTokenStore.readiness !== 'ready' ||
+      refreshTokenCipher.readiness !== 'ready'
+    ) {
       logger.trackEvent('adobeSign.oauth.callback.store-unavailable', {
         correlationId: requestId,
         stateReady: stateStore.readiness === 'ready',
         grantReady: grantStore.readiness === 'ready',
+        refreshTokenStoreReady: refreshTokenStore.readiness === 'ready',
+        refreshTokenCipherReady: refreshTokenCipher.readiness === 'ready',
       });
       return buildRedirect(
         ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH,
         CALLBACK_UX_STATUS.configurationRequired,
       );
+    }
+
+    // Validate the Adobe-supplied access points BEFORE consuming state or
+    // exchanging the code. A forged callback never reaches the token endpoint.
+    if (!isAllowedAdobeAccessPoint(apiAccessPoint) || !isAllowedAdobeAccessPoint(webAccessPoint)) {
+      logger.trackEvent('adobeSign.oauth.callback.invalid-access-point', {
+        correlationId: requestId,
+        apiAccessPointAllowed: isAllowedAdobeAccessPoint(apiAccessPoint),
+        webAccessPointAllowed: isAllowedAdobeAccessPoint(webAccessPoint),
+      });
+      return buildRedirect(ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH, CALLBACK_UX_STATUS.invalidState);
     }
 
     const takeResult = await stateStore.store.take(state, deps.now());
@@ -374,26 +424,51 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
     }
 
     const [actorTenantId, actorOid] = stateRecord.actorKey.split('::');
+
+    // Encrypt the refresh-token plaintext via the Prompt-02 AES-256-GCM
+    // cipher, then persist the ciphertext envelope so the grant record
+    // can reference it opaquely. The plaintext is never persisted nor
+    // referenced again after the encrypt call.
+    const envelope = refreshTokenCipher.cipher.encrypt(exchange.refreshToken);
+    let encryptedRefreshTokenRef;
+    try {
+      encryptedRefreshTokenRef = await refreshTokenStore.store.putCiphertext(
+        stateRecord.actorKey,
+        envelope,
+        deps.now(),
+      );
+    } catch {
+      logger.trackEvent('adobeSign.oauth.callback.refresh-token-store-write-failed', {
+        correlationId: requestId,
+      });
+      return buildRedirect(stateRecord.returnPath, CALLBACK_UX_STATUS.sourceUnavailable);
+    }
+
     const grant: IAdobeSignGrantRecord = {
       actorTenantId,
       actorOid,
       actorKey: stateRecord.actorKey,
       adobeApiAccessPoint: apiAccessPoint,
       adobeWebAccessPoint: webAccessPoint,
-      encryptedRefreshTokenRef: {
-        storeKind: 'pending-selection',
-        address: '',
-      },
+      encryptedRefreshTokenRef,
       grantedScopes: exchange.grantedScopes,
       grantedAtUtc: deps.now().toISOString(),
       state: grantStateForExchange(exchange),
     };
-    await grantStore.store.upsertGrant(grant);
+    try {
+      await grantStore.store.upsertGrant(grant);
+    } catch {
+      logger.trackEvent('adobeSign.oauth.callback.grant-store-write-failed', {
+        correlationId: requestId,
+      });
+      return buildRedirect(stateRecord.returnPath, CALLBACK_UX_STATUS.sourceUnavailable);
+    }
 
     logger.trackEvent('adobeSign.oauth.callback.granted', {
       correlationId: requestId,
       grantState: grant.state,
       scopeCount: grant.grantedScopes.length,
+      refreshTokenRefStoreKind: encryptedRefreshTokenRef.storeKind,
     });
 
     return buildRedirect(stateRecord.returnPath, CALLBACK_UX_STATUS.success);
