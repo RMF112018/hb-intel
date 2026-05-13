@@ -2,214 +2,292 @@
 
 ## 1. Target end state
 
-After execution, the repository should clearly communicate:
+The B05 runtime implementation should produce a backend architecture that:
 
-- B05 is the canonical detailed planning authority for Sections 15, 16, 17, and 20.
-- B05 inherits B01–B04 and sits beside them in the My Dashboard dev-plan family.
-- The folder README and outline accurately index B04 and B05.
-- The outline does not contain stale draft guidance that conflicts with B05’s closed integration architecture.
-- The outline’s open-items list no longer presents B02/B04/B05-closed decisions as unresolved.
-- The repo remains docs-only; no runtime OAuth/provider work is performed.
+1. preserves all B01–B05 closed decisions,
+2. creates the OAuth route pair at the locked public/protected paths,
+3. exposes configuration/readiness gates rather than pretending live enablement exists when it does not,
+4. binds Adobe authorization to stable Entra actor identity,
+5. uses provider abstractions and queue DTO mappings compatible with B04,
+6. never leaks tokens, codes, or raw Adobe payloads to SPFx,
+7. validates source-handoff URLs before they reach the frontend,
+8. ships with tests and closeout evidence.
 
 ---
 
-## 2. Exact files to create/update
+## 2. Predecessor implementation dependency
 
-## 2.1 Create — canonical B05 artifact
+Before runtime B05 implementation proceeds, the working tree should contain or consciously scaffold against:
 
-### Path
+- B02 runtime auth/config foundation,
+- B03 My Work shell/module foundation,
+- B04 My Work read-model models/routes/fixtures/client seams.
+
+If any predecessor implementation is absent, Prompt 01 must identify the gap and determine whether the agent should:
+- stop with a precise dependency finding, or
+- create only B05-contained interfaces/tests that do not pretend missing lower-layer app/runtime files exist.
+
+---
+
+## 3. Recommended code placement
+
+### 3.1 Existing host family to extend
+
+Batch 04 defined:
+
 ```text
-docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/B05_Adobe_Sign_Integration_Architecture_Development.md
+backend/functions/src/hosts/my-work-read-model/
 ```
 
-### Purpose
-Commit the authoritative B05 planning artifact supplied with the package/session into the canonical batch-artifact folder.
+B05 should extend that domain rather than introduce a new unrelated host.
 
-### Required handling
-- Preserve the attached B05 artifact’s substantive content.
-- Preserve its:
-  - title,
-  - prepared date,
-  - continuation anchor,
-  - predecessor declarations,
-  - batch scope,
-  - decisions closed register,
-  - section development for 15/16/17/20,
-  - dependency checklist,
-  - downstream constraints,
-  - final quality gate.
-- Do not dilute closed decisions into “recommended only” language.
+### 3.2 Suggested backend files
 
----
-
-## 2.2 Update — folder authority index
-
-### Path
 ```text
-docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/README.md
+backend/functions/src/hosts/my-work-read-model/
+├── adobe-sign-oauth-routes.ts
+├── read-models/
+│   ├── my-work-read-model-provider.ts
+│   └── adobe-sign/
+│       ├── adobe-sign-actor-normalizer.ts
+│       ├── adobe-sign-principal-resolver.ts
+│       ├── adobe-sign-grant-store.ts
+│       ├── adobe-sign-oauth-state-store.ts
+│       ├── adobe-sign-oauth-service.ts
+│       ├── adobe-sign-token-service.ts
+│       ├── adobe-sign-search-client.ts
+│       ├── adobe-sign-search-request-builder.ts
+│       ├── adobe-sign-action-queue-adapter.ts
+│       ├── adobe-sign-source-handoff-policy.ts
+│       └── adobe-sign-types.ts
 ```
 
-### Purpose
-Make the authority index current through B05.
+The code agent may align filenames to existing repo naming conventions, but the seam separation above must survive.
 
-### Required changes
-1. Add B04 to the artifact index table.
-2. Add B05 to the artifact index table.
-3. State B05 authority:
-   ```text
-   Sections 15, 16, 17, and 20
-   ```
-4. Update the later-batch inheritance rule so later sessions know B05 must be read before any security/resilience/testing/live-integration implementation package.
-5. Preserve the existing hierarchy:
-   - live repo truth,
-   - applicable detailed batch artifact,
-   - umbrella outline,
-   - older/historical references.
+### 3.3 Suggested configuration files
 
----
+Prefer the repository’s existing backend configuration patterns. An Adobe-specific config module should centralize:
 
-## 2.3 Update — outline batch-authority posture
+- OAuth client ID presence,
+- OAuth client secret presence,
+- redirect URI,
+- callback URL/path consistency,
+- approved Adobe scope string,
+- token/grant store readiness,
+- optional Adobe host/domain policy inputs.
 
-### Path
+A reasonable target is a config module such as:
+
 ```text
-docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
+backend/functions/src/config/adobe-sign-config.ts
 ```
 
-### Purpose
-Make the outline’s authority header consistent with the actual batch history.
+unless the codebase has a closer established location.
 
-### Required changes
-1. Add B03, B04, and B05 to the authority artifact table.
-2. State B05 governs:
-   ```text
-   Sections 15, 16, 17, and 20
-   ```
-3. Reinforce that this outline cannot override B05 for those sections.
-4. Keep the outline as the umbrella scaffold rather than transforming it into a duplicate B05 artifact.
+### 3.4 Suggested tests
 
----
+```text
+backend/functions/src/hosts/my-work-read-model/
+├── adobe-sign-oauth-routes.test.ts
+└── read-models/adobe-sign/
+    ├── adobe-sign-actor-normalizer.test.ts
+    ├── adobe-sign-principal-resolver.test.ts
+    ├── adobe-sign-oauth-state-store.test.ts
+    ├── adobe-sign-oauth-service.test.ts
+    ├── adobe-sign-token-service.test.ts
+    ├── adobe-sign-search-request-builder.test.ts
+    ├── adobe-sign-action-queue-adapter.test.ts
+    └── adobe-sign-source-handoff-policy.test.ts
+```
 
-## 2.4 Update — outline Sections 15, 16, 17, and 20
-
-### Path
-Same outline path.
-
-### Purpose
-Replace older draft assumptions with B05-compatible planning posture.
-
-### Required section-level target state
-
-#### Section 15 — Authenticated Actor → Adobe Principal Resolution
-Replace stale email/UPN claim-precedence framing with:
-- stable actor key using trusted tenant context + `claims.oid`,
-- `claims.upn` for display/diagnostics only,
-- app-only token rejection for user queue reads,
-- grant-record based principal resolution,
-- no shared principal or email search fallback.
-
-#### Section 16 — Adobe Authentication Architecture Gate
-Replace “the final plan must choose one of two implementation paths” framing with:
-- delegated OAuth authorization-code flow as the closed live-auth architecture,
-- backend-controlled start/callback/token services,
-- production-live provider gated until app registration, redirect URI, grant store, encryption, and protected backend prerequisites exist,
-- fixture/configuration mode may still ship before live dependencies are present.
-
-#### Section 17 — Adobe Sign API Query Contract
-Replace or refine draft posture so it matches B05:
-- `POST v6/search` baseline,
-- exact six-status union inherited from B04,
-- no raw search pass-through,
-- page-size clamping/cursor opacity,
-- no unsupported “expiration soon first” claim unless live Adobe search validation proves it,
-- no unbounded detail enrichment loops,
-- rate-limit/Retry-After translation to My Work state.
-
-#### Section 20 — Adobe Sign Source Handoff Contract
-Refine the source-handoff section to reflect:
-- row CTA only from backend-supplied validated URL,
-- no guessed links,
-- signing URL endpoint is not the default row-open contract,
-- optional validated module-level general Adobe launch via stored `web_access_point`,
-- source link suppression must remain a valid state when no safe URL exists.
+Tests should be grouped or colocated according to repo standards if a different convention is already dominant.
 
 ---
 
-## 2.5 Update — outline open-items posture
+## 4. Route contract
 
-### Path
-Same outline path, especially Section 29.
+### 4.1 Protected start route
 
-### Required handling
-The open-items list must not continue to present decisions already closed by earlier batch artifacts as unresolved.
+```http
+POST /api/my-work/me/adobe-sign/oauth/start
+```
 
-At minimum:
-- Remove or reframe the item about whether the Adobe OAuth onboarding architecture exists in MVP; B05 closes the architecture and introduces production-live dependency gates.
-- Remove or reframe the source-unavailable transport choice as an open issue if B04 already closes that read-model behavior.
-- Remove or reframe the actor-email-claim precedence item; B05 replaces this with stable actor-key binding.
-- Remove or reframe the property-pane operational config exposure item if B02 already closes that posture.
+#### Required behavior
 
-Preserve genuinely residual items that remain outside B05’s scope, such as:
-- final SharePoint page URL,
-- queue cache posture if not closed elsewhere,
-- final UX presentation of urgency thresholds if not closed,
-- focused-module pagination UX posture if not closed.
+- wrapped with existing HB auth middleware,
+- rejects/returns a governed non-ready response for app-only identities,
+- creates cryptographically unpredictable, single-use, expiring OAuth state,
+- binds state to actor key + return destination,
+- returns a backend-generated Adobe authorization URL,
+- never returns client secret, refresh token, or token exchange material.
 
----
+### 4.2 Public callback route
 
-## 3. Sequencing logic
+```http
+GET /api/my-work/adobe-sign/oauth/callback
+```
 
-### Prompt 01 — Canonical artifact first
-Place B05 in the folder before updating the docs that point to it.
+#### Required behavior
 
-### Prompt 02 — README authority index
-Update the folder’s reading order and artifact table to include B04/B05.
-
-### Prompt 03 — Outline authority header
-Make the outline’s batch posture current before reconciling body sections.
-
-### Prompt 04 — Outline body and open items
-Replace stale draft language with B05-compatible architecture and prune closed open items.
-
-### Prompt 05 — Validate and close
-Run path, grep, consistency, and docs-only checks.
+- not under `/me/...`,
+- reachable by Adobe browser redirect without HB bearer token,
+- validates state before exchanging code,
+- reads `code`, `api_access_point`, `web_access_point`, and `state`,
+- exchanges the code server-side,
+- persists/rotates grant record through the grant-store abstraction,
+- returns a safe browser redirect to My Dashboard with a non-secret outcome indicator,
+- never echoes tokens, secrets, or codes.
 
 ---
 
-## 4. Dependency logic
+## 5. Actor and grant contract
 
-| Work item | Depends on | Why |
-|---|---|---|
-| Create B05 artifact | None | Canonical target file must exist before references update |
-| Update README | B05 artifact exists | README should index files that exist |
-| Update outline authority table | B05 artifact exists | Outline should point to canonical file |
-| Reconcile Sections 15/16/17/20 | Authority table updated | Body should inherit the established authority chain |
-| Prune open items | Body reconciliation underway | Prevents stale “open” markers after B05 is integrated |
-| Validation | All prior prompts | Must prove final combined state |
+### 5.1 Actor key
+
+Closed design:
+
+```text
+tenantId + ":" + claims.oid
+```
+
+Where `tenantId` is trusted backend configuration unless the code agent intentionally extends validated claims to expose a verified `tid`.
+
+### 5.2 Delegated-user gate
+
+The actor normalizer must reject or non-readily classify:
+
+- `idtyp === 'app'`,
+- missing `oid`,
+- missing delegated-user context.
+
+### 5.3 Grant-record contract
+
+Use B05’s backend-only grant-record structure as the governing target:
+
+- actor tenant ID,
+- actor Entra object ID,
+- optional UPN/display snapshots,
+- Adobe API access point,
+- Adobe web access point,
+- encrypted refresh token,
+- lifecycle timestamps,
+- granted scopes,
+- grant state,
+- failure/audit metadata.
 
 ---
 
-## 5. Conflicts to avoid
+## 6. OAuth configuration and environment gates
+
+### 6.1 Operator-visible config runbook
+
+The implementation package includes an operator runbook with the exact Adobe registration values. The code agent should not rewrite those values unless the operator changes the live hostname decision.
+
+### 6.2 Backend configuration expectations
+
+At minimum, the backend config layer must represent readiness for:
+
+```text
+ADOBE_SIGN_OAUTH_CLIENT_ID
+ADOBE_SIGN_OAUTH_CLIENT_SECRET
+ADOBE_SIGN_OAUTH_REDIRECT_URI
+ADOBE_SIGN_OAUTH_SCOPE_SET or equivalent fixed governed scope config
+```
+
+The exact env variable names may be adapted to repo naming doctrine, but:
+- the client secret remains backend-only,
+- the redirect URI must exactly match Adobe app registration and token exchange use,
+- the scope posture remains `agreement_read:self`.
+
+### 6.3 Configuration-required mapping
+
+Missing app-registration values, redirect URI, or selected token/grant-store prerequisites must map to:
+
+```text
+configuration-required
+```
+
+at the My Work read-model boundary.
+
+---
+
+## 7. Search adapter and status mapping
+
+### 7.1 Live retrieval baseline
+
+Use bounded:
+
+```http
+POST v6/search
+```
+
+through backend service code only.
+
+### 7.2 Exact six statuses
+
+Do not exceed the six-status contract already closed by B04/B05.
+
+### 7.3 Source-state mapping
+
+Map:
+
+- missing grant or expired/revoked refresh token → `authorization-required`
+- no stable actor → `principal-unresolved`
+- missing Adobe app config/store → `configuration-required`
+- provider throttling/outage → `source-unavailable` or `partial` if safe subset exists.
+
+### 7.4 Detail enrichment
+
+Do not create an unbounded `search -> N detail calls` pattern. If a bounded enrichment proves strictly necessary, cap it and test degradation to `partial`.
+
+---
+
+## 8. Source handoff
+
+### 8.1 Row CTA rule
+
+Only include `sourceOpenUrl` when:
+
+- backend supplied,
+- URL policy accepted,
+- no sensitive query parameters,
+- no guessed path construction.
+
+### 8.2 Module-level fallback
+
+A general Adobe launch CTA may exist only if:
+- derived from stored `web_access_point`,
+- vetted as a durable product route,
+- URL policy accepted.
+
+### 8.3 Signing URL prohibition
+
+Do not use Adobe signing URL endpoints as the default queue-row “open” mechanism.
+
+---
+
+## 9. Prompt sequencing logic
+
+| Prompt | Purpose |
+|---|---|
+| 01 | Preflight foundation and dependency check |
+| 02 | Actor/grant contracts and configuration gates |
+| 03 | OAuth start + callback routes |
+| 04 | Grant-store/token-service seams |
+| 05 | Search client + queue adapter |
+| 06 | Source handoff policy + module seams |
+| 07 | Validation/readiness/closeout |
+
+---
+
+## 10. Non-negotiable drift controls
 
 Do not:
-- implement runtime Adobe integration,
-- over-convert the outline into a second B05 artifact,
-- weaken B05 decisions into “optional” language,
-- preserve the outline’s old claim-priority text alongside B05’s stable actor-key posture,
-- leave "nearest expiration date first" as a guaranteed sort claim unless that wording is deliberately reframed as conditional/live-verification-dependent,
-- imply signing URLs are the default row-level source handoff,
-- reopen B04’s exact six-status union,
-- reintroduce actor/user query override concepts.
-
----
-
-## 6. Intended final repository truth
-
-The finished repo should tell a later implementation team:
-
-1. **Read B05 before writing any live Adobe integration prompt or code.**
-2. **Use delegated OAuth and backend-only grant records.**
-3. **Bind Adobe grants to stable HB actor identity, not mutable username/email fields.**
-4. **Use bounded `POST v6/search`, not broad list pulls followed by local filtering.**
-5. **Treat row-level source handoff as optional and backend-validated only.**
-6. **Do not conflate signing URLs with durable queue-row open links.**
-7. **Do not begin live provider implementation until the B05 dependency gates are satisfied.**
+- place Adobe config in SPFx property panes,
+- add user/actor query override paths,
+- use shared Adobe principals,
+- use mutable UPN/email as the grant primary key,
+- introduce unbounded queue polling,
+- log tokens/codes/raw Adobe bodies,
+- change the locked OAuth callback route or redirect URI without explicit operator instruction,
+- add speculative staging/prod redirect URIs.

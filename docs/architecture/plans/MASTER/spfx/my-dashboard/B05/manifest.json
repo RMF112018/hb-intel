@@ -1,0 +1,26 @@
+{
+  "title": "HB Intel My Dashboard — B05 Runtime Integration + OAuth Configuration Prompt Package",
+  "version": "1.0.0",
+  "package": "my_dashboard_b05_runtime_oauth_configuration_prompt_package",
+  "generatedAt": "2026-05-13T00:00:00Z",
+  "repo": "RMF112018/hb-intel",
+  "scope": "Runtime implementation and Adobe OAuth configuration prompts for Batch 05 — delegated user OAuth, grant/token seams, bounded Adobe search adapter, source handoff policy, and operator runbook for app registration; assumes B02/B03/B04 foundations.",
+  "files": [
+    "README.md",
+    "manifest.json",
+    "00_B05_Implementation_Package_Overview.md",
+    "01_B05_Repo_Truth_Implementation_Plan.md",
+    "02_B05_Target_Architecture_OAuth_And_Configuration_Map.md",
+    "03_B05_Validation_And_Closeout_Requirements.md",
+    "04_B05_Implementation_Gap_Register.md",
+    "05_B05_Targeted_Web_Verification_Notes.md",
+    "06_B05_Adobe_OAuth_Configuration_Runbook.md",
+    "Prompt_01_Preflight_B05_Runtime_And_Predecessor_Foundations.md",
+    "Prompt_02_Implement_Actor_Grant_Contracts_And_Configuration_Gates.md",
+    "Prompt_03_Implement_OAuth_Start_And_Public_Callback_Routes.md",
+    "Prompt_04_Implement_Grant_Store_And_Token_Service_Boundaries.md",
+    "Prompt_05_Implement_Adobe_Search_Adapter_And_Action_Queue_Mapping.md",
+    "Prompt_06_Implement_Source_Handoff_Policy_And_Module_Seams.md",
+    "Prompt_07_Validate_B05_OAuth_Configuration_Runtime_Readiness_And_Closeout.md"
+  ]
+}

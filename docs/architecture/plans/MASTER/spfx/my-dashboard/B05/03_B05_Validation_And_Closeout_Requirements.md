@@ -2,156 +2,198 @@
 
 ## 1. Validation objective
 
-Prove that B05 documentation alignment is complete, repo-truth-consistent, and docs-only.
+Prove that the B05 implementation:
+
+- preserves the delegated OAuth architecture,
+- exposes the locked route contract,
+- rejects personal-queue access for app-only HB identities,
+- protects tokens/codes/secrets,
+- uses explicit configuration/readiness gating,
+- maps Adobe/source failures to B04/B05 read-model states,
+- keeps source handoff optional and policy-validated,
+- documents the exact OAuth registration posture.
 
 ---
 
-## 2. Required path checks
+## 2. Required validation families
+
+### 2.1 Type and package validation
+
+Run the repo-appropriate equivalents of:
 
 ```bash
-test -f docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/B05_Adobe_Sign_Integration_Architecture_Development.md
-test -f docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/README.md
-test -f docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
+pnpm --filter @hbc/models check-types
+pnpm --filter @hbc/functions check-types
 ```
 
----
+If B05 touches app/client-facing files, also run the relevant My Dashboard typecheck/test commands introduced by prior batches.
 
-## 3. Required content checks
+### 2.2 Unit tests
 
-## 3.1 B05 artifact presence and scope
-```bash
-rg -n "B05 — HB Intel My Dashboard Adobe Sign Integration Architecture|Repo continuation anchor|4514a4fda765a0ac40801006374f277beddd7c5a|Sections \\*\\*15\\*\\*, \\*\\*16\\*\\*, \\*\\*17\\*\\*, and \\*\\*20\\*\\*" \
-  docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/B05_Adobe_Sign_Integration_Architecture_Development.md
-```
+Required test coverage should include:
 
-## 3.2 README authority index through B05
-```bash
-rg -n "B04_My_Work_Read_Models_Routes_And_Fixtures_Development|B05_Adobe_Sign_Integration_Architecture_Development|Sections 15, 16, 17, and 20|B05" \
-  docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/README.md
-```
+- actor normalizer:
+  - delegated user accepted,
+  - app-only token rejected/non-ready,
+  - missing `oid` rejected/non-ready;
+- state store:
+  - generated state is unique/unpredictable by construction,
+  - one-time consumption,
+  - expiry,
+  - actor binding,
+  - return path binding;
+- OAuth start route:
+  - requires HB auth,
+  - derives actor from `AuthContext`,
+  - returns only safe authorization URL metadata;
+- OAuth callback:
+  - rejects invalid/missing/expired state,
+  - does not exchange code when state invalid,
+  - persists grant through store abstraction when success path is mocked,
+  - redirects without secrets/tokens/codes;
+- token service:
+  - usable token path,
+  - refresh success,
+  - refresh revoked/expired → `authorization-required`,
+  - refresh source failure → `source-unavailable`;
+- search adapter:
+  - exact six-status contract,
+  - no unsupported status leakage,
+  - bounded query translation,
+  - no raw Adobe payload leakage;
+- source handoff:
+  - allowed URL passes,
+  - non-HTTPS fails,
+  - private host fails,
+  - credential-like query param fails,
+  - CTA omission remains valid.
 
-## 3.3 Outline authority header through B05
-```bash
-rg -n "B03_My_Work_Shell_Navigation_And_UX_Development|B04_My_Work_Read_Models_Routes_And_Fixtures_Development|B05_Adobe_Sign_Integration_Architecture_Development|Sections 15, 16, 17, and 20" \
-  docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
-```
+### 2.3 Route registration validation
 
-## 3.4 Outline Section 15 identity/principal-resolution posture
-```bash
-rg -n "claims\\.oid|tenant context|configured tenant|app-only|grant record|shared principal|authorization-required|principal-unresolved" \
-  docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
-```
-
-## 3.5 Outline Section 16 OAuth/gating posture
-```bash
-rg -n "delegated OAuth|authorization-code flow|redirect|callback|grant store|refresh-token|production-live provider|configuration mode" \
-  docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
-```
-
-## 3.6 Outline Section 17 search/query posture
-```bash
-rg -n "POST v6/search|pageSize|cursor|source-supported sort|urgency|Retry-After|bounded enrichment|six" \
-  docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
-```
-
-## 3.7 Outline Section 20 source-handoff posture
-```bash
-rg -n "sourceOpenUrl|validated|guessed|Signing URL|signingUrls|web_access_point|Open Adobe Sign|policy" \
-  docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
-```
-
----
-
-## 4. Required contradiction checks
-
-## 4.1 Stale actor-email claim priority must not remain
-```bash
-! rg -n "normalized `preferred_username`|normalized `upn`|normalized `email`|Final exact claim precedence for actor email resolution" \
-  docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
-```
-
-## 4.2 Unsupported guaranteed sort language must not remain
-```bash
-! rg -n "nearest expiration date first" \
-  docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
-```
-
-## 4.3 Open-item drift must be pruned/reframed
-```bash
-! rg -n "Final exact claim precedence for actor email resolution" \
-  docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
-```
-
-If the agent keeps a residual note about OAuth release dependencies, it must not be framed as an unresolved **architecture choice** once B05 is committed.
-
----
-
-## 5. Docs-only scope validation
-
-Run:
-
-```bash
-git diff --name-only
-git diff --stat
-```
-
-Expected changed paths must be limited to:
+Prove exact paths:
 
 ```text
-docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/B05_Adobe_Sign_Integration_Architecture_Development.md
-docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/README.md
-docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
+POST /api/my-work/me/adobe-sign/oauth/start
+GET  /api/my-work/adobe-sign/oauth/callback
 ```
 
-No runtime source, manifests, lockfiles, package manifests, or build tooling should change.
+Prove:
+- start route is protected through auth middleware,
+- callback route is not under `/me/...`,
+- callback path is the same path referenced by OAuth configuration docs,
+- no accidental route with a conflicting older `authorization/start` or `oauth/callback` variant remains.
+
+### 2.4 Logging/redaction validation
+
+Prove there is no logging of:
+- Adobe client secret,
+- Adobe access token,
+- Adobe refresh token,
+- OAuth authorization code,
+- raw OAuth callback URL with code/state query,
+- raw provider response bodies where sensitive content could appear.
+
+### 2.5 Readiness-state validation
+
+Prove:
+- missing Adobe config maps to `configuration-required`,
+- no grant record maps to `authorization-required`,
+- app-only actor maps to `principal-unresolved`,
+- provider outage maps to `source-unavailable`,
+- safe partial search/enrichment maps to `partial`.
 
 ---
 
-## 6. Formatting / lint posture
+## 3. OAuth configuration validation
 
-Use the repo’s established Markdown formatter/checker if a targeted command exists.
+### 3.1 Exact configured redirect URI
 
-Minimum acceptable evidence:
-- Markdown formatting is consistent,
-- tables render correctly,
-- links/path references are internally coherent,
-- code fences are balanced,
-- headings retain logical nesting.
+The implementation documentation must preserve:
 
-If the repo exposes a specific Prettier/check command for changed Markdown, run it and report it. Do not invent a command.
-
----
-
-## 7. Required closeout report
-
-The local agent’s final closeout must include:
-
-1. **Final verdict:** PASS / FAIL
-2. **Branch / HEAD**
-3. **Docs created**
-4. **Docs updated**
-5. **Validation commands executed**
-6. **Validation outcomes**
-7. **Formatting/lint results if available**
-8. **Confirmation that runtime code/manifests/lockfiles were untouched**
-9. **Residual production-live dependencies intentionally left out of scope**
-10. **Recommended commit summary and description**
-
----
-
-## 8. Recommended commit language
-
-### Commit summary
 ```text
-docs(my-dashboard): add B05 Adobe integration architecture plan and reconcile authority
+https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net/api/my-work/adobe-sign/oauth/callback
 ```
 
-### Commit description
+### 3.2 Host verification note
+
+The closeout must state whether:
+- the code agent only preserved the repo-captured dev host decision, or
+- the operator separately confirmed the live Azure hostname before Adobe registration.
+
+The code agent should not claim a live Azure confirmation it did not perform.
+
+### 3.3 Adobe screen values
+
+The closeout must restate:
+
+| Field | Value |
+|---|---|
+| Redirect URI | exact URI above |
+| Scope | `agreement_read` |
+| Modifier | `self` |
+| Other scopes | unchecked |
+
+---
+
+## 4. Suggested grep checks
+
+Use repo-appropriate grep/ripgrep checks to prove absence/presence.
+
+### Presence
 ```text
-- add the canonical B05 Adobe Sign integration architecture artifact for Sections 15/16/17/20
-- refresh the My Dashboard dev-plan README to index B04 and B05 and preserve batch authority order
-- update the comprehensive outline batch-authority map for B03/B04/B05
-- reconcile outline identity, OAuth, query, and source-handoff guidance to B05 closed decisions
-- prune stale open-item drift where prior batches already closed the architecture posture
-- preserve docs-only scope with no runtime implementation changes
+my-work/me/adobe-sign/oauth/start
+my-work/adobe-sign/oauth/callback
+agreement_read:self
+configuration-required
+authorization-required
+principal-unresolved
 ```
+
+### Absence or prohibited patterns
+```text
+?user=
+?email=
+?principal=
+client_secret in frontend/app files
+refresh_token in frontend/app files
+access_token in frontend/app files
+shared Adobe principal fallback
+```
+
+Exact grep commands should be adapted to shell/repo norms.
+
+---
+
+## 5. Closeout report format
+
+The final agent report must include:
+
+1. Verdict: PASS / FAIL
+2. Branch / HEAD
+3. Files created
+4. Files updated
+5. Route contract implemented
+6. OAuth configuration route/redirect URI preserved
+7. Validation commands executed
+8. Test results
+9. Readiness-gate outcomes
+10. Operator dependencies still pending for live Adobe enablement
+11. Confirmation that no tokens/secrets were committed
+12. Recommended commit title and description
+
+---
+
+## 6. Minimum acceptance matrix
+
+| Requirement | Acceptance |
+|---|---|
+| OAuth start route | Implemented, protected, actor-bound |
+| Callback route | Implemented, public callback path, state-validated |
+| Redirect URI | Exact dev redirect URI documented |
+| Actor binding | Tenant context + `oid` |
+| App-only tokens | Not eligible for personal queue reads |
+| Grant store | Backend-only abstraction wired |
+| Refresh token | Backend-only encrypted-persistence requirement preserved |
+| Search baseline | Bounded `POST v6/search` posture preserved |
+| Source handoff | Optional + validated only |
+| Live enablement | Explicitly gated, not falsely claimed |

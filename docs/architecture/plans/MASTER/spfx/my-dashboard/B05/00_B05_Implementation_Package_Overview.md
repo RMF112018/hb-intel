@@ -1,86 +1,136 @@
-# 00 — B05 Implementation Package Overview
+# 00 — B05 Runtime Integration + OAuth Configuration Package Overview
 
 ## Objective
 
-Implement the repository-facing documentation alignment required for:
+Implement the Batch 05 Adobe Sign integration architecture as a backend-mediated, delegated-user OAuth backbone for **My Dashboard / My Work**, while also closing the operator-facing OAuth configuration decision required to complete Acrobat Sign app registration safely.
+
+This package is **not** a restatement of the docs-only B05 package already in the repository. It is a runtime/backend implementation package that assumes the authoritative B05 planning artifact remains the governing architecture reference.
+
+---
+
+## 1. Repo-truth findings that control this package
+
+### 1.1 B05 architecture is already committed
+
+The canonical Batch 05 artifact exists in the My Dashboard dev-plan folder and closes:
+
+- delegated OAuth as the live-auth baseline,
+- CUSTOMER app posture,
+- stable actor/grant binding,
+- exact six-status queue search baseline,
+- source handoff limitations,
+- production-live dependency gates.
+
+### 1.2 Existing B05 package is docs-only
+
+The repository B05 prompt package under:
 
 ```text
-B05 — Adobe Sign Integration Architecture, Identity Mapping, OAuth, Agreement Search, and Source Handoff Development
+docs/architecture/plans/MASTER/spfx/my-dashboard/B05/
 ```
 
-B05 is a **closed-decision planning artifact** for Sections **15**, **16**, **17**, and **20** of the My Dashboard comprehensive plan. The repo implementation task is to commit that artifact into the canonical dev-plan folder and reconcile the folder/index/outline docs so later work inherits B05 correctly.
+is a documentation alignment package. It does not implement runtime provider code, OAuth routes, token/grant stores, or Adobe clients. This runtime package intentionally fills that gap.
+
+### 1.3 Backend claim truth supports stable actor binding
+
+Current backend auth claims expose:
+
+- `oid`
+- `upn`
+- `displayName`
+- `idtyp`
+- `scp`
+- token version metadata
+
+The Batch 05 actor contract must therefore use:
+
+```text
+trusted tenant context + claims.oid
+```
+
+for grant lookup, while preserving UPN only for display/diagnostics.
+
+### 1.4 Public callback route must be distinct from protected `/me/...` routes
+
+Adobe redirects a browser without an HB bearer token. The callback route must therefore remain public/anonymous at the Function App registration level, while validating one-time state internally.
+
+Locked route contract:
+
+```http
+POST /api/my-work/me/adobe-sign/oauth/start
+GET  /api/my-work/adobe-sign/oauth/callback
+```
+
+### 1.5 Dev Function App redirect URI is known, but must be live-confirmed
+
+The repo-captured Azure resource record and backend deployment documentation support this current dev redirect URI:
+
+```text
+https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net/api/my-work/adobe-sign/oauth/callback
+```
+
+Because Azure Flex hosts may include generated suffixes and repo-captured resource JSON is not a live metadata read, the runbook requires hostname confirmation before saving the OAuth configuration in Adobe.
 
 ---
 
-## Why B05 is a documentation/planning implementation batch
+## 2. B05 implementation scope
 
-B05 resolves architecture questions that later code implementation must inherit, but it does not itself build the runtime subsystem. It defines:
+### In scope
 
-- delegated Adobe OAuth architecture,
-- Acrobat Sign app-domain posture,
-- actor-to-grant identity binding,
-- app-only token exclusion,
-- grant-record based principal resolution,
-- production-live provider dependency gates,
-- bounded `POST v6/search` retrieval posture,
-- source-handoff rules and row-link restrictions,
-- downstream security, resilience, and testing constraints.
+- backend actor normalization and delegated-user eligibility gate,
+- grant-record contracts and lookup interface,
+- OAuth configuration/readiness contract,
+- protected OAuth start route,
+- public OAuth callback route,
+- state-binding and return-flow contract,
+- token-service abstraction for access/refresh lifecycle,
+- queue provider integration seam,
+- Adobe search-client adapter posture,
+- source-handoff URL policy adaptation,
+- source-state mapping to B04/B05 envelope semantics,
+- validation and closeout,
+- exact Adobe OAuth registration runbook.
 
-Those decisions need to exist in canonical repo planning documentation before a local code agent begins future live integration implementation.
+### Out of scope
 
----
-
-## Key repo-truth findings that shape this package
-
-### Finding 1 — B04 is already committed on live `main`
-The B05 artifact correctly names the B04 commit as its continuation anchor. The live repo contains the B04 detailed planning artifact in the My Dashboard dev-plan folder.
-
-### Finding 2 — The current folder README exists, but it is stale
-The README indexes B01, B02, and B03, then states that B04 and later must extend the table. Because B04 already exists and B05 is now ready to be added, the README must be refreshed.
-
-### Finding 3 — The outline’s batch authority header is incomplete
-The outline’s “Batch Authority Posture” table currently lists B01 and B02 only, even though B03 and B04 exist and B05 will now be added. The authority map must be made current.
-
-### Finding 4 — The outline still contains draft posture that B05 supersedes
-The outline still includes:
-- claim-precedence guidance using `preferred_username`, `upn`, and `email`,
-- unresolved OAuth path framing,
-- a sorting recommendation that could overstate what the live Adobe search request proves,
-- a shallow source-handoff section that lacks B05’s signing-URL and validated-link rules.
-
-### Finding 5 — The outline’s open-items section still lists decisions already closed elsewhere
-At minimum, the following should no longer remain framed as unclosed architecture decisions:
-- OAuth live-auth model and gating posture (closed by B05),
-- source-unavailable HTTP posture (closed by B04),
-- actor identity/key resolution posture (closed by B05),
-- operational property-pane exposure posture (closed by B02).
-
-Residual business/environment decisions may remain, but they must be separated from decisions already closed by batch artifacts.
+- inventing a production durable token store without an approved storage/security choice,
+- placing Adobe secrets in frontend/SPFx config,
+- direct Adobe API calls from browser code,
+- using shared/admin Adobe principals as fallback,
+- broadening queue status scope beyond the six locked statuses,
+- implementing B06 resilience/security work that is deliberately deferred,
+- adding speculative staging/production callback URLs.
 
 ---
 
-## Package objective translated into repo work
+## 3. Implementation philosophy
 
-The package makes the following state transition:
+The work should be implemented as **production-shaped seams with explicit operational gates**:
 
-| Current repo condition | Required B05 repo condition |
-|---|---|
-| B05 attached but not canonical in dev-plan folder | B05 committed as authoritative batch artifact |
-| README lists B01–B03 only | README lists B01–B05 accurately |
-| Outline authority table lists B01/B02 only | Outline authority table lists B01–B05 accurately |
-| Outline Section 15 contains stale claim-priority posture | Outline Section 15 defers to stable actor key and `oid`/tenant posture from B05 |
-| Outline Section 16 leaves OAuth architecture/gating open | Outline Section 16 reflects B05’s backend-controlled delegated OAuth architecture and production-live gating |
-| Outline Section 17 allows a sort interpretation B05 rejects | Outline Section 17 preserves B05’s source-supported sort vs. UI urgency distinction |
-| Outline Section 20 is shallow | Outline Section 20 carries B05’s validated URL, no-guessed-link, and signing-URL-not-default-row-CTA rules |
-| Outline Section 29 keeps closed items as unresolved | Section 29 is pruned/reframed so only genuinely residual items remain open |
+- interfaces and services are real,
+- route paths and callback mechanics are real,
+- token/secret movement constraints are real,
+- tests are real,
+- live enablement remains gated where the architecture says a secure operator dependency is still needed.
+
+This is preferable to:
+- fake “live” behavior,
+- a shared-account workaround,
+- silently returning empty queues when authorization is missing,
+- or hardcoding configuration in ways that create future drift.
 
 ---
 
-## Closure standard
+## 4. Expected outcome
 
-B05 implementation is closed only when:
-1. the B05 artifact is present in the canonical dev-plan folder,
-2. the README and outline point readers to B05 as the detailed authority for Sections 15/16/17/20,
-3. the outline no longer contradicts B05 on identity, OAuth, query, or source handoff,
-4. the docs remain planning-only with no runtime code changes,
-5. validation proves the final document state.
+After executing this package, the repo should have a clear B05 backbone that a later secure-enablement phase can activate without reopening architecture:
+
+```text
+HB authenticated actor
+  -> stable actor key
+  -> grant lookup / authorization state
+  -> OAuth callback persistence seam
+  -> usable access token or authorization-required state
+  -> bounded Adobe search adapter
+  -> B04/B05 My Work envelopes
+```

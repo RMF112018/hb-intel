@@ -1,203 +1,167 @@
-# HB Intel My Dashboard — B05 Implementation Prompt Package
+# HB Intel My Dashboard — B05 Runtime Integration + OAuth Configuration Prompt Package
 
-**Package purpose:**  
-This package instructs a local code agent to implement the repository-facing documentation alignment work required for:
+## Purpose
 
-```text
-B05 — Adobe Sign Integration Architecture, Identity Mapping, OAuth, Agreement Search, and Source Handoff Development
-```
+This package converts the canonical **B05 Adobe Sign Integration Architecture** into a focused implementation sequence for a local code agent. It is intentionally distinct from the existing **docs-only B05 authority-alignment package** already present in the repository.
 
-**Package posture:**  
-This is a **documentation/planning implementation package**, not a runtime integration package. It does **not** instruct the agent to build Adobe OAuth, token storage, grant persistence, Adobe API clients, or production routes. It instructs the agent to:
+This package covers:
 
-1. add the authoritative B05 batch artifact to the My Dashboard dev-plan folder,
-2. refresh the My Dashboard dev-plan authority index for B04 and B05,
-3. reconcile the comprehensive My Dashboard outline where older draft language conflicts with B05’s closed decisions,
-4. prune or reclassify outline “open items” that are already closed by B02/B04/B05,
-5. validate that the repository now communicates B05’s integration architecture clearly and durably.
+- delegated Adobe OAuth implementation seams,
+- authenticated actor → Adobe grant resolution,
+- protected OAuth initiation route,
+- public Adobe OAuth callback route,
+- OAuth callback/state configuration,
+- secure grant/token-store abstraction and configuration gates,
+- bounded Adobe Sign action-queue search adapter posture,
+- source-handoff URL validation,
+- validation and closeout,
+- the exact **Adobe Configure OAuth** values to register for the current dev Function App host.
 
 ---
 
-## 1. Repo assumptions used by this package
+## 1. Repo-truth posture addressed by this package
 
-### Repository
-```text
-Repository: RMF112018/hb-intel
-Branch: main
-Audit date: 2026-05-12
-Continuation anchor for B05: 4514a4fda765a0ac40801006374f277beddd7c5a
-```
+### Current repository facts
 
-### Live repo posture verified before package generation
-The repo currently contains:
+The repository already contains:
 
 ```text
 docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/
-├── README.md
-├── B01_My_Dashboard_Foundation_Scope_And_Repo_Truth_Development.md
-├── B02_My_Dashboard_Hosting_Packaging_Auth_And_Runtime_Development.md
-├── B03_My_Work_Shell_Navigation_And_UX_Development.md
-├── B04_My_Work_Read_Models_Routes_And_Fixtures_Development.md
-└── HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
+└── B05_Adobe_Sign_Integration_Architecture_Development.md
 ```
 
-The B05 artifact is **not yet the canonical committed dev-plan batch artifact** on the target repo posture addressed by this package. The package therefore treats B05’s first implementation task as creating:
+and an existing B05 prompt package under:
 
 ```text
-docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/B05_Adobe_Sign_Integration_Architecture_Development.md
+docs/architecture/plans/MASTER/spfx/my-dashboard/B05/
 ```
 
-using the authoritative attached B05 artifact supplied to the local agent.
+That repository package is **documentation/planning only**. It does **not** instruct implementation of OAuth routes, Adobe client code, token/grant store seams, or provider runtime logic.
+
+### This package is different
+
+This ZIP is the **runtime implementation + OAuth configuration package** that should follow the committed B05 architecture. It is meant for local-agent execution after the B02/B03/B04 implementation foundations are present in the working tree.
 
 ---
 
-## 2. Why this package is needed
+## 2. Binding architecture decisions
 
-B05 closes material integration-architecture decisions that are not yet durably reflected across the My Dashboard planning seams:
+The prompts in this package treat these decisions as closed:
 
-- delegated Adobe OAuth is the live auth baseline,
-- the Acrobat Sign app posture is `CUSTOMER`,
-- actor-to-grant binding is stable-identity based (`tenant context + oid`), not email/UPN keyed,
-- app-only HB tokens are not eligible for user-specific Adobe queue reads,
-- provider authorization must be grant-record based, not fallback search by email,
-- production-live queue access is gated on app registration, redirect URI, secure token store, and backend prerequisites,
-- Adobe retrieval baseline is bounded `POST v6/search`,
-- row-level handoff URLs are optional and backend-validated only,
-- guessed Adobe URLs and signing-URL-as-default-row-CTA behavior are prohibited.
-
-The existing outline still contains older draft language that:
-- recommends actor claim priority using `preferred_username` / `upn` / `email`,
-- leaves OAuth inclusion as an unresolved architecture choice,
-- implies a sort posture that B05 explicitly warns not to claim without live verification,
-- under-specifies source handoff and signing URL constraints,
-- preserves an “open items” list that still contains decisions already closed by B02/B04/B05.
+1. **Adobe auth baseline:** delegated user OAuth, not shared/admin Adobe principal.
+2. **Adobe app type:** `CUSTOMER`.
+3. **Adobe queue scope:** `agreement_read:self`.
+4. **Actor key:** stable Entra identity, using trusted tenant context + `claims.oid`; UPN is display/diagnostic only.
+5. **App-only HB tokens:** not eligible for user-specific Adobe queue retrieval.
+6. **Principal resolution:** grant-record based, not email lookup and never shared-principal fallback.
+7. **Queue retrieval:** bounded `POST v6/search`.
+8. **Queue statuses:** exact six B04/B05 current-user action statuses only.
+9. **Source handoff:** row URL only when backend-supplied and policy-validated; no guessed links.
+10. **OAuth route contract:**
+    ```http
+    POST /api/my-work/me/adobe-sign/oauth/start
+    GET  /api/my-work/adobe-sign/oauth/callback
+    ```
 
 ---
 
-## 3. Package contents
+## 3. OAuth registration decision included in this package
+
+The package includes:
+
+```text
+06_B05_Adobe_OAuth_Configuration_Runbook.md
+```
+
+which closes the current Adobe app-registration posture:
+
+| Adobe OAuth field | Value |
+|---|---|
+| Redirect URI | `https://hb-intel-function-app-gbd6ecgrh7fsgscm.eastus2-01.azurewebsites.net/api/my-work/adobe-sign/oauth/callback` |
+| Enabled scope | `agreement_read` |
+| Modifier | `self` |
+| Other scopes | Leave unchecked |
+
+The runbook also requires confirming the Function App’s **current live hostname** in Azure before saving, because the repo-captured resource snapshot is evidence, not a fresh Azure metadata read.
+
+---
+
+## 4. Package contents
 
 | File | Purpose |
 |---|---|
-| `README.md` | This package guide |
-| `00_B05_Implementation_Package_Overview.md` | Objective, repo-truth findings, package posture |
-| `01_B05_Repo_Truth_Implementation_Plan.md` | Exact files to create/update and sequencing |
-| `02_B05_Document_Authority_And_Cross_Reference_Map.md` | Authority chain, batch ownership, outline reconciliation map |
-| `03_B05_Validation_And_Closeout_Requirements.md` | Validation commands, acceptance checks, closeout format |
-| `04_B05_Implementation_Gap_Register.md` | Gap-by-gap remediation register |
-| `05_B05_Targeted_Web_Verification_Notes.md` | Narrow verification notes for the time-sensitive Adobe/Microsoft claims B05 preserves |
-| `Prompt_01_Add_B05_Authoritative_Batch_Artifact.md` | Add canonical B05 planning artifact |
-| `Prompt_02_Refresh_Dev_Plan_README_For_B04_B05_Authority.md` | Update authority index |
-| `Prompt_03_Update_Outline_Batch_Authority_For_B03_B04_B05.md` | Refresh outline authority posture |
-| `Prompt_04_Reconcile_Outline_Sections_15_16_17_20_And_Open_Items.md` | Replace stale outline draft posture with B05-compatible authority |
-| `Prompt_05_Validate_B05_Documentation_Alignment_And_Closeout.md` | Final validation and closeout |
+| `README.md` | This guide |
+| `00_B05_Implementation_Package_Overview.md` | Objective, repo-truth posture, scope, decisions |
+| `01_B05_Repo_Truth_Implementation_Plan.md` | Sequenced implementation plan and file map |
+| `02_B05_Target_Architecture_OAuth_And_Configuration_Map.md` | Architecture, route map, actor/grant/token seams, environment settings |
+| `03_B05_Validation_And_Closeout_Requirements.md` | Acceptance tests, validation commands, closeout format |
+| `04_B05_Implementation_Gap_Register.md` | Gap-by-gap implementation register |
+| `05_B05_Targeted_Web_Verification_Notes.md` | Time-sensitive Adobe/Microsoft verification notes |
+| `06_B05_Adobe_OAuth_Configuration_Runbook.md` | Exact Acrobat Sign OAuth configuration and callback/public-origin decision |
+| `Prompt_01_Preflight_B05_Runtime_And_Predecessor_Foundations.md` | Preflight and repo-truth gate |
+| `Prompt_02_Implement_Actor_Grant_Contracts_And_Configuration_Gates.md` | Actor resolution, grant contracts, env/readiness gates |
+| `Prompt_03_Implement_OAuth_Start_And_Public_Callback_Routes.md` | Protected start route + public callback route |
+| `Prompt_04_Implement_Grant_Store_And_Token_Service_Boundaries.md` | Store abstraction, token lifecycle, redaction posture |
+| `Prompt_05_Implement_Adobe_Search_Adapter_And_Action_Queue_Mapping.md` | Search client, status mapping, provider translation |
+| `Prompt_06_Implement_Source_Handoff_Policy_And_Module_Seams.md` | URL policy + handoff DTO/UX seams |
+| `Prompt_07_Validate_B05_OAuth_Configuration_Runtime_Readiness_And_Closeout.md` | Full validation and final closeout |
 
 ---
 
-## 4. Recommended execution order
+## 5. Recommended execution order
 
-Execute prompts **sequentially**:
+Execute in order:
 
-1. `Prompt_01_Add_B05_Authoritative_Batch_Artifact.md`
-2. `Prompt_02_Refresh_Dev_Plan_README_For_B04_B05_Authority.md`
-3. `Prompt_03_Update_Outline_Batch_Authority_For_B03_B04_B05.md`
-4. `Prompt_04_Reconcile_Outline_Sections_15_16_17_20_And_Open_Items.md`
-5. `Prompt_05_Validate_B05_Documentation_Alignment_And_Closeout.md`
+1. `Prompt_01_Preflight_B05_Runtime_And_Predecessor_Foundations.md`
+2. `Prompt_02_Implement_Actor_Grant_Contracts_And_Configuration_Gates.md`
+3. `Prompt_03_Implement_OAuth_Start_And_Public_Callback_Routes.md`
+4. `Prompt_04_Implement_Grant_Store_And_Token_Service_Boundaries.md`
+5. `Prompt_05_Implement_Adobe_Search_Adapter_And_Action_Queue_Mapping.md`
+6. `Prompt_06_Implement_Source_Handoff_Policy_And_Module_Seams.md`
+7. `Prompt_07_Validate_B05_OAuth_Configuration_Runtime_Readiness_And_Closeout.md`
 
-### Dependency logic
-- Prompt 01 places the canonical B05 artifact.
-- Prompt 02 makes the folder authority index acknowledge B04 and B05.
-- Prompt 03 makes the outline’s batch-authority header accurate.
-- Prompt 04 updates the outline body/open-items posture to align with B05.
-- Prompt 05 proves the final docs state is coherent and docs-only.
+### Operator action timing
 
-No prompt should be skipped.
+Use the OAuth configuration runbook before final live callback validation. The route code may be developed first, but the Adobe application must contain the exact redirect URI before the first real callback round-trip can succeed.
 
 ---
 
-## 5. Files/docs expected to change
+## 6. Explicit implementation posture
 
-### Create
-```text
-docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/B05_Adobe_Sign_Integration_Architecture_Development.md
-```
+This package instructs the code agent to implement the **B05 integration backbone** while preserving the B05 production-live gate:
 
-### Update
-```text
-docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/README.md
-
-docs/architecture/plans/MASTER/spfx/my-dashboard/dev-plan/HB_Intel_My_Dashboard_Comprehensive_Development_Plan_Outline.md
-```
-
-No other repo paths are expected to change.
-
----
-
-## 6. Explicitly out of scope
-
-The local agent must not:
-
-- implement OAuth initiation routes,
-- implement OAuth callback routes,
-- build grant stores or refresh-token persistence,
-- add Adobe client secrets or environment wiring,
-- create Adobe API service code,
-- modify `backend/functions` runtime code,
-- modify `apps/my-dashboard` runtime code,
-- add or change SPFx manifests, package-solution files, or lockfiles,
-- implement source URL policy helpers,
-- create test fixtures or production tests for the future live integration,
-- rewrite B01–B04 batch artifacts unless a narrow cross-reference correction is explicitly required by the prompts,
-- broaden the task into B06/B07/B08 implementation work.
+- It should add route and service seams.
+- It should add tests, configuration/readiness behavior, and mockable provider abstractions.
+- It should not fabricate secrets, generate a fake production grant store, or claim live Adobe readiness when the operator-controlled dependencies are not in place.
+- It should preserve `configuration-required` / `authorization-required` / `principal-unresolved` source-state behavior when live prerequisites are absent.
 
 ---
 
 ## 7. What “done” means
 
-B05 documentation implementation is complete only when:
+B05 runtime implementation is complete only when:
 
-1. the canonical B05 artifact exists in the My Dashboard dev-plan folder,
-2. the folder README indexes B04 and B05 and states B05’s section ownership,
-3. the comprehensive outline’s batch-authority section includes B03, B04, and B05,
-4. outline Sections 15, 16, 17, and 20 do not contradict B05’s closed integration decisions,
-5. the outline no longer presents already-closed B05/B04/B02 items as unresolved open decisions,
-6. docs-only scope is preserved,
-7. validation outputs prove the resulting authority chain and drift fixes.
-
----
-
-## 8. Residual non-documentation dependencies that remain after this package
-
-These are **not blockers to committing B05 planning documentation**, but they remain production-live implementation prerequisites:
-
-- Acrobat Sign `CUSTOMER` app registration,
-- approved redirect URI,
-- backend-side client secret availability,
-- secure grant-store selection/provisioning,
-- refresh-token encryption strategy,
-- test account(s) and live smoke scenarios,
-- final empirical verification of the narrowest Adobe `POST v6/search` criteria,
-- confirmation of row-level source-open URL availability if the product wants item-specific launch affordances.
-
-These belong to later implementation/security/resilience/test packages, not this documentation package.
+1. the protected OAuth start route and public callback route are implemented at the locked paths,
+2. callback state is cryptographically generated, single-use, actor-bound, return-flow-bound, and expiry-bound,
+3. actor normalization rejects app-only identities for personal queue operations,
+4. grant/token persistence is represented through a deliberate backend-only abstraction with secure configuration gates,
+5. no Adobe token, refresh token, OAuth code, or raw provider payload crosses the SPFx boundary,
+6. queue reads remain bounded around the B04/B05 six-status contract,
+7. source URLs remain optional and policy-validated,
+8. tests prove source-state mapping and no actor override behavior,
+9. docs/readiness output clearly identifies what is still operator-gated for live enablement,
+10. the exact OAuth app-registration values are documented and ready for Azure/Adobe confirmation.
 
 ---
 
-## 9. Recommended final local-agent closure shape
+## 8. Suggested commit themes if executed as separate commits
 
-The final agent report should include:
+A reasonable local sequence would be:
 
-1. **Verdict:** PASS / FAIL
-2. **Branch / HEAD**
-3. **Docs created**
-4. **Docs updated**
-5. **Validation commands executed**
-6. **Validation results**
-7. **Confirmation that runtime code/manifests/lockfiles were untouched**
-8. **Residual production-live dependencies intentionally left out of scope**
-9. **Recommended commit summary and description**
+1. `feat(my-dashboard): add Adobe actor/grant readiness contracts`
+2. `feat(my-dashboard): add Adobe OAuth start and callback route seams`
+3. `feat(my-dashboard): add Adobe grant/token service abstractions`
+4. `feat(my-dashboard): add Adobe action-queue search adapter`
+5. `feat(my-dashboard): harden Adobe handoff policy and B05 validation`
 
-Suggested commit title:
-
-```text
-docs(my-dashboard): add B05 Adobe integration architecture plan and reconcile authority
-```
+The executing agent should adapt commit boundaries to the actual repo state and the team’s normal commit discipline.
