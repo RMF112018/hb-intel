@@ -4,6 +4,7 @@ import { createMyWorkReadModelClient } from '../api/myWorkReadModelClientFactory
 import { useMyWorkShellState } from '../state/useMyWorkShellState.js';
 import { selectMyWorkHeroPreviewViewModel } from '../preview/myWorkHeroPreview.js';
 import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
+import { AdobeSignCallbackBanner } from './AdobeSignCallbackBanner.js';
 import { MyWorkPrimaryNavigation } from './MyWorkPrimaryNavigation.js';
 import { MyWorkHeroBand } from './MyWorkHeroBand.js';
 import { MyWorkSurfaceRouter } from './MyWorkSurfaceRouter.js';
@@ -122,6 +123,7 @@ export function MyWorkShell({
           className={styles.activePanel}
           data-my-work-active-surface-panel={activePrimarySurfaceId}
         >
+          <AdobeSignCallbackBanner />
           <MyWorkBentoGrid mode={mode}>
             <MyWorkSurfaceRouter
               activePrimarySurfaceId={activePrimarySurfaceId}
