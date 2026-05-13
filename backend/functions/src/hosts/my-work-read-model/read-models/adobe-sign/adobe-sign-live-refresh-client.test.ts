@@ -218,36 +218,39 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
     const { deps, fetch } = buildDeps();
     fetch.mockResolvedValueOnce(jsonResponse({ error: 'invalid_token' }, 400));
     const client = createAdobeSignLiveRefreshClient(deps);
-    expect(
-      await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW }),
-    ).toEqual({ status: 'invalid-grant' });
+    expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
+      status: 'invalid-grant',
+    });
   });
 
   it('HTTP 400 with unknown error → unreachable + unknown', async () => {
     const { deps, fetch } = buildDeps();
     fetch.mockResolvedValueOnce(jsonResponse({ error: 'something_else' }, 400));
     const client = createAdobeSignLiveRefreshClient(deps);
-    expect(
-      await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW }),
-    ).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
+      status: 'unreachable',
+      reason: 'unknown',
+    });
   });
 
   it('HTTP 500 → unreachable + http-5xx', async () => {
     const { deps, fetch } = buildDeps();
     fetch.mockResolvedValueOnce(jsonResponse({ error: 'server' }, 500));
     const client = createAdobeSignLiveRefreshClient(deps);
-    expect(
-      await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW }),
-    ).toEqual({ status: 'unreachable', reason: 'http-5xx' });
+    expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
+      status: 'unreachable',
+      reason: 'http-5xx',
+    });
   });
 
   it('network throw → unreachable + network', async () => {
     const { deps, fetch } = buildDeps();
     fetch.mockRejectedValueOnce(new Error('network down'));
     const client = createAdobeSignLiveRefreshClient(deps);
-    expect(
-      await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW }),
-    ).toEqual({ status: 'unreachable', reason: 'network' });
+    expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
+      status: 'unreachable',
+      reason: 'network',
+    });
   });
 
   it('AbortError throw → unreachable + network (refresh union has no timeout enum)', async () => {
@@ -256,9 +259,10 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
     err.name = 'AbortError';
     fetch.mockRejectedValueOnce(err);
     const client = createAdobeSignLiveRefreshClient(deps);
-    expect(
-      await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW }),
-    ).toEqual({ status: 'unreachable', reason: 'network' });
+    expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
+      status: 'unreachable',
+      reason: 'network',
+    });
   });
 
   it('Malformed (non-JSON) 200 body → unreachable + unknown', async () => {
@@ -267,18 +271,20 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
       new Response('not json', { status: 200, headers: { 'content-type': 'text/plain' } }),
     );
     const client = createAdobeSignLiveRefreshClient(deps);
-    expect(
-      await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW }),
-    ).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
+      status: 'unreachable',
+      reason: 'unknown',
+    });
   });
 
   it('HTTP 200 missing required field → unreachable + unknown', async () => {
     const { deps, fetch } = buildDeps();
     fetch.mockResolvedValueOnce(jsonResponse({ access_token: 'x', expires_in: 3600 }));
     const client = createAdobeSignLiveRefreshClient(deps);
-    expect(
-      await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW }),
-    ).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
+      status: 'unreachable',
+      reason: 'unknown',
+    });
   });
 
   it('Decryption throw → invalid-grant; no fetch call', async () => {
