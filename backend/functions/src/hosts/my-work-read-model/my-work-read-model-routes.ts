@@ -29,21 +29,13 @@ import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
 
-import { MyWorkMockReadModelProvider } from './read-models/my-work-mock-read-model-provider.js';
-import { MyProjectLinksReadModelProvider } from './read-models/project-links/my-project-links-read-model-provider.js';
+import { resolveMyWorkReadModelProvider } from './read-models/my-work-read-model-provider-resolver.js';
 import type {
   IMyWorkReadModelProvider,
   MyWorkReadContext,
 } from './read-models/my-work-read-model-provider.js';
 
-const mockProvider = new MyWorkMockReadModelProvider();
-const projectLinksProvider = new MyProjectLinksReadModelProvider();
-
-const provider: IMyWorkReadModelProvider = {
-  getMyWorkHome: (context) => mockProvider.getMyWorkHome(context),
-  getAdobeSignActionQueue: (context, query) => mockProvider.getAdobeSignActionQueue(context, query),
-  getMyProjectLinks: (context) => projectLinksProvider.getMyProjectLinks(context),
-};
+const provider: IMyWorkReadModelProvider = resolveMyWorkReadModelProvider(process.env);
 
 const MAX_CURSOR_LENGTH = 256;
 

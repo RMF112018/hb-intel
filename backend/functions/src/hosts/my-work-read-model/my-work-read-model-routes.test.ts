@@ -50,12 +50,8 @@ vi.mock('../../middleware/auth.js', () => ({
   },
 }));
 
-vi.mock('./read-models/my-work-mock-read-model-provider.js', () => ({
-  MyWorkMockReadModelProvider: vi.fn(() => provider),
-}));
-
-vi.mock('./read-models/project-links/my-project-links-read-model-provider.js', () => ({
-  MyProjectLinksReadModelProvider: vi.fn(() => provider),
+vi.mock('./read-models/my-work-read-model-provider-resolver.js', () => ({
+  resolveMyWorkReadModelProvider: vi.fn(() => provider),
 }));
 
 const buildRequest = (query: string = ''): any => ({
@@ -285,7 +281,10 @@ describe('my-work-read-model-routes — getMyWorkProjectLinks handler', () => {
   it('returns 200 with { data: envelope } and passes auth-derived actor/requestId', async () => {
     provider.getMyProjectLinks.mockResolvedValueOnce(MY_PROJECT_LINKS_AVAILABLE);
     const reg = findRegistration('getMyWorkProjectLinks');
-    const response = await reg.config.handler(buildRequest('actor=mallory&upn=mallory@example.com'), {});
+    const response = await reg.config.handler(
+      buildRequest('actor=mallory&upn=mallory@example.com'),
+      {},
+    );
     expect(response.status).toBe(200);
     expect(response.jsonBody).toEqual({ data: MY_PROJECT_LINKS_AVAILABLE });
     expect(provider.getMyProjectLinks).toHaveBeenCalledTimes(1);
