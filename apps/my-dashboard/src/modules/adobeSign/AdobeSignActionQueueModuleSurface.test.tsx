@@ -224,6 +224,66 @@ describe('AdobeSignActionQueueModuleSurface — envelope-state variants', () => 
   });
 });
 
+describe('AdobeSignActionQueueModuleSurface — authorization-required CTA exclusivity (Prompt 03)', () => {
+  it('authorization-required + onConnect → guidance card mounts, status marker is "authorization-required", Connect button visible and idle', () => {
+    const onConnect = () => new Promise<void>(() => undefined);
+    const { container } = renderFocused({
+      readinessVariant: 'non-ready',
+      sourceStatus: 'authorization-required',
+      onConnect,
+    });
+    const guidance = container.querySelector(
+      '[data-my-work-card-role="adobe-sign-connection-guidance"]',
+    ) as HTMLElement;
+    expect(guidance.getAttribute('data-adobe-sign-guidance-status')).toBe('authorization-required');
+    expect(guidance.textContent).toContain('Authorization required');
+    const button = guidance.querySelector(
+      '[data-adobe-sign-connect-action="start"]',
+    ) as HTMLButtonElement | null;
+    expect(button).not.toBeNull();
+    expect(button?.getAttribute('data-adobe-sign-connect-state')).toBe('idle');
+    expect(button?.textContent).toBe('Connect Adobe Sign');
+  });
+
+  it.each([
+    ['principal-unresolved', 'Account not resolved'],
+    ['source-unavailable', 'Adobe Sign unavailable'],
+    ['backend-unavailable', 'Service unavailable'],
+  ] as const)(
+    'non-authorization-required status "%s" + onConnect → guidance card mounts with status marker but no Connect CTA',
+    (sourceStatus, expectedHeadline) => {
+      const onConnect = () => new Promise<void>(() => undefined);
+      const { container } = renderFocused({
+        readinessVariant: 'non-ready',
+        sourceStatus,
+        onConnect,
+      });
+      const guidance = container.querySelector(
+        '[data-my-work-card-role="adobe-sign-connection-guidance"]',
+      ) as HTMLElement;
+      expect(guidance.getAttribute('data-adobe-sign-guidance-status')).toBe(sourceStatus);
+      expect(guidance.textContent).toContain(expectedHeadline);
+      // The CTA is exclusive to 'authorization-required'; every other non-ready
+      // status must suppress the Connect button even when onConnect is supplied.
+      expect(guidance.querySelector('[data-adobe-sign-connect-action="start"]')).toBeNull();
+    },
+  );
+
+  it('ready variant ("available") + onConnect → connection-guidance card is not mounted at all', () => {
+    const onConnect = () => new Promise<void>(() => undefined);
+    const { container } = renderFocused({
+      readinessVariant: 'ready',
+      sourceStatus: 'available',
+      onConnect,
+    });
+    expect(
+      container.querySelector('[data-my-work-card-role="adobe-sign-connection-guidance"]'),
+    ).toBeNull();
+    expect(container.querySelector('[data-adobe-sign-guidance-status]')).toBeNull();
+    expect(container.querySelector('[data-adobe-sign-connect-action="start"]')).toBeNull();
+  });
+});
+
 describe('AdobeSignActionQueueModuleSurface — onConnect forwarding', () => {
   it('forwards onConnect to the connection guidance card on the non-ready variant', () => {
     const onConnect = () => new Promise<void>(() => undefined);

@@ -117,6 +117,18 @@ describe('MyWorkShell — Adobe Sign OAuth end-to-end handler', () => {
       return b!;
     });
 
+    // Prompt 03 closure: the focused panel must carry the
+    // `authorization-required` guidance marker so a hosted-tenant screenshot
+    // reviewer can grep one attribute to prove the auth-required branch was
+    // actually rendered (and not a fixture-ready path masquerading as it).
+    const guidance = container.querySelector(
+      '[data-my-work-card-role="adobe-sign-connection-guidance"]',
+    );
+    expect(guidance?.getAttribute('data-adobe-sign-guidance-status')).toBe(
+      'authorization-required',
+    );
+    expect(button.getAttribute('data-adobe-sign-connect-state')).toBe('idle');
+
     fireEvent.click(button);
 
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));

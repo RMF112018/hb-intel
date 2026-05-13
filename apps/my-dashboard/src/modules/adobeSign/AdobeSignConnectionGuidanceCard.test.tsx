@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, waitFor } from '@testing-library/react';
 
+import type { ConnectionGuidanceVm } from '../../state/myWorkCardViewModel.js';
 import { MyWorkBentoGrid } from '../../layout/MyWorkBentoGrid.js';
 import { AdobeSignConnectionGuidanceCard } from './AdobeSignConnectionGuidanceCard.js';
 
@@ -110,4 +111,83 @@ describe('AdobeSignConnectionGuidanceCard — with onConnect (backend posture)',
 
     resolveConnect?.();
   });
+});
+
+describe('AdobeSignConnectionGuidanceCard — vm-gated CTA (Prompt 03)', () => {
+  const authVm: ConnectionGuidanceVm = {
+    sourceStatus: 'authorization-required',
+    headline: 'Authorization required',
+    guidance:
+      "You haven't authorized the Adobe Sign connection yet — connect to start loading your queue.",
+    ctaVisible: true,
+  };
+
+  function makeVm(
+    sourceStatus: ConnectionGuidanceVm['sourceStatus'],
+    headline: string,
+    guidance: string,
+  ): ConnectionGuidanceVm {
+    return { sourceStatus, headline, guidance, ctaVisible: false };
+  }
+
+  it('renders the Connect button when vm.ctaVisible is true AND onConnect is supplied', () => {
+    const onConnect = vi.fn(() => new Promise<void>(() => undefined));
+    const { container } = renderCard({ onConnect, vm: authVm });
+    const guidance = container.querySelector('[data-adobe-sign-guidance-status]');
+    expect(guidance?.getAttribute('data-adobe-sign-guidance-status')).toBe(
+      'authorization-required',
+    );
+    expect(container.querySelector('[data-adobe-sign-connect-action="start"]')).not.toBeNull();
+  });
+
+  it('suppresses the Connect button when vm.ctaVisible is true but onConnect is absent', () => {
+    const { container } = renderCard({ vm: authVm });
+    // Status marker is still published so operators can see why no CTA renders.
+    expect(
+      container
+        .querySelector('[data-adobe-sign-guidance-status]')
+        ?.getAttribute('data-adobe-sign-guidance-status'),
+    ).toBe('authorization-required');
+    expect(container.querySelector('[data-adobe-sign-connect-action="start"]')).toBeNull();
+  });
+
+  it.each([
+    [
+      'configuration-required',
+      'Configuration required',
+      'Adobe Sign credentials need to be configured by an administrator before your queue can load.',
+    ],
+    [
+      'principal-unresolved',
+      'Account not resolved',
+      "Your HB account couldn't be matched to an Adobe Sign user. Contact an administrator.",
+    ],
+    [
+      'source-unavailable',
+      'Adobe Sign unavailable',
+      "Adobe Sign isn't reachable right now. Your queue will resume once the source is back online.",
+    ],
+    [
+      'backend-unavailable',
+      'Service unavailable',
+      "The HB read-model service isn't responding. Try again shortly.",
+    ],
+  ] as const)(
+    'suppresses the Connect button when vm.ctaVisible is false (%s) even with onConnect supplied',
+    (sourceStatus, headline, guidance) => {
+      const onConnect = vi.fn(() => new Promise<void>(() => undefined));
+      const { container } = renderCard({
+        onConnect,
+        vm: makeVm(sourceStatus, headline, guidance),
+      });
+      expect(
+        container
+          .querySelector('[data-adobe-sign-guidance-status]')
+          ?.getAttribute('data-adobe-sign-guidance-status'),
+      ).toBe(sourceStatus);
+      expect(container.textContent ?? '').toContain(headline);
+      expect(container.querySelector('[data-adobe-sign-connect-action="start"]')).toBeNull();
+      expect(onConnect).not.toHaveBeenCalled();
+    },
+  );
 });
