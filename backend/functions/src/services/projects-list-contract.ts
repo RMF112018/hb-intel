@@ -108,7 +108,7 @@ export interface IProjectsListItem {
   projectZip: number | null;
   /** Office/division classification. */
   officeDivision: string;
-  /** Procore project flag (`'Yes'` | `'No'` | `''`). */
+  /** Raw Procore project identifier/token (optional; empty string when unset). */
   procoreProject: string;
   /** Project executive UPN. */
   projectExecutiveUpn: string;

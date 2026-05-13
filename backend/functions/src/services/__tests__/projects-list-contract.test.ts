@@ -138,7 +138,7 @@ function makeCompleteItem(): Record<string, unknown> {
     projectState: 'FL',
     projectZip: 33401,
     officeDivision: 'South Florida',
-    procoreProject: 'No',
+    procoreProject: '1234567',
     projectExecutiveUpn: 'exec@hb.com',
     projectManagerUpn: 'pm@hb.com',
     leadEstimatorUpn: 'est@hb.com',

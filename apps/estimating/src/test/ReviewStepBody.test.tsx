@@ -12,7 +12,7 @@ describe('ReviewStepBody', () => {
         request={createTestRequest({
           clientName: 'Client A',
           startDate: '2026-05-01',
-          procoreProject: 'No',
+          procoreProject: '1234567',
           officeDivision: 'HB HQ General Commercial (01-43)',
           contractType: 'Design-Build (DB) Contract',
         })}

@@ -85,7 +85,7 @@ function createBaseRequest(
     estimatedValue: 1250000,
     clientName: 'City of Charlotte',
     startDate: offsetIso(14),
-    procoreProject: 'Yes',
+    procoreProject: '1234567',
     contractType: 'Construction Management at Risk (CMAR) Contract',
     year: new Date().getFullYear(),
     ...overrides,

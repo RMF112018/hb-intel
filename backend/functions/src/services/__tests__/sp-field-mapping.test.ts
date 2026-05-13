@@ -67,7 +67,7 @@ function makeFullRequest(): IProjectSetupRequest {
     projectState: 'FL',
     projectZip: '33401',
     officeDivision: 'South Florida',
-    procoreProject: 'Yes',
+    procoreProject: '1234567',
     projectExecutiveUpn: 'exec@hb.com',
     projectManagerUpn: 'pm2@hb.com',
     leadEstimatorUpn: 'est@hb.com',

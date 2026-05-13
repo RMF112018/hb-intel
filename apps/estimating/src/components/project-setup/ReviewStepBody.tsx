@@ -37,7 +37,7 @@ export function ReviewStepBody({ request, mode, onSubmit, submitting }: ReviewSt
         : '—',
     },
     { label: 'Start Date', value: dv(request.startDate) },
-    { label: 'Procore Project', value: dv(request.procoreProject) },
+    { label: 'Procore Project ID', value: dv(request.procoreProject) },
   ];
 
   const departmentItems: DescriptionListItem[] = [

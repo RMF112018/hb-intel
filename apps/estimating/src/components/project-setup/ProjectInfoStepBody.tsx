@@ -58,11 +58,6 @@ const STATE_OPTIONS = [
   { value: 'WY', label: 'Wyoming' },
 ] as const;
 
-const PROCORE_OPTIONS = [
-  { value: 'Yes', label: 'Yes' },
-  { value: 'No', label: 'No' },
-] as const;
-
 const useStyles = makeStyles({
   row2col: {
     display: 'grid',
@@ -116,7 +111,7 @@ export function ProjectInfoStepBody({ request, onChange }: StepBodyProps): React
             label="State"
             options={[...STATE_OPTIONS]}
             value={request.projectState ?? ''}
-            onChange={(v) => onChange({ projectState: v || undefined })}
+            onChange={(v: string) => onChange({ projectState: v || undefined })}
             required={PROJECT_SETUP_REQUIRED_FIELDS_ENABLED}
           />
         </div>
@@ -152,12 +147,11 @@ export function ProjectInfoStepBody({ request, onChange }: StepBodyProps): React
             type="date"
           />
         </div>
-        <HbcSelect
-          label="Procore Project"
-          options={[...PROCORE_OPTIONS]}
+        <HbcTextField
+          label="Procore Project ID"
           value={request.procoreProject ?? ''}
-          onChange={(v) => onChange({ procoreProject: (v || undefined) as 'Yes' | 'No' | undefined })}
-          placeholder="Select if applicable"
+          onChange={(v) => onChange({ procoreProject: v?.trim() || undefined })}
+          placeholder="Optional token (for example: 1234567)"
         />
       </HbcFormSection>
     </>

@@ -81,7 +81,9 @@ The repo uses a **single persisted durable identifier** stored in SharePoint col
 | `projectStage` | `ProjectStage` | Yes | User-entered | `field_6` | Choice | Yes | Default `'Pursuit'` on read if falsy |
 | `department` | `ProjectDepartment` | No | User-entered | `field_12` | Choice | Yes | `'commercial'` / `'luxury-residential'` |
 | `officeDivision` | `string` | No | User-entered | `officeDivision` | Text | Yes | P2-07 classification |
-| `procoreProject` | `'Yes' \| 'No'` | No | User-entered | `procoreProject` | Text | Yes | P2-07 |
+| `procoreProject` | `string` | No | User-entered | `procoreProject` | Text | Yes | P2-07; raw Procore project identifier/token (not a Yes/No flag) |
+
+Legacy-data note: historical values such as `Yes` / `No` are not valid Procore launch tokens. Downstream launch surfaces must treat those legacy values as unavailable until operator-owned data remediation is completed.
 
 ### Financial and schedule
 

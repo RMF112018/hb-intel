@@ -35,7 +35,7 @@ function validRequest(overrides?: Partial<IProjectSetupRequest>): IProjectSetupR
     leadEstimatorUpn: 'lead@example.com',
     supportingEstimatorUpns: ['support@example.com'],
     timberscanApproverUpn: 'lead@example.com',
-    procoreProject: 'Yes',
+    procoreProject: '1234567',
     ...overrides,
   };
 }

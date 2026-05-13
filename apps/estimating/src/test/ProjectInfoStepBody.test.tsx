@@ -25,6 +25,6 @@ describe('ProjectInfoStepBody', () => {
     expect(text.indexOf('Street Address')).toBeLessThan(text.indexOf('City'));
     expect(text.indexOf('City')).toBeLessThan(text.indexOf('State'));
     expect(text.indexOf('Estimated Value')).toBeLessThan(text.indexOf('Expected Start Date'));
-    expect(text.indexOf('Expected Start Date')).toBeLessThan(text.indexOf('Procore Project'));
+    expect(text.indexOf('Expected Start Date')).toBeLessThan(text.indexOf('Procore Project ID'));
   });
 });

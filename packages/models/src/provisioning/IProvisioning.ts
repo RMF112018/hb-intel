@@ -220,8 +220,11 @@ export interface IProjectSetupRequest {
   clientName?: string;
   /** W0-G3-T01: Step 1 — anticipated start date, ISO 8601 (optional). */
   startDate?: string;
-  /** W0-G4-T09: Step 1 — whether the project already exists in Procore. */
-  procoreProject?: 'Yes' | 'No';
+  /**
+   * W0-G4-T09: Step 1 — optional raw Procore project identifier/token.
+   * Used downstream to assemble `https://app.procore.com/{procoreProject}/project/home`.
+   */
+  procoreProject?: string;
   /** W0-G3-T01: Step 2 — contract type classification (optional). */
   contractType?: string;
   /** W0-G4-T11: Step 3 — project executive assignment (single person). */

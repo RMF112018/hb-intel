@@ -55,7 +55,7 @@ function makeFullSpItem(): Record<string, unknown> {
     projectState: 'FL',
     projectZip: 33401,
     officeDivision: 'South Florida',
-    procoreProject: 'Yes',
+    procoreProject: '1234567',
     projectExecutiveUpn: 'exec@hb.com',
     projectManagerUpn: 'pm2@hb.com',
     leadEstimatorUpn: 'est@hb.com',
@@ -105,7 +105,7 @@ function makeFullDomainRequest(): IProjectSetupRequest {
     projectState: 'FL',
     projectZip: '33401',
     officeDivision: 'South Florida',
-    procoreProject: 'Yes',
+    procoreProject: '1234567',
     projectExecutiveUpn: 'exec@hb.com',
     projectManagerUpn: 'pm2@hb.com',
     leadEstimatorUpn: 'est@hb.com',
@@ -162,7 +162,7 @@ describe('toDomain() — SP item to domain object', () => {
     expect(domain.projectState).toBe('FL');
     expect(domain.projectZip).toBe('33401');
     expect(domain.officeDivision).toBe('South Florida');
-    expect(domain.procoreProject).toBe('Yes');
+    expect(domain.procoreProject).toBe('1234567');
     expect(domain.projectExecutiveUpn).toBe('exec@hb.com');
     expect(domain.projectManagerUpn).toBe('pm2@hb.com');
     expect(domain.leadEstimatorUpn).toBe('est@hb.com');
@@ -295,7 +295,7 @@ describe('toListItem() — domain object to SP payload', () => {
     expect(payload.projectState).toBe('FL');
     expect(payload.projectZip).toBe(33401);
     expect(payload.officeDivision).toBe('South Florida');
-    expect(payload.procoreProject).toBe('Yes');
+    expect(payload.procoreProject).toBe('1234567');
     expect(payload.projectExecutiveUpn).toBe('exec@hb.com');
     expect(payload.projectManagerUpn).toBe('pm2@hb.com');
     expect(payload.leadEstimatorUpn).toBe('est@hb.com');

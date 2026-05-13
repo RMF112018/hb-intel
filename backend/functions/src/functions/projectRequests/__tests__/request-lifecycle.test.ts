@@ -79,7 +79,7 @@ describe('Request lifecycle — user-command flows', () => {
       projectState: 'CO',
       projectZip: '80202',
       officeDivision: 'Mountain West',
-      procoreProject: 'Yes',
+      procoreProject: '1234567',
       projectExecutiveUpn: 'exec@hb.com',
       projectManagerUpn: 'pm@hb.com',
       leadEstimatorUpn: 'est@hb.com',
@@ -98,7 +98,7 @@ describe('Request lifecycle — user-command flows', () => {
     expect(retrieved!.projectState).toBe('CO');
     expect(retrieved!.projectZip).toBe('80202');
     expect(retrieved!.officeDivision).toBe('Mountain West');
-    expect(retrieved!.procoreProject).toBe('Yes');
+    expect(retrieved!.procoreProject).toBe('1234567');
     expect(retrieved!.projectExecutiveUpn).toBe('exec@hb.com');
     expect(retrieved!.projectManagerUpn).toBe('pm@hb.com');
     expect(retrieved!.leadEstimatorUpn).toBe('est@hb.com');
