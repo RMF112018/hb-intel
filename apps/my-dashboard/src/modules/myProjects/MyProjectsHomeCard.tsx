@@ -201,9 +201,17 @@ function RoleChips({
 
 function ProjectLaunchRow({ row }: { readonly row: MyProjectLinkItem }) {
   return (
-    <li className={styles.row} data-my-projects-row={row.recordKey}>
+    <li
+      className={styles.row}
+      data-my-projects-row={row.recordKey}
+      data-my-projects-row-source={row.source}
+    >
       <div className={styles.rowTop}>
-        <span className={styles.sourceBadge} data-my-projects-source-badge={row.source}>
+        <span
+          className={styles.sourceBadge}
+          data-my-projects-source-badge={row.source}
+          title={sourceBadgeLabel(row.source)}
+        >
           {sourceBadgeLabel(row.source)}
         </span>
         <span className={styles.projectNumber}>{row.projectNumber}</span>
@@ -213,7 +221,7 @@ function ProjectLaunchRow({ row }: { readonly row: MyProjectLinkItem }) {
 
       <RoleChips rowKey={row.recordKey} roles={row.assignmentRoles} />
 
-      <div className={styles.actionRail}>
+      <div className={styles.actionRail} aria-label="Project launch actions">
         <ActionSlot area="sharepoint" row={row} />
         <ActionSlot area="procore" row={row} />
       </div>
@@ -348,6 +356,10 @@ export function MyProjectsHomeCard({ getApiToken }: MyProjectsHomeCardProps) {
       ) : null}
 
       <div className={styles.launchRegion} data-my-projects-launch-region="">
+        <div
+          data-my-projects-expanded={expanded ? 'true' : 'false'}
+          data-my-projects-has-disclosure={showRowDisclosure ? 'true' : 'false'}
+        />
         <p className={styles.launchTitle}>Launch List</p>
         {isLoading ? <p className={styles.launchBody}>Loading project launches…</p> : null}
         {showEmpty ? <p className={styles.launchBody}>{rowSetDescription(items)}</p> : null}

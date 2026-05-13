@@ -11,6 +11,7 @@ import {
   MY_PROJECT_LINKS_PRINCIPAL_UNRESOLVED,
 } from '@hbc/models/myWork/fixtures';
 import { MyWorkBentoGrid } from '../../layout/MyWorkBentoGrid.js';
+import type { MyWorkResponsiveMode } from '../../layout/useMyWorkContainerBreakpoint.js';
 import { MyProjectsHomeCard } from './MyProjectsHomeCard.js';
 
 const getMyProjectLinksMock = vi.fn();
@@ -26,9 +27,9 @@ afterEach(() => {
   getMyProjectLinksMock.mockReset();
 });
 
-function renderCard() {
+function renderCard(mode: MyWorkResponsiveMode = 'desktop') {
   return render(
-    <MyWorkBentoGrid mode="desktop">
+    <MyWorkBentoGrid mode={mode}>
       <MyProjectsHomeCard />
     </MyWorkBentoGrid>,
   );
@@ -169,6 +170,7 @@ describe('MyProjectsHomeCard', () => {
     );
 
     const expand = getByText('View all My Projects') as HTMLButtonElement;
+    expect(expand.getAttribute('aria-controls')).toBe('my-projects-row-list');
     expect(expand.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(expand);
 
@@ -253,5 +255,22 @@ describe('MyProjectsHomeCard', () => {
     expect(unavailable.getAttribute('aria-label')).toBe(
       'Procore unavailable due to invalid project token.',
     );
+  });
+
+  it('keeps dual action structure and explicit action slots in compact mode', async () => {
+    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
+    const { container } = renderCard('phone');
+
+    await waitFor(() =>
+      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+    );
+
+    const card = container.querySelector('[data-my-work-card-role="my-projects-home"]');
+    expect(card?.getAttribute('data-my-work-mode')).toBe('phone');
+    const firstRow = container.querySelector('[data-my-projects-row]') as HTMLElement;
+    expect(
+      firstRow.querySelector('[data-my-projects-action-slot="sharepoint"]')?.textContent,
+    ).toBeTruthy();
+    expect(firstRow.querySelector('[data-my-projects-action-slot="procore"]')?.textContent).toBeTruthy();
   });
 });
