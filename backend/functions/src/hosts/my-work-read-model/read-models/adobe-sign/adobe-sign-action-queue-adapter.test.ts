@@ -508,8 +508,12 @@ describe('createAdobeSignActionQueueAdapter', () => {
     });
   });
 
-  describe('handoff-URL Prompt-06 safe seam', () => {
-    it('leaves `sourceOpenUrl` undefined on every emitted item and emits the documented warning', async () => {
+  describe('handoff-URL policy wiring', () => {
+    const APPROVED_ADOBE: AdobeSignActionQueueAdapterDeps['urlPolicyConfig'] = {
+      approvedDomainPolicy: [{ approvedHostSuffixes: ['.adobesign.com'] }],
+    };
+
+    it('omits `sourceOpenUrl` and emits `source-open-url-omitted` when no candidate is supplied', async () => {
       const result: AdobeSignSearchResult = {
         status: 'ok',
         items: [
@@ -527,12 +531,160 @@ describe('createAdobeSignActionQueueAdapter', () => {
         expect(Object.prototype.hasOwnProperty.call(item, 'sourceOpenUrl')).toBe(false);
       }
       expect(env.warnings.map((w) => w.code)).toContain('source-open-url-omitted');
+      expect(env.warnings.map((w) => w.code)).not.toContain('source-open-url-policy-rejected');
     });
 
-    it('does not emit the handoff-URL warning when no items are returned', async () => {
+    it('does not emit any handoff-URL warning when no items are returned', async () => {
       const adapter = createAdobeSignActionQueueAdapter(buildDeps({}));
       const env = await adapter.getActionQueue(context(), QUERY_EMPTY);
-      expect(env.warnings.map((w) => w.code)).not.toContain('source-open-url-omitted');
+      const codes = env.warnings.map((w) => w.code);
+      expect(codes).not.toContain('source-open-url-omitted');
+      expect(codes).not.toContain('source-open-url-policy-rejected');
+    });
+
+    it('populates `sourceOpenUrl` verbatim when the candidate passes policy on an approved host', async () => {
+      const allowedUrl = 'https://secure.na1.adobesign.com/account/agreementView?aid=abc';
+      const result: AdobeSignSearchResult = {
+        status: 'ok',
+        items: [
+          {
+            ...rowForStatus('WAITING_FOR_MY_SIGNATURE', 'agr-1'),
+            sourceOpenUrlCandidate: allowedUrl,
+          },
+        ],
+      };
+      const adapter = createAdobeSignActionQueueAdapter(
+        buildDeps({
+          searchClient: createDeterministicMockSearchClient([result]),
+          urlPolicyConfig: APPROVED_ADOBE,
+        }),
+      );
+      const env = await adapter.getActionQueue(context(), QUERY_EMPTY);
+
+      expect(env.data.items[0]?.sourceOpenUrl).toBe(allowedUrl);
+      const codes = env.warnings.map((w) => w.code);
+      expect(codes).not.toContain('source-open-url-omitted');
+      expect(codes).not.toContain('source-open-url-policy-rejected');
+    });
+
+    it('omits `sourceOpenUrl` and emits a policy-rejected warning carrying the reason code when the candidate fails policy', async () => {
+      const httpUrl = 'http://secure.adobesign.com/agreementView'; // scheme-blocked
+      const result: AdobeSignSearchResult = {
+        status: 'ok',
+        items: [
+          {
+            ...rowForStatus('WAITING_FOR_MY_SIGNATURE', 'agr-1'),
+            sourceOpenUrlCandidate: httpUrl,
+          },
+        ],
+      };
+      const adapter = createAdobeSignActionQueueAdapter(
+        buildDeps({
+          searchClient: createDeterministicMockSearchClient([result]),
+          urlPolicyConfig: APPROVED_ADOBE,
+        }),
+      );
+      const env = await adapter.getActionQueue(context(), QUERY_EMPTY);
+
+      expect(env.data.items[0]?.sourceOpenUrl).toBeUndefined();
+      expect(Object.prototype.hasOwnProperty.call(env.data.items[0]!, 'sourceOpenUrl')).toBe(false);
+      const rejected = env.warnings.find((w) => w.code === 'source-open-url-policy-rejected');
+      expect(rejected).toBeDefined();
+      expect(rejected?.message).toContain('scheme-blocked');
+    });
+
+    it.each([
+      ['http://secure.adobesign.com/x', 'scheme-blocked'],
+      ['https://localhost/x', 'host-blocked-local'],
+      ['https://10.0.0.1/x', 'host-blocked-local'],
+      ['https://secure.adobesign.com/x?access_token=a', 'query-contains-credential-like-parameter'],
+      ['https://attacker.example.com/x', 'host-not-approved'],
+      ['not a url', 'invalid-url'],
+    ])('rejects %s with reason %s when policy is configured', async (candidate, expectedReason) => {
+      const result: AdobeSignSearchResult = {
+        status: 'ok',
+        items: [
+          {
+            ...rowForStatus('WAITING_FOR_MY_SIGNATURE', 'agr-1'),
+            sourceOpenUrlCandidate: candidate,
+          },
+        ],
+      };
+      const adapter = createAdobeSignActionQueueAdapter(
+        buildDeps({
+          searchClient: createDeterministicMockSearchClient([result]),
+          urlPolicyConfig: APPROVED_ADOBE,
+        }),
+      );
+      const env = await adapter.getActionQueue(context(), QUERY_EMPTY);
+      expect(env.data.items[0]?.sourceOpenUrl).toBeUndefined();
+      const rejected = env.warnings.find((w) => w.code === 'source-open-url-policy-rejected');
+      expect(rejected?.message).toContain(expectedReason);
+    });
+
+    it('surfaces both omitted and policy-rejected warnings simultaneously on a mixed page', async () => {
+      const allowedUrl = 'https://secure.na1.adobesign.com/agreementView?aid=ok';
+      const blockedUrl = 'http://secure.adobesign.com/agreementView'; // scheme-blocked
+      const result: AdobeSignSearchResult = {
+        status: 'ok',
+        items: [
+          {
+            ...rowForStatus('WAITING_FOR_MY_SIGNATURE', 'agr-1'),
+            sourceOpenUrlCandidate: allowedUrl,
+          },
+          {
+            ...rowForStatus('WAITING_FOR_MY_APPROVAL', 'agr-2'),
+            sourceOpenUrlCandidate: blockedUrl,
+          },
+          rowForStatus('WAITING_FOR_MY_ACCEPTANCE', 'agr-3'),
+        ],
+      };
+      const adapter = createAdobeSignActionQueueAdapter(
+        buildDeps({
+          searchClient: createDeterministicMockSearchClient([result]),
+          urlPolicyConfig: APPROVED_ADOBE,
+        }),
+      );
+      const env = await adapter.getActionQueue(context(), QUERY_EMPTY);
+
+      expect(env.data.items[0]?.sourceOpenUrl).toBe(allowedUrl);
+      expect(env.data.items[1]?.sourceOpenUrl).toBeUndefined();
+      expect(env.data.items[2]?.sourceOpenUrl).toBeUndefined();
+
+      const codes = env.warnings.map((w) => w.code);
+      expect(codes).toContain('source-open-url-omitted');
+      expect(codes).toContain('source-open-url-policy-rejected');
+    });
+
+    it('coalesces multiple rejections into a single warning with sorted distinct reasons in `message`', async () => {
+      const result: AdobeSignSearchResult = {
+        status: 'ok',
+        items: [
+          {
+            ...rowForStatus('WAITING_FOR_MY_SIGNATURE', 'agr-1'),
+            sourceOpenUrlCandidate: 'http://secure.adobesign.com/x',
+          },
+          {
+            ...rowForStatus('WAITING_FOR_MY_APPROVAL', 'agr-2'),
+            sourceOpenUrlCandidate: 'http://secure.adobesign.com/y',
+          },
+          {
+            ...rowForStatus('WAITING_FOR_MY_ACCEPTANCE', 'agr-3'),
+            sourceOpenUrlCandidate: 'https://localhost/z',
+          },
+        ],
+      };
+      const adapter = createAdobeSignActionQueueAdapter(
+        buildDeps({
+          searchClient: createDeterministicMockSearchClient([result]),
+          urlPolicyConfig: APPROVED_ADOBE,
+        }),
+      );
+      const env = await adapter.getActionQueue(context(), QUERY_EMPTY);
+
+      const rejected = env.warnings.filter((w) => w.code === 'source-open-url-policy-rejected');
+      expect(rejected).toHaveLength(1);
+      expect(rejected[0]?.message).toBe('host-blocked-local,scheme-blocked');
     });
   });
 

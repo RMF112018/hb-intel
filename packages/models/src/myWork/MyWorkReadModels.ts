@@ -48,6 +48,7 @@ export const MY_WORK_READ_MODEL_WARNING_CODES = [
   'stale-cache-used',
   'result-set-truncated',
   'source-open-url-omitted',
+  'source-open-url-policy-rejected',
   'unsupported-source-status-filtered',
 ] as const;
 

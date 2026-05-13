@@ -64,6 +64,17 @@ export interface MyWorkAdobeSignActionQueueItem {
   readonly createdAtUtc?: string;
   readonly modifiedAtUtc?: string;
   readonly expirationAtUtc?: string;
+  /**
+   * Optional, backend-derived, policy-approved row-level launch URL for
+   * the Adobe Sign agreement view. Present **only** when a backend
+   * candidate URL passed the canonical HB/PCC URL-policy doctrine
+   * (`evaluateExternalUrlPolicy` in `@hbc/models/pcc`); omitted
+   * otherwise. SPFx surfaces MUST NOT synthesize an Adobe URL: row
+   * CTAs (e.g. "Open in Adobe Sign") render only when this field is
+   * present, and absence MUST NOT render a broken button or link.
+   * Signing-endpoint URLs are not eligible — this carries an agreement
+   * view URL only.
+   */
   readonly sourceOpenUrl?: string;
 }
 

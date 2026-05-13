@@ -20,10 +20,15 @@
  *   - Exactly one search-client call per `getActionQueue` invocation —
  *     no per-item detail fan-out. The opaque `cursor` and `nextCursor`
  *     are forwarded verbatim, preserving cursor opacity end-to-end.
- *   - `sourceOpenUrl` is intentionally left `undefined` on every emitted
- *     item; Prompt 06 owns the handoff-URL policy decision. When at
- *     least one item is emitted, the envelope carries a single
- *     `'source-open-url-omitted'` warning to make the seam explicit.
+ *   - Each retained row's optional `sourceOpenUrlCandidate` is evaluated
+ *     against the canonical HB/PCC URL-policy doctrine
+ *     (`evaluateAdobeSignSourceHandoff`). `sourceOpenUrl` is set on the
+ *     emitted item only when the policy allows the candidate. Missing
+ *     candidates trip a single envelope-level `'source-open-url-omitted'`
+ *     warning; rejected candidates trip a single envelope-level
+ *     `'source-open-url-policy-rejected'` warning whose `message`
+ *     carries the sorted, comma-separated set of `UrlPolicyReasonCode`
+ *     values observed.
  *
  * @module hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-action-queue-adapter
  */
@@ -52,6 +57,10 @@ import { toMyWorkSourceStatus } from './adobe-sign-principal-resolution.js';
 import type { IAdobeSignTokenService } from './adobe-sign-token-service.js';
 import type { IAdobeSignSearchClient } from './adobe-sign-search-client.js';
 import { buildAdobeSignSearchRequest } from './adobe-sign-search-request.js';
+import {
+  evaluateAdobeSignSourceHandoff,
+  type AdobeSignSourceHandoffPolicyConfig,
+} from './adobe-sign-source-handoff-policy.js';
 
 /** Items whose `expirationAtUtc` is within this window are counted as "expiring soon". */
 export const ADOBE_SIGN_EXPIRING_SOON_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;
@@ -76,6 +85,13 @@ export interface AdobeSignActionQueueAdapterDeps {
   readonly tokenService: IAdobeSignTokenService;
   readonly searchClient: IAdobeSignSearchClient;
   readonly now: () => Date;
+  /**
+   * Optional URL-policy configuration for row-level handoff. When omitted,
+   * any candidate URL that passes the canonical scheme / host / query
+   * checks is allowed; when present, the host must match the configured
+   * approved-domain rules.
+   */
+  readonly urlPolicyConfig?: AdobeSignSourceHandoffPolicyConfig;
 }
 
 function emptySummary(): MyWorkAdobeSignActionQueueSummary {
@@ -255,12 +271,25 @@ export function createAdobeSignActionQueueAdapter(
       // ---------------------------------------------------------------
       const items: MyWorkAdobeSignActionQueueItem[] = [];
       let droppedCount = 0;
+      let anyCandidateOmitted = false;
+      const rejectedReasons = new Set<string>();
       for (const row of searchResult.items) {
         if (!isActionableStatus(row.recipientStatus)) {
           droppedCount++;
           continue;
         }
         const requiredAction = ADOBE_SIGN_STATUS_TO_REQUIRED_ACTION[row.recipientStatus];
+
+        const policyDecision = evaluateAdobeSignSourceHandoff(
+          row.sourceOpenUrlCandidate,
+          deps.urlPolicyConfig,
+        );
+        if (policyDecision.status === 'omitted') {
+          anyCandidateOmitted = true;
+        } else if (policyDecision.status === 'rejected') {
+          rejectedReasons.add(policyDecision.reason);
+        }
+
         const item: MyWorkAdobeSignActionQueueItem = {
           itemId: buildItemId(row.agreementId),
           sourceSystem: 'adobe-sign',
@@ -281,7 +310,9 @@ export function createAdobeSignActionQueueAdapter(
           ...(row.createdAtUtc !== undefined ? { createdAtUtc: row.createdAtUtc } : {}),
           ...(row.modifiedAtUtc !== undefined ? { modifiedAtUtc: row.modifiedAtUtc } : {}),
           ...(row.expirationAtUtc !== undefined ? { expirationAtUtc: row.expirationAtUtc } : {}),
-          // sourceOpenUrl intentionally omitted — Prompt 06 owns handoff-URL policy.
+          ...(policyDecision.status === 'allowed'
+            ? { sourceOpenUrl: policyDecision.sourceOpenUrl }
+            : {}),
         };
         items.push(item);
       }
@@ -301,9 +332,12 @@ export function createAdobeSignActionQueueAdapter(
         warnings.push({ code: 'partial-source-data' });
         warnings.push({ code: 'unsupported-source-status-filtered' });
       }
-      if (items.length > 0) {
-        // Handoff-URL seam: Prompt 06 will validate and populate `sourceOpenUrl`.
+      if (anyCandidateOmitted) {
         warnings.push({ code: 'source-open-url-omitted' });
+      }
+      if (rejectedReasons.size > 0) {
+        const reasonSummary = [...rejectedReasons].sort().join(',');
+        warnings.push({ code: 'source-open-url-policy-rejected', message: reasonSummary });
       }
 
       const readModel: MyWorkAdobeSignActionQueueReadModel = {

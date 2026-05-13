@@ -51,6 +51,16 @@ export interface AdobeSignSearchClientItem {
   readonly createdAtUtc?: string;
   readonly modifiedAtUtc?: string;
   readonly expirationAtUtc?: string;
+  /**
+   * Backend-derived agreement-view URL candidate for the row-level
+   * "Open in Adobe Sign" CTA. The action-queue adapter evaluates this
+   * against the HB/PCC URL-policy doctrine before populating the
+   * sealed `MyWorkAdobeSignActionQueueItem.sourceOpenUrl` field — a
+   * candidate is never forwarded blindly. Signing-endpoint URLs are
+   * not eligible here (binding decision in B05 Prompt 06); the live
+   * search client must surface an agreement-view URL only.
+   */
+  readonly sourceOpenUrlCandidate?: string;
 }
 
 export type AdobeSignSearchResult =

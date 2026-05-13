@@ -61,7 +61,7 @@ describe('My Work read models — source-status vocabulary', () => {
 });
 
 describe('My Work read models — warning-code vocabulary', () => {
-  it('exposes exactly the ten B04 warning codes in order', () => {
+  it('exposes the B04/B05 warning codes in order', () => {
     expect(MY_WORK_READ_MODEL_WARNING_CODES).toEqual([
       'partial-source-data',
       'configuration-required',
@@ -72,9 +72,10 @@ describe('My Work read models — warning-code vocabulary', () => {
       'stale-cache-used',
       'result-set-truncated',
       'source-open-url-omitted',
+      'source-open-url-policy-rejected',
       'unsupported-source-status-filtered',
     ]);
-    expect(MY_WORK_READ_MODEL_WARNING_CODES).toHaveLength(10);
+    expect(MY_WORK_READ_MODEL_WARNING_CODES).toHaveLength(11);
   });
 });
 
