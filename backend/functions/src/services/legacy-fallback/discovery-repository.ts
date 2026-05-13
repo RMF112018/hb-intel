@@ -239,14 +239,11 @@ export class LegacyFallbackDiscoveryRepository implements ILegacyFallbackDiscove
         FolderName: payload.folderName,
         FolderPath: payload.folderPath,
         FolderWebUrl: payload.folderWebUrl,
-        // Operational override: all registry rows default to matched/high/no-match
-        // regardless of what the matching engine returned. The underlying match
-        // decision is still available in `Notes` (recordKey=...;<matching notes>).
-        MatchStatus: 'matched',
-        MatchConfidence: 'high',
+        MatchStatus: payload.matchStatus,
+        MatchConfidence: payload.matchConfidence,
         MatchedProjectListItemId: payload.matchedProjectListItemId,
         MatchedProjectTitle: payload.matchedProjectTitle,
-        MatchMethod: 'no-match',
+        MatchMethod: payload.matchMethod,
         LastSeenUtc: payload.lastSeenUtc,
         LastValidatedUtc: payload.lastValidatedUtc,
         DiscoveryRunId: payload.discoveryRunId,
