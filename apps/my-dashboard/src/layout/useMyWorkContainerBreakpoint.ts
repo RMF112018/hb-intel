@@ -15,14 +15,18 @@ export type MyWorkResponsiveMode = (typeof MY_WORK_RESPONSIVE_MODES)[number];
 
 const DEFAULT_MODE: MyWorkResponsiveMode = 'standardLaptop';
 
-function widthToMode(width: number): MyWorkResponsiveMode {
-  if (width < 480) return 'phone';
-  if (width < 768) return 'tabletPortrait';
-  if (width < 1024) return 'tabletLandscape';
-  if (width < 1200) return 'smallLaptop';
-  if (width < 1440) return 'standardLaptop';
-  if (width < 1680) return 'largeLaptop';
-  if (width < 1920) return 'desktop';
+/**
+ * Pure threshold ladder for the My Work shell. Aligned to PCC's documented
+ * breakpoint policy (smallLaptop ≤ 1180, largeLaptop ≤ 1599, desktop ≤ 1919).
+ */
+export function resolveMyWorkResponsiveMode(inlineSizePx: number): MyWorkResponsiveMode {
+  if (inlineSizePx < 480) return 'phone';
+  if (inlineSizePx <= 768) return 'tabletPortrait';
+  if (inlineSizePx <= 1024) return 'tabletLandscape';
+  if (inlineSizePx <= 1180) return 'smallLaptop';
+  if (inlineSizePx <= 1440) return 'standardLaptop';
+  if (inlineSizePx <= 1599) return 'largeLaptop';
+  if (inlineSizePx <= 1919) return 'desktop';
   return 'ultrawide';
 }
 
@@ -49,8 +53,11 @@ export function useMyWorkContainerBreakpoint(
     if (typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const width = entry.contentRect?.width ?? node.getBoundingClientRect().width;
-        setMode(widthToMode(width));
+        const width =
+          entry.contentBoxSize?.[0]?.inlineSize ??
+          entry.contentRect?.width ??
+          node.getBoundingClientRect().width;
+        setMode(resolveMyWorkResponsiveMode(width));
       }
     });
     observer.observe(node);

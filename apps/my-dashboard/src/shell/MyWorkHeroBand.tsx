@@ -1,4 +1,4 @@
-import type { MyWorkResponsiveMode } from './useMyWorkContainerBreakpoint.js';
+import type { MyWorkResponsiveMode } from '../layout/useMyWorkContainerBreakpoint.js';
 import styles from './MyWorkHeroBand.module.css';
 
 export interface IMyWorkHeroHighlight {

@@ -2,12 +2,14 @@ import { useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
 import { useMyWorkShellState } from '../state/useMyWorkShellState.js';
 import { selectMyWorkHeroPreviewViewModel } from '../preview/myWorkHeroPreview.js';
+import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
 import { MyWorkPrimaryNavigation } from './MyWorkPrimaryNavigation.js';
 import { MyWorkHeroBand } from './MyWorkHeroBand.js';
+import { MyWorkSurfaceRouter } from './MyWorkSurfaceRouter.js';
 import {
   useMyWorkContainerBreakpoint,
   type MyWorkResponsiveMode,
-} from './useMyWorkContainerBreakpoint.js';
+} from '../layout/useMyWorkContainerBreakpoint.js';
 import styles from './MyWorkShell.module.css';
 
 export const MY_WORK_ACTIVE_PANEL_ID = 'my-work-active-surface-panel';
@@ -102,7 +104,13 @@ export function MyWorkShell({
           className={styles.activePanel}
           data-my-work-active-surface-panel={activePrimarySurfaceId}
         >
-          {children}
+          <MyWorkBentoGrid mode={mode}>
+            <MyWorkSurfaceRouter
+              activePrimarySurfaceId={activePrimarySurfaceId}
+              activeModuleId={activeModuleId}
+            />
+            {children}
+          </MyWorkBentoGrid>
         </main>
       </div>
     </div>

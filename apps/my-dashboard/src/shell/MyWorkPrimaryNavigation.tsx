@@ -14,7 +14,7 @@ import {
   type MyWorkNavigationModule,
   type MyWorkPrimarySurfaceId,
 } from '@hbc/models/myWork';
-import type { MyWorkResponsiveMode } from './useMyWorkContainerBreakpoint.js';
+import type { MyWorkResponsiveMode } from '../layout/useMyWorkContainerBreakpoint.js';
 import styles from './MyWorkPrimaryNavigation.module.css';
 
 export interface MyWorkPrimaryNavigationProps {
