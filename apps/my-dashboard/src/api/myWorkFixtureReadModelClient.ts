@@ -14,6 +14,7 @@
  */
 
 import type {
+  MyProjectLinksReadModel,
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
   MyWorkHomeReadModel,
@@ -56,6 +57,13 @@ class MyWorkFixtureReadModelClient implements IMyWorkReadModelClient {
         ? 'available-paged'
         : 'available';
     const base = MY_WORK_FIXTURES['adobe-sign-action-queue'][scenario];
+    return { ...base, generatedAtUtc: this.now() };
+  }
+
+  async getMyProjectLinks(): Promise<MyWorkReadModelEnvelope<MyProjectLinksReadModel>> {
+    const base = this.simulateBackendUnavailable
+      ? MY_WORK_FIXTURES['project-links']['backend-unavailable']
+      : MY_WORK_FIXTURES['project-links'].available;
     return { ...base, generatedAtUtc: this.now() };
   }
 }

@@ -7,6 +7,8 @@ import {
   ADOBE_SIGN_QUEUE_AVAILABLE,
   ADOBE_SIGN_QUEUE_AVAILABLE_PAGED,
   ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
+  MY_PROJECT_LINKS_AVAILABLE,
+  MY_PROJECT_LINKS_BACKEND_UNAVAILABLE,
   MY_WORK_FIXTURE_GENERATED_AT_UTC,
   MY_WORK_HOME_AVAILABLE,
   MY_WORK_HOME_BACKEND_UNAVAILABLE,
@@ -43,6 +45,15 @@ describe('My Work fixture read-model client — default posture', () => {
     expect(envelope.sourceStatus).toBe('available');
     expect(envelope.data.pagination.hasMore).toBe(false);
   });
+
+  it('returns the AVAILABLE project-links envelope', async () => {
+    const client = createMyWorkFixtureReadModelClient();
+    const envelope = await client.getMyProjectLinks();
+    expect(envelope).toEqual({
+      ...MY_PROJECT_LINKS_AVAILABLE,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+    });
+  });
 });
 
 describe('My Work fixture read-model client — backend-unavailable posture', () => {
@@ -71,6 +82,17 @@ describe('My Work fixture read-model client — backend-unavailable posture', ()
     });
     expect(withCursor).toEqual({
       ...ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+    });
+  });
+
+  it('returns the BACKEND_UNAVAILABLE project-links envelope', async () => {
+    const client = createMyWorkFixtureReadModelClient({
+      simulateBackendUnavailable: true,
+    });
+    const envelope = await client.getMyProjectLinks();
+    expect(envelope).toEqual({
+      ...MY_PROJECT_LINKS_BACKEND_UNAVAILABLE,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
     });
   });
@@ -103,8 +125,10 @@ describe('My Work fixture read-model client — clock override', () => {
     });
     const home = await client.getMyWorkHome();
     const queue = await client.getAdobeSignActionQueue();
+    const projectLinks = await client.getMyProjectLinks();
     expect(home.generatedAtUtc).toBe('2030-01-01T00:00:00.000Z');
     expect(queue.generatedAtUtc).toBe('2030-01-01T00:00:00.000Z');
+    expect(projectLinks.generatedAtUtc).toBe('2030-01-01T00:00:00.000Z');
     expect(queue.data.freshness.generatedAtUtc).toBe(MY_WORK_FIXTURE_GENERATED_AT_UTC);
   });
 });

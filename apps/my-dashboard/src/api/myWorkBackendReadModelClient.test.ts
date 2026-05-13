@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { ADOBE_SIGN_QUEUE_AVAILABLE, MY_WORK_HOME_AVAILABLE } from '@hbc/models/myWork/fixtures';
+import {
+  ADOBE_SIGN_QUEUE_AVAILABLE,
+  MY_PROJECT_LINKS_AVAILABLE,
+  MY_WORK_HOME_AVAILABLE,
+} from '@hbc/models/myWork/fixtures';
 
 import {
   buildAdobeQueueQueryString,
@@ -130,6 +134,45 @@ describe('My Work backend read-model client — happy path', () => {
     }
   });
 
+  it('issues a GET to the canonical project-links route with no query string', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ data: MY_PROJECT_LINKS_AVAILABLE }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok-project-links',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+
+    await client.getMyProjectLinks();
+
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(url).toBe('https://example.invalid/api/my-work/me/project-links');
+    expect(url).not.toContain('?');
+    expect(init.method).toBe('GET');
+    expect(init.headers.Authorization).toBe('Bearer tok-project-links');
+  });
+
+  it('does not include actor/user/principal/email/upn in the project-links URL', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ data: MY_PROJECT_LINKS_AVAILABLE }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+
+    await client.getMyProjectLinks();
+
+    const [url] = fetchSpy.mock.calls[0]!;
+    for (const forbidden of ['actor', 'user', 'principal', 'email', 'upn']) {
+      expect(String(url).toLowerCase()).not.toContain(forbidden);
+    }
+  });
+
   it('acquires a fresh token per call', async () => {
     const fetchSpy = vi
       .fn<MyWorkReadModelFetch>()
@@ -171,11 +214,11 @@ describe('My Work backend read-model client — happy path', () => {
 });
 
 describe('My Work backend read-model client — fallback paths', () => {
-  const assertBackendUnavailable = (
-    envelope: Awaited<
-      ReturnType<ReturnType<typeof createMyWorkBackendReadModelClient>['getMyWorkHome']>
-    >,
-  ) => {
+  const assertBackendUnavailable = (envelope: {
+    readonly sourceStatus: string;
+    readonly mode: string;
+    readonly warnings: readonly { readonly code: string }[];
+  }) => {
     expect(envelope.sourceStatus).toBe('backend-unavailable');
     expect(envelope.mode).toBe('fixture');
     expect(envelope.warnings[0]?.code).toBe('backend-unavailable');
@@ -277,6 +320,18 @@ describe('My Work backend read-model client — fallback paths', () => {
       fallback: makeBackendUnavailableFallback(),
     });
     const envelope = await client.getMyWorkHome();
+    assertBackendUnavailable(envelope);
+  });
+
+  it('falls back for project-links when backend fetch throws', async () => {
+    const fetchSpy = vi.fn<MyWorkReadModelFetch>().mockRejectedValue(new Error('network down'));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    const envelope = await client.getMyProjectLinks();
     assertBackendUnavailable(envelope);
   });
 });

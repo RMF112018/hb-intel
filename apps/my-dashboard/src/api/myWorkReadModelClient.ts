@@ -11,6 +11,7 @@
 
 import {
   MY_WORK_READ_MODEL_ROUTE_PATHS,
+  type MyProjectLinksReadModel,
   type MyWorkAdobeSignActionQueueQuery,
   type MyWorkAdobeSignActionQueueReadModel,
   type MyWorkHomeReadModel,
@@ -24,6 +25,7 @@ export type MyWorkReadModelRouteId = MyWorkReadModelRouteKey;
 export const MY_WORK_READ_MODEL_ROUTE_IDS = [
   'home',
   'adobe-sign-action-queue',
+  'project-links',
 ] as const satisfies readonly MyWorkReadModelRouteKey[];
 
 export type MyWorkReadModelMode = 'fixture' | 'backend';
@@ -35,4 +37,5 @@ export interface IMyWorkReadModelClient {
   getAdobeSignActionQueue(
     query?: MyWorkAdobeSignActionQueueQuery,
   ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>>;
+  getMyProjectLinks(): Promise<MyWorkReadModelEnvelope<MyProjectLinksReadModel>>;
 }

@@ -14,6 +14,7 @@
  */
 
 import type {
+  MyProjectLinksReadModel,
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
   MyWorkHomeReadModel,
@@ -143,6 +144,10 @@ class MyWorkBackendReadModelClient implements IMyWorkReadModelClient {
       () => this.fallback.getAdobeSignActionQueue(query),
       buildAdobeQueueQueryString(query),
     );
+  }
+
+  async getMyProjectLinks(): Promise<MyWorkReadModelEnvelope<MyProjectLinksReadModel>> {
+    return this.callBackend('project-links', () => this.fallback.getMyProjectLinks());
   }
 }
 
