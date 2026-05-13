@@ -1,0 +1,23 @@
+{
+  "title": "HB Intel My Dashboard — B07 Implementation Prompt Package",
+  "version": "1.0.0",
+  "package": "my_dashboard_b07_implementation_prompt_package",
+  "generatedAt": "2026-05-13T00:00:00Z",
+  "repo": "RMF112018/hb-intel",
+  "scope": "Documentation reconciliation prompts for Batch 07 — align the committed B07 dev-plan artifact, README, and outline with current main while preserving B07 validation authority; no runtime implementation.",
+  "files": [
+    "README.md",
+    "manifest.json",
+    "00_B07_Implementation_Package_Overview.md",
+    "01_B07_Repo_Truth_Implementation_Plan.md",
+    "02_B07_Document_Authority_And_Cross_Reference_Map.md",
+    "03_B07_Validation_And_Closeout_Requirements.md",
+    "04_B07_Implementation_Gap_Register.md",
+    "05_B07_Targeted_Web_Verification_Notes.md",
+    "Prompt_01_Reconcile_B07_Artifact_To_Current_Main_And_Correct_B05_Predecessor_Path.md",
+    "Prompt_02_Refresh_Dev_Plan_README_And_Outline_Authority_Through_B07.md",
+    "Prompt_03_Reconcile_Outline_Sections_6_8_25_With_B07_Validation_Contract.md",
+    "Prompt_04_Reconcile_Outline_Sections_26_27_And_B07_Dependent_Closure_Items.md",
+    "Prompt_05_Validate_B07_Documentation_Alignment_And_Closeout.md"
+  ]
+}
