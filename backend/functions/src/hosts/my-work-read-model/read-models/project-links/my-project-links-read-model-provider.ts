@@ -5,6 +5,8 @@ import {
   type MyProjectAssignmentRoleId,
   type MyProjectLinkItem,
   type MyProjectLinkWarning,
+  type MyProjectLinksDiagnostics,
+  type MyProjectLinksPrincipalUnresolvedReason,
   type MyProjectLinksReadModel,
   type MyWorkReadModelEnvelope,
   type MyWorkReadModelSourceStatus,
@@ -94,7 +96,10 @@ function readOptionalNumber(value: unknown): number | null {
   return null;
 }
 
-function parseAssignmentRolesFromProjects(row: IProjectSourceRow, actorUpn: string): {
+function parseAssignmentRolesFromProjects(
+  row: IProjectSourceRow,
+  actorUpn: string,
+): {
   roles: readonly MyProjectAssignmentRoleId[];
   usedLegacyFallback: boolean;
 } {
@@ -126,8 +131,10 @@ function parseAssignmentRolesFromProjects(row: IProjectSourceRow, actorUpn: stri
   }
 
   const roles = [...roleSet].sort((a, b) => {
-    const left = MY_PROJECT_ASSIGNMENT_ROLE_DEFINITIONS.find((item) => item.roleId === a)?.priority ?? 0;
-    const right = MY_PROJECT_ASSIGNMENT_ROLE_DEFINITIONS.find((item) => item.roleId === b)?.priority ?? 0;
+    const left =
+      MY_PROJECT_ASSIGNMENT_ROLE_DEFINITIONS.find((item) => item.roleId === a)?.priority ?? 0;
+    const right =
+      MY_PROJECT_ASSIGNMENT_ROLE_DEFINITIONS.find((item) => item.roleId === b)?.priority ?? 0;
     return left - right;
   });
 
@@ -148,8 +155,10 @@ function parseAssignmentRolesFromRegistry(
   }
 
   return [...roleSet].sort((a, b) => {
-    const left = MY_PROJECT_ASSIGNMENT_ROLE_DEFINITIONS.find((item) => item.roleId === a)?.priority ?? 0;
-    const right = MY_PROJECT_ASSIGNMENT_ROLE_DEFINITIONS.find((item) => item.roleId === b)?.priority ?? 0;
+    const left =
+      MY_PROJECT_ASSIGNMENT_ROLE_DEFINITIONS.find((item) => item.roleId === a)?.priority ?? 0;
+    const right =
+      MY_PROJECT_ASSIGNMENT_ROLE_DEFINITIONS.find((item) => item.roleId === b)?.priority ?? 0;
     return left - right;
   });
 }
@@ -345,13 +354,16 @@ function sortItems(items: MyProjectLinkItem[]): MyProjectLinkItem[] {
 }
 
 function buildSummary(items: readonly MyProjectLinkItem[]): MyProjectLinksReadModel['summary'] {
-  const sharePointReadyCount = items.filter((item) => item.sharePointAction.state === 'available').length;
+  const sharePointReadyCount = items.filter(
+    (item) => item.sharePointAction.state === 'available',
+  ).length;
   const procoreReadyCount = items.filter((item) => item.procoreAction.state === 'available').length;
 
   return {
     assignedProjectCount: items.length,
     dualLaunchReadyCount: items.filter(
-      (item) => item.sharePointAction.state === 'available' && item.procoreAction.state === 'available',
+      (item) =>
+        item.sharePointAction.state === 'available' && item.procoreAction.state === 'available',
     ).length,
     sharePointReadyCount,
     procoreReadyCount,
@@ -396,7 +408,9 @@ function buildEnvelopeWarnings(
   return warnings;
 }
 
-function buildRoleFieldObjectFromRow(row: Record<string, unknown>): Partial<Record<string, unknown>> {
+function buildRoleFieldObjectFromRow(
+  row: Record<string, unknown>,
+): Partial<Record<string, unknown>> {
   const output: Partial<Record<string, unknown>> = {};
   for (const definition of MY_PROJECT_ASSIGNMENT_ROLE_DEFINITIONS) {
     output[definition.internalField] = row[definition.internalField];
@@ -559,6 +573,64 @@ export function reconcileProjectLinks(
   return sortItems(items);
 }
 
+function classifyPrincipalUnresolvedReason(
+  rawPrincipalName: unknown,
+): MyProjectLinksPrincipalUnresolvedReason {
+  // The provider only reaches this path when `normalizeUpn(...)` returned null.
+  // Distinguish the two failure modes so operators can triage between
+  // "claim was empty / whitespace" and "claim was present but not a valid UPN".
+  if (typeof rawPrincipalName !== 'string') return 'missing-upn';
+  const trimmed = rawPrincipalName.trim();
+  return trimmed.length === 0 ? 'missing-upn' : 'invalid-upn-format';
+}
+
+/**
+ * Derive the sanitized diagnostics blob from the same facts the envelope
+ * assembly already consumes. Closed-set enums and numeric counts only —
+ * never includes the actor's UPN, OID, or displayName.
+ */
+function selectDiagnostics(input: {
+  readonly actorUpn: string | null;
+  readonly rawPrincipalName: unknown;
+  readonly projects: ISourceLoadResult<IProjectSourceRow>;
+  readonly registry: ISourceLoadResult<ILegacyRegistrySourceRow>;
+  readonly matchCount: number;
+}): MyProjectLinksDiagnostics {
+  if (input.actorUpn === null) {
+    return {
+      classification: 'principal-unresolved',
+      principalResolution: 'unresolved',
+      principalUnresolvedReason: classifyPrincipalUnresolvedReason(input.rawPrincipalName),
+      matchCount: 0,
+      projectsSourceStatus: 'principal-unresolved',
+      legacyFallbackRegistrySourceStatus: 'principal-unresolved',
+    };
+  }
+
+  const projectsSourceStatus = sourceReadinessStatus(input.projects);
+  const legacyFallbackRegistrySourceStatus = sourceReadinessStatus(input.registry);
+  const envelopeStatus = selectEnvelopeStatus(input.projects, input.registry);
+
+  let classification: MyProjectLinksDiagnostics['classification'];
+  if (envelopeStatus === 'source-unavailable') {
+    classification = 'source-unavailable';
+  } else if (envelopeStatus === 'partial') {
+    classification = 'partial';
+  } else if (input.matchCount === 0) {
+    classification = 'zero-match-available-sources';
+  } else {
+    classification = 'available';
+  }
+
+  return {
+    classification,
+    principalResolution: 'resolved',
+    matchCount: input.matchCount,
+    projectsSourceStatus,
+    legacyFallbackRegistrySourceStatus,
+  };
+}
+
 function createDefaultSourceDeps(): IProjectLinksSourceDeps {
   const graph = new GraphListClient(getLegacyFallbackListHostSiteUrl());
 
@@ -603,7 +675,8 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
           .map((entry): IProjectSourceRow | null => {
             const row: Record<string, unknown> = { Id: Number(entry.id), ...entry.fields };
             const projectNumber = trimToString(row[resolveSpField('projectNumber')]);
-            const projectName = trimToString(row[resolveSpField('projectName')]) || trimToString(row.Title);
+            const projectName =
+              trimToString(row[resolveSpField('projectName')]) || trimToString(row.Title);
             if (!projectNumber || !projectName) return null;
 
             return {
@@ -616,9 +689,11 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
               procoreProject: trimToString(row[resolveSpField('procoreProject')]) || undefined,
               roleArrays: buildRoleFieldObjectFromRow(row),
               legacyRoleFallbacks: {
-                leadEstimatorUpn: trimToString(row[resolveSpField('leadEstimatorUpn')]) || undefined,
+                leadEstimatorUpn:
+                  trimToString(row[resolveSpField('leadEstimatorUpn')]) || undefined,
                 supportingEstimatorUpns: row[resolveSpField('supportingEstimatorUpns')],
-                projectManagerUpn: trimToString(row[resolveSpField('projectManagerUpn')]) || undefined,
+                projectManagerUpn:
+                  trimToString(row[resolveSpField('projectManagerUpn')]) || undefined,
                 projectExecutiveUpn:
                   trimToString(row[resolveSpField('projectExecutiveUpn')]) || undefined,
               },
@@ -692,6 +767,7 @@ export class MyProjectLinksReadModelProvider {
     const actorUpn = normalizeUpn(context.actor.principalName);
 
     if (!actorUpn) {
+      const unresolvedSentinel: ISourceLoadResult<never> = { ok: true, rows: [], bounded: false };
       return {
         mode: 'backend',
         sourceStatus: 'principal-unresolved',
@@ -710,6 +786,13 @@ export class MyProjectLinksReadModelProvider {
             projects: 'principal-unresolved',
             legacyFallbackRegistry: 'principal-unresolved',
           },
+          diagnostics: selectDiagnostics({
+            actorUpn: null,
+            rawPrincipalName: context.actor.principalName,
+            projects: unresolvedSentinel as ISourceLoadResult<IProjectSourceRow>,
+            registry: unresolvedSentinel as ISourceLoadResult<ILegacyRegistrySourceRow>,
+            matchCount: 0,
+          }),
         },
       };
     }
@@ -744,6 +827,13 @@ export class MyProjectLinksReadModelProvider {
           projects: sourceReadinessStatus(projects),
           legacyFallbackRegistry: sourceReadinessStatus(registry),
         },
+        diagnostics: selectDiagnostics({
+          actorUpn,
+          rawPrincipalName: context.actor.principalName,
+          projects,
+          registry,
+          matchCount: items.length,
+        }),
       },
     };
   }

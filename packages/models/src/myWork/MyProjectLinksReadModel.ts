@@ -49,6 +49,48 @@ export interface MyProjectLinkItem {
   readonly warnings: readonly MyProjectLinkWarning[];
 }
 
+/**
+ * Closed-set classification surfaced to operators triaging "why are there
+ * no projects?" on a hosted tenant. The provider stamps this synchronously
+ * alongside the envelope so a single field collapses the five legitimate
+ * zero-row paths into one machine-readable value.
+ */
+export const MY_PROJECT_LINKS_DIAGNOSTIC_CLASSIFICATIONS = [
+  'available',
+  'zero-match-available-sources',
+  'partial',
+  'principal-unresolved',
+  'source-unavailable',
+] as const;
+
+export type MyProjectLinksDiagnosticClassification =
+  (typeof MY_PROJECT_LINKS_DIAGNOSTIC_CLASSIFICATIONS)[number];
+
+export const MY_PROJECT_LINKS_PRINCIPAL_UNRESOLVED_REASONS = [
+  'missing-upn',
+  'invalid-upn-format',
+] as const;
+
+export type MyProjectLinksPrincipalUnresolvedReason =
+  (typeof MY_PROJECT_LINKS_PRINCIPAL_UNRESOLVED_REASONS)[number];
+
+/**
+ * Sanitized diagnostic blob co-located with the read-model payload.
+ *
+ * **Redaction rule**: only closed-set enum values and numeric counts.
+ * Never includes UPN, OID, displayName, or any raw claim string. The
+ * provider populates this synchronously; the route layer passes it
+ * through unchanged.
+ */
+export interface MyProjectLinksDiagnostics {
+  readonly classification: MyProjectLinksDiagnosticClassification;
+  readonly principalResolution: 'resolved' | 'unresolved';
+  readonly principalUnresolvedReason?: MyProjectLinksPrincipalUnresolvedReason;
+  readonly matchCount: number;
+  readonly projectsSourceStatus: MyWorkReadModelSourceStatus;
+  readonly legacyFallbackRegistrySourceStatus: MyWorkReadModelSourceStatus;
+}
+
 export interface MyProjectLinksReadModel {
   readonly moduleId: 'my-project-links';
   readonly actor: {
@@ -71,4 +113,10 @@ export interface MyProjectLinksReadModel {
     readonly projects: MyWorkReadModelSourceStatus;
     readonly legacyFallbackRegistry: MyWorkReadModelSourceStatus;
   };
+  /**
+   * Sanitized diagnostic classification — additive, optional. Populated
+   * by the my-dashboard backend provider; safe to omit for fixtures and
+   * legacy consumers.
+   */
+  readonly diagnostics?: MyProjectLinksDiagnostics;
 }

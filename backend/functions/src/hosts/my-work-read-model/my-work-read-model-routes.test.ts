@@ -327,4 +327,32 @@ describe('my-work-read-model-routes — getMyWorkProjectLinks handler', () => {
       requestId: 'req-123',
     });
   });
+
+  it('passes the data.diagnostics blob through unchanged from provider to response (Prompt 04)', async () => {
+    const envelopeWithDiagnostics = {
+      ...MY_PROJECT_LINKS_AVAILABLE,
+      data: {
+        ...MY_PROJECT_LINKS_AVAILABLE.data,
+        diagnostics: {
+          classification: 'zero-match-available-sources' as const,
+          principalResolution: 'resolved' as const,
+          matchCount: 0,
+          projectsSourceStatus: 'available' as const,
+          legacyFallbackRegistrySourceStatus: 'available' as const,
+        },
+      },
+    };
+    provider.getMyProjectLinks.mockResolvedValueOnce(envelopeWithDiagnostics);
+    const reg = findRegistration('getMyWorkProjectLinks');
+    const response = await reg.config.handler(buildRequest(), {});
+    expect(response.status).toBe(200);
+    const body = response.jsonBody as { data: { data: { diagnostics: unknown } } };
+    expect(body.data.data.diagnostics).toEqual({
+      classification: 'zero-match-available-sources',
+      principalResolution: 'resolved',
+      matchCount: 0,
+      projectsSourceStatus: 'available',
+      legacyFallbackRegistrySourceStatus: 'available',
+    });
+  });
 });
