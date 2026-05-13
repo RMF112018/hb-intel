@@ -1,0 +1,18 @@
+{
+  "title": "HB Intel My Dashboard — Adobe Sign Backend Runtime Remediation Prompt Package",
+  "version": "1.0.0",
+  "package": "my_dashboard_b05_adobe_sign_backend_runtime_remediation_prompt_package",
+  "generatedAt": "2026-05-13T00:00:00Z",
+  "repo": "RMF112018/hb-intel",
+  "scope": "Post-B05 runtime remediation sequence for apps/my-dashboard Adobe Sign integration: live OAuth exchange, durable state and encrypted grant storage, production refresh and token service, live search client and read-model composition, and readiness closeout; governed to existing B05/B06 route and scope decisions.",
+  "files": [
+    "README.md",
+    "manifest.json",
+    "Prompt_01_Adobe_Sign_Backend_Runtime_Preflight_And_Drift_Audit.md",
+    "Prompt_02_Implement_Durable_OAuth_State_Grant_And_Encrypted_Token_Storage.md",
+    "Prompt_03_Implement_Live_OAuth_Code_Exchange_And_Callback_Grant_Persistence.md",
+    "Prompt_04_Implement_Production_Refresh_Client_And_Token_Service_Runtime.md",
+    "Prompt_05_Implement_Live_Search_Client_Principal_Resolver_And_Read_Model_Composition.md",
+    "Prompt_06_Validate_Adobe_Backend_Runtime_Readiness_Security_And_Closeout.md"
+  ]
+}
