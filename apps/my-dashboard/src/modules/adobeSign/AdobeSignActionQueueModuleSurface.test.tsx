@@ -131,6 +131,73 @@ describe('AdobeSignActionQueueModuleSurface — copy posture', () => {
   });
 });
 
+describe('AdobeSignActionQueueModuleSurface — data-driven content via queueEnvelope', () => {
+  it('renders 6 agreement rows and pending=6 when queueEnvelope is "available"', async () => {
+    const { ADOBE_SIGN_QUEUE_AVAILABLE } = await import('@hbc/models/myWork/fixtures');
+    const { container } = renderFocused({
+      readinessVariant: 'ready',
+      queueEnvelope: ADOBE_SIGN_QUEUE_AVAILABLE,
+    });
+    const summary = container.querySelector(
+      '[data-my-work-card-role="adobe-sign-queue-summary"]',
+    ) as HTMLElement;
+    expect(summary.querySelector('[data-adobe-queue-summary-pending="6"]')).not.toBeNull();
+    expect(summary.querySelector('[data-adobe-queue-summary-signature="1"]')).not.toBeNull();
+    expect(summary.querySelector('[data-adobe-queue-summary-review="3"]')).not.toBeNull();
+    const list = container.querySelector(
+      '[data-my-work-card-role="adobe-sign-agreement-action-list"]',
+    ) as HTMLElement;
+    expect(list.querySelectorAll('[data-my-work-agreement-item]')).toHaveLength(6);
+    expect(list.querySelector('[data-my-work-empty-queue]')).toBeNull();
+  });
+
+  it('renders the empty-state marker (not unavailable) for an empty queue envelope', async () => {
+    const { ADOBE_SIGN_QUEUE_EMPTY } = await import('@hbc/models/myWork/fixtures');
+    const { container } = renderFocused({
+      readinessVariant: 'ready',
+      queueEnvelope: ADOBE_SIGN_QUEUE_EMPTY,
+    });
+    const list = container.querySelector(
+      '[data-my-work-card-role="adobe-sign-agreement-action-list"]',
+    ) as HTMLElement;
+    expect(list.querySelector('[data-my-work-empty-queue]')).not.toBeNull();
+    expect(list.querySelectorAll('[data-my-work-agreement-item]')).toHaveLength(0);
+  });
+
+  it('renders distinct guidance for configuration-required vs authorization-required (non-ready)', async () => {
+    const config = renderFocused({
+      readinessVariant: 'non-ready',
+      sourceStatus: 'configuration-required',
+    });
+    const configGuidance = config.container.querySelector(
+      '[data-my-work-card-role="adobe-sign-connection-guidance"]',
+    ) as HTMLElement;
+    expect(configGuidance.getAttribute('data-adobe-sign-guidance-status')).toBe(
+      'configuration-required',
+    );
+    expect(configGuidance.textContent).toContain('Configuration required');
+    // configuration-required is NOT the user-actionable case — no Connect CTA.
+    expect(configGuidance.querySelector('[data-adobe-sign-connect-action="start"]')).toBeNull();
+    config.unmount();
+    cleanup();
+
+    const onConnect = () => new Promise<void>(() => undefined);
+    const auth = renderFocused({
+      readinessVariant: 'non-ready',
+      sourceStatus: 'authorization-required',
+      onConnect,
+    });
+    const authGuidance = auth.container.querySelector(
+      '[data-my-work-card-role="adobe-sign-connection-guidance"]',
+    ) as HTMLElement;
+    expect(authGuidance.getAttribute('data-adobe-sign-guidance-status')).toBe(
+      'authorization-required',
+    );
+    expect(authGuidance.textContent).toContain('Authorization required');
+    expect(authGuidance.querySelector('[data-adobe-sign-connect-action="start"]')).not.toBeNull();
+  });
+});
+
 describe('AdobeSignActionQueueModuleSurface — envelope-state variants', () => {
   it('loading variant renders only the loading marker (no ready/non-ready cards)', () => {
     const { container } = renderFocused({ readinessVariant: 'loading' });

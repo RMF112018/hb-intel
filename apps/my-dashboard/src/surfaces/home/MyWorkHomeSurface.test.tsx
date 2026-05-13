@@ -115,6 +115,66 @@ describe('MyWorkHomeSurface — copy posture', () => {
   });
 });
 
+describe('MyWorkHomeSurface — data-driven content via homeEnvelope', () => {
+  it('renders the action item count from the home envelope in both the work-summary and action-queue-home cards (ready)', async () => {
+    const { MY_WORK_HOME_AVAILABLE } = await import('@hbc/models/myWork/fixtures');
+    const { container } = renderHome({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+    });
+    const workSummary = container.querySelector(
+      '[data-my-work-card-role="work-summary"]',
+    ) as HTMLElement;
+    expect(workSummary.getAttribute('data-my-work-card')).toBe('');
+    expect(workSummary.querySelector('[data-my-work-action-item-count="6"]')).not.toBeNull();
+    const queueHome = container.querySelector(
+      '[data-my-work-card-role="adobe-sign-action-queue-home"]',
+    ) as HTMLElement;
+    expect(queueHome.querySelector('[data-adobe-queue-pending-count="6"]')).not.toBeNull();
+    expect(queueHome.querySelector('[data-adobe-queue-awaiting-action-count="6"]')).not.toBeNull();
+  });
+
+  it('renders distinct source-readiness copy for authorization-required vs configuration-required (non-ready)', async () => {
+    const { MY_WORK_HOME_AUTHORIZATION_REQUIRED, MY_WORK_HOME_CONFIGURATION_REQUIRED } =
+      await import('@hbc/models/myWork/fixtures');
+    const auth = renderHome({
+      readinessVariant: 'non-ready',
+      sourceStatus: 'authorization-required',
+      homeEnvelope: MY_WORK_HOME_AUTHORIZATION_REQUIRED,
+    });
+    const authCard = auth.container.querySelector(
+      '[data-my-work-card-role="source-readiness"]',
+    ) as HTMLElement;
+    expect(
+      authCard.querySelector('[data-source-readiness-status="authorization-required"]'),
+    ).not.toBeNull();
+    expect(authCard.textContent).toContain('Authorization required');
+    auth.unmount();
+
+    const config = renderHome({
+      readinessVariant: 'non-ready',
+      sourceStatus: 'configuration-required',
+      homeEnvelope: MY_WORK_HOME_CONFIGURATION_REQUIRED,
+    });
+    const configCard = config.container.querySelector(
+      '[data-my-work-card-role="source-readiness"]',
+    ) as HTMLElement;
+    expect(
+      configCard.querySelector('[data-source-readiness-status="configuration-required"]'),
+    ).not.toBeNull();
+    expect(configCard.textContent).toContain('Configuration required');
+    expect(configCard.textContent).not.toContain('Authorization required');
+  });
+
+  it('preserves the em-dash placeholder when no homeEnvelope is supplied (legacy/preview fallback)', () => {
+    const { container } = renderHome({ readinessVariant: 'ready' });
+    const queueHome = container.querySelector(
+      '[data-my-work-card-role="adobe-sign-action-queue-home"]',
+    ) as HTMLElement;
+    expect(queueHome.textContent).toContain('—');
+  });
+});
+
 describe('MyWorkHomeSurface — envelope-state variants', () => {
   it('loading variant renders only the loading marker (never any non-ready cards)', () => {
     const { container } = renderHome({ readinessVariant: 'loading' });

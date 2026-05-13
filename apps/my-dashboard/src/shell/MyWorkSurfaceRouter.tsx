@@ -39,6 +39,7 @@ function MyWorkHomeRoute({
     <MyWorkHomeSurface
       readinessVariant={readiness.variant}
       sourceStatus={readiness.sourceStatus}
+      homeEnvelope={readiness.envelope}
       onSelectModule={onSelectModule}
     />
   );
@@ -59,6 +60,7 @@ function AdobeSignActionQueueModuleRoute({
     <AdobeSignActionQueueModuleSurface
       readinessVariant={readiness.variant}
       sourceStatus={readiness.sourceStatus}
+      queueEnvelope={readiness.envelope}
       onConnect={onConnect}
     />
   );

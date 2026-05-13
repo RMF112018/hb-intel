@@ -1,5 +1,15 @@
-import type { MyWorkReadModelSourceStatus } from '@hbc/models/myWork';
+import type {
+  MyWorkAdobeSignActionQueueReadModel,
+  MyWorkReadModelEnvelope,
+  MyWorkReadModelSourceStatus,
+} from '@hbc/models/myWork';
 import type { MyWorkCardSpanOverrides } from '../../layout/myWorkFootprints.js';
+import {
+  selectAdobeAgreementListVm,
+  selectAdobeQueueStateVmFromQueue,
+  selectAdobeQueueSummaryVm,
+  selectConnectionGuidanceVm,
+} from '../../state/myWorkCardViewModel.js';
 import type { MyWorkSurfaceReadinessVariant } from '../../state/myWorkSurfaceReadiness.js';
 import { AdobeSignAgreementActionListCard } from './AdobeSignAgreementActionListCard.js';
 import { AdobeSignConnectionGuidanceCard } from './AdobeSignConnectionGuidanceCard.js';
@@ -18,6 +28,12 @@ export interface AdobeSignActionQueueModuleSurfaceProps {
   readonly readinessVariant?: MyWorkSurfaceReadinessVariant;
   /** Source-status marker forwarded for partial-state signaling in Prompt 04. */
   readonly sourceStatus?: MyWorkReadModelSourceStatus;
+  /**
+   * Read-model envelope for the focused Adobe Sign queue route. When
+   * provided, cards render envelope-derived values via view-model
+   * selectors. When absent, cards fall back to legacy placeholder copy.
+   */
+  readonly queueEnvelope?: MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>;
   /**
    * Optional consent-start callback. Forwarded to the connection
    * guidance card on the non-ready variant; the ready variant ignores
@@ -51,6 +67,7 @@ const FOCUSED_NON_READY_GUIDANCE_OVERRIDES: MyWorkCardSpanOverrides = {
 export function AdobeSignActionQueueModuleSurface({
   readinessVariant = 'non-ready',
   sourceStatus,
+  queueEnvelope,
   onConnect,
 }: AdobeSignActionQueueModuleSurfaceProps) {
   if (readinessVariant === 'loading') {
@@ -71,20 +88,35 @@ export function AdobeSignActionQueueModuleSurface({
     <span hidden data-my-work-source-status={sourceStatus} />
   ) : null;
   if (readinessVariant === 'ready') {
+    const queueSummaryVm = selectAdobeQueueSummaryVm(queueEnvelope);
+    const agreementListVm = selectAdobeAgreementListVm(queueEnvelope);
     return (
       <>
         {statusMarker}
-        <AdobeSignQueueSummaryCard spanOverrides={FOCUSED_READY_QUEUE_SUMMARY_OVERRIDES} />
-        <AdobeSignAgreementActionListCard />
+        <AdobeSignQueueSummaryCard
+          spanOverrides={FOCUSED_READY_QUEUE_SUMMARY_OVERRIDES}
+          vm={queueSummaryVm}
+        />
+        <AdobeSignAgreementActionListCard vm={agreementListVm} />
       </>
     );
   }
+  const queueStateVm = selectAdobeQueueStateVmFromQueue(queueEnvelope, sourceStatus);
+  // Only thread a guidance VM when the source status is known. Without a
+  // typed status, the guidance card preserves its legacy CTA-on-onConnect
+  // behavior (used by preview/test contexts that do not supply envelope
+  // metadata).
+  const guidanceVm = sourceStatus ? selectConnectionGuidanceVm(sourceStatus) : undefined;
   return (
     <>
       {statusMarker}
-      <AdobeSignQueueStateCard spanOverrides={FOCUSED_NON_READY_QUEUE_STATE_OVERRIDES} />
+      <AdobeSignQueueStateCard
+        spanOverrides={FOCUSED_NON_READY_QUEUE_STATE_OVERRIDES}
+        vm={queueStateVm}
+      />
       <AdobeSignConnectionGuidanceCard
         spanOverrides={FOCUSED_NON_READY_GUIDANCE_OVERRIDES}
+        vm={guidanceVm}
         onConnect={onConnect}
       />
     </>
