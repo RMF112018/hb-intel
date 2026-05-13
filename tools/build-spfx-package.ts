@@ -27,6 +27,11 @@ import path from 'path';
 import { execSync } from 'child_process';
 import { Script, createContext } from 'node:vm';
 import { createHash } from 'node:crypto';
+import {
+  DOMAINS_REQUIRING_PRODUCTION_RUNTIME_CONFIG,
+  assertProductionRuntimeConfigRequirements,
+  isProductionIntendedBackendMode,
+} from './build-spfx-package-production-runtime-config';
 
 // ── Domain registry ────────────────────────────────────────────────────────
 
@@ -1409,6 +1414,25 @@ function inspectCompiledShellAsset(
   if (backendMode && !shellJs.includes(`"${backendMode}"`)) {
     errors.push(`missing backend mode reference ${backendMode}`);
   }
+  // Defense-in-depth: for domains that require production runtime config, the
+  // compiled shell asset must carry usable functionAppUrl/apiAudience values
+  // when the build is production-intended. Catches operators who bypass the
+  // orchestrator's preflight and invoke gulp directly.
+  if (
+    DOMAINS_REQUIRING_PRODUCTION_RUNTIME_CONFIG.has(domainDir) &&
+    isProductionIntendedBackendMode(backendMode)
+  ) {
+    if (!apiAudience) {
+      errors.push(
+        'production-intended build is missing API_AUDIENCE — refusing to ship a compiled shell asset without it',
+      );
+    }
+    if (!functionAppUrl) {
+      errors.push(
+        'production-intended build is missing FUNCTION_APP_URL — refusing to ship a compiled shell asset without it',
+      );
+    }
+  }
   if (apiAudience && !shellJs.includes('apiAudience')) {
     errors.push('missing apiAudience reference in compiled shell asset');
   }
@@ -1475,6 +1499,23 @@ function inspectPackagedShellAsset(
     }
     if (backendMode && !shellJs.includes(`"${backendMode}"`)) {
       errors.push(`missing packaged backend mode reference ${backendMode}`);
+    }
+    // Defense-in-depth: same production-runtime-config gate applied to the
+    // already-packaged .sppkg shell asset.
+    if (
+      DOMAINS_REQUIRING_PRODUCTION_RUNTIME_CONFIG.has(domainDir) &&
+      isProductionIntendedBackendMode(backendMode)
+    ) {
+      if (!apiAudience) {
+        errors.push(
+          'production-intended .sppkg is missing API_AUDIENCE — refusing to publish a packaged shell asset without it',
+        );
+      }
+      if (!functionAppUrl) {
+        errors.push(
+          'production-intended .sppkg is missing FUNCTION_APP_URL — refusing to publish a packaged shell asset without it',
+        );
+      }
     }
     if (apiAudience && !shellJs.includes('apiAudience')) {
       errors.push('missing apiAudience reference in packaged shell asset');
@@ -2850,6 +2891,18 @@ for (const domain of domains) {
     // Safety-only overrides; empty/absent for every other domain.
     ...safetyShellEnv,
   };
+
+  // Preflight hard-gate: for domains in
+  // DOMAINS_REQUIRING_PRODUCTION_RUNTIME_CONFIG, refuse to spawn the gulp
+  // build when the resolved BACKEND_MODE is production-intended and the
+  // required runtime values are absent. Fail fast — before the build cycle
+  // and before any .sppkg is produced.
+  assertProductionRuntimeConfigRequirements({
+    domainDir: domain.dir,
+    backendMode: shellEnv.BACKEND_MODE,
+    functionAppUrl: shellEnv.FUNCTION_APP_URL,
+    apiAudience: shellEnv.API_AUDIENCE,
+  });
 
   console.log('  Running gulp bundle --ship...');
   run('node node_modules/gulp-cli/bin/gulp.js bundle --ship', {
