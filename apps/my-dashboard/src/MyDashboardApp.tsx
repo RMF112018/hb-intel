@@ -1,4 +1,6 @@
 import type { FC } from 'react';
+
+import { MyWorkReadModelClientProvider } from './runtime/MyWorkReadModelClientProvider.js';
 import { MyWorkShell } from './shell/MyWorkShell.js';
 
 export interface MyDashboardAppProps {
@@ -10,7 +12,9 @@ export interface MyDashboardAppProps {
 export const MyDashboardApp: FC<MyDashboardAppProps> = ({ spfxContext, getApiToken }) => {
   return (
     <div data-my-dashboard-app-root="true">
-      <MyWorkShell spfxContext={spfxContext} getApiToken={getApiToken} />
+      <MyWorkReadModelClientProvider getApiToken={getApiToken}>
+        <MyWorkShell spfxContext={spfxContext} getApiToken={getApiToken} />
+      </MyWorkReadModelClientProvider>
     </div>
   );
 };
