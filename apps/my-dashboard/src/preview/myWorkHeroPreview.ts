@@ -1,15 +1,26 @@
-import {
-  getMyWorkModule,
-  getMyWorkPrimaryNavigationSurface,
-  type MyWorkModuleId,
-  type MyWorkPrimarySurfaceId,
-} from '@hbc/models/myWork';
+/**
+ * Visual / test fixtures for the My Work hero band.
+ *
+ * **Preview-only.** Do not import these constants from production
+ * composition. The shell now derives its hero view-model from the active
+ * route's read-model envelope via `selectMyWorkHomeHeroViewModel` /
+ * `selectMyWorkFocusedAdobeHeroViewModel` (see
+ * `state/myWorkHeroViewModel.ts`). These frozen constants remain only as
+ * stable inputs for `MyWorkHeroBand` unit-render tests and ad-hoc visual
+ * review contexts.
+ *
+ * @module preview/myWorkHeroPreview
+ */
+
+import { getMyWorkModule, getMyWorkPrimaryNavigationSurface } from '@hbc/models/myWork';
 import type { IMyWorkHeroViewModel } from '../shell/MyWorkHeroBand.js';
 
 /**
- * Visible product copy used while Batch 04 read-model values are not yet
- * wired. Reads as a real source-connection state to users; never
- * `TODO`, `mock`, or `placeholder`.
+ * Visible product copy used as a stable placeholder in preview/test renders.
+ * Reads as a real source-connection state to users; never `TODO`, `mock`,
+ * or `placeholder`. Production rendering never emits this string for any
+ * envelope state — `state/myWorkHeroViewModel.ts` uses status-derived copy
+ * (`Loading…`, `Unavailable`, `Authorization required`, etc.) instead.
  */
 const PENDING_VALUE = 'Pending source connection';
 
@@ -59,17 +70,3 @@ export const MY_WORK_FOCUSED_ADOBE_HERO_PREVIEW_VIEW_MODEL: IMyWorkHeroViewModel
     },
   ]),
 });
-
-/**
- * Pick the My Work hero preview view-model for the current shell state.
- * Replace with a read-model-derived selector when Batch 04 lands.
- */
-export function selectMyWorkHeroPreviewViewModel(input: {
-  readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
-  readonly activeModuleId?: MyWorkModuleId;
-}): IMyWorkHeroViewModel {
-  if (input.activeModuleId === 'adobe-sign-action-queue') {
-    return MY_WORK_FOCUSED_ADOBE_HERO_PREVIEW_VIEW_MODEL;
-  }
-  return MY_WORK_HOME_HERO_PREVIEW_VIEW_MODEL;
-}

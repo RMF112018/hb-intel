@@ -1,6 +1,14 @@
 import type { ReactElement } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import {
+  ADOBE_SIGN_QUEUE_AUTHORIZATION_REQUIRED,
+  ADOBE_SIGN_QUEUE_AVAILABLE,
+  MY_WORK_HOME_AUTHORIZATION_REQUIRED,
+  MY_WORK_HOME_AVAILABLE,
+} from '@hbc/models/myWork/fixtures';
+import type { MyProjectLinksReadModel, MyWorkReadModelEnvelope } from '@hbc/models/myWork';
+import type { IMyWorkReadModelClient } from '../api/myWorkReadModelClient.js';
 import { MyWorkReadModelClientProvider } from '../runtime/MyWorkReadModelClientProvider.js';
 import { MY_WORK_ACTIVE_PANEL_ID, MyWorkShell } from './MyWorkShell.js';
 
@@ -16,6 +24,48 @@ afterEach(() => {
  */
 function renderShell(node: ReactElement) {
   return render(<MyWorkReadModelClientProvider>{node}</MyWorkReadModelClientProvider>);
+}
+
+const PROJECT_LINKS_AVAILABLE: MyWorkReadModelEnvelope<MyProjectLinksReadModel> = {
+  mode: 'fixture',
+  sourceStatus: 'available',
+  readOnly: true,
+  warnings: [],
+  generatedAtUtc: '2026-05-13T00:00:00Z',
+  data: { items: [], paging: { hasMore: false } } as unknown as MyProjectLinksReadModel,
+};
+
+function makeStubClient(overrides: Partial<IMyWorkReadModelClient> = {}): IMyWorkReadModelClient {
+  return {
+    getMyWorkHome: vi.fn().mockResolvedValue(MY_WORK_HOME_AVAILABLE),
+    getAdobeSignActionQueue: vi.fn().mockResolvedValue(ADOBE_SIGN_QUEUE_AVAILABLE),
+    getMyProjectLinks: vi.fn().mockResolvedValue(PROJECT_LINKS_AVAILABLE),
+    startAdobeSignOAuth: vi.fn(),
+    ...overrides,
+  };
+}
+
+function renderShellWithStub(stub: IMyWorkReadModelClient, node: ReactElement = <MyWorkShell />) {
+  return render(
+    <MyWorkReadModelClientProvider client={stub}>{node}</MyWorkReadModelClientProvider>,
+  );
+}
+
+function openAdobeFocusedModule(container: HTMLElement): void {
+  const launcher = container.querySelector(
+    '[data-my-work-module-launcher="my-work-home"]',
+  ) as HTMLButtonElement;
+  fireEvent.click(launcher);
+  const item = container.querySelector(
+    '[data-my-work-module-menu-item="adobe-sign-action-queue"]',
+  ) as HTMLButtonElement;
+  fireEvent.click(item);
+}
+
+function getHeroHighlightValue(container: HTMLElement, id: string): string | null {
+  const node = container.querySelector(`[data-my-work-hero-highlight="${id}"]`);
+  // The second span is the value (label is first).
+  return node?.children[1]?.textContent ?? null;
 }
 
 describe('MyWorkShell — composition and data-attribute contract', () => {
@@ -217,5 +267,93 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     const { container } = renderShell(<MyWorkShell forceMode="phone" />);
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
     expect(grid.getAttribute('data-my-work-mode')).toBe('phone');
+  });
+});
+
+describe('MyWorkShell — envelope-derived hero band (Prompt 01 remediation)', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('home + `available` envelope drives the live actionable-items count and Connected source-health', async () => {
+    const stub = makeStubClient();
+    const { container } = renderShellWithStub(stub);
+    await waitFor(() => {
+      expect(getHeroHighlightValue(container, 'actionable-items')).toBe('6');
+    });
+    expect(getHeroHighlightValue(container, 'source-health')).toBe('Connected');
+    expect(getHeroHighlightValue(container, 'connected-sources')).toBe('Adobe Sign');
+    // The active-route envelope is the only fetch on the home view.
+    expect(stub.getMyWorkHome).toHaveBeenCalledTimes(1);
+    expect(stub.getAdobeSignActionQueue).not.toHaveBeenCalled();
+  });
+
+  it('home + `authorization-required` envelope drives status-derived hero highlights', async () => {
+    const stub = makeStubClient({
+      getMyWorkHome: vi.fn().mockResolvedValue(MY_WORK_HOME_AUTHORIZATION_REQUIRED),
+    });
+    const { container } = renderShellWithStub(stub);
+    await waitFor(() => {
+      expect(getHeroHighlightValue(container, 'actionable-items')).toBe('Authorization required');
+    });
+    expect(getHeroHighlightValue(container, 'source-health')).toBe('Authorization required');
+  });
+
+  it('focused Adobe + `available` envelope drives Connected queue-state and the live pending count', async () => {
+    const stub = makeStubClient();
+    const { container } = renderShellWithStub(stub);
+    openAdobeFocusedModule(container);
+    await waitFor(() => {
+      expect(getHeroHighlightValue(container, 'queue-state')).toBe('Connected');
+    });
+    expect(getHeroHighlightValue(container, 'pending-items')).toBe(
+      String(ADOBE_SIGN_QUEUE_AVAILABLE.data.summary.totalActionItemCount),
+    );
+    expect(getHeroHighlightValue(container, 'action-system')).toBe('Adobe Sign');
+    expect(stub.getAdobeSignActionQueue).toHaveBeenCalledTimes(1);
+  });
+
+  it('focused Adobe + `authorization-required` envelope drives Authorization required queue-state copy', async () => {
+    const stub = makeStubClient({
+      getAdobeSignActionQueue: vi.fn().mockResolvedValue(ADOBE_SIGN_QUEUE_AUTHORIZATION_REQUIRED),
+    });
+    const { container } = renderShellWithStub(stub);
+    openAdobeFocusedModule(container);
+    await waitFor(() => {
+      expect(getHeroHighlightValue(container, 'queue-state')).toBe('Authorization required');
+    });
+    expect(getHeroHighlightValue(container, 'pending-items')).toBe('Authorization required');
+  });
+
+  it('never emits the legacy "Pending source connection" copy in hero highlights when the envelope has resolved', async () => {
+    const stub = makeStubClient();
+    const { container } = renderShellWithStub(stub);
+    await waitFor(() => {
+      expect(getHeroHighlightValue(container, 'actionable-items')).toBe('6');
+    });
+    const heroText = container.querySelector('[data-my-work-hero]')?.textContent ?? '';
+    expect(heroText.includes('Pending source connection')).toBe(false);
+
+    openAdobeFocusedModule(container);
+    await waitFor(() => {
+      expect(getHeroHighlightValue(container, 'queue-state')).toBe('Connected');
+    });
+    const focusedHeroText = container.querySelector('[data-my-work-hero]')?.textContent ?? '';
+    expect(focusedHeroText.includes('Pending source connection')).toBe(false);
+  });
+
+  it('the focused Adobe route shares one envelope fetch between the hero and the surface body', async () => {
+    const stub = makeStubClient();
+    // Re-render so the shell mounts directly in the focused Adobe state would
+    // require shell-level state injection; instead, mount focused via the
+    // provider/router directly to assert single-fetch under the focused route.
+    const { container } = renderShellWithStub(stub);
+    openAdobeFocusedModule(container);
+    await waitFor(() => {
+      expect(getHeroHighlightValue(container, 'queue-state')).toBe('Connected');
+    });
+    // Hero band and surface body share the focused Adobe envelope via the
+    // provider context — exactly one fetch for the active focused route.
+    expect(stub.getAdobeSignActionQueue).toHaveBeenCalledTimes(1);
   });
 });

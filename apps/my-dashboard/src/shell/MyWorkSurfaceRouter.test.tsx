@@ -16,6 +16,7 @@ import type { IMyWorkReadModelClient } from '../api/myWorkReadModelClient.js';
 import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
 import { MyWorkReadModelClientProvider } from '../runtime/MyWorkReadModelClientProvider.js';
 
+import { MyWorkActiveEnvelopeProvider } from './MyWorkActiveEnvelopeContext.js';
 import { MyWorkSurfaceRouter } from './MyWorkSurfaceRouter.js';
 
 const PROJECT_LINKS_AVAILABLE: MyWorkReadModelEnvelope<MyProjectLinksReadModel> = {
@@ -43,9 +44,11 @@ function renderRouter(
 ) {
   return render(
     <MyWorkReadModelClientProvider client={client}>
-      <MyWorkBentoGrid mode="standardLaptop">
-        <MyWorkSurfaceRouter activePrimarySurfaceId="my-work-home" {...routerProps} />
-      </MyWorkBentoGrid>
+      <MyWorkActiveEnvelopeProvider activeModuleId={routerProps.activeModuleId}>
+        <MyWorkBentoGrid mode="standardLaptop">
+          <MyWorkSurfaceRouter activePrimarySurfaceId="my-work-home" {...routerProps} />
+        </MyWorkBentoGrid>
+      </MyWorkActiveEnvelopeProvider>
     </MyWorkReadModelClientProvider>,
   );
 }

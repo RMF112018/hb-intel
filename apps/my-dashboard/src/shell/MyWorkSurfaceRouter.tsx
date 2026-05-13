@@ -4,12 +4,12 @@ import {
   type MyWorkPrimarySurfaceId,
 } from '@hbc/models/myWork';
 import { AdobeSignActionQueueModuleSurface } from '../modules/adobeSign/AdobeSignActionQueueModuleSurface.js';
-import {
-  useAdobeSignActionQueueEnvelope,
-  useMyWorkHomeEnvelope,
-} from '../runtime/useMyWorkReadModelEnvelope.js';
 import { selectSurfaceReadiness } from '../state/myWorkSurfaceReadiness.js';
 import { MyWorkHomeSurface } from '../surfaces/home/MyWorkHomeSurface.js';
+import {
+  useMyWorkFocusedAdobeEnvelopeContext,
+  useMyWorkHomeEnvelopeContext,
+} from './MyWorkActiveEnvelopeContext.js';
 
 export interface MyWorkSurfaceRouterProps {
   readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
@@ -25,9 +25,9 @@ export interface MyWorkSurfaceRouterProps {
 }
 
 /**
- * Home route container. Consumes the home read-model envelope via the
- * Prompt 02 hook and maps the envelope state into surface readiness props.
- * Co-located here so each route only fetches what its active surface needs.
+ * Home route container. Consumes the home read-model envelope from the
+ * shell-level `MyWorkActiveEnvelopeProvider` so the hero band and this
+ * route share a single fetch.
  */
 function MyWorkHomeRoute({
   onSelectModule,
@@ -36,7 +36,7 @@ function MyWorkHomeRoute({
   readonly onSelectModule?: (id: MyWorkModuleId) => void;
   readonly getApiToken?: () => Promise<string>;
 }) {
-  const state = useMyWorkHomeEnvelope();
+  const state = useMyWorkHomeEnvelopeContext();
   const readiness = selectSurfaceReadiness(state);
   return (
     <MyWorkHomeSurface
@@ -50,15 +50,16 @@ function MyWorkHomeRoute({
 }
 
 /**
- * Adobe Sign action queue route container. Consumes the Adobe Sign queue
- * envelope and maps it into the focused module surface's readiness props.
+ * Adobe Sign action queue route container. Consumes the queue envelope
+ * from the shell-level `MyWorkActiveEnvelopeProvider` so the hero band and
+ * this route share a single fetch.
  */
 function AdobeSignActionQueueModuleRoute({
   onConnect,
 }: {
   readonly onConnect?: () => Promise<void>;
 }) {
-  const state = useAdobeSignActionQueueEnvelope();
+  const state = useMyWorkFocusedAdobeEnvelopeContext();
   const readiness = selectSurfaceReadiness(state);
   return (
     <AdobeSignActionQueueModuleSurface
@@ -79,8 +80,10 @@ function AdobeSignActionQueueModuleRoute({
  * - any other value (including `undefined` and invalid strings via
  *   `normalizeMyWorkModuleId`) → home surface
  *
- * Each branch delegates to a route container that owns its envelope hook,
- * so the inactive route never issues a read-model request.
+ * Each branch delegates to a route container that consumes its envelope
+ * from `MyWorkActiveEnvelopeProvider` (mounted by the shell), so the
+ * inactive route never issues a read-model request and the hero band
+ * shares the same fetch.
  */
 export function MyWorkSurfaceRouter({
   activeModuleId,

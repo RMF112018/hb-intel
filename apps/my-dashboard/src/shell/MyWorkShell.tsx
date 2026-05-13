@@ -1,10 +1,22 @@
 import { useCallback, useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
-import type { MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
+import {
+  normalizeMyWorkModuleId,
+  type MyWorkModuleId,
+  type MyWorkPrimarySurfaceId,
+} from '@hbc/models/myWork';
 import { createMyWorkReadModelClient } from '../api/myWorkReadModelClientFactory.js';
 import { useMyWorkShellState } from '../state/useMyWorkShellState.js';
-import { selectMyWorkHeroPreviewViewModel } from '../preview/myWorkHeroPreview.js';
+import {
+  selectMyWorkFocusedAdobeHeroViewModel,
+  selectMyWorkHomeHeroViewModel,
+} from '../state/myWorkHeroViewModel.js';
 import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
 import { AdobeSignCallbackBanner } from './AdobeSignCallbackBanner.js';
+import {
+  MyWorkActiveEnvelopeProvider,
+  useMyWorkFocusedAdobeEnvelopeContext,
+  useMyWorkHomeEnvelopeContext,
+} from './MyWorkActiveEnvelopeContext.js';
 import { MyWorkPrimaryNavigation } from './MyWorkPrimaryNavigation.js';
 import { MyWorkHeroBand } from './MyWorkHeroBand.js';
 import { MyWorkSurfaceRouter } from './MyWorkSurfaceRouter.js';
@@ -69,11 +81,6 @@ export function MyWorkShell({
 
   const themeStyle = useMemo(() => MY_WORK_THEME_VARS, []);
 
-  const heroViewModel = useMemo(
-    () => selectMyWorkHeroPreviewViewModel({ activePrimarySurfaceId, activeModuleId }),
-    [activePrimarySurfaceId, activeModuleId],
-  );
-
   // Adobe Sign consent-start callback. Only wired in backend mode
   // (a real bearer-token provider is present); fixture/test renders
   // omit `getApiToken`, so the connection card stays button-less.
@@ -104,40 +111,73 @@ export function MyWorkShell({
       data-my-work-shell-mode={mode}
       data-my-work-view-state={viewState}
     >
-      <section className={styles.commandSurface} data-my-work-command-surface="">
-        <MyWorkPrimaryNavigation
-          mode={mode}
-          activePrimarySurfaceId={activePrimarySurfaceId}
-          activeModuleId={activeModuleId}
-          onSelectPrimarySurface={selectPrimarySurface}
-          onSelectModule={selectModule}
-          panelId={MY_WORK_ACTIVE_PANEL_ID}
-        />
-        <MyWorkHeroBand mode={mode} viewModel={heroViewModel} />
-      </section>
-      <div className={styles.canvas} data-my-work-canvas="">
-        <main
-          id={MY_WORK_ACTIVE_PANEL_ID}
-          role="tabpanel"
-          aria-labelledby={tabId}
-          className={styles.activePanel}
-          data-my-work-active-surface-panel={activePrimarySurfaceId}
-        >
-          <AdobeSignCallbackBanner />
-          <MyWorkBentoGrid mode={mode}>
-            <MyWorkSurfaceRouter
-              activePrimarySurfaceId={activePrimarySurfaceId}
-              activeModuleId={activeModuleId}
-              onSelectModule={selectModule}
-              getApiToken={getApiToken}
-              onConnectAdobeSign={handleConnectAdobeSign}
-            />
-            {children}
-          </MyWorkBentoGrid>
-        </main>
-      </div>
+      <MyWorkActiveEnvelopeProvider activeModuleId={activeModuleId}>
+        <section className={styles.commandSurface} data-my-work-command-surface="">
+          <MyWorkPrimaryNavigation
+            mode={mode}
+            activePrimarySurfaceId={activePrimarySurfaceId}
+            activeModuleId={activeModuleId}
+            onSelectPrimarySurface={selectPrimarySurface}
+            onSelectModule={selectModule}
+            panelId={MY_WORK_ACTIVE_PANEL_ID}
+          />
+          <MyWorkHeroBandAdapter mode={mode} activeModuleId={activeModuleId} />
+        </section>
+        <div className={styles.canvas} data-my-work-canvas="">
+          <main
+            id={MY_WORK_ACTIVE_PANEL_ID}
+            role="tabpanel"
+            aria-labelledby={tabId}
+            className={styles.activePanel}
+            data-my-work-active-surface-panel={activePrimarySurfaceId}
+          >
+            <AdobeSignCallbackBanner />
+            <MyWorkBentoGrid mode={mode}>
+              <MyWorkSurfaceRouter
+                activePrimarySurfaceId={activePrimarySurfaceId}
+                activeModuleId={activeModuleId}
+                onSelectModule={selectModule}
+                getApiToken={getApiToken}
+                onConnectAdobeSign={handleConnectAdobeSign}
+              />
+              {children}
+            </MyWorkBentoGrid>
+          </main>
+        </div>
+      </MyWorkActiveEnvelopeProvider>
     </div>
   );
+}
+
+/**
+ * Selects the hero view-model from whichever envelope context is mounted by
+ * the active provider. Branches on `activeModuleId` so only the active
+ * route's consumer hook is invoked — matching the provider mounted above.
+ */
+function MyWorkHeroBandAdapter({
+  mode,
+  activeModuleId,
+}: {
+  readonly mode: MyWorkResponsiveMode;
+  readonly activeModuleId?: MyWorkModuleId;
+}) {
+  const normalized = normalizeMyWorkModuleId(activeModuleId);
+  if (normalized === 'adobe-sign-action-queue') {
+    return <FocusedAdobeHeroBand mode={mode} />;
+  }
+  return <HomeHeroBand mode={mode} />;
+}
+
+function HomeHeroBand({ mode }: { readonly mode: MyWorkResponsiveMode }) {
+  const state = useMyWorkHomeEnvelopeContext();
+  const viewModel = useMemo(() => selectMyWorkHomeHeroViewModel(state), [state]);
+  return <MyWorkHeroBand mode={mode} viewModel={viewModel} />;
+}
+
+function FocusedAdobeHeroBand({ mode }: { readonly mode: MyWorkResponsiveMode }) {
+  const state = useMyWorkFocusedAdobeEnvelopeContext();
+  const viewModel = useMemo(() => selectMyWorkFocusedAdobeHeroViewModel(state), [state]);
+  return <MyWorkHeroBand mode={mode} viewModel={viewModel} />;
 }
 
 export default MyWorkShell;
