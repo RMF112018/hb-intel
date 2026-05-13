@@ -10,6 +10,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@hbc/models/myWork/fixtures': resolve(
+        __dirname,
+        '../../packages/models/src/myWork/fixtures/index.ts',
+      ),
       '@hbc/models/myWork': resolve(__dirname, '../../packages/models/src/myWork/index.ts'),
       '@hbc/models/pcc': resolve(__dirname, '../../packages/models/src/pcc/index.ts'),
       '@hbc/models': resolve(__dirname, '../../packages/models/src/index.ts'),
