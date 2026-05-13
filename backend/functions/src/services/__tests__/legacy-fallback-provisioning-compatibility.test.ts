@@ -17,6 +17,11 @@ describe('legacy fallback provisioning compatibility', () => {
     expect(isSharePointFieldTypeCompatible('MultiLineText', 'Text')).toBe(false);
   });
 
+  it('keeps URL compatibility strict and does not treat Text as URL-compatible', () => {
+    expect(isSharePointFieldTypeCompatible('URL', 'URL')).toBe(true);
+    expect(isSharePointFieldTypeCompatible('URL', 'Text')).toBe(false);
+  });
+
   it('exposes compatible type families for diagnostics', () => {
     expect(getCompatibleSharePointFieldTypes('Choice')).toEqual(['Choice', 'MultiChoice']);
     expect(getCompatibleSharePointFieldTypes('Number')).toEqual(['Number', 'Currency']);

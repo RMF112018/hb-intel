@@ -57,12 +57,36 @@ describe('legacy fallback list descriptors and matching contracts', () => {
     expect(field(LEGACY_FALLBACK_REGISTRY_LIST_DESCRIPTOR, 'FolderWebUrl')?.type).toBe('URL');
     expect(field(LEGACY_FALLBACK_REGISTRY_LIST_DESCRIPTOR, 'MatchMethod')?.type).toBe('Choice');
     expect(field(LEGACY_FALLBACK_REGISTRY_LIST_DESCRIPTOR, 'Notes')?.type).toBe('MultiLineText');
+    expect(field(LEGACY_FALLBACK_REGISTRY_LIST_DESCRIPTOR, 'procoreProject')?.type).toBe('Text');
 
     expect(field(LEGACY_FALLBACK_SYNC_RUNS_LIST_DESCRIPTOR, 'RunId')?.type).toBe('Text');
     expect(field(LEGACY_FALLBACK_SYNC_RUNS_LIST_DESCRIPTOR, 'StartedUtc')?.type).toBe('DateTime');
     expect(field(LEGACY_FALLBACK_SYNC_RUNS_LIST_DESCRIPTOR, 'CompletedUtc')?.type).toBe('DateTime');
     expect(field(LEGACY_FALLBACK_SYNC_RUNS_LIST_DESCRIPTOR, 'Status')?.type).toBe('Choice');
     expect(field(LEGACY_FALLBACK_SYNC_RUNS_LIST_DESCRIPTOR, 'SummaryJson')?.type).toBe('MultiLineText');
+  });
+
+  it('includes all My Projects canonical role-array registry fields as MultiLineText', () => {
+    const canonicalRoleFields = [
+      'leadEstimatorUpns',
+      'estimatorUpns',
+      'idsManagerUpns',
+      'projectAccountantUpns',
+      'projectAdministratorUpns',
+      'projectCoordinatorUpns',
+      'superintendentUpns',
+      'leadSuperintendentUpns',
+      'projectManagerUpns',
+      'leadProjectManagerUpns',
+      'projectExecutiveUpns',
+      'safetyCoordinatorUpns',
+      'qcManagerUpns',
+      'warrantyManagerUpns',
+    ] as const;
+
+    for (const fieldName of canonicalRoleFields) {
+      expect(field(LEGACY_FALLBACK_REGISTRY_LIST_DESCRIPTOR, fieldName)?.type).toBe('MultiLineText');
+    }
   });
 
   it('uses anchored parser and confidence mapping assumptions', () => {

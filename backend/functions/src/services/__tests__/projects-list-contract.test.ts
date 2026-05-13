@@ -53,8 +53,8 @@ describe('REQUIRED_PRODUCTION_FIELDS', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('OPTIONAL_EXTENSION_FIELDS', () => {
-  it('contains 18 extension fields (16 P2-07 + 2 P9-G5-05)', () => {
-    expect(OPTIONAL_EXTENSION_FIELDS).toHaveLength(18);
+  it('contains 32 extension fields (16 existing + 14 My Projects role arrays + 2 P9-G5-05)', () => {
+    expect(OPTIONAL_EXTENSION_FIELDS).toHaveLength(32);
   });
 
   it('includes P2-07 structured location fields', () => {
@@ -66,6 +66,31 @@ describe('OPTIONAL_EXTENSION_FIELDS', () => {
   it('includes P9-G5-05 OID fields', () => {
     expect(OPTIONAL_EXTENSION_FIELDS).toContain('submittedByOid');
     expect(OPTIONAL_EXTENSION_FIELDS).toContain('completedByOid');
+  });
+
+  it('includes all My Projects canonical role-array fields', () => {
+    const canonicalRoleFields = [
+      'leadEstimatorUpns',
+      'estimatorUpns',
+      'idsManagerUpns',
+      'projectAccountantUpns',
+      'projectAdministratorUpns',
+      'projectCoordinatorUpns',
+      'superintendentUpns',
+      'leadSuperintendentUpns',
+      'projectManagerUpns',
+      'leadProjectManagerUpns',
+      'projectExecutiveUpns',
+      'safetyCoordinatorUpns',
+      'qcManagerUpns',
+      'warrantyManagerUpns',
+    ] as const;
+
+    for (const field of canonicalRoleFields) {
+      expect(OPTIONAL_EXTENSION_FIELDS).toContain(field);
+      expect(PROJECTS_LIST_FIELD_MAP[field].spType).toBe('MultiLineText');
+      expect(PROJECTS_LIST_FIELD_MAP[field].serialization).toBe('json-array');
+    }
   });
 
   it('every optional field exists in PROJECTS_LIST_SELECT_FIELDS', () => {
@@ -118,6 +143,20 @@ function makeCompleteItem(): Record<string, unknown> {
     projectManagerUpn: 'pm@hb.com',
     leadEstimatorUpn: 'est@hb.com',
     supportingEstimatorUpns: '[]',
+    leadEstimatorUpns: '[]',
+    estimatorUpns: '[]',
+    idsManagerUpns: '[]',
+    projectAccountantUpns: '[]',
+    projectAdministratorUpns: '[]',
+    projectCoordinatorUpns: '[]',
+    superintendentUpns: '[]',
+    leadSuperintendentUpns: '[]',
+    projectManagerUpns: '[]',
+    leadProjectManagerUpns: '[]',
+    projectExecutiveUpns: '[]',
+    safetyCoordinatorUpns: '[]',
+    qcManagerUpns: '[]',
+    warrantyManagerUpns: '[]',
     timberscanApproverUpn: 'ts@hb.com',
     sageAccessUpns: '[]',
     clarificationRequestedAt: '',

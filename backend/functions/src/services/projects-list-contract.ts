@@ -118,6 +118,34 @@ export interface IProjectsListItem {
   leadEstimatorUpn: string;
   /** Supporting estimator UPNs — JSON-serialized `string[]` in SP MultiLineText. */
   supportingEstimatorUpns: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  leadEstimatorUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  estimatorUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  idsManagerUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  projectAccountantUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  projectAdministratorUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  projectCoordinatorUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  superintendentUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  leadSuperintendentUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  projectManagerUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  leadProjectManagerUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  projectExecutiveUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  safetyCoordinatorUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  qcManagerUpns?: string;
+  /** My Projects canonical role field — JSON-serialized `string[]`. */
+  warrantyManagerUpns?: string;
   /** Timberscan approver UPN. */
   timberscanApproverUpn: string;
   /** Sage 300 access UPNs — JSON-serialized `string[]` in SP MultiLineText. */
@@ -230,6 +258,20 @@ export const PROJECTS_LIST_FIELD_MAP = {
   projectManagerUpn:        { spInternalName: 'projectManagerUpn',        spType: 'Text',     serialization: 'direct' },
   leadEstimatorUpn:         { spInternalName: 'leadEstimatorUpn',         spType: 'Text',     serialization: 'direct' },
   supportingEstimatorUpns:  { spInternalName: 'supportingEstimatorUpns',  spType: 'MultiLineText', serialization: 'json-array' },
+  leadEstimatorUpns:        { spInternalName: 'leadEstimatorUpns',        spType: 'MultiLineText', serialization: 'json-array' },
+  estimatorUpns:            { spInternalName: 'estimatorUpns',            spType: 'MultiLineText', serialization: 'json-array' },
+  idsManagerUpns:           { spInternalName: 'idsManagerUpns',           spType: 'MultiLineText', serialization: 'json-array' },
+  projectAccountantUpns:    { spInternalName: 'projectAccountantUpns',    spType: 'MultiLineText', serialization: 'json-array' },
+  projectAdministratorUpns: { spInternalName: 'projectAdministratorUpns', spType: 'MultiLineText', serialization: 'json-array' },
+  projectCoordinatorUpns:   { spInternalName: 'projectCoordinatorUpns',   spType: 'MultiLineText', serialization: 'json-array' },
+  superintendentUpns:       { spInternalName: 'superintendentUpns',       spType: 'MultiLineText', serialization: 'json-array' },
+  leadSuperintendentUpns:   { spInternalName: 'leadSuperintendentUpns',   spType: 'MultiLineText', serialization: 'json-array' },
+  projectManagerUpns:       { spInternalName: 'projectManagerUpns',       spType: 'MultiLineText', serialization: 'json-array' },
+  leadProjectManagerUpns:   { spInternalName: 'leadProjectManagerUpns',   spType: 'MultiLineText', serialization: 'json-array' },
+  projectExecutiveUpns:     { spInternalName: 'projectExecutiveUpns',     spType: 'MultiLineText', serialization: 'json-array' },
+  safetyCoordinatorUpns:    { spInternalName: 'safetyCoordinatorUpns',    spType: 'MultiLineText', serialization: 'json-array' },
+  qcManagerUpns:            { spInternalName: 'qcManagerUpns',            spType: 'MultiLineText', serialization: 'json-array' },
+  warrantyManagerUpns:      { spInternalName: 'warrantyManagerUpns',      spType: 'MultiLineText', serialization: 'json-array' },
   timberscanApproverUpn:    { spInternalName: 'timberscanApproverUpn',    spType: 'Text',     serialization: 'direct' },
   sageAccessUpns:           { spInternalName: 'sageAccessUpns',           spType: 'MultiLineText', serialization: 'json-array' },
 
@@ -283,7 +325,12 @@ export const OPTIONAL_EXTENSION_FIELDS: readonly (keyof IProjectsListItem)[] = [
   'projectStreetAddress', 'projectCity', 'projectCounty', 'projectState', 'projectZip',
   'officeDivision', 'procoreProject',
   'projectExecutiveUpn', 'projectManagerUpn', 'leadEstimatorUpn',
-  'supportingEstimatorUpns', 'timberscanApproverUpn', 'sageAccessUpns',
+  'supportingEstimatorUpns',
+  'leadEstimatorUpns', 'estimatorUpns', 'idsManagerUpns', 'projectAccountantUpns',
+  'projectAdministratorUpns', 'projectCoordinatorUpns', 'superintendentUpns',
+  'leadSuperintendentUpns', 'projectManagerUpns', 'leadProjectManagerUpns',
+  'projectExecutiveUpns', 'safetyCoordinatorUpns', 'qcManagerUpns', 'warrantyManagerUpns',
+  'timberscanApproverUpn', 'sageAccessUpns',
   'clarificationRequestedAt', 'requesterRetryUsed', 'clarificationItems',
   'submittedByOid', 'completedByOid',
 ];

@@ -68,27 +68,57 @@
 | Title | LinkTitleNoMenu | Computed | No | No | Yes | No | System/OOB-like |
 | Modified | Modified | DateTime | No | No | Yes | No | System/OOB-like |
 
-## 4. Content Types / Forms / Behavioral Context
+## 4. Prompt 02 Target Additions (Provisioning-Required)
+
+The following fields are repo-side target contract additions for My Projects and are not yet represented as live-verified columns in the snapshot table above.
+
+| Internal Name | Target Type | Required | Indexed | Storage/Semantics |
+|---|---|---|---|---|
+| leadEstimatorUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| estimatorUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| idsManagerUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| projectAccountantUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| projectAdministratorUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| projectCoordinatorUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| superintendentUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| leadSuperintendentUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| projectManagerUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| leadProjectManagerUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| projectExecutiveUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| safetyCoordinatorUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| qcManagerUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| warrantyManagerUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| procoreProject | Text | No | No | Raw Procore project identifier/token |
+
+## 5. Schema Gap Table (Prompt 02)
+
+| Concern | Live Snapshot | Target Contract | Tenant Mutation Owner |
+|---|---|---|---|
+| Canonical role arrays + `procoreProject` | Not present in live snapshot table | Add 14 role-array Note fields + `procoreProject` Text | Later operator-gated provisioning/migration path (Prompt 06/07) |
+| `FolderWebUrl` type drift | Live snapshot is `Text` | Descriptor remains `URL` in Prompt 02 | Operator-pending provisioning-readiness issue (documented; no destructive recreation in Prompt 02) |
+
+## 6. Content Types / Forms / Behavioral Context
 - Associated Content Types: `Item`
 - Default List Forms: `/sites/HBCentral/Lists/Legacy Project Fallback Registry/AllItems.aspx`
 - Observed Role Hint: canonical registry populated by timer-triggered `legacyFallbackDiscoveryRun` handler in the `@hbc/functions` Azure Functions app.
 
-## 5. Relationship Observations
+## 7. Relationship Observations
 - Outbound lookup references: AppPrincipals, User Information List.
 - Logical foreign keys:
   - `DiscoveryRunId` → `Legacy Project Fallback Sync Runs.RunId` (per-run provenance; not an enforced SharePoint lookup).
   - `MatchedProjectListItemId` → `Projects.ID` on HBCentral when `MatchStatus == matched` (contractual join, not enforced).
 - Composite natural key: `(DriveId, DriveItemId)` — the handler upserts on this pair; both fields indexed.
 
-## 6. Implementation-Relevant Findings
+## 8. Implementation-Relevant Findings
 - Writer: `backend/functions/src/services/legacy-fallback/discovery-repository.ts` — `upsertRegistryRecord()` now uses a Graph-native list client ([graph-list-client.ts](../../../../../backend/functions/src/services/legacy-fallback/graph-list-client.ts)) that filters payload to declared non-readonly columns before POST/PATCH.
 - Indexed fields: `ProjectNumber`, `DriveId`, `DriveItemId`, `MatchStatus`, `IsActive` — use these as filter keys to avoid non-indexed query warnings.
 - Non-hidden editable business fields: 24.
 - Stale-reconciliation contract: the discovery handler calls `listActiveRegistryRecordsByYear(year)` then `markRegistryRecordsInactive(...)` at end of each run to flip `IsActive=false` for folders not re-seen; identity is preserved by the `(DriveId, DriveItemId)` pair.
 - Graph field-payload shape: numbers and booleans are native JSON values; choice fields accept the literal choice string; `LegacyYear` is a plain numeric, not a SharePoint Year column.
 
-## 7. Open Questions / Follow-Up Checks
+## 9. Open Questions / Follow-Up Checks
 - The original `FolderWebUrl` column was created without a usable type definition (Graph POST returned `500 generalException` for any payload shape). It was deleted and recreated 2026-04-19 as a text column of `MaxLength=255`. If folder paths can exceed 255 chars, widen the column or truncate in the writer.
+- Prompt 02 intentionally keeps descriptor/runtime handling unchanged (`FolderWebUrl` remains `URL` in descriptor, while live snapshot remains `Text`) and carries this as an explicit operator-gated type drift for provisioning readiness; no destructive column recreation is in scope.
 - `MatchConfidence` is a choice column but the writer currently stores values from a domain enum (`none`, `low`, `medium`, `high`). Confirm both sets stay in sync whenever the matching engine's confidence vocabulary evolves.
 - Consider adding an index on `LegacyYear` if registry review queries filter by year (Graph `$filter=fields/LegacyYear eq N` currently requires `Prefer: HonorNonIndexedQueriesWarningMayFailRandomly`).
 - Re-extract after schema changes via `scripts/provision-legacy-fallback-lists.ts` or manual column edits.

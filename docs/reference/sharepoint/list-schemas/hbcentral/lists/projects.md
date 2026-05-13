@@ -95,7 +95,35 @@
 | Modified | Modified | DateTime | No | No | Yes | No | System/OOB-like |
 | Unique Id | UniqueId | Lookup | No | Yes | Yes | No | System/OOB-like |
 
-## 4. Content Types / Forms / Behavioral Context
+## 4. Prompt 02 Target Additions (Provisioning-Required)
+
+The following My Projects fields are repo-side target contract additions and are **not** represented as live-verified columns in the snapshot above. Tenant mutation is operator-gated in later prompts/scripts.
+
+| Internal Name | Target Type | Required | Indexed | Storage/Semantics |
+|---|---|---|---|---|
+| leadEstimatorUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| estimatorUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| idsManagerUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| projectAccountantUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| projectAdministratorUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| projectCoordinatorUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| superintendentUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| leadSuperintendentUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| projectManagerUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| leadProjectManagerUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| projectExecutiveUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| safetyCoordinatorUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| qcManagerUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+| warrantyManagerUpns | Note (MultiLineText) | No | No | JSON-serialized `string[]` |
+
+## 5. Schema Gap Table (Prompt 02)
+
+| Concern | Live Snapshot | Target Contract | Tenant Mutation Owner |
+|---|---|---|---|
+| Canonical role arrays for My Projects | Not present in live snapshot table | Add 14 `...Upns` Note fields | Later operator-gated provisioning step (Prompt 05/06 path) |
+| Legacy compatibility role fields | Present (`projectExecutiveUpn`, `projectManagerUpn`, `leadEstimatorUpn`, `supportingEstimatorUpns`) | Retain unchanged | N/A in Prompt 02 |
+
+## 6. Content Types / Forms / Behavioral Context
 - Associated Content Types: `Item, Folder`
 - Default New Form: `/sites/HBCentral/Lists/Projects/NewForm.aspx`
 - Default Edit Form: `/sites/HBCentral/Lists/Projects/EditForm.aspx`
@@ -103,10 +131,10 @@
 - Appears Custom Forms (URL heuristic): `true`
 - Observed Role Hint: `project master registry (likely)`
 
-## 5. Relationship Observations
+## 7. Relationship Observations
 - Outbound lookup references: AppPrincipals, User Information List.
 
-## 6. Implementation-Relevant Findings
+## 8. Implementation-Relevant Findings
 - Non-hidden editable fields: `43`
 - Hidden fields: `61`
 - Non-hidden lookup fields: `4`
@@ -114,7 +142,7 @@
 - Indexed non-hidden fields: `0`
 - System/OOB fields are included where integration-relevant; app contracts should prefer non-hidden business fields unless specific OOB audit/compliance metadata is required.
 
-## 7. Open Questions / Follow-Up Checks
+## 9. Open Questions / Follow-Up Checks
 - Confirm custom form bindings in list settings if app UX depends on Power Apps forms.
 - Confirm canonical join keys and index strategy for production query patterns.
 - Re-extract after provisioning changes or when schema drift is suspected.

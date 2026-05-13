@@ -532,8 +532,8 @@ describe('safeParseJsonArray()', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('PROJECTS_LIST_SELECT_FIELDS', () => {
-  it('contains exactly 43 field names (24 legacy + 17 P2-07 gap fields + 2 P9-G5-05 oid fields)', () => {
-    expect(PROJECTS_LIST_SELECT_FIELDS).toHaveLength(43);
+  it('contains exactly 57 field names (existing contract + 14 My Projects canonical role arrays)', () => {
+    expect(PROJECTS_LIST_SELECT_FIELDS).toHaveLength(57);
   });
 
   it('includes Title and Year', () => {

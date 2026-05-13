@@ -165,9 +165,8 @@ describe('Mock repository round-trip (in-memory only — not SP proof)', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Real field contract proof (PROJECTS_LIST_FIELD_MAP)', () => {
-  it('field map covers all 43 production schema columns', () => {
-    // 26 legacy (Title + field_1..field_24 + Year) + 17 P2-07 gap fields + 2 P9-G5-05 oid fields
-    expect(Object.keys(PROJECTS_LIST_FIELD_MAP)).toHaveLength(43);
+  it('field map covers all 57 production schema columns after My Projects schema expansion', () => {
+    expect(Object.keys(PROJECTS_LIST_FIELD_MAP)).toHaveLength(57);
   });
 
   it('SELECT_FIELDS includes all mapped SP internal names', () => {
