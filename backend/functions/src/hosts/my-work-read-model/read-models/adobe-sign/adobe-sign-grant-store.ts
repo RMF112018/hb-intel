@@ -14,11 +14,29 @@
  */
 
 import type { AdobeSignActorKey } from './adobe-sign-actor-normalizer.js';
-import type { IAdobeSignGrantRecord } from './adobe-sign-grant-record.js';
+import type {
+  AdobeSignGrantFailureMetadata,
+  IAdobeSignGrantRecord,
+} from './adobe-sign-grant-record.js';
 
 export interface IAdobeSignGrantStore {
   upsertGrant(record: IAdobeSignGrantRecord): Promise<void>;
   findGrant(actorKey: AdobeSignActorKey): Promise<IAdobeSignGrantRecord | undefined>;
+  /**
+   * Mark an existing grant as `requires-reauth`. No-op when the actor has
+   * no grant on file. Optional failure metadata is recorded for diagnostic
+   * UI; it must never include vendor secret strings (Prompt 02 contract
+   * already restricts the type).
+   */
+  markReauthorizationRequired(
+    actorKey: AdobeSignActorKey,
+    failure?: AdobeSignGrantFailureMetadata,
+  ): Promise<void>;
+  /**
+   * Mark an existing grant as `revoked` and stamp `revokedAtUtc`. No-op
+   * when the actor has no grant on file.
+   */
+  markRevoked(actorKey: AdobeSignActorKey, revokedAtUtc: string): Promise<void>;
 }
 
 export function createDeterministicMockGrantStore(): IAdobeSignGrantStore {
@@ -29,6 +47,24 @@ export function createDeterministicMockGrantStore(): IAdobeSignGrantStore {
     },
     async findGrant(actorKey) {
       return grants.get(actorKey);
+    },
+    async markReauthorizationRequired(actorKey, failure) {
+      const existing = grants.get(actorKey);
+      if (!existing) return;
+      grants.set(actorKey, {
+        ...existing,
+        state: 'requires-reauth',
+        ...(failure !== undefined ? { failureMetadata: failure } : {}),
+      });
+    },
+    async markRevoked(actorKey, revokedAtUtc) {
+      const existing = grants.get(actorKey);
+      if (!existing) return;
+      grants.set(actorKey, {
+        ...existing,
+        state: 'revoked',
+        revokedAtUtc,
+      });
     },
   };
 }
