@@ -26,9 +26,11 @@ function getCardRoles(container: HTMLElement): string[] {
 }
 
 function spanOf(container: HTMLElement, role: string): string | null {
-  return container
-    .querySelector(`[data-my-work-card-role="${role}"]`)
-    ?.getAttribute('data-my-work-column-span') ?? null;
+  return (
+    container
+      .querySelector(`[data-my-work-card-role="${role}"]`)
+      ?.getAttribute('data-my-work-column-span') ?? null
+  );
 }
 
 describe('MyWorkHomeSurface — default (non-ready) variant', () => {
@@ -39,8 +41,9 @@ describe('MyWorkHomeSurface — default (non-ready) variant', () => {
       'adobe-sign-queue-state',
       'source-readiness',
     ]);
-    expect(container.querySelector('[data-my-work-card-role="adobe-sign-action-queue-home"]'))
-      .toBeNull();
+    expect(
+      container.querySelector('[data-my-work-card-role="adobe-sign-action-queue-home"]'),
+    ).toBeNull();
   });
 
   it('resolves 12-column spans on desktop (3 / 6 / 3)', () => {
@@ -68,14 +71,9 @@ describe('MyWorkHomeSurface — default (non-ready) variant', () => {
 describe('MyWorkHomeSurface — ready variant', () => {
   it('emits the two ready cards in order', () => {
     const { container } = renderHome({ readinessVariant: 'ready' });
-    expect(getCardRoles(container)).toEqual([
-      'work-summary',
-      'adobe-sign-action-queue-home',
-    ]);
-    expect(container.querySelector('[data-my-work-card-role="adobe-sign-queue-state"]'))
-      .toBeNull();
-    expect(container.querySelector('[data-my-work-card-role="source-readiness"]'))
-      .toBeNull();
+    expect(getCardRoles(container)).toEqual(['work-summary', 'adobe-sign-action-queue-home']);
+    expect(container.querySelector('[data-my-work-card-role="adobe-sign-queue-state"]')).toBeNull();
+    expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
   });
 
   it('resolves 12-column spans on desktop (4 / 8)', () => {
@@ -114,5 +112,29 @@ describe('MyWorkHomeSurface — copy posture', () => {
     expect(/\bmock\b/i.test(text)).toBe(false);
     expect(/\bplaceholder\b/i.test(text)).toBe(false);
     expect(/\bfake\b/i.test(text)).toBe(false);
+  });
+});
+
+describe('MyWorkHomeSurface — envelope-state variants', () => {
+  it('loading variant renders only the loading marker (never any non-ready cards)', () => {
+    const { container } = renderHome({ readinessVariant: 'loading' });
+    expect(container.querySelector('[data-my-work-readiness-state="loading"]')).not.toBeNull();
+    expect(getCardRoles(container)).toEqual([]);
+    expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
+  });
+
+  it('error variant renders only the error marker', () => {
+    const { container } = renderHome({ readinessVariant: 'error' });
+    expect(container.querySelector('[data-my-work-readiness-state="error"]')).not.toBeNull();
+    expect(getCardRoles(container)).toEqual([]);
+  });
+
+  it('ready + sourceStatus="partial" emits the ready tree plus a hidden source-status marker', () => {
+    const { container } = renderHome({
+      readinessVariant: 'ready',
+      sourceStatus: 'partial',
+    });
+    expect(getCardRoles(container)).toEqual(['work-summary', 'adobe-sign-action-queue-home']);
+    expect(container.querySelector('[data-my-work-source-status="partial"]')).not.toBeNull();
   });
 });

@@ -1,15 +1,23 @@
-import type { MyWorkModuleId } from '@hbc/models/myWork';
+import type { MyWorkModuleId, MyWorkReadModelSourceStatus } from '@hbc/models/myWork';
 import type { MyWorkCardSpanOverrides } from '../../layout/myWorkFootprints.js';
 import { AdobeSignActionQueueHomeCard } from '../../modules/adobeSign/AdobeSignActionQueueHomeCard.js';
 import { AdobeSignQueueStateCard } from '../../modules/adobeSign/AdobeSignQueueStateCard.js';
+import type { MyWorkSurfaceReadinessVariant } from '../../state/myWorkSurfaceReadiness.js';
 import { SourceReadinessCard } from './SourceReadinessCard.js';
 import { WorkSummaryCard } from './WorkSummaryCard.js';
 
-export type MyWorkSurfaceReadinessVariant = 'ready' | 'non-ready';
+export type { MyWorkSurfaceReadinessVariant };
 
 export interface MyWorkHomeSurfaceProps {
-  /** Presentation-only readiness variant. Defaults to `'non-ready'`. */
+  /**
+   * Readiness variant. `'loading'` and `'error'` are envelope-state variants
+   * driven by the router; `'ready'` / `'non-ready'` are content variants
+   * derived from `MyWorkReadModelSourceStatus`. Defaults to `'non-ready'` for
+   * legacy callers that pre-date the live-envelope wiring.
+   */
   readonly readinessVariant?: MyWorkSurfaceReadinessVariant;
+  /** Source-status marker forwarded for partial-state signaling in Prompt 04. */
+  readonly sourceStatus?: MyWorkReadModelSourceStatus;
   readonly onSelectModule?: (id: MyWorkModuleId) => void;
 }
 
@@ -43,11 +51,30 @@ const HOME_NON_READY_SOURCE_READINESS_OVERRIDES: MyWorkCardSpanOverrides = {
 
 export function MyWorkHomeSurface({
   readinessVariant = 'non-ready',
+  sourceStatus,
   onSelectModule,
 }: MyWorkHomeSurfaceProps) {
+  if (readinessVariant === 'loading') {
+    return (
+      <div data-my-work-readiness-state="loading" role="status" aria-live="polite">
+        Loading…
+      </div>
+    );
+  }
+  if (readinessVariant === 'error') {
+    return (
+      <div data-my-work-readiness-state="error" role="alert">
+        Unable to load.
+      </div>
+    );
+  }
+  const statusMarker = sourceStatus ? (
+    <span hidden data-my-work-source-status={sourceStatus} />
+  ) : null;
   if (readinessVariant === 'ready') {
     return (
       <>
+        {statusMarker}
         <WorkSummaryCard spanOverrides={HOME_READY_WORK_SUMMARY_OVERRIDES} />
         <AdobeSignActionQueueHomeCard onSelectModule={onSelectModule} />
       </>
@@ -55,6 +82,7 @@ export function MyWorkHomeSurface({
   }
   return (
     <>
+      {statusMarker}
       <WorkSummaryCard spanOverrides={HOME_NON_READY_WORK_SUMMARY_OVERRIDES} />
       <AdobeSignQueueStateCard spanOverrides={HOME_NON_READY_QUEUE_STATE_OVERRIDES} />
       <SourceReadinessCard spanOverrides={HOME_NON_READY_SOURCE_READINESS_OVERRIDES} />

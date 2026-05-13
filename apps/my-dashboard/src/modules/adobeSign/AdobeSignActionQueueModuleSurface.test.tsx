@@ -131,6 +131,32 @@ describe('AdobeSignActionQueueModuleSurface — copy posture', () => {
   });
 });
 
+describe('AdobeSignActionQueueModuleSurface — envelope-state variants', () => {
+  it('loading variant renders only the loading marker (no ready/non-ready cards)', () => {
+    const { container } = renderFocused({ readinessVariant: 'loading' });
+    expect(container.querySelector('[data-my-work-readiness-state="loading"]')).not.toBeNull();
+    expect(getCardRoles(container)).toEqual([]);
+  });
+
+  it('error variant renders only the error marker', () => {
+    const { container } = renderFocused({ readinessVariant: 'error' });
+    expect(container.querySelector('[data-my-work-readiness-state="error"]')).not.toBeNull();
+    expect(getCardRoles(container)).toEqual([]);
+  });
+
+  it('ready + sourceStatus="partial" emits the ready tree plus a hidden source-status marker', () => {
+    const { container } = renderFocused({
+      readinessVariant: 'ready',
+      sourceStatus: 'partial',
+    });
+    expect(getCardRoles(container)).toEqual([
+      'adobe-sign-queue-summary',
+      'adobe-sign-agreement-action-list',
+    ]);
+    expect(container.querySelector('[data-my-work-source-status="partial"]')).not.toBeNull();
+  });
+});
+
 describe('AdobeSignActionQueueModuleSurface — onConnect forwarding', () => {
   it('forwards onConnect to the connection guidance card on the non-ready variant', () => {
     const onConnect = () => new Promise<void>(() => undefined);

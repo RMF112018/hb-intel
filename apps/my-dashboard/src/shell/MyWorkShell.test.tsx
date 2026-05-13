@@ -1,14 +1,26 @@
+import type { ReactElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { MyWorkReadModelClientProvider } from '../runtime/MyWorkReadModelClientProvider.js';
 import { MY_WORK_ACTIVE_PANEL_ID, MyWorkShell } from './MyWorkShell.js';
 
 afterEach(() => {
   cleanup();
 });
 
+/**
+ * Wraps shell renders with the read-model provider so the surface router's
+ * envelope hooks resolve. With no `client` prop the provider falls through
+ * to the factory's default fixture client (ui-review / available envelopes),
+ * which matches the shell's intended preview posture in tests.
+ */
+function renderShell(node: ReactElement) {
+  return render(<MyWorkReadModelClientProvider>{node}</MyWorkReadModelClientProvider>);
+}
+
 describe('MyWorkShell — composition and data-attribute contract', () => {
   it('renders the shell root with shell + mode + view-state markers', () => {
-    const { container } = render(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell />);
     const shell = container.querySelector('[data-my-work-shell]') as HTMLElement;
     expect(shell).not.toBeNull();
     expect(shell.getAttribute('data-my-work-shell')).toBe('thin');
@@ -18,7 +30,7 @@ describe('MyWorkShell — composition and data-attribute contract', () => {
   });
 
   it('renders exactly one active-surface-panel marker, on a <main role="tabpanel">', () => {
-    const { container } = render(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell />);
     const panels = container.querySelectorAll('[data-my-work-active-surface-panel]');
     expect(panels).toHaveLength(1);
     const main = panels[0] as HTMLElement;
@@ -30,19 +42,19 @@ describe('MyWorkShell — composition and data-attribute contract', () => {
   });
 
   it('renders the command-surface region and canvas wrapper exactly once each', () => {
-    const { container } = render(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell />);
     expect(container.querySelectorAll('[data-my-work-command-surface]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-my-work-canvas]')).toHaveLength(1);
   });
 
   it('mounts the primary navigation inside the command surface', () => {
-    const { container } = render(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell />);
     const commandSurface = container.querySelector('[data-my-work-command-surface]')!;
     expect(commandSurface.querySelector('[data-my-work-primary-navigation]')).not.toBeNull();
   });
 
   it('forwards forceMode to the breakpoint marker and density', () => {
-    const { container } = render(<MyWorkShell forceMode="phone" />);
+    const { container } = renderShell(<MyWorkShell forceMode="phone" />);
     const shell = container.querySelector('[data-my-work-shell]') as HTMLElement;
     expect(shell.getAttribute('data-my-work-shell-mode')).toBe('phone');
     const tablist = container.querySelector('[data-my-work-primary-navigation]')!;
@@ -50,7 +62,7 @@ describe('MyWorkShell — composition and data-attribute contract', () => {
   });
 
   it('flips view-state to "focused-module" once the Adobe module is selected', () => {
-    const { container } = render(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell />);
     const shell = container.querySelector('[data-my-work-shell]') as HTMLElement;
     expect(shell.getAttribute('data-my-work-view-state')).toBe('home');
 
@@ -72,7 +84,7 @@ describe('MyWorkShell — composition and data-attribute contract', () => {
   });
 
   it('renders provided active-panel children', () => {
-    const { container } = render(
+    const { container } = renderShell(
       <MyWorkShell>
         <div data-test-child="">child content</div>
       </MyWorkShell>,
@@ -84,7 +96,7 @@ describe('MyWorkShell — composition and data-attribute contract', () => {
 
 describe('MyWorkShell — hero band composition', () => {
   it('mounts the hero band inside the command surface, after the primary navigation', () => {
-    const { container } = render(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell />);
     const commandSurface = container.querySelector('[data-my-work-command-surface]')!;
     const nav = commandSurface.querySelector('[data-my-work-primary-navigation]');
     const hero = commandSurface.querySelector('[data-my-work-hero]');
@@ -96,7 +108,7 @@ describe('MyWorkShell — hero band composition', () => {
   });
 
   it('shows the home hero copy when no module is active', () => {
-    const { container } = render(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell />);
     expect(container.querySelector('[data-my-work-hero-secondary-title]')?.textContent).toBe(
       'My Work',
     );
@@ -107,7 +119,7 @@ describe('MyWorkShell — hero band composition', () => {
   });
 
   it('flips the hero identity and governance copy when the Adobe module is selected', () => {
-    const { container } = render(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell />);
     const launcher = container.querySelector(
       '[data-my-work-module-launcher="my-work-home"]',
     ) as HTMLButtonElement;
@@ -131,27 +143,26 @@ describe('MyWorkShell — hero band composition', () => {
 
 describe('MyWorkShell — bento grid + surface router composition', () => {
   it('mounts exactly one bento grid inside the main panel', () => {
-    const { container } = render(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell />);
     const main = container.querySelector(`#${MY_WORK_ACTIVE_PANEL_ID}`) as HTMLElement;
     expect(main.querySelectorAll('[data-my-work-bento-grid]')).toHaveLength(1);
   });
 
-  it('routes to the home surface (non-ready default) — work-summary + queue-state + source-readiness', () => {
-    const { container } = render(<MyWorkShell />);
+  it("routes to the home surface (non-ready cards under the default provider's backend-unavailable envelope)", async () => {
+    const { container } = renderShell(<MyWorkShell />);
+    await waitFor(() => {
+      const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
+      const roles = Array.from(grid.querySelectorAll('[data-my-work-card-role]')).map((el) =>
+        el.getAttribute('data-my-work-card-role'),
+      );
+      expect(roles).toEqual(['work-summary', 'adobe-sign-queue-state', 'source-readiness']);
+    });
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
-    const roles = Array.from(grid.querySelectorAll('[data-my-work-card-role]')).map((el) =>
-      el.getAttribute('data-my-work-card-role'),
-    );
-    expect(roles).toEqual([
-      'work-summary',
-      'adobe-sign-queue-state',
-      'source-readiness',
-    ]);
     expect(grid.querySelector('[data-my-work-card-role="adobe-sign-queue-summary"]')).toBeNull();
   });
 
-  it('routes to the Adobe focused-module surface (non-ready default) after the module is selected', () => {
-    const { container } = render(<MyWorkShell />);
+  it('routes to the Adobe focused-module surface after the module is selected (non-ready cards under default backend-unavailable envelope)', async () => {
+    const { container } = renderShell(<MyWorkShell />);
     const launcher = container.querySelector(
       '[data-my-work-module-launcher="my-work-home"]',
     ) as HTMLButtonElement;
@@ -161,23 +172,26 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     ) as HTMLButtonElement;
     fireEvent.click(item);
 
+    await waitFor(() => {
+      const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
+      const roles = Array.from(grid.querySelectorAll('[data-my-work-card-role]')).map((el) =>
+        el.getAttribute('data-my-work-card-role'),
+      );
+      expect(roles).toEqual(['adobe-sign-queue-state', 'adobe-sign-connection-guidance']);
+    });
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
-    const roles = Array.from(grid.querySelectorAll('[data-my-work-card-role]')).map((el) =>
-      el.getAttribute('data-my-work-card-role'),
-    );
-    expect(roles).toEqual(['adobe-sign-queue-state', 'adobe-sign-connection-guidance']);
     expect(grid.querySelector('[data-my-work-card-role="work-summary"]')).toBeNull();
   });
 
   it('keeps the active-panel marker exclusively on the shell <main>', () => {
-    const { container } = render(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell />);
     const panels = container.querySelectorAll('[data-my-work-active-surface-panel]');
     expect(panels).toHaveLength(1);
     expect((panels[0] as HTMLElement).tagName).toBe('MAIN');
   });
 
-  it('continues to render `children` inside the bento grid after the router output', () => {
-    const { container } = render(
+  it('continues to render `children` inside the bento grid after the router output', async () => {
+    const { container } = renderShell(
       <MyWorkShell>
         <div data-test-child="">child</div>
       </MyWorkShell>,
@@ -185,15 +199,17 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
     const child = grid.querySelector('[data-test-child]');
     expect(child?.textContent).toBe('child');
-    // The home surface's first card (work-summary) mounts before the children prop.
+    // Wait for the ready home tree to mount so the work-summary positional anchor exists.
+    await waitFor(() =>
+      expect(grid.querySelector('[data-my-work-card-role="work-summary"]')).not.toBeNull(),
+    );
     const firstCard = grid.querySelector('[data-my-work-card-role="work-summary"]');
-    expect(firstCard).not.toBeNull();
     const position = firstCard!.compareDocumentPosition(child!);
     expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(0);
   });
 
   it('forwards forceMode to the bento grid mode marker', () => {
-    const { container } = render(<MyWorkShell forceMode="phone" />);
+    const { container } = renderShell(<MyWorkShell forceMode="phone" />);
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
     expect(grid.getAttribute('data-my-work-mode')).toBe('phone');
   });
