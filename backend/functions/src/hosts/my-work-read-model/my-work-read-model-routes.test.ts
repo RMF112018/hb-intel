@@ -1,12 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ADOBE_SIGN_QUEUE_AVAILABLE, MY_WORK_HOME_AVAILABLE } from '@hbc/models/myWork/fixtures';
+import {
+  ADOBE_SIGN_QUEUE_AVAILABLE,
+  MY_PROJECT_LINKS_AVAILABLE,
+  MY_WORK_HOME_AVAILABLE,
+} from '@hbc/models/myWork/fixtures';
 
 const registrations: Array<{ name: string; config: any }> = [];
 
 const provider = {
   getMyWorkHome: vi.fn(),
   getAdobeSignActionQueue: vi.fn(),
+  getMyProjectLinks: vi.fn(),
 };
 
 vi.mock('@azure/functions', () => ({
@@ -49,6 +54,10 @@ vi.mock('./read-models/my-work-mock-read-model-provider.js', () => ({
   MyWorkMockReadModelProvider: vi.fn(() => provider),
 }));
 
+vi.mock('./read-models/project-links/my-project-links-read-model-provider.js', () => ({
+  MyProjectLinksReadModelProvider: vi.fn(() => provider),
+}));
+
 const buildRequest = (query: string = ''): any => ({
   method: 'GET',
   url: `http://localhost/api/my-work/me/anything${query ? `?${query}` : ''}`,
@@ -66,15 +75,20 @@ describe('my-work-read-model-routes — registration shape', () => {
     registrations.length = 0;
     provider.getMyWorkHome.mockReset();
     provider.getAdobeSignActionQueue.mockReset();
+    provider.getMyProjectLinks.mockReset();
     injectedAuth = DEFAULT_AUTH;
     vi.resetModules();
     await import('./my-work-read-model-routes.js');
   });
 
-  it('registers exactly two B04 read-model routes and no others', () => {
-    expect(registrations).toHaveLength(2);
+  it('registers exactly three read-model routes and no others', () => {
+    expect(registrations).toHaveLength(3);
     const names = registrations.map((r) => r.name).sort();
-    expect(names).toEqual(['getMyWorkAdobeSignActionQueue', 'getMyWorkHome']);
+    expect(names).toEqual([
+      'getMyWorkAdobeSignActionQueue',
+      'getMyWorkHome',
+      'getMyWorkProjectLinks',
+    ]);
   });
 
   it('binds the home route to the canonical B04 path', () => {
@@ -87,6 +101,13 @@ describe('my-work-read-model-routes — registration shape', () => {
   it('binds the Adobe queue route to the canonical B04 path', () => {
     const reg = findRegistration('getMyWorkAdobeSignActionQueue');
     expect(reg.config.route).toBe('my-work/me/adobe-sign/action-queue');
+    expect(reg.config.methods).toEqual(['GET']);
+    expect(reg.config.authLevel).toBe('anonymous');
+  });
+
+  it('binds the project-links route to the canonical path', () => {
+    const reg = findRegistration('getMyWorkProjectLinks');
+    expect(reg.config.route).toBe('my-work/me/project-links');
     expect(reg.config.methods).toEqual(['GET']);
     expect(reg.config.authLevel).toBe('anonymous');
   });
@@ -111,6 +132,7 @@ describe('my-work-read-model-routes — getMyWorkHome handler', () => {
     registrations.length = 0;
     provider.getMyWorkHome.mockReset();
     provider.getAdobeSignActionQueue.mockReset();
+    provider.getMyProjectLinks.mockReset();
     injectedAuth = DEFAULT_AUTH;
     vi.resetModules();
     await import('./my-work-read-model-routes.js');
@@ -169,6 +191,7 @@ describe('my-work-read-model-routes — getMyWorkAdobeSignActionQueue handler', 
     registrations.length = 0;
     provider.getMyWorkHome.mockReset();
     provider.getAdobeSignActionQueue.mockReset();
+    provider.getMyProjectLinks.mockReset();
     injectedAuth = DEFAULT_AUTH;
     vi.resetModules();
     await import('./my-work-read-model-routes.js');
@@ -239,6 +262,65 @@ describe('my-work-read-model-routes — getMyWorkAdobeSignActionQueue handler', 
   it('returns 500 INTERNAL_ERROR when the provider throws', async () => {
     provider.getAdobeSignActionQueue.mockRejectedValueOnce(new Error('boom'));
     const reg = findRegistration('getMyWorkAdobeSignActionQueue');
+    const response = await reg.config.handler(buildRequest(), {});
+    expect(response.status).toBe(500);
+    expect(response.jsonBody).toMatchObject({
+      code: 'INTERNAL_ERROR',
+      requestId: 'req-123',
+    });
+  });
+});
+
+describe('my-work-read-model-routes — getMyWorkProjectLinks handler', () => {
+  beforeEach(async () => {
+    registrations.length = 0;
+    provider.getMyWorkHome.mockReset();
+    provider.getAdobeSignActionQueue.mockReset();
+    provider.getMyProjectLinks.mockReset();
+    injectedAuth = DEFAULT_AUTH;
+    vi.resetModules();
+    await import('./my-work-read-model-routes.js');
+  });
+
+  it('returns 200 with { data: envelope } and passes auth-derived actor/requestId', async () => {
+    provider.getMyProjectLinks.mockResolvedValueOnce(MY_PROJECT_LINKS_AVAILABLE);
+    const reg = findRegistration('getMyWorkProjectLinks');
+    const response = await reg.config.handler(buildRequest('actor=mallory&upn=mallory@example.com'), {});
+    expect(response.status).toBe(200);
+    expect(response.jsonBody).toEqual({ data: MY_PROJECT_LINKS_AVAILABLE });
+    expect(provider.getMyProjectLinks).toHaveBeenCalledTimes(1);
+    const [context] = provider.getMyProjectLinks.mock.calls[0]!;
+    expect(context).toEqual({
+      actor: {
+        displayName: 'Avery Lead',
+        principalName: 'avery@hbc.test',
+        hbcUserId: 'oid-fixture',
+      },
+      requestId: 'req-123',
+    });
+  });
+
+  it('falls back displayName to UPN consistently for project-links actor context', async () => {
+    injectedAuth = {
+      userToken: 'token',
+      claims: {
+        oid: 'oid-p10',
+        upn: 'no.display@hbc.test',
+        roles: [],
+      } as any,
+    };
+    provider.getMyProjectLinks.mockResolvedValueOnce(MY_PROJECT_LINKS_AVAILABLE);
+    const reg = findRegistration('getMyWorkProjectLinks');
+    await reg.config.handler(buildRequest(), {});
+    const [context] = provider.getMyProjectLinks.mock.calls[0]!;
+    expect(context.actor.displayName).toBe('no.display@hbc.test');
+    expect(context.actor.principalName).toBe('no.display@hbc.test');
+    expect(context.actor.hbcUserId).toBe('oid-p10');
+  });
+
+  it('returns 500 INTERNAL_ERROR when the project-links provider throws', async () => {
+    provider.getMyProjectLinks.mockRejectedValueOnce(new Error('boom'));
+    const reg = findRegistration('getMyWorkProjectLinks');
     const response = await reg.config.handler(buildRequest(), {});
     expect(response.status).toBe(500);
     expect(response.jsonBody).toMatchObject({

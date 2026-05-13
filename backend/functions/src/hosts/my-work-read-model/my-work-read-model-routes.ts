@@ -1,10 +1,11 @@
 /**
  * My Work read-model backend routes.
  *
- * Registers exactly two protected GET endpoints behind the standard
+ * Registers protected GET endpoints behind the standard
  * `withAuth(withTelemetry(...))` envelope:
  *   - GET /api/my-work/me/home
  *   - GET /api/my-work/me/adobe-sign/action-queue
+ *   - GET /api/my-work/me/project-links
  *
  * The actor principal is derived from validated auth claims inside
  * the handler and passed to the provider; no actor/user/principal
@@ -29,12 +30,20 @@ import { errorResponse, successResponse } from '../../utils/response-helpers.js'
 import { withTelemetry } from '../../utils/withTelemetry.js';
 
 import { MyWorkMockReadModelProvider } from './read-models/my-work-mock-read-model-provider.js';
+import { MyProjectLinksReadModelProvider } from './read-models/project-links/my-project-links-read-model-provider.js';
 import type {
   IMyWorkReadModelProvider,
   MyWorkReadContext,
 } from './read-models/my-work-read-model-provider.js';
 
-const provider: IMyWorkReadModelProvider = new MyWorkMockReadModelProvider();
+const mockProvider = new MyWorkMockReadModelProvider();
+const projectLinksProvider = new MyProjectLinksReadModelProvider();
+
+const provider: IMyWorkReadModelProvider = {
+  getMyWorkHome: (context) => mockProvider.getMyWorkHome(context),
+  getAdobeSignActionQueue: (context, query) => mockProvider.getAdobeSignActionQueue(context, query),
+  getMyProjectLinks: (context) => projectLinksProvider.getMyProjectLinks(context),
+};
 
 const MAX_CURSOR_LENGTH = 256;
 
@@ -147,6 +156,37 @@ app.http('getMyWorkAdobeSignActionQueue', {
       {
         domain: 'my-work-read-model',
         operation: 'getMyWorkAdobeSignActionQueue',
+      },
+    ),
+  ),
+});
+
+app.http('getMyWorkProjectLinks', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'my-work/me/project-links',
+  handler: withAuth(
+    withTelemetry(
+      async (
+        request: HttpRequest,
+        _context: InvocationContext,
+        auth,
+      ): Promise<HttpResponseInit> => {
+        const requestId = extractOrGenerateRequestId(request);
+        try {
+          const context: MyWorkReadContext = {
+            actor: actorFromClaims(auth.claims),
+            requestId,
+          };
+          const envelope = await provider.getMyProjectLinks(context);
+          return successResponse(envelope);
+        } catch {
+          return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
+        }
+      },
+      {
+        domain: 'my-work-read-model',
+        operation: 'getMyWorkProjectLinks',
       },
     ),
   ),
