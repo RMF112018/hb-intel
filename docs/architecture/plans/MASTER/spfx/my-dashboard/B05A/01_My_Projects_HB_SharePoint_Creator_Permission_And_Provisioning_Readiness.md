@@ -2,7 +2,7 @@
 
 **Prepared:** May 13, 2026  
 **Repo:** `hb-intel`  
-**HEAD:** `bce84f9ccdab5a298552fdb6020d449d23a5048e`
+**HEAD:** `53ef2c74bcd27db0d3d1dc14d2bbebd7096686f4`
 
 ## 1. Current Repo-Documented Posture
 
@@ -92,26 +92,65 @@ Using `supporting/01_External_Research_Validation_Summary.md` as the authoritati
 - [ ] Choose provisioner credential path: `SHAREPOINT_BEARER_TOKEN` or `DefaultAzureCredential`.
 - [ ] Ensure no secrets/tokens are committed to repo artifacts.
 
-## 6. Prompt 02 Readiness Gate
+## 6. Tenant Proof Bundle Requirements (Closure of Operator-Pending Blocker)
+
+To close the blocker, the operator must furnish all five evidence groups below in one review packet:
+
+1. App identity proof (`HB SharePoint Creator` + `08c399eb-a394-4087-b859-659d493f8dc7`).
+2. Entra API permissions + admin consent proof.
+3. HBCentral site/resource grant proof (selected-resource role assignment).
+4. Read-path runtime proof (list/column inspection success for Projects + Registry).
+5. Gated write-capability proof (schema-write and item-write authorization path success, no broad mutation run).
+
+If any evidence group is missing or fails, `Operator-pending tenant proof` remains open.
+
+## 7. Operator Command Ledger (Run and Paste Outputs)
+
+Use one auth lane only for the runtime proof pair.
+
+```bash
+git rev-parse --abbrev-ref HEAD
+git rev-parse HEAD
+
+# lane declaration (record one of these in evidence)
+# SHAREPOINT_BEARER_TOKEN lane
+# DefaultAzureCredential lane
+
+pnpm exec tsx scripts/provision-legacy-fallback-lists.ts --help
+pnpm exec tsx scripts/provision-legacy-fallback-lists.ts <your-readonly-flags>
+pnpm exec tsx scripts/provision-legacy-fallback-lists.ts <your-minimal-write-proof-flags>
+```
+
+Notes:
+- This script does not currently advertise a dedicated `--read-only` switch in repo truth; operator must use tenant-approved non-mutating/limited flags.
+- Do not paste tokens or secrets into repo artifacts.
+
+## 8. Prompt 02+ Tenant-Mutation Gate Logic
+
+- **GO:** only when both schema-write proof and item-write proof are present and successful in tenant evidence.
+- **NO-GO:** if either proof is absent/fails, with explicit missing prerequisite logged.
+
+## 9. Prompt 02 Readiness Gate
 
 **Current gate decision: CONDITIONAL GO (repo-ready, tenant-proof pending).**
 
 - Prompt 02 may proceed for repo-side descriptor/docs/contracts preparation and non-mutating validation.
 - Any live schema/list mutation action remains blocked until operator tenant-proof checklist items above are satisfied.
 
-## 7. Explicit Non-Goals and Safety Assertions
+## 10. Explicit Non-Goals and Safety Assertions
 
 - No live tenant mutation was executed in this prompt.
 - No provisioning/backfill/mirroring apply command was run.
 - No app registration replacement was proposed.
 - SPFx `access_as_user` seam was kept separate from app-only provisioner identity seam.
 
-## 8. Validation Commands and Outcomes
+## 11. Validation Commands and Outcomes
 
 ### Commands run
 
 ```bash
 git status --short
+git rev-parse --abbrev-ref HEAD
 git rev-parse HEAD
 
 rg -n "HB SharePoint Creator|08c399eb-a394-4087-b859-659d493f8dc7|pilot-interim|least-privilege-sites-selected" \
@@ -126,11 +165,23 @@ rg -n "SHAREPOINT_BEARER_TOKEN|DefaultAzureCredential|--allow-type-drift" \
 
 ### Outcome summary
 
+- Branch/HEAD resolved to `main` / `53ef2c74bcd27db0d3d1dc14d2bbebd7096686f4`.
 - Repo posture tokens and app identity values were found at expected paths.
 - Provisioner credential/auth flow markers were found in script (`SHAREPOINT_BEARER_TOKEN`, `DefaultAzureCredential`, `--allow-type-drift`).
+- Script argument parsing shows `--allow-type-drift` support but no explicit read-only flag.
 - No destructive command or tenant mutation was executed.
 
-## 9. Prompt 01 Verdict and Carry Forward
+## 12. Evidence Appendix Template (Fill with Tenant Proof)
+
+| Evidence Group | Artifact/Output Reference | Timestamp (UTC) | Result |
+|---|---|---|---|
+| App identity (`HB SharePoint Creator` / app ID) | `OPERATOR_FILL` | `OPERATOR_FILL` | `PASS/FAIL` |
+| Entra permissions + admin consent | `OPERATOR_FILL` | `OPERATOR_FILL` | `PASS/FAIL` |
+| HBCentral selected-resource grant + role | `OPERATOR_FILL` | `OPERATOR_FILL` | `PASS/FAIL` |
+| Read-path runtime proof | `OPERATOR_FILL` | `OPERATOR_FILL` | `PASS/FAIL` |
+| Gated write-capability proof | `OPERATOR_FILL` | `OPERATOR_FILL` | `PASS/FAIL` |
+
+## 13. Prompt 01 Verdict and Carry Forward
 
 - **Prompt 01 verdict:** PASS (readiness artifact complete, tenant-proof still operator-owned).
 - **Prompt 02 proceed:** YES for docs/contracts and non-mutating work; live tenant mutation remains gated.
