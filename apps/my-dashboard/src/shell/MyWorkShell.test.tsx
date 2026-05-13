@@ -81,3 +81,50 @@ describe('MyWorkShell — composition and data-attribute contract', () => {
     expect(main.querySelector('[data-test-child]')?.textContent).toBe('child content');
   });
 });
+
+describe('MyWorkShell — hero band composition', () => {
+  it('mounts the hero band inside the command surface, after the primary navigation', () => {
+    const { container } = render(<MyWorkShell />);
+    const commandSurface = container.querySelector('[data-my-work-command-surface]')!;
+    const nav = commandSurface.querySelector('[data-my-work-primary-navigation]');
+    const hero = commandSurface.querySelector('[data-my-work-hero]');
+    expect(nav).not.toBeNull();
+    expect(hero).not.toBeNull();
+    // DOM order: navigation must precede hero inside the command surface.
+    const position = nav!.compareDocumentPosition(hero!);
+    expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(0);
+  });
+
+  it('shows the home hero copy when no module is active', () => {
+    const { container } = render(<MyWorkShell />);
+    expect(container.querySelector('[data-my-work-hero-secondary-title]')?.textContent).toBe(
+      'My Work',
+    );
+    const governance = container.querySelector('[data-my-work-hero-governance-copy]');
+    expect(governance?.textContent).toBe(
+      'Read-only work visibility · Source actions remain in their governing systems.',
+    );
+  });
+
+  it('flips the hero identity and governance copy when the Adobe module is selected', () => {
+    const { container } = render(<MyWorkShell />);
+    const launcher = container.querySelector(
+      '[data-my-work-module-launcher="my-work-home"]',
+    ) as HTMLButtonElement;
+    fireEvent.click(launcher);
+    const item = container.querySelector(
+      '[data-my-work-module-menu-item="adobe-sign-action-queue"]',
+    ) as HTMLButtonElement;
+    fireEvent.click(item);
+
+    expect(container.querySelector('[data-my-work-hero-secondary-title]')?.textContent).toBe(
+      'Adobe Sign Action Queue',
+    );
+    expect(container.querySelector('[data-my-work-hero-description]')?.textContent).toBe(
+      'Agreements in Adobe Sign that require your review, signature, approval, or other source-defined action.',
+    );
+    expect(container.querySelector('[data-my-work-hero-governance-copy]')?.textContent).toBe(
+      'Queue visibility only · Agreement actions remain in Adobe Sign.',
+    );
+  });
+});

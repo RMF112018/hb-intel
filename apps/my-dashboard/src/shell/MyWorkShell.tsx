@@ -1,7 +1,9 @@
 import { useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
 import { useMyWorkShellState } from '../state/useMyWorkShellState.js';
+import { selectMyWorkHeroPreviewViewModel } from '../preview/myWorkHeroPreview.js';
 import { MyWorkPrimaryNavigation } from './MyWorkPrimaryNavigation.js';
+import { MyWorkHeroBand } from './MyWorkHeroBand.js';
 import {
   useMyWorkContainerBreakpoint,
   type MyWorkResponsiveMode,
@@ -67,6 +69,11 @@ export function MyWorkShell({
 
   const themeStyle = useMemo(() => MY_WORK_THEME_VARS, []);
 
+  const heroViewModel = useMemo(
+    () => selectMyWorkHeroPreviewViewModel({ activePrimarySurfaceId, activeModuleId }),
+    [activePrimarySurfaceId, activeModuleId],
+  );
+
   return (
     <div
       ref={shellRef}
@@ -85,6 +92,7 @@ export function MyWorkShell({
           onSelectModule={selectModule}
           panelId={MY_WORK_ACTIVE_PANEL_ID}
         />
+        <MyWorkHeroBand mode={mode} viewModel={heroViewModel} />
       </section>
       <div className={styles.canvas} data-my-work-canvas="">
         <main
