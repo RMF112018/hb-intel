@@ -1,0 +1,133 @@
+.card {
+  display: block;
+  background: var(--my-work-color-card);
+  border: 1px solid var(--my-work-color-border);
+  border-radius: var(--my-work-radius-lg);
+  box-shadow: var(--my-work-elevation-card);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--my-work-space-sm);
+  padding: var(--my-work-space-md);
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--my-work-space-sm);
+}
+
+.titleStack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--my-work-color-text-muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--my-work-color-text-primary);
+  line-height: 1.3;
+}
+
+.action {
+  display: flex;
+  gap: var(--my-work-space-xs);
+  flex-shrink: 0;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--my-work-space-xs);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--my-work-space-sm);
+}
+
+.rowLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--my-work-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rowValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--my-work-color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bodyText {
+  margin: 0;
+  font-size: 13px;
+  color: var(--my-work-color-text-muted);
+  line-height: 1.45;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--my-work-radius-md);
+  border: 1px solid var(--my-work-color-rail-accent);
+  background: var(--my-work-color-rail-accent);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    filter 180ms ease-out,
+    box-shadow 180ms ease-out;
+}
+
+.cta:hover {
+  filter: brightness(1.05);
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--my-work-color-rail-accent);
+  outline-offset: 2px;
+}
+
+.cta[aria-disabled='true'] {
+  background: var(--my-work-color-rail-hover);
+  border-color: var(--my-work-color-border);
+  color: var(--my-work-color-text-muted);
+  cursor: default;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cta {
+    transition: none;
+  }
+}

@@ -1,17 +1,53 @@
-/**
- * Adobe Sign Action Queue focused-module surface scaffold.
- *
- * B03-04 mounts a structural marker so the router and shell tests can
- * verify which surface rendered. The visible queue cards land in B03-05.
- */
-export function AdobeSignActionQueueModuleSurface() {
+import type { MyWorkCardSpanOverrides } from '../../layout/myWorkFootprints.js';
+import { AdobeSignAgreementActionListCard } from './AdobeSignAgreementActionListCard.js';
+import { AdobeSignConnectionGuidanceCard } from './AdobeSignConnectionGuidanceCard.js';
+import { AdobeSignQueueStateCard } from './AdobeSignQueueStateCard.js';
+import { AdobeSignQueueSummaryCard } from './AdobeSignQueueSummaryCard.js';
+
+export type MyWorkSurfaceReadinessVariant = 'ready' | 'non-ready';
+
+export interface AdobeSignActionQueueModuleSurfaceProps {
+  /** Presentation-only readiness variant. Defaults to `'non-ready'`. */
+  readonly readinessVariant?: MyWorkSurfaceReadinessVariant;
+}
+
+const FOCUSED_READY_QUEUE_SUMMARY_OVERRIDES: MyWorkCardSpanOverrides = {
+  largeLaptop: 4,
+  desktop: 4,
+  ultrawide: 4,
+  standardLaptop: 3,
+};
+
+const FOCUSED_NON_READY_QUEUE_STATE_OVERRIDES: MyWorkCardSpanOverrides = {
+  largeLaptop: 8,
+  desktop: 8,
+  ultrawide: 8,
+  standardLaptop: 6,
+};
+
+const FOCUSED_NON_READY_GUIDANCE_OVERRIDES: MyWorkCardSpanOverrides = {
+  largeLaptop: 4,
+  desktop: 4,
+  ultrawide: 4,
+  standardLaptop: 4,
+};
+
+export function AdobeSignActionQueueModuleSurface({
+  readinessVariant = 'non-ready',
+}: AdobeSignActionQueueModuleSurfaceProps) {
+  if (readinessVariant === 'ready') {
+    return (
+      <>
+        <AdobeSignQueueSummaryCard spanOverrides={FOCUSED_READY_QUEUE_SUMMARY_OVERRIDES} />
+        <AdobeSignAgreementActionListCard />
+      </>
+    );
+  }
   return (
-    <div
-      data-my-work-surface="adobe-sign-action-queue"
-      data-my-work-surface-role="focused-module"
-      data-my-work-surface-scaffold="b03-04"
-      aria-hidden="true"
-    />
+    <>
+      <AdobeSignQueueStateCard spanOverrides={FOCUSED_NON_READY_QUEUE_STATE_OVERRIDES} />
+      <AdobeSignConnectionGuidanceCard spanOverrides={FOCUSED_NON_READY_GUIDANCE_OVERRIDES} />
+    </>
   );
 }
 

@@ -136,14 +136,21 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     expect(main.querySelectorAll('[data-my-work-bento-grid]')).toHaveLength(1);
   });
 
-  it('routes to the home surface scaffold in the default state', () => {
+  it('routes to the home surface (non-ready default) — work-summary + queue-state + source-readiness', () => {
     const { container } = render(<MyWorkShell />);
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
-    expect(grid.querySelector('[data-my-work-surface="my-work-home"]')).not.toBeNull();
-    expect(grid.querySelector('[data-my-work-surface="adobe-sign-action-queue"]')).toBeNull();
+    const roles = Array.from(grid.querySelectorAll('[data-my-work-card-role]')).map((el) =>
+      el.getAttribute('data-my-work-card-role'),
+    );
+    expect(roles).toEqual([
+      'work-summary',
+      'adobe-sign-queue-state',
+      'source-readiness',
+    ]);
+    expect(grid.querySelector('[data-my-work-card-role="adobe-sign-queue-summary"]')).toBeNull();
   });
 
-  it('routes to the Adobe focused-module scaffold after the module is selected', () => {
+  it('routes to the Adobe focused-module surface (non-ready default) after the module is selected', () => {
     const { container } = render(<MyWorkShell />);
     const launcher = container.querySelector(
       '[data-my-work-module-launcher="my-work-home"]',
@@ -155,8 +162,11 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     fireEvent.click(item);
 
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
-    expect(grid.querySelector('[data-my-work-surface="adobe-sign-action-queue"]')).not.toBeNull();
-    expect(grid.querySelector('[data-my-work-surface="my-work-home"]')).toBeNull();
+    const roles = Array.from(grid.querySelectorAll('[data-my-work-card-role]')).map((el) =>
+      el.getAttribute('data-my-work-card-role'),
+    );
+    expect(roles).toEqual(['adobe-sign-queue-state', 'adobe-sign-connection-guidance']);
+    expect(grid.querySelector('[data-my-work-card-role="work-summary"]')).toBeNull();
   });
 
   it('keeps the active-panel marker exclusively on the shell <main>', () => {
@@ -175,10 +185,10 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
     const child = grid.querySelector('[data-test-child]');
     expect(child?.textContent).toBe('child');
-    // The home surface scaffold mounts before the children prop.
-    const surface = grid.querySelector('[data-my-work-surface="my-work-home"]');
-    expect(surface).not.toBeNull();
-    const position = surface!.compareDocumentPosition(child!);
+    // The home surface's first card (work-summary) mounts before the children prop.
+    const firstCard = grid.querySelector('[data-my-work-card-role="work-summary"]');
+    expect(firstCard).not.toBeNull();
+    const position = firstCard!.compareDocumentPosition(child!);
     expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(0);
   });
 

@@ -108,6 +108,7 @@ export function MyWorkShell({
             <MyWorkSurfaceRouter
               activePrimarySurfaceId={activePrimarySurfaceId}
               activeModuleId={activeModuleId}
+              onSelectModule={selectModule}
             />
             {children}
           </MyWorkBentoGrid>

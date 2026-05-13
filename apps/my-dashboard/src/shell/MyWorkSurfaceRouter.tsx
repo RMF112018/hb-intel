@@ -9,6 +9,7 @@ import { AdobeSignActionQueueModuleSurface } from '../modules/adobeSign/AdobeSig
 export interface MyWorkSurfaceRouterProps {
   readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
   readonly activeModuleId?: MyWorkModuleId;
+  readonly onSelectModule?: (id: MyWorkModuleId) => void;
 }
 
 /**
@@ -20,12 +21,15 @@ export interface MyWorkSurfaceRouterProps {
  * - any other value (including `undefined` and invalid strings via
  *   `normalizeMyWorkModuleId`) → home surface
  */
-export function MyWorkSurfaceRouter({ activeModuleId }: MyWorkSurfaceRouterProps) {
+export function MyWorkSurfaceRouter({
+  activeModuleId,
+  onSelectModule,
+}: MyWorkSurfaceRouterProps) {
   const normalized = normalizeMyWorkModuleId(activeModuleId);
   if (normalized === 'adobe-sign-action-queue') {
     return <AdobeSignActionQueueModuleSurface />;
   }
-  return <MyWorkHomeSurface />;
+  return <MyWorkHomeSurface onSelectModule={onSelectModule} />;
 }
 
 export default MyWorkSurfaceRouter;
