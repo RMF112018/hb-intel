@@ -4,6 +4,8 @@ import {
   ADOBE_SIGN_QUEUE_AVAILABLE,
   ADOBE_SIGN_QUEUE_AVAILABLE_PAGED,
   ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
+  MY_PROJECT_LINKS_AVAILABLE,
+  MY_PROJECT_LINKS_BACKEND_UNAVAILABLE,
   MY_WORK_FIXTURE_GENERATED_AT_UTC,
   MY_WORK_HOME_AVAILABLE,
   MY_WORK_HOME_BACKEND_UNAVAILABLE,
@@ -48,6 +50,15 @@ describe('MyWorkMockReadModelProvider — default posture', () => {
     expect(envelope.sourceStatus).toBe('available');
     expect(envelope.data.pagination.hasMore).toBe(false);
   });
+
+  it('returns the AVAILABLE project-links envelope', async () => {
+    const provider = new MyWorkMockReadModelProvider();
+    const envelope = await provider.getMyProjectLinks(FIXTURE_CONTEXT);
+    expect(envelope).toEqual({
+      ...MY_PROJECT_LINKS_AVAILABLE,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+    });
+  });
 });
 
 describe('MyWorkMockReadModelProvider — backend-unavailable posture', () => {
@@ -76,6 +87,17 @@ describe('MyWorkMockReadModelProvider — backend-unavailable posture', () => {
     });
     expect(withCursor).toEqual({
       ...ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+    });
+  });
+
+  it('returns the BACKEND_UNAVAILABLE project-links envelope', async () => {
+    const provider = new MyWorkMockReadModelProvider({
+      simulateBackendUnavailable: true,
+    });
+    const envelope = await provider.getMyProjectLinks(FIXTURE_CONTEXT);
+    expect(envelope).toEqual({
+      ...MY_PROJECT_LINKS_BACKEND_UNAVAILABLE,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
     });
   });

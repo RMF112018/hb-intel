@@ -28,6 +28,7 @@ vi.mock('./read-models/my-work-mock-read-model-provider.js', () => ({
   MyWorkMockReadModelProvider: vi.fn(() => ({
     getMyWorkHome: vi.fn(),
     getAdobeSignActionQueue: vi.fn(),
+    getMyProjectLinks: vi.fn(),
   })),
 }));
 
@@ -48,17 +49,20 @@ describe('my-work-read-model route ↔ model agreement', () => {
     expect(reg?.config.route).toBe(MY_WORK_READ_MODEL_ROUTE_PATHS['adobe-sign-action-queue']);
   });
 
-  it('registers exactly one route per model route key — no duplicates and no alternate slugs', () => {
+  it('registers one route per currently-hosted model key; project-links is intentionally deferred', () => {
     const modelKeys = Object.keys(MY_WORK_READ_MODEL_ROUTE_PATHS) as ReadonlyArray<
       keyof typeof MY_WORK_READ_MODEL_ROUTE_PATHS
     >;
-    expect(modelKeys).toHaveLength(2);
-    for (const key of modelKeys) {
+    expect(modelKeys).toHaveLength(3);
+    const hostedKeys = modelKeys.filter((key) => key !== 'project-links');
+    for (const key of hostedKeys) {
       const path = MY_WORK_READ_MODEL_ROUTE_PATHS[key];
       const matches = registrations.filter((r) => r.config.route === path);
       expect(matches, `route registered exactly once: ${path}`).toHaveLength(1);
     }
-    expect(registrations).toHaveLength(modelKeys.length);
+    const deferredPath = MY_WORK_READ_MODEL_ROUTE_PATHS['project-links'];
+    expect(registrations.some((r) => r.config.route === deferredPath)).toBe(false);
+    expect(registrations).toHaveLength(hostedKeys.length);
   });
 
   it('does not register any path outside the canonical model route map', () => {

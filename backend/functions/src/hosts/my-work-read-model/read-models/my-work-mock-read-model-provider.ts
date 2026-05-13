@@ -17,6 +17,7 @@ import type {
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
   MyWorkHomeReadModel,
+  MyProjectLinksReadModel,
   MyWorkReadModelEnvelope,
 } from '@hbc/models/myWork';
 import { MY_WORK_FIXTURE_GENERATED_AT_UTC, MY_WORK_FIXTURES } from '@hbc/models/myWork/fixtures';
@@ -56,6 +57,15 @@ export class MyWorkMockReadModelProvider implements IMyWorkReadModelProvider {
     const scenario =
       typeof query.cursor === 'string' && query.cursor.length > 0 ? 'available-paged' : 'available';
     const base = MY_WORK_FIXTURES['adobe-sign-action-queue'][scenario];
+    return { ...base, generatedAtUtc: this.now() };
+  }
+
+  async getMyProjectLinks(
+    _context: MyWorkReadContext,
+  ): Promise<MyWorkReadModelEnvelope<MyProjectLinksReadModel>> {
+    const base = this.simulateBackendUnavailable
+      ? MY_WORK_FIXTURES['project-links']['backend-unavailable']
+      : MY_WORK_FIXTURES['project-links'].available;
     return { ...base, generatedAtUtc: this.now() };
   }
 }

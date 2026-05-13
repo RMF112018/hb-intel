@@ -18,6 +18,7 @@ import type {
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
   MyWorkHomeReadModel,
+  MyProjectLinksReadModel,
   MyWorkReadModelEnvelope,
 } from '@hbc/models/myWork';
 
@@ -33,6 +34,10 @@ export interface IMyWorkReadModelProvider {
     context: MyWorkReadContext,
     query: MyWorkAdobeSignActionQueueQuery,
   ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>>;
+
+  getMyProjectLinks(
+    context: MyWorkReadContext,
+  ): Promise<MyWorkReadModelEnvelope<MyProjectLinksReadModel>>;
 }
 
 export interface MyWorkMockReadModelProviderOptions {
