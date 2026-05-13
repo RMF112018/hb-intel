@@ -75,23 +75,52 @@ describe('resolveAdobeSignOAuthConfigReadiness', () => {
     expect(readiness.tokenStoreMode).toBe('pending-selection');
   });
 
-  it('reports ready when OAuth keys are complete and store mode is a known durable kind', () => {
+  it('reports ready when OAuth keys are complete, table-storage is selected, and infrastructure keys are present', () => {
     const env: EnvLike = {
       ...FULL_OAUTH_ENV,
       ADOBE_SIGN_TOKEN_STORE_MODE: 'table-storage',
+      AZURE_TABLE_ENDPOINT: 'https://example.table.core.windows.net',
+      ADOBE_SIGN_TOKEN_ENCRYPTION_KEY: 'dGVzdC1rZXktdGVzdC1rZXktdGVzdC1rZXktdGVzdC0=',
     };
     const readiness = resolveAdobeSignOAuthConfigReadiness(env);
     expect(readiness.status).toBe('ready');
     expect(readiness.tokenStoreMode).toBe('table-storage');
+    expect(readiness.missingStorageKeys).toEqual([]);
     expect(isAdobeSignConfigReady(readiness)).toBe(true);
   });
 
-  it('also accepts key-vault as a durable store mode', () => {
+  it('reports configuration-required for table-storage when AZURE_TABLE_ENDPOINT is missing', () => {
+    const env: EnvLike = {
+      ...FULL_OAUTH_ENV,
+      ADOBE_SIGN_TOKEN_STORE_MODE: 'table-storage',
+      ADOBE_SIGN_TOKEN_ENCRYPTION_KEY: 'dGVzdC1rZXktdGVzdC1rZXktdGVzdC1rZXktdGVzdC0=',
+    };
+    const readiness = resolveAdobeSignOAuthConfigReadiness(env);
+    expect(readiness.status).toBe('configuration-required');
+    expect(readiness.missingStorageKeys).toEqual(['AZURE_TABLE_ENDPOINT']);
+  });
+
+  it('reports configuration-required for table-storage when the encryption key is missing', () => {
+    const env: EnvLike = {
+      ...FULL_OAUTH_ENV,
+      ADOBE_SIGN_TOKEN_STORE_MODE: 'table-storage',
+      AZURE_TABLE_ENDPOINT: 'https://example.table.core.windows.net',
+    };
+    const readiness = resolveAdobeSignOAuthConfigReadiness(env);
+    expect(readiness.status).toBe('configuration-required');
+    expect(readiness.missingStorageKeys).toEqual(['ADOBE_SIGN_TOKEN_ENCRYPTION_KEY']);
+  });
+
+  it('reports unsupported-store-mode for key-vault (no production adapter in this remediation)', () => {
     const env: EnvLike = {
       ...FULL_OAUTH_ENV,
       ADOBE_SIGN_TOKEN_STORE_MODE: 'key-vault',
+      AZURE_TABLE_ENDPOINT: 'https://example.table.core.windows.net',
+      ADOBE_SIGN_TOKEN_ENCRYPTION_KEY: 'dGVzdC1rZXktdGVzdC1rZXktdGVzdC1rZXktdGVzdC0=',
     };
-    expect(resolveAdobeSignOAuthConfigReadiness(env).status).toBe('ready');
+    const readiness = resolveAdobeSignOAuthConfigReadiness(env);
+    expect(readiness.status).toBe('unsupported-store-mode');
+    expect(isAdobeSignConfigReady(readiness)).toBe(false);
   });
 
   it('never echoes secret values back through the readiness object', () => {

@@ -11,6 +11,7 @@
 
 export * from './adobeSignActionQueueReadModels.js';
 export * from './myWorkHomeReadModels.js';
+export * from './myProjectLinksReadModels.js';
 
 import {
   ADOBE_SIGN_QUEUE_AUTHORIZATION_REQUIRED,
@@ -34,6 +35,17 @@ import {
   MY_WORK_HOME_PRINCIPAL_UNRESOLVED,
   MY_WORK_HOME_SOURCE_UNAVAILABLE,
 } from './myWorkHomeReadModels.js';
+import {
+  MY_PROJECT_LINKS_AVAILABLE,
+  MY_PROJECT_LINKS_BACKEND_UNAVAILABLE,
+  MY_PROJECT_LINKS_BOUNDED_SOURCE_PARTIAL_WARNING,
+  MY_PROJECT_LINKS_MIXED_ACTION_AVAILABILITY,
+  MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS,
+  MY_PROJECT_LINKS_NO_ASSIGNED_PROJECTS,
+  MY_PROJECT_LINKS_PARTIAL_SOURCE_READINESS,
+  MY_PROJECT_LINKS_PRINCIPAL_UNRESOLVED,
+  MY_PROJECT_LINKS_SOURCE_UNAVAILABLE,
+} from './myProjectLinksReadModels.js';
 
 export const MY_WORK_FIXTURES = {
   home: {
@@ -57,9 +69,21 @@ export const MY_WORK_FIXTURES = {
     'source-unavailable': ADOBE_SIGN_QUEUE_SOURCE_UNAVAILABLE,
     'backend-unavailable': ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
   },
+  'project-links': {
+    available: MY_PROJECT_LINKS_AVAILABLE,
+    'more-than-six-items': MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS,
+    'mixed-action-availability': MY_PROJECT_LINKS_MIXED_ACTION_AVAILABILITY,
+    'no-assigned-projects': MY_PROJECT_LINKS_NO_ASSIGNED_PROJECTS,
+    'partial-source-readiness': MY_PROJECT_LINKS_PARTIAL_SOURCE_READINESS,
+    'source-unavailable': MY_PROJECT_LINKS_SOURCE_UNAVAILABLE,
+    'principal-unresolved': MY_PROJECT_LINKS_PRINCIPAL_UNRESOLVED,
+    'backend-unavailable': MY_PROJECT_LINKS_BACKEND_UNAVAILABLE,
+    'bounded-source-partial-warning': MY_PROJECT_LINKS_BOUNDED_SOURCE_PARTIAL_WARNING,
+  },
 } as const;
 
 export type MyWorkFixtureRouteKey = keyof typeof MY_WORK_FIXTURES;
 export type MyWorkHomeFixtureScenarioKey = keyof (typeof MY_WORK_FIXTURES)['home'];
 export type AdobeSignQueueFixtureScenarioKey =
   keyof (typeof MY_WORK_FIXTURES)['adobe-sign-action-queue'];
+export type MyProjectLinksFixtureScenarioKey = keyof (typeof MY_WORK_FIXTURES)['project-links'];

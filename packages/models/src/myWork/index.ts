@@ -32,5 +32,6 @@ export {
 
 export * from './AdobeSignActionQueue.js';
 export * from './MyWorkReadModels.js';
+export * from './MyProjectLinksReadModel.js';
 export * from './MyProjectAssignmentRoles.js';
 export * from './MyProjectUpnNormalization.js';

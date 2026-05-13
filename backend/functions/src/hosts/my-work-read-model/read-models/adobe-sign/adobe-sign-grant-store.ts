@@ -13,11 +13,17 @@
  * @module hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-grant-store
  */
 
+import { createAppTableClient } from '../../../../utils/table-client-factory.js';
+
 import type { AdobeSignActorKey } from './adobe-sign-actor-normalizer.js';
 import type {
   AdobeSignGrantFailureMetadata,
   IAdobeSignGrantRecord,
 } from './adobe-sign-grant-record.js';
+import {
+  ADOBE_SIGN_GRANTS_TABLE,
+  TableAdobeSignGrantStore,
+} from './adobe-sign-table-grant-store.js';
 
 export interface IAdobeSignGrantStore {
   upsertGrant(record: IAdobeSignGrantRecord): Promise<void>;
@@ -84,6 +90,14 @@ const isMockOrTestMode = (env: GrantStoreEnv): boolean =>
 export function resolveAdobeSignGrantStore(env: GrantStoreEnv): AdobeSignGrantStoreReadiness {
   if (isMockOrTestMode(env)) {
     return { readiness: 'ready', store: createDeterministicMockGrantStore() };
+  }
+  if (env.ADOBE_SIGN_TOKEN_STORE_MODE === 'table-storage') {
+    try {
+      const client = createAppTableClient(ADOBE_SIGN_GRANTS_TABLE);
+      return { readiness: 'ready', store: new TableAdobeSignGrantStore(client) };
+    } catch {
+      return { readiness: 'configuration-required', reason: 'production-store-not-selected' };
+    }
   }
   return { readiness: 'configuration-required', reason: 'production-store-not-selected' };
 }

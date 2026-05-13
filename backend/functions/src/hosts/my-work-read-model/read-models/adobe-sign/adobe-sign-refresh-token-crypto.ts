@@ -86,9 +86,7 @@ function fromBase64Url(encoded: string): Buffer {
  * `resolveAdobeSignRefreshTokenCipherKey` first or be prepared to map
  * the error to a `configuration-required` outcome.
  */
-export function createAdobeSignRefreshTokenCipher(
-  rawKey: Uint8Array,
-): AdobeSignRefreshTokenCipher {
+export function createAdobeSignRefreshTokenCipher(rawKey: Uint8Array): AdobeSignRefreshTokenCipher {
   if (rawKey.byteLength !== ADOBE_SIGN_CIPHER_KEY_BYTES) {
     throw new AdobeSignCipherKeyLengthError();
   }

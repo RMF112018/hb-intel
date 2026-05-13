@@ -64,9 +64,9 @@ describe('createAdobeSignRefreshTokenCipher', () => {
   it('rejects an envelope with an unsupported cipher version', () => {
     const cipher = createAdobeSignRefreshTokenCipher(KEY_32);
     const env = cipher.encrypt(PLAINTEXT);
-    expect(() =>
-      cipher.decrypt({ ...env, cipherVersion: 2 as unknown as 1 }),
-    ).toThrow(AdobeSignCipherEnvelopeError);
+    expect(() => cipher.decrypt({ ...env, cipherVersion: 2 as unknown as 1 })).toThrow(
+      AdobeSignCipherEnvelopeError,
+    );
   });
 
   it('rejects an envelope with an IV of the wrong length', () => {

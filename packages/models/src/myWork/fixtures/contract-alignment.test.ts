@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   ADOBE_SIGN_STATUS_TO_REQUIRED_ACTION,
+  MY_PROJECT_LINK_WARNING_CODES,
   MY_WORK_READ_MODEL_MODES,
   MY_WORK_READ_MODEL_SOURCE_STATUSES,
   MY_WORK_READ_MODEL_WARNING_CODES,
@@ -15,6 +16,9 @@ const ALL_ENVELOPES = [
   ),
   ...Object.entries(MY_WORK_FIXTURES['adobe-sign-action-queue']).map(
     ([key, envelope]) => [`adobe-sign-action-queue.${key}`, envelope] as const,
+  ),
+  ...Object.entries(MY_WORK_FIXTURES['project-links']).map(
+    ([key, envelope]) => [`project-links.${key}`, envelope] as const,
   ),
 ];
 
@@ -76,5 +80,19 @@ describe('My Work fixtures — Adobe queue items honor the canonical status mapp
       }
     }
     expect(totalPreviewItemsAsserted).toBeGreaterThan(0);
+  });
+});
+
+describe('My Work fixtures — project-links item warnings honor project-links vocabulary', () => {
+  it('every project-links item warning is in the canonical project-links warning-code set', () => {
+    const allowed = new Set(MY_PROJECT_LINK_WARNING_CODES);
+    const projectScenarios = Object.values(MY_WORK_FIXTURES['project-links']);
+    for (const envelope of projectScenarios) {
+      for (const item of envelope.data.items) {
+        for (const warning of item.warnings) {
+          expect(allowed.has(warning.code)).toBe(true);
+        }
+      }
+    }
   });
 });

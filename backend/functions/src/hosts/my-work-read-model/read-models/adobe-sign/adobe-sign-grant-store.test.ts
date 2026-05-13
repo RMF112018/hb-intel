@@ -93,4 +93,33 @@ describe('resolveAdobeSignGrantStore — readiness gate', () => {
   it('returns configuration-required when env is empty', () => {
     expect(resolveAdobeSignGrantStore({}).readiness).toBe('configuration-required');
   });
+
+  it('returns ready when table-storage is selected and AZURE_TABLE_ENDPOINT is present', () => {
+    const previous = process.env.AZURE_TABLE_ENDPOINT;
+    process.env.AZURE_TABLE_ENDPOINT = 'https://example.table.core.windows.net';
+    try {
+      const result = resolveAdobeSignGrantStore({
+        NODE_ENV: 'production',
+        ADOBE_SIGN_TOKEN_STORE_MODE: 'table-storage',
+      });
+      expect(result.readiness).toBe('ready');
+    } finally {
+      if (previous === undefined) delete process.env.AZURE_TABLE_ENDPOINT;
+      else process.env.AZURE_TABLE_ENDPOINT = previous;
+    }
+  });
+
+  it('returns configuration-required when table-storage is selected but AZURE_TABLE_ENDPOINT is absent', () => {
+    const previous = process.env.AZURE_TABLE_ENDPOINT;
+    delete process.env.AZURE_TABLE_ENDPOINT;
+    try {
+      const result = resolveAdobeSignGrantStore({
+        NODE_ENV: 'production',
+        ADOBE_SIGN_TOKEN_STORE_MODE: 'table-storage',
+      });
+      expect(result.readiness).toBe('configuration-required');
+    } finally {
+      if (previous !== undefined) process.env.AZURE_TABLE_ENDPOINT = previous;
+    }
+  });
 });

@@ -80,10 +80,11 @@ describe('My Work read models — warning-code vocabulary', () => {
 });
 
 describe('My Work read models — route registry', () => {
-  it('exposes exactly the two B04 read-model route keys', () => {
+  it('exposes the My Work read-model route keys including project-links', () => {
     expect(Object.keys(MY_WORK_READ_MODEL_ROUTE_PATHS)).toEqual([
       'home',
       'adobe-sign-action-queue',
+      'project-links',
     ]);
   });
 
@@ -91,6 +92,7 @@ describe('My Work read models — route registry', () => {
     expect(MY_WORK_READ_MODEL_ROUTE_PATHS).toEqual({
       home: 'my-work/me/home',
       'adobe-sign-action-queue': 'my-work/me/adobe-sign/action-queue',
+      'project-links': 'my-work/me/project-links',
     });
   });
 });
@@ -206,7 +208,7 @@ describe('My Work read models — actor, home summary, and source readiness DTOs
 });
 
 describe('My Work read models — response map', () => {
-  it('keys the response map by exactly the two B04 route keys', () => {
+  it('keys the response map by home, adobe-sign-action-queue, and project-links routes', () => {
     const map: MyWorkReadModelResponseMap = {
       home: {
         mode: 'fixture',
@@ -262,10 +264,41 @@ describe('My Work read models — response map', () => {
           },
         },
       },
+      'project-links': {
+        mode: 'fixture',
+        sourceStatus: 'available',
+        readOnly: true,
+        warnings: [],
+        generatedAtUtc: '2026-05-13T10:00:00.000Z',
+        data: {
+          moduleId: 'my-project-links',
+          actor: {
+            principalName: 'a@example.com',
+            displayName: 'A',
+          },
+          summary: {
+            assignedProjectCount: 0,
+            dualLaunchReadyCount: 0,
+            sharePointReadyCount: 0,
+            procoreReadyCount: 0,
+            noSharePointLaunchCount: 0,
+            noProcoreLaunchCount: 0,
+            projectsOnlyCount: 0,
+            mergedCount: 0,
+            legacyOnlyCount: 0,
+          },
+          items: [],
+          sourceReadiness: {
+            projects: 'available',
+            legacyFallbackRegistry: 'available',
+          },
+        },
+      },
     };
-    expect(Object.keys(map)).toEqual(['home', 'adobe-sign-action-queue']);
+    expect(Object.keys(map)).toEqual(['home', 'adobe-sign-action-queue', 'project-links']);
     expect(map.home.data.adobeSignActionQueue.previewItemLimit).toBe(5);
     expect(map['adobe-sign-action-queue'].data.moduleId).toBe('adobe-sign-action-queue');
+    expect(map['project-links'].data.moduleId).toBe('my-project-links');
   });
 });
 

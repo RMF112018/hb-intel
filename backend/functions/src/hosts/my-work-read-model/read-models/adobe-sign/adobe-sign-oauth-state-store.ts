@@ -12,8 +12,14 @@
  * @module hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-oauth-state-store
  */
 
+import { createAppTableClient } from '../../../../utils/table-client-factory.js';
+
 import type { AdobeSignOAuthStateRecord } from './adobe-sign-oauth-state.js';
 import { classifyOAuthStateAtConsume } from './adobe-sign-oauth-state.js';
+import {
+  ADOBE_SIGN_OAUTH_STATE_TABLE,
+  TableAdobeSignOAuthStateStore,
+} from './adobe-sign-table-oauth-state-store.js';
 
 export type AdobeSignOAuthStateTakeResult =
   | { readonly outcome: 'valid'; readonly record: AdobeSignOAuthStateRecord }
@@ -84,6 +90,17 @@ export function resolveAdobeSignOAuthStateStore(
 ): AdobeSignOAuthStateStoreReadiness {
   if (isMockOrTestMode(env)) {
     return { readiness: 'ready', store: createDeterministicMockOAuthStateStore() };
+  }
+  if (env.ADOBE_SIGN_TOKEN_STORE_MODE === 'table-storage') {
+    try {
+      const client = createAppTableClient(ADOBE_SIGN_OAUTH_STATE_TABLE);
+      return { readiness: 'ready', store: new TableAdobeSignOAuthStateStore(client) };
+    } catch {
+      return {
+        readiness: 'configuration-required',
+        reason: 'production-store-not-selected',
+      };
+    }
   }
   return {
     readiness: 'configuration-required',

@@ -46,7 +46,16 @@ export type AdobeSignTokenStoreMode = (typeof ADOBE_SIGN_TOKEN_STORE_MODES)[numb
 export type AdobeSignConfigReadinessStatus =
   | 'ready'
   | 'configuration-required'
-  | 'pending-store-selection';
+  | 'pending-store-selection'
+  | 'unsupported-store-mode';
+
+export const ADOBE_SIGN_STORAGE_INFRASTRUCTURE_KEYS = [
+  'AZURE_TABLE_ENDPOINT',
+  'ADOBE_SIGN_TOKEN_ENCRYPTION_KEY',
+] as const;
+
+export type AdobeSignStorageInfrastructureKey =
+  (typeof ADOBE_SIGN_STORAGE_INFRASTRUCTURE_KEYS)[number];
 
 /**
  * Non-secret diagnostic surface. Carries only key names and presence
@@ -55,6 +64,8 @@ export type AdobeSignConfigReadinessStatus =
 export interface AdobeSignOAuthConfigReadiness {
   readonly status: AdobeSignConfigReadinessStatus;
   readonly missingKeys: readonly AdobeSignOAuthConfigKey[];
+  /** Durable-storage infrastructure keys (Azure / encryption) missing for the selected store mode. */
+  readonly missingStorageKeys: readonly AdobeSignStorageInfrastructureKey[];
   /** Final selected durable store. `pending-selection` blocks production writes. */
   readonly tokenStoreMode: AdobeSignTokenStoreMode;
   /** True when at least one governed OAuth scope is configured. */
@@ -98,10 +109,16 @@ export function parseAdobeSignScopes(raw: string | undefined): readonly string[]
  * Inspect the supplied env-like object and produce a readiness summary.
  *
  * - All four OAuth keys present + at least one parsed scope + a non-pending
- *   store mode → `ready`.
- * - Any required key missing or no governed scopes → `configuration-required`.
+ *   store mode + every durable-storage infrastructure key present → `ready`.
+ * - Any required OAuth key missing or no governed scopes →
+ *   `configuration-required`.
  * - All OAuth keys present + scopes parsed, but store mode is pending
  *   (or unset / unknown) → `pending-store-selection`.
+ * - `tokenStoreMode === 'table-storage'` but `AZURE_TABLE_ENDPOINT` or
+ *   `ADOBE_SIGN_TOKEN_ENCRYPTION_KEY` missing → `configuration-required`
+ *   with the missing infrastructure keys in `missingStorageKeys`.
+ * - `tokenStoreMode === 'key-vault'` → `unsupported-store-mode` (no
+ *   production adapter wired in this remediation).
  *
  * The function never echoes the values themselves — only key names.
  */
@@ -129,6 +146,7 @@ export function resolveAdobeSignOAuthConfigReadiness(env: EnvLike): AdobeSignOAu
     return {
       status: 'configuration-required',
       missingKeys,
+      missingStorageKeys: [],
       tokenStoreMode,
       hasGovernedScopes,
     };
@@ -138,6 +156,35 @@ export function resolveAdobeSignOAuthConfigReadiness(env: EnvLike): AdobeSignOAu
     return {
       status: 'pending-store-selection',
       missingKeys: [],
+      missingStorageKeys: [],
+      tokenStoreMode,
+      hasGovernedScopes,
+    };
+  }
+
+  if (tokenStoreMode === 'key-vault') {
+    return {
+      status: 'unsupported-store-mode',
+      missingKeys: [],
+      missingStorageKeys: [],
+      tokenStoreMode,
+      hasGovernedScopes,
+    };
+  }
+
+  // tokenStoreMode === 'table-storage'
+  const missingStorageKeys: AdobeSignStorageInfrastructureKey[] = [];
+  for (const key of ADOBE_SIGN_STORAGE_INFRASTRUCTURE_KEYS) {
+    if (!isNonEmptyString(env[key])) {
+      missingStorageKeys.push(key);
+    }
+  }
+
+  if (missingStorageKeys.length > 0) {
+    return {
+      status: 'configuration-required',
+      missingKeys: [],
+      missingStorageKeys,
       tokenStoreMode,
       hasGovernedScopes,
     };
@@ -146,6 +193,7 @@ export function resolveAdobeSignOAuthConfigReadiness(env: EnvLike): AdobeSignOAu
   return {
     status: 'ready',
     missingKeys: [],
+    missingStorageKeys: [],
     tokenStoreMode,
     hasGovernedScopes,
   };
