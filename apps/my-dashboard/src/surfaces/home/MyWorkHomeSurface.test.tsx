@@ -34,9 +34,10 @@ function spanOf(container: HTMLElement, role: string): string | null {
 }
 
 describe('MyWorkHomeSurface — default (non-ready) variant', () => {
-  it('emits the three non-ready cards in order', () => {
+  it('emits the four non-ready cards in order with My Projects first', () => {
     const { container } = renderHome();
     expect(getCardRoles(container)).toEqual([
+      'my-projects-home',
       'work-summary',
       'adobe-sign-queue-state',
       'source-readiness',
@@ -46,15 +47,17 @@ describe('MyWorkHomeSurface — default (non-ready) variant', () => {
     ).toBeNull();
   });
 
-  it('resolves 12-column spans on desktop (3 / 6 / 3)', () => {
+  it('resolves flagship full-width + non-ready spans on desktop (12 / 3 / 6 / 3)', () => {
     const { container } = renderHome();
+    expect(spanOf(container, 'my-projects-home')).toBe('12');
     expect(spanOf(container, 'work-summary')).toBe('3');
     expect(spanOf(container, 'adobe-sign-queue-state')).toBe('6');
     expect(spanOf(container, 'source-readiness')).toBe('3');
   });
 
-  it('resolves 10-column spans on standardLaptop (3 / 4 / 3)', () => {
+  it('resolves flagship full-width + non-ready spans on standardLaptop (10 / 3 / 4 / 3)', () => {
     const { container } = renderHome({}, 'standardLaptop');
+    expect(spanOf(container, 'my-projects-home')).toBe('10');
     expect(spanOf(container, 'work-summary')).toBe('3');
     expect(spanOf(container, 'adobe-sign-queue-state')).toBe('4');
     expect(spanOf(container, 'source-readiness')).toBe('3');
@@ -62,6 +65,7 @@ describe('MyWorkHomeSurface — default (non-ready) variant', () => {
 
   it('clamps every card to 1 column on phone', () => {
     const { container } = renderHome({}, 'phone');
+    expect(spanOf(container, 'my-projects-home')).toBe('1');
     expect(spanOf(container, 'work-summary')).toBe('1');
     expect(spanOf(container, 'adobe-sign-queue-state')).toBe('1');
     expect(spanOf(container, 'source-readiness')).toBe('1');
@@ -69,21 +73,27 @@ describe('MyWorkHomeSurface — default (non-ready) variant', () => {
 });
 
 describe('MyWorkHomeSurface — ready variant', () => {
-  it('emits the two ready cards in order', () => {
+  it('emits the three ready cards in order with My Projects first', () => {
     const { container } = renderHome({ readinessVariant: 'ready' });
-    expect(getCardRoles(container)).toEqual(['work-summary', 'adobe-sign-action-queue-home']);
+    expect(getCardRoles(container)).toEqual([
+      'my-projects-home',
+      'work-summary',
+      'adobe-sign-action-queue-home',
+    ]);
     expect(container.querySelector('[data-my-work-card-role="adobe-sign-queue-state"]')).toBeNull();
     expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
   });
 
-  it('resolves 12-column spans on desktop (4 / 8)', () => {
+  it('resolves flagship full-width + ready spans on desktop (12 / 4 / 8)', () => {
     const { container } = renderHome({ readinessVariant: 'ready' });
+    expect(spanOf(container, 'my-projects-home')).toBe('12');
     expect(spanOf(container, 'work-summary')).toBe('4');
     expect(spanOf(container, 'adobe-sign-action-queue-home')).toBe('8');
   });
 
-  it('resolves 10-column spans on standardLaptop (3 / 7)', () => {
+  it('resolves flagship full-width + ready spans on standardLaptop (10 / 3 / 7)', () => {
     const { container } = renderHome({ readinessVariant: 'ready' }, 'standardLaptop');
+    expect(spanOf(container, 'my-projects-home')).toBe('10');
     expect(spanOf(container, 'work-summary')).toBe('3');
     expect(spanOf(container, 'adobe-sign-action-queue-home')).toBe('7');
   });
@@ -112,6 +122,15 @@ describe('MyWorkHomeSurface — copy posture', () => {
     expect(/\bmock\b/i.test(text)).toBe(false);
     expect(/\bplaceholder\b/i.test(text)).toBe(false);
     expect(/\bfake\b/i.test(text)).toBe(false);
+  });
+
+  it('renders the My Projects header and purpose statement', () => {
+    const { container } = renderHome();
+    const myProjects = container.querySelector('[data-my-work-card-role="my-projects-home"]');
+    expect(myProjects?.textContent).toContain('My Projects');
+    expect(myProjects?.textContent).toContain(
+      'Your assigned projects, ready to open in SharePoint and Procore.',
+    );
   });
 });
 
@@ -194,7 +213,11 @@ describe('MyWorkHomeSurface — envelope-state variants', () => {
       readinessVariant: 'ready',
       sourceStatus: 'partial',
     });
-    expect(getCardRoles(container)).toEqual(['work-summary', 'adobe-sign-action-queue-home']);
+    expect(getCardRoles(container)).toEqual([
+      'my-projects-home',
+      'work-summary',
+      'adobe-sign-action-queue-home',
+    ]);
     expect(container.querySelector('[data-my-work-source-status="partial"]')).not.toBeNull();
   });
 });

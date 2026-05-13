@@ -1,0 +1,80 @@
+.purpose {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--my-work-color-text-muted);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--my-work-space-sm);
+}
+
+.metricTile {
+  border: 1px solid var(--my-work-color-border);
+  border-radius: var(--my-work-radius-md);
+  background: color-mix(in srgb, var(--my-work-color-card) 92%, var(--my-work-color-rail) 8%);
+  padding: var(--my-work-space-sm);
+  min-width: 0;
+}
+
+.metricLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--my-work-color-text-muted);
+}
+
+.metricValue {
+  display: block;
+  margin-top: 2px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--my-work-color-text-primary);
+}
+
+.banner {
+  border: 1px solid var(--my-work-color-border);
+  border-radius: var(--my-work-radius-md);
+  padding: var(--my-work-space-sm);
+  background: color-mix(in srgb, var(--my-work-color-rail) 80%, #ffffff 20%);
+}
+
+.bannerText {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--my-work-color-text-primary);
+}
+
+.launchRegion {
+  border: 1px dashed var(--my-work-color-border);
+  border-radius: var(--my-work-radius-md);
+  padding: var(--my-work-space-sm);
+  background: var(--my-work-color-card);
+}
+
+.launchTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--my-work-color-text-muted);
+}
+
+.launchBody {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--my-work-color-text-primary);
+}
+
+@media (max-width: 639px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}

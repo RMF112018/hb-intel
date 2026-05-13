@@ -7,6 +7,7 @@ import type {
 import type { MyWorkCardSpanOverrides } from '../../layout/myWorkFootprints.js';
 import { AdobeSignActionQueueHomeCard } from '../../modules/adobeSign/AdobeSignActionQueueHomeCard.js';
 import { AdobeSignQueueStateCard } from '../../modules/adobeSign/AdobeSignQueueStateCard.js';
+import { MyProjectsHomeCard } from '../../modules/myProjects/MyProjectsHomeCard.js';
 import {
   selectAdobeQueueHomeVm,
   selectAdobeQueueStateVmFromHome,
@@ -37,6 +38,7 @@ export interface MyWorkHomeSurfaceProps {
    */
   readonly homeEnvelope?: MyWorkReadModelEnvelope<MyWorkHomeReadModel>;
   readonly onSelectModule?: (id: MyWorkModuleId) => void;
+  readonly getApiToken?: () => Promise<string>;
 }
 
 const HOME_READY_WORK_SUMMARY_OVERRIDES: MyWorkCardSpanOverrides = {
@@ -72,6 +74,7 @@ export function MyWorkHomeSurface({
   sourceStatus,
   homeEnvelope,
   onSelectModule,
+  getApiToken,
 }: MyWorkHomeSurfaceProps) {
   if (readinessVariant === 'loading') {
     return (
@@ -96,6 +99,7 @@ export function MyWorkHomeSurface({
     return (
       <>
         {statusMarker}
+        <MyProjectsHomeCard getApiToken={getApiToken} />
         <WorkSummaryCard spanOverrides={HOME_READY_WORK_SUMMARY_OVERRIDES} vm={workSummaryVm} />
         <AdobeSignActionQueueHomeCard vm={queueHomeVm} onSelectModule={onSelectModule} />
       </>
@@ -106,6 +110,7 @@ export function MyWorkHomeSurface({
   return (
     <>
       {statusMarker}
+      <MyProjectsHomeCard getApiToken={getApiToken} />
       <WorkSummaryCard spanOverrides={HOME_NON_READY_WORK_SUMMARY_OVERRIDES} vm={workSummaryVm} />
       <AdobeSignQueueStateCard
         spanOverrides={HOME_NON_READY_QUEUE_STATE_OVERRIDES}

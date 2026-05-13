@@ -15,6 +15,7 @@ export interface MyWorkSurfaceRouterProps {
   readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
   readonly activeModuleId?: MyWorkModuleId;
   readonly onSelectModule?: (id: MyWorkModuleId) => void;
+  readonly getApiToken?: () => Promise<string>;
   /**
    * Optional Adobe Sign consent-start callback. Forwarded only when
    * the focused module is the Adobe Sign action queue. The shell
@@ -30,8 +31,10 @@ export interface MyWorkSurfaceRouterProps {
  */
 function MyWorkHomeRoute({
   onSelectModule,
+  getApiToken,
 }: {
   readonly onSelectModule?: (id: MyWorkModuleId) => void;
+  readonly getApiToken?: () => Promise<string>;
 }) {
   const state = useMyWorkHomeEnvelope();
   const readiness = selectSurfaceReadiness(state);
@@ -41,6 +44,7 @@ function MyWorkHomeRoute({
       sourceStatus={readiness.sourceStatus}
       homeEnvelope={readiness.envelope}
       onSelectModule={onSelectModule}
+      getApiToken={getApiToken}
     />
   );
 }
@@ -82,12 +86,13 @@ export function MyWorkSurfaceRouter({
   activeModuleId,
   onSelectModule,
   onConnectAdobeSign,
+  getApiToken,
 }: MyWorkSurfaceRouterProps) {
   const normalized = normalizeMyWorkModuleId(activeModuleId);
   if (normalized === 'adobe-sign-action-queue') {
     return <AdobeSignActionQueueModuleRoute onConnect={onConnectAdobeSign} />;
   }
-  return <MyWorkHomeRoute onSelectModule={onSelectModule} />;
+  return <MyWorkHomeRoute onSelectModule={onSelectModule} getApiToken={getApiToken} />;
 }
 
 export default MyWorkSurfaceRouter;

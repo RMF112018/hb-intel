@@ -155,7 +155,12 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
       const roles = Array.from(grid.querySelectorAll('[data-my-work-card-role]')).map((el) =>
         el.getAttribute('data-my-work-card-role'),
       );
-      expect(roles).toEqual(['work-summary', 'adobe-sign-queue-state', 'source-readiness']);
+      expect(roles).toEqual([
+        'my-projects-home',
+        'work-summary',
+        'adobe-sign-queue-state',
+        'source-readiness',
+      ]);
     });
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
     expect(grid.querySelector('[data-my-work-card-role="adobe-sign-queue-summary"]')).toBeNull();

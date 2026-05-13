@@ -127,6 +127,7 @@ export function MyWorkShell({
               activePrimarySurfaceId={activePrimarySurfaceId}
               activeModuleId={activeModuleId}
               onSelectModule={selectModule}
+              getApiToken={getApiToken}
               onConnectAdobeSign={handleConnectAdobeSign}
             />
             {children}

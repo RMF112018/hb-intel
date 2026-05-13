@@ -115,7 +115,11 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
     const stub = makeStubClient();
     const { container } = renderRouter(stub);
     await waitFor(() =>
-      expect(getCardRoles(container)).toEqual(['work-summary', 'adobe-sign-action-queue-home']),
+      expect(getCardRoles(container)).toEqual([
+        'my-projects-home',
+        'work-summary',
+        'adobe-sign-action-queue-home',
+      ]),
     );
     expect(container.querySelector('[data-my-work-source-status="available"]')).not.toBeNull();
     expect(container.querySelector('[data-my-work-readiness-state="loading"]')).toBeNull();
@@ -129,7 +133,11 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
     await waitFor(() =>
       expect(container.querySelector('[data-my-work-source-status="partial"]')).not.toBeNull(),
     );
-    expect(getCardRoles(container)).toEqual(['work-summary', 'adobe-sign-action-queue-home']);
+    expect(getCardRoles(container)).toEqual([
+      'my-projects-home',
+      'work-summary',
+      'adobe-sign-action-queue-home',
+    ]);
   });
 
   it('renders the home non-ready tree for "authorization-required" envelope', async () => {
@@ -143,6 +151,7 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
       ).not.toBeNull(),
     );
     expect(getCardRoles(container)).toEqual([
+      'my-projects-home',
       'work-summary',
       'adobe-sign-queue-state',
       'source-readiness',
