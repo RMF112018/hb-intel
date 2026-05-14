@@ -13,6 +13,11 @@
     "./*": {
       "types": "./dist/*/index.d.ts",
       "import": "./dist/*/index.js"
+    },
+    "./myWork": {
+      "types": "./dist/myWork/index.d.ts",
+      "import": "./dist/myWork/index.js",
+      "default": "./dist/myWork/index.js"
     }
   },
   "scripts": {

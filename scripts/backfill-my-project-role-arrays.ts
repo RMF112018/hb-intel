@@ -196,9 +196,14 @@ async function runBackfill(): Promise<void> {
 }
 
 if (process.argv[1] && process.argv[1].includes('backfill-my-project-role-arrays')) {
-  runBackfill().catch((error) => {
-    console.error('[my-projects-backfill] failed');
-    console.error(error instanceof Error ? error.message : String(error));
-    process.exitCode = 1;
-  });
+  const keepAlive = setInterval(() => {}, 1000);
+  runBackfill()
+    .catch((error) => {
+      console.error('[my-projects-backfill] failed');
+      console.error(error instanceof Error ? error.message : String(error));
+      process.exitCode = 1;
+    })
+    .finally(() => {
+      clearInterval(keepAlive);
+    });
 }

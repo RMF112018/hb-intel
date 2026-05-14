@@ -1,6 +1,8 @@
 import { spfi } from '@pnp/sp';
 import '@pnp/nodejs-commonjs';
 import '@pnp/sp/webs/index.js';
+import '@pnp/sp/lists/index.js';
+import '@pnp/sp/items/index.js';
 import {
   createSharePointBearerTokenBehavior,
   type IManagedIdentityTokenService,

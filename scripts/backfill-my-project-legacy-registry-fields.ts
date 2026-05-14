@@ -244,9 +244,14 @@ async function run(): Promise<void> {
 }
 
 if (process.argv[1] && process.argv[1].includes('backfill-my-project-legacy-registry-fields')) {
-  run().catch((error) => {
-    console.error('[legacy-registry-backfill] failed');
-    console.error(error instanceof Error ? error.message : String(error));
-    process.exitCode = 1;
-  });
+  const keepAlive = setInterval(() => {}, 1000);
+  run()
+    .catch((error) => {
+      console.error('[legacy-registry-backfill] failed');
+      console.error(error instanceof Error ? error.message : String(error));
+      process.exitCode = 1;
+    })
+    .finally(() => {
+      clearInterval(keepAlive);
+    });
 }
