@@ -24,11 +24,12 @@
  * default applied when the caller omits a return path.
  */
 export const ADOBE_SIGN_OAUTH_RETURN_PATH_ALLOWLIST: readonly string[] = [
+  '/sites/HBCentral/SitePages/MyDashboard.aspx',
   '/SitePages/MyDashboard.aspx',
   '/sites/',
 ];
 
-export const ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH = '/SitePages/MyDashboard.aspx';
+export const ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH = '/sites/HBCentral/SitePages/MyDashboard.aspx';
 export const ADOBE_SIGN_OAUTH_FRONTEND_ORIGIN_ENV_KEY = 'MY_DASHBOARD_PUBLIC_ORIGIN';
 
 export type AdobeSignReturnPathRejectionReason =
