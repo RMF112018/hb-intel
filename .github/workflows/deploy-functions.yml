@@ -42,11 +42,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build shared packages
-        run: pnpm turbo run build --filter=@hbc/models --filter=@hbc/provisioning
-
-      - name: Build Functions
-        run: pnpm turbo run build --filter=@hbc/functions
+      # Keep this turbo scope identical to scripts/package-functions-artifact.ts and
+      # main_hb-intel-function-app.yml so clean CI can resolve shared package dist
+      # outputs (e.g. @hbc/sharepoint-platform type declarations) before @hbc/functions.
+      - name: Build upstream packages for @hbc/functions
+        run: |
+          pnpm turbo run build \
+            --filter=@hbc/models \
+            --filter=@hbc/sharepoint-platform \
+            --filter=@hbc/provisioning \
+            --filter=@hbc/notification-intelligence \
+            --filter=@hbc/acknowledgment \
+            --filter=@hbc/functions
 
       - name: Run unit tests (gate)
         run: pnpm turbo run test --filter=@hbc/functions --filter=@hbc/provisioning
