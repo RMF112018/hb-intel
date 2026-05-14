@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { AdobeSignRuntimeDiagnosticError } from './adobe-sign-runtime-diagnostics.js';
 import { adobeSignActorKey } from './adobe-sign-actor-normalizer.js';
 import type { IAdobeSignGrantRecord } from './adobe-sign-grant-record.js';
 import { TableAdobeSignGrantStore } from './adobe-sign-table-grant-store.js';
@@ -58,6 +59,27 @@ function createFakeTableClient() {
       },
     } as unknown as ConstructorParameters<typeof TableAdobeSignGrantStore>[0],
   };
+}
+
+function createThrowingTableClient(options: {
+  createTableError?: unknown;
+  getEntityError?: unknown;
+  upsertEntityError?: unknown;
+}) {
+  return {
+    createTable: async () => {
+      if (options.createTableError) throw options.createTableError;
+    },
+    upsertEntity: async () => {
+      if (options.upsertEntityError) throw options.upsertEntityError;
+    },
+    getEntity: async () => {
+      if (options.getEntityError) throw options.getEntityError;
+      const err = new Error('not found') as Error & { statusCode: number };
+      err.statusCode = 404;
+      throw err;
+    },
+  } as unknown as ConstructorParameters<typeof TableAdobeSignGrantStore>[0];
 }
 
 describe('TableAdobeSignGrantStore', () => {
@@ -166,5 +188,54 @@ describe('TableAdobeSignGrantStore', () => {
     expect(found?.upnSnapshot).toBeUndefined();
     expect(found?.displayNameSnapshot).toBeUndefined();
     expect(found?.encryptedRefreshTokenRef.lastPersistedAtUtc).toBeUndefined();
+  });
+
+  it('classifies createTable failures as diagnostic errors', async () => {
+    const err = Object.assign(new Error('Forbidden'), { statusCode: 403, code: 'AuthorizationFailed' });
+    const store = new TableAdobeSignGrantStore(
+      createThrowingTableClient({
+        createTableError: err,
+      }),
+    );
+    await expect(store.findGrant(ACTOR_KEY)).rejects.toBeInstanceOf(AdobeSignRuntimeDiagnosticError);
+    await expect(store.findGrant(ACTOR_KEY)).rejects.toMatchObject({
+      diagnostic: {
+        operation: 'find-grant',
+        stage: 'create-table',
+        errorClass: 'auth-forbidden',
+      },
+    });
+  });
+
+  it('classifies getEntity non-404 failures as diagnostic errors', async () => {
+    const err = Object.assign(new Error('Unauthorized'), { statusCode: 401, code: 'Unauthorized' });
+    const store = new TableAdobeSignGrantStore(
+      createThrowingTableClient({
+        getEntityError: err,
+      }),
+    );
+    await expect(store.findGrant(ACTOR_KEY)).rejects.toMatchObject({
+      diagnostic: {
+        operation: 'find-grant',
+        stage: 'get-entity',
+        errorClass: 'auth-unauthorized',
+      },
+    });
+  });
+
+  it('classifies upsertEntity failures as diagnostic errors', async () => {
+    const err = Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' });
+    const store = new TableAdobeSignGrantStore(
+      createThrowingTableClient({
+        upsertEntityError: err,
+      }),
+    );
+    await expect(store.upsertGrant(baseGrant())).rejects.toMatchObject({
+      diagnostic: {
+        operation: 'upsert-grant',
+        stage: 'upsert-entity',
+        errorClass: 'network',
+      },
+    });
   });
 });

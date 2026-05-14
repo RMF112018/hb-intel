@@ -21,10 +21,12 @@ import type {
   MyProjectLinksReadModel,
   MyWorkReadModelEnvelope,
 } from '@hbc/models/myWork';
+import type { AdobeSignRuntimeDiagnosticReporter } from './adobe-sign/adobe-sign-runtime-diagnostics.js';
 
 export interface MyWorkReadContext {
   readonly actor: MyWorkActorSummary;
   readonly requestId: string;
+  readonly diagnostics?: AdobeSignRuntimeDiagnosticReporter;
 }
 
 export interface IMyWorkReadModelProvider {

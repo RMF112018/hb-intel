@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 
+import { AdobeSignRuntimeDiagnosticError } from './adobe-sign-runtime-diagnostics.js';
 import { adobeSignActorKey } from './adobe-sign-actor-normalizer.js';
 import { ADOBE_SIGN_TOKEN_ENCRYPTION_KEY_ENV } from './adobe-sign-refresh-token-crypto.js';
 import {
@@ -44,6 +45,31 @@ function createFakeTableClient(opts?: { getError?: unknown }) {
     },
     deleteEntity: async (partitionKey: string, rowKey: string) => {
       rows.delete(`${partitionKey}|${rowKey}`);
+    },
+  };
+}
+
+function createThrowingTableClient(opts: {
+  createTableError?: unknown;
+  getError?: unknown;
+  upsertError?: unknown;
+  deleteError?: unknown;
+}) {
+  return {
+    createTable: async () => {
+      if (opts.createTableError) throw opts.createTableError;
+    },
+    upsertEntity: async () => {
+      if (opts.upsertError) throw opts.upsertError;
+    },
+    getEntity: async () => {
+      if (opts.getError) throw opts.getError;
+      const err = new Error('not found') as Error & { statusCode: number };
+      err.statusCode = 404;
+      throw err;
+    },
+    deleteEntity: async () => {
+      if (opts.deleteError) throw opts.deleteError;
     },
   };
 }
@@ -217,5 +243,69 @@ describe('TableAdobeSignRefreshTokenStore', () => {
         'rowKey',
       ].sort(),
     );
+  });
+
+  it('classifies createTable failures as diagnostic errors', async () => {
+    const err = Object.assign(new Error('Forbidden'), { statusCode: 403, code: 'AuthorizationFailed' });
+    const store = new TableAdobeSignRefreshTokenStore(
+      createThrowingTableClient({ createTableError: err }) as unknown as ConstructorParameters<
+        typeof TableAdobeSignRefreshTokenStore
+      >[0],
+    );
+    await expect(store.getCiphertext({ storeKind: 'table-storage', address: ACTOR_KEY })).rejects.toBeInstanceOf(
+      AdobeSignRuntimeDiagnosticError,
+    );
+    await expect(store.getCiphertext({ storeKind: 'table-storage', address: ACTOR_KEY })).rejects.toMatchObject({
+      diagnostic: {
+        operation: 'get-ciphertext',
+        stage: 'create-table',
+        errorClass: 'auth-forbidden',
+      },
+    });
+  });
+
+  it('classifies put failures as diagnostic errors', async () => {
+    const store = new TableAdobeSignRefreshTokenStore(
+      createThrowingTableClient({
+        upsertError: Object.assign(new Error('request timed out'), { code: 'ETIMEDOUT' }),
+      }) as unknown as ConstructorParameters<typeof TableAdobeSignRefreshTokenStore>[0],
+    );
+    await expect(store.putCiphertext(ACTOR_KEY, ENVELOPE, NOW)).rejects.toMatchObject({
+      diagnostic: {
+        operation: 'put-ciphertext',
+        stage: 'upsert-entity',
+        errorClass: 'timeout',
+      },
+    });
+  });
+
+  it('classifies get non-404 failures as diagnostic errors', async () => {
+    const store = new TableAdobeSignRefreshTokenStore(
+      createThrowingTableClient({
+        getError: Object.assign(new Error('Unauthorized'), { statusCode: 401 }),
+      }) as unknown as ConstructorParameters<typeof TableAdobeSignRefreshTokenStore>[0],
+    );
+    await expect(store.getCiphertext({ storeKind: 'table-storage', address: ACTOR_KEY })).rejects.toMatchObject({
+      diagnostic: {
+        operation: 'get-ciphertext',
+        stage: 'get-entity',
+        errorClass: 'auth-unauthorized',
+      },
+    });
+  });
+
+  it('classifies delete non-404 failures as diagnostic errors', async () => {
+    const store = new TableAdobeSignRefreshTokenStore(
+      createThrowingTableClient({
+        deleteError: Object.assign(new Error('invalid input payload')),
+      }) as unknown as ConstructorParameters<typeof TableAdobeSignRefreshTokenStore>[0],
+    );
+    await expect(store.deleteCiphertext({ storeKind: 'table-storage', address: ACTOR_KEY })).rejects.toMatchObject({
+      diagnostic: {
+        operation: 'delete-ciphertext',
+        stage: 'delete-entity',
+        errorClass: 'invalid-input',
+      },
+    });
   });
 });

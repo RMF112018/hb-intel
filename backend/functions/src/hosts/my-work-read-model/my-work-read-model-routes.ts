@@ -26,9 +26,11 @@ import type { MyWorkActorSummary, MyWorkAdobeSignActionQueueQuery } from '@hbc/m
 
 import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
+import { createLogger } from '../../utils/logger.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
 
+import type { AdobeSignRuntimeDiagnosticReporter } from './read-models/adobe-sign/adobe-sign-runtime-diagnostics.js';
 import { resolveMyWorkReadModelProvider } from './read-models/my-work-read-model-provider-resolver.js';
 import type {
   IMyWorkReadModelProvider,
@@ -92,6 +94,23 @@ const parseQueueQuery = (request: HttpRequest, requestId: string): QueueQueryPar
   return { ok: true, query };
 };
 
+const createAdobeSignRuntimeDiagnosticsReporter = (
+  context: InvocationContext,
+  requestId: string,
+): AdobeSignRuntimeDiagnosticReporter => {
+  const logger = createLogger(context);
+  return {
+    trackAdobeSignRuntimeEvent(name, properties) {
+      logger.trackEvent(name, {
+        domain: 'my-work-read-model',
+        runtimeOperation: 'adobe-sign-runtime',
+        correlationId: requestId,
+        ...properties,
+      });
+    },
+  };
+};
+
 app.http('getMyWorkHome', {
   methods: ['GET'],
   authLevel: 'anonymous',
@@ -108,6 +127,7 @@ app.http('getMyWorkHome', {
           const context: MyWorkReadContext = {
             actor: actorFromClaims(auth.claims),
             requestId,
+            diagnostics: createAdobeSignRuntimeDiagnosticsReporter(_context, requestId),
           };
           const envelope = await provider.getMyWorkHome(context);
           return successResponse(envelope);
@@ -138,6 +158,7 @@ app.http('getMyWorkAdobeSignActionQueue', {
           const context: MyWorkReadContext = {
             actor: actorFromClaims(auth.claims),
             requestId,
+            diagnostics: createAdobeSignRuntimeDiagnosticsReporter(_context, requestId),
           };
           const envelope = await provider.getAdobeSignActionQueue(context, parsed.query);
           return successResponse(envelope);

@@ -18,6 +18,13 @@
  */
 
 import { TableClient, type TableEntity } from '@azure/data-tables';
+import {
+  AdobeSignRuntimeDiagnosticError,
+  classifyAdobeSignRuntimeError,
+  resolveSafeTableEndpointHost,
+  type AdobeSignTableStoreOperation,
+  type AdobeSignTableStoreStage,
+} from './adobe-sign-runtime-diagnostics.js';
 
 import { createAppTableClient } from '../../../../utils/table-client-factory.js';
 
@@ -97,28 +104,35 @@ interface RefreshTokenEntity {
 
 export class TableAdobeSignRefreshTokenStore implements IAdobeSignRefreshTokenStore {
   private tableEnsured = false;
+  private readonly endpointHost: string | undefined;
 
-  constructor(private readonly client: TableClient) {}
+  constructor(private readonly client: TableClient) {
+    this.endpointHost = resolveSafeTableEndpointHost(process.env.AZURE_TABLE_ENDPOINT);
+  }
 
   async putCiphertext(
     actorKey: AdobeSignActorKey,
     envelope: AdobeSignRefreshTokenCiphertextEnvelope,
     now: Date,
   ): Promise<AdobeSignEncryptedRefreshTokenRef> {
-    await this.ensureTable();
+    await this.ensureTable('put-ciphertext');
     const lastPersistedAtUtc = now.toISOString();
-    await this.client.upsertEntity<TableEntity<RefreshTokenEntity>>(
-      {
-        partitionKey: ADOBE_SIGN_REFRESH_TOKEN_PARTITION,
-        rowKey: actorKey,
-        cipherVersion: envelope.cipherVersion,
-        iv: envelope.iv,
-        authTag: envelope.authTag,
-        ciphertext: envelope.ciphertext,
-        lastPersistedAtUtc,
-      },
-      'Replace',
-    );
+    try {
+      await this.client.upsertEntity<TableEntity<RefreshTokenEntity>>(
+        {
+          partitionKey: ADOBE_SIGN_REFRESH_TOKEN_PARTITION,
+          rowKey: actorKey,
+          cipherVersion: envelope.cipherVersion,
+          iv: envelope.iv,
+          authTag: envelope.authTag,
+          ciphertext: envelope.ciphertext,
+          lastPersistedAtUtc,
+        },
+        'Replace',
+      );
+    } catch (err: unknown) {
+      throw this.wrapDiagnosticError(err, 'put-ciphertext', 'upsert-entity');
+    }
     return {
       storeKind: 'table-storage',
       address: actorKey,
@@ -129,7 +143,7 @@ export class TableAdobeSignRefreshTokenStore implements IAdobeSignRefreshTokenSt
   async getCiphertext(
     ref: AdobeSignEncryptedRefreshTokenRef,
   ): Promise<AdobeSignRefreshTokenCiphertextEnvelope | undefined> {
-    await this.ensureTable();
+    await this.ensureTable('get-ciphertext');
     try {
       const entity = await this.client.getEntity<RefreshTokenEntity>(
         ADOBE_SIGN_REFRESH_TOKEN_PARTITION,
@@ -145,29 +159,55 @@ export class TableAdobeSignRefreshTokenStore implements IAdobeSignRefreshTokenSt
     } catch (err: unknown) {
       const status = (err as { statusCode?: number }).statusCode;
       if (status === 404) return undefined;
-      throw err;
+      throw this.wrapDiagnosticError(err, 'get-ciphertext', 'get-entity');
     }
   }
 
   async deleteCiphertext(ref: AdobeSignEncryptedRefreshTokenRef): Promise<void> {
-    await this.ensureTable();
+    await this.ensureTable('delete-ciphertext');
     try {
       await this.client.deleteEntity(ADOBE_SIGN_REFRESH_TOKEN_PARTITION, ref.address);
     } catch (err: unknown) {
       const status = (err as { statusCode?: number }).statusCode;
-      if (status !== 404) throw err;
+      if (status !== 404) {
+        throw this.wrapDiagnosticError(err, 'delete-ciphertext', 'delete-entity');
+      }
     }
   }
 
-  private async ensureTable(): Promise<void> {
+  private async ensureTable(operation: AdobeSignTableStoreOperation): Promise<void> {
     if (this.tableEnsured) return;
     try {
       await this.client.createTable();
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
-      if (code !== 'TableAlreadyExists') throw err;
+      if (code !== 'TableAlreadyExists') {
+        throw this.wrapDiagnosticError(err, operation, 'create-table');
+      }
     }
     this.tableEnsured = true;
+  }
+
+  private wrapDiagnosticError(
+    error: unknown,
+    operation: AdobeSignTableStoreOperation,
+    stage: AdobeSignTableStoreStage,
+  ): AdobeSignRuntimeDiagnosticError {
+    const classified = classifyAdobeSignRuntimeError(error);
+    const errorClass =
+      classified.errorClass === 'resource-not-found' ? 'table-not-found' : classified.errorClass;
+    return new AdobeSignRuntimeDiagnosticError(
+      {
+        operation,
+        stage,
+        errorClass,
+        ...(classified.statusCode !== undefined ? { statusCode: classified.statusCode } : {}),
+        ...(classified.sdkCode !== undefined ? { sdkCode: classified.sdkCode } : {}),
+        tableName: ADOBE_SIGN_REFRESH_TOKEN_TABLE,
+        ...(this.endpointHost !== undefined ? { endpointHost: this.endpointHost } : {}),
+      },
+      error,
+    );
   }
 }
 

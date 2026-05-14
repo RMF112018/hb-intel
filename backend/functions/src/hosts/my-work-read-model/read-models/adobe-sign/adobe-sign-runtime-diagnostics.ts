@@ -1,0 +1,149 @@
+/**
+ * Internal Adobe Sign runtime diagnostics contracts.
+ *
+ * These types are for operator diagnostics only and must never carry
+ * secrets, actor identifiers, tokens, or OAuth artifacts.
+ */
+
+export type AdobeSignRuntimeDiagnosticEventName = 'adobe-sign-runtime-failure';
+
+export type AdobeSignTableStoreOperation =
+  | 'find-grant'
+  | 'upsert-grant'
+  | 'mark-reauthorization-required'
+  | 'mark-revoked'
+  | 'put-ciphertext'
+  | 'get-ciphertext'
+  | 'delete-ciphertext';
+
+export type AdobeSignTableStoreStage =
+  | 'ensure-table'
+  | 'create-table'
+  | 'get-entity'
+  | 'upsert-entity'
+  | 'delete-entity'
+  | 'map-entity';
+
+export type AdobeSignRuntimeErrorClass =
+  | 'auth-forbidden'
+  | 'auth-unauthorized'
+  | 'credential-unavailable'
+  | 'table-not-found'
+  | 'resource-not-found'
+  | 'timeout'
+  | 'network'
+  | 'sdk-rejected'
+  | 'invalid-input'
+  | 'unknown';
+
+export interface AdobeSignRuntimeDiagnosticProperties {
+  readonly operation: AdobeSignTableStoreOperation;
+  readonly stage: AdobeSignTableStoreStage;
+  readonly errorClass: AdobeSignRuntimeErrorClass;
+  readonly statusCode?: number;
+  readonly sdkCode?: string;
+  readonly tableName?: string;
+  readonly endpointHost?: string;
+}
+
+export interface AdobeSignRuntimeDiagnosticReporter {
+  trackAdobeSignRuntimeEvent(
+    name: AdobeSignRuntimeDiagnosticEventName,
+    properties: AdobeSignRuntimeDiagnosticProperties,
+  ): void;
+}
+
+export interface AdobeSignRuntimeErrorDiagnostic extends AdobeSignRuntimeDiagnosticProperties {}
+
+export class AdobeSignRuntimeDiagnosticError extends Error {
+  constructor(
+    public readonly diagnostic: AdobeSignRuntimeErrorDiagnostic,
+    cause?: unknown,
+  ) {
+    super('adobe-sign-runtime-diagnostic-error');
+    this.name = 'AdobeSignRuntimeDiagnosticError';
+    if (cause !== undefined) {
+      (this as Error & { cause?: unknown }).cause = cause;
+    }
+  }
+}
+
+interface ErrorLike {
+  statusCode?: number;
+  code?: string;
+  message?: string;
+  name?: string;
+}
+
+const messageContains = (message: string, patterns: readonly string[]): boolean => {
+  const lower = message.toLowerCase();
+  return patterns.some((pattern) => lower.includes(pattern));
+};
+
+export function classifyAdobeSignRuntimeError(error: unknown): {
+  readonly errorClass: AdobeSignRuntimeErrorClass;
+  readonly statusCode?: number;
+  readonly sdkCode?: string;
+} {
+  const raw = (error ?? {}) as ErrorLike;
+  const statusCode = typeof raw.statusCode === 'number' ? raw.statusCode : undefined;
+  const sdkCode = typeof raw.code === 'string' ? raw.code : undefined;
+  const message = typeof raw.message === 'string' ? raw.message : '';
+  const name = typeof raw.name === 'string' ? raw.name : '';
+  const signal = `${name} ${message}`.toLowerCase();
+
+  if (statusCode === 401) return { errorClass: 'auth-unauthorized', statusCode, sdkCode };
+  if (statusCode === 403) return { errorClass: 'auth-forbidden', statusCode, sdkCode };
+  if (statusCode === 404) return { errorClass: 'resource-not-found', statusCode, sdkCode };
+
+  if (
+    messageContains(signal, [
+      'credentialunavailableerror',
+      'failed to retrieve a token',
+      'managed identity',
+      'environmentcredential',
+      'defaultazurecredential failed',
+      'workloadidentitycredential',
+    ])
+  ) {
+    return { errorClass: 'credential-unavailable', statusCode, sdkCode };
+  }
+
+  if (messageContains(signal, ['timeout', 'timed out', 'etimedout', 'requesttimeout'])) {
+    return { errorClass: 'timeout', statusCode, sdkCode };
+  }
+
+  if (
+    messageContains(signal, [
+      'enotfound',
+      'econnrefused',
+      'econnreset',
+      'socket hang up',
+      'network',
+      'fetch failed',
+      'getaddrinfo',
+    ])
+  ) {
+    return { errorClass: 'network', statusCode, sdkCode };
+  }
+
+  if (messageContains(signal, ['invalid', 'malformed', 'bad request'])) {
+    return { errorClass: 'invalid-input', statusCode, sdkCode };
+  }
+
+  if (statusCode !== undefined || sdkCode !== undefined) {
+    return { errorClass: 'sdk-rejected', statusCode, sdkCode };
+  }
+
+  return { errorClass: 'unknown' };
+}
+
+export function resolveSafeTableEndpointHost(endpoint: string | undefined): string | undefined {
+  if (typeof endpoint !== 'string' || endpoint.trim().length === 0) return undefined;
+  if (!endpoint.startsWith('http')) return undefined;
+  try {
+    return new URL(endpoint).host;
+  } catch {
+    return undefined;
+  }
+}

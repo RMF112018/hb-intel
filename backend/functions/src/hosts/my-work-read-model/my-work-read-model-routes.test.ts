@@ -142,7 +142,7 @@ describe('my-work-read-model-routes — getMyWorkHome handler', () => {
     expect(response.jsonBody).toEqual({ data: MY_WORK_HOME_AVAILABLE });
     expect(provider.getMyWorkHome).toHaveBeenCalledTimes(1);
     const [context] = provider.getMyWorkHome.mock.calls[0]!;
-    expect(context).toEqual({
+    expect(context).toMatchObject({
       actor: {
         displayName: 'Avery Lead',
         principalName: 'avery@hbc.test',
@@ -150,6 +150,7 @@ describe('my-work-read-model-routes — getMyWorkHome handler', () => {
       },
       requestId: 'req-123',
     });
+    expect(typeof context.diagnostics?.trackAdobeSignRuntimeEvent).toBe('function');
   });
 
   it('falls back to upn when the displayName claim is absent', async () => {

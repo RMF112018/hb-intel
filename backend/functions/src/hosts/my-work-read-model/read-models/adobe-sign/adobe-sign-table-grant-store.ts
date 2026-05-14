@@ -19,6 +19,13 @@
  */
 
 import { TableClient, type TableEntity } from '@azure/data-tables';
+import {
+  AdobeSignRuntimeDiagnosticError,
+  classifyAdobeSignRuntimeError,
+  resolveSafeTableEndpointHost,
+  type AdobeSignTableStoreOperation,
+  type AdobeSignTableStoreStage,
+} from './adobe-sign-runtime-diagnostics.js';
 
 import type { AdobeSignActorKey } from './adobe-sign-actor-normalizer.js';
 import type {
@@ -165,24 +172,35 @@ function entityToRecord(entity: GrantEntity): IAdobeSignGrantRecord {
 
 export class TableAdobeSignGrantStore implements IAdobeSignGrantStore {
   private tableEnsured = false;
+  private readonly endpointHost: string | undefined;
 
-  constructor(private readonly client: TableClient) {}
+  constructor(private readonly client: TableClient) {
+    this.endpointHost = resolveSafeTableEndpointHost(process.env.AZURE_TABLE_ENDPOINT);
+  }
 
   async upsertGrant(record: IAdobeSignGrantRecord): Promise<void> {
-    await this.ensureTable();
-    await this.client.upsertEntity<TableEntity<GrantEntity>>(recordToEntity(record), 'Replace');
+    await this.ensureTable('upsert-grant');
+    try {
+      await this.client.upsertEntity<TableEntity<GrantEntity>>(recordToEntity(record), 'Replace');
+    } catch (err: unknown) {
+      throw this.wrapDiagnosticError(err, 'upsert-grant', 'upsert-entity');
+    }
   }
 
   async findGrant(actorKey: AdobeSignActorKey): Promise<IAdobeSignGrantRecord | undefined> {
-    await this.ensureTable();
+    await this.ensureTable('find-grant');
     const { partitionKey, rowKey } = rowKeysFromActorKey(actorKey);
     try {
       const entity = await this.client.getEntity<GrantEntity>(partitionKey, rowKey);
-      return entityToRecord(entity);
+      try {
+        return entityToRecord(entity);
+      } catch (err: unknown) {
+        throw this.wrapDiagnosticError(err, 'find-grant', 'map-entity');
+      }
     } catch (err: unknown) {
       const status = (err as { statusCode?: number }).statusCode;
       if (status === 404) return undefined;
-      throw err;
+      throw this.wrapDiagnosticError(err, 'find-grant', 'get-entity');
     }
   }
 
@@ -190,33 +208,95 @@ export class TableAdobeSignGrantStore implements IAdobeSignGrantStore {
     actorKey: AdobeSignActorKey,
     failure?: AdobeSignGrantFailureMetadata,
   ): Promise<void> {
-    const existing = await this.findGrant(actorKey);
+    const existing = await this.findGrantWithOperation(actorKey, 'mark-reauthorization-required');
     if (!existing) return;
-    await this.upsertGrant({
-      ...existing,
-      state: 'requires-reauth',
-      ...(failure !== undefined ? { failureMetadata: failure } : {}),
-    });
+    await this.upsertGrantWithOperation(
+      {
+        ...existing,
+        state: 'requires-reauth',
+        ...(failure !== undefined ? { failureMetadata: failure } : {}),
+      },
+      'mark-reauthorization-required',
+    );
   }
 
   async markRevoked(actorKey: AdobeSignActorKey, revokedAtUtc: string): Promise<void> {
-    const existing = await this.findGrant(actorKey);
+    const existing = await this.findGrantWithOperation(actorKey, 'mark-revoked');
     if (!existing) return;
-    await this.upsertGrant({
+    await this.upsertGrantWithOperation(
+      {
       ...existing,
-      state: 'revoked',
-      revokedAtUtc,
-    });
+        state: 'revoked',
+        revokedAtUtc,
+      },
+      'mark-revoked',
+    );
   }
 
-  private async ensureTable(): Promise<void> {
+  private async findGrantWithOperation(
+    actorKey: AdobeSignActorKey,
+    operation: AdobeSignTableStoreOperation,
+  ): Promise<IAdobeSignGrantRecord | undefined> {
+    await this.ensureTable(operation);
+    const { partitionKey, rowKey } = rowKeysFromActorKey(actorKey);
+    try {
+      const entity = await this.client.getEntity<GrantEntity>(partitionKey, rowKey);
+      try {
+        return entityToRecord(entity);
+      } catch (err: unknown) {
+        throw this.wrapDiagnosticError(err, operation, 'map-entity');
+      }
+    } catch (err: unknown) {
+      const status = (err as { statusCode?: number }).statusCode;
+      if (status === 404) return undefined;
+      throw this.wrapDiagnosticError(err, operation, 'get-entity');
+    }
+  }
+
+  private async upsertGrantWithOperation(
+    record: IAdobeSignGrantRecord,
+    operation: AdobeSignTableStoreOperation,
+  ): Promise<void> {
+    await this.ensureTable(operation);
+    try {
+      await this.client.upsertEntity<TableEntity<GrantEntity>>(recordToEntity(record), 'Replace');
+    } catch (err: unknown) {
+      throw this.wrapDiagnosticError(err, operation, 'upsert-entity');
+    }
+  }
+
+  private async ensureTable(operation: AdobeSignTableStoreOperation): Promise<void> {
     if (this.tableEnsured) return;
     try {
       await this.client.createTable();
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
-      if (code !== 'TableAlreadyExists') throw err;
+      if (code !== 'TableAlreadyExists') {
+        throw this.wrapDiagnosticError(err, operation, 'create-table');
+      }
     }
     this.tableEnsured = true;
+  }
+
+  private wrapDiagnosticError(
+    error: unknown,
+    operation: AdobeSignTableStoreOperation,
+    stage: AdobeSignTableStoreStage,
+  ): AdobeSignRuntimeDiagnosticError {
+    const classified = classifyAdobeSignRuntimeError(error);
+    const errorClass =
+      classified.errorClass === 'resource-not-found' ? 'table-not-found' : classified.errorClass;
+    return new AdobeSignRuntimeDiagnosticError(
+      {
+        operation,
+        stage,
+        errorClass,
+        ...(classified.statusCode !== undefined ? { statusCode: classified.statusCode } : {}),
+        ...(classified.sdkCode !== undefined ? { sdkCode: classified.sdkCode } : {}),
+        tableName: ADOBE_SIGN_GRANTS_TABLE,
+        ...(this.endpointHost !== undefined ? { endpointHost: this.endpointHost } : {}),
+      },
+      error,
+    );
   }
 }

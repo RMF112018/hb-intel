@@ -37,6 +37,7 @@ import {
 import type { AdobeSignGrantStoreReadiness } from './adobe-sign-grant-store.js';
 import { toAdobeSignGrantPublic } from './adobe-sign-grant-record.js';
 import type { AdobeSignPrincipalResolutionResult } from './adobe-sign-principal-resolution.js';
+import { AdobeSignRuntimeDiagnosticError } from './adobe-sign-runtime-diagnostics.js';
 
 export interface AdobeSignPrincipalResolverDeps {
   readonly resolveTenantId: () => string | undefined;
@@ -111,7 +112,10 @@ export function createAdobeSignPrincipalResolver(
     let grant;
     try {
       grant = await grantStore.store.findGrant(actor.actorKey);
-    } catch {
+    } catch (err: unknown) {
+      if (err instanceof AdobeSignRuntimeDiagnosticError) {
+        context.diagnostics?.trackAdobeSignRuntimeEvent('adobe-sign-runtime-failure', err.diagnostic);
+      }
       return { status: 'source-unavailable', reason: 'token-store-unavailable' };
     }
 
