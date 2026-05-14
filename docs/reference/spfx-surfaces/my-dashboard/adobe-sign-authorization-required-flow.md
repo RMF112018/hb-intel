@@ -118,4 +118,24 @@ Security posture:
 - absolute caller return URLs are still rejected;
 - when `MY_DASHBOARD_PUBLIC_ORIGIN` is missing/invalid, callback returns `503 CONFIGURATION_REQUIRED` instead of a relative redirect to the Function App host.
 
+## Callback endpoint-shape compatibility
+
+The callback route supports both observed Adobe redirect shapes:
+
+- shape A: `code + state + api_access_point + web_access_point`
+- shape B: `code + state` (no callback access-point params)
+
+Endpoint resolution precedence:
+
+1. use callback access points when both are present and valid;
+2. when callback access points are absent, exchange the code using the documented fallback token endpoint and resolve access points from the token response;
+3. persist only validated Adobe-host access points to the grant record.
+
+Security constraints remain unchanged:
+
+- callback values are never trusted blindly;
+- endpoint validation requires absolute `https` URLs with Adobe-host allowlist suffixes;
+- partial callback endpoint shape (only one of the two access points) is rejected;
+- raw callback query values (`code`, `state`) and token material are never logged.
+
 If any marker is missing or has the wrong value, the corresponding row in the **Test-coverage map** is the first place to triage.

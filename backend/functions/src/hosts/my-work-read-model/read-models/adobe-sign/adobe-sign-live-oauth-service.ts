@@ -30,6 +30,7 @@
  */
 
 import type {
+  AdobeSignEndpointSource,
   AdobeSignTokenExchangeInput,
   AdobeSignTokenExchangeResult,
   IAdobeSignOAuthService,
@@ -41,6 +42,7 @@ export const ADOBE_SIGN_ACCESS_POINT_ALLOWED_SUFFIXES = [
 ] as const;
 
 export const ADOBE_SIGN_OAUTH_TOKEN_PATH = '/oauth/v2/token' as const;
+export const ADOBE_SIGN_OAUTH_TOKEN_FALLBACK_API_ACCESS_POINT = 'https://api.na1.adobesign.com';
 
 export const ADOBE_SIGN_LIVE_OAUTH_DEFAULT_TIMEOUT_MS = 10_000;
 
@@ -81,6 +83,11 @@ export function isAllowedAdobeAccessPoint(candidate: string): boolean {
   return false;
 }
 
+function normalizeAllowedAccessPoint(candidate: string): string {
+  const parsed = new URL(candidate);
+  return parsed.origin;
+}
+
 function trimTrailingSlash(url: string): string {
   return url.endsWith('/') ? url.slice(0, -1) : url;
 }
@@ -115,6 +122,8 @@ interface AdobeTokenSuccessBody {
   readonly refresh_token: string;
   readonly expires_in: number;
   readonly scope?: string;
+  readonly api_access_point?: string;
+  readonly web_access_point?: string;
 }
 
 function isAdobeTokenSuccessBody(value: unknown): value is AdobeTokenSuccessBody {
@@ -147,11 +156,33 @@ export function createAdobeSignLiveOAuthService(
     async exchangeAuthorizationCode(
       input: AdobeSignTokenExchangeInput,
     ): Promise<AdobeSignTokenExchangeResult> {
-      if (!isAllowedAdobeAccessPoint(input.apiAccessPoint)) {
-        return { status: 'unreachable', reason: 'invalid-access-point' };
+      const callbackApiAccessPoint = input.apiAccessPoint?.trim();
+      const callbackWebAccessPoint = input.webAccessPoint?.trim();
+      const hasCallbackApiAccessPoint = Boolean(callbackApiAccessPoint);
+      const hasCallbackWebAccessPoint = Boolean(callbackWebAccessPoint);
+      const hasCallbackEndpoints = hasCallbackApiAccessPoint || hasCallbackWebAccessPoint;
+
+      if (hasCallbackEndpoints) {
+        if (!hasCallbackApiAccessPoint || !hasCallbackWebAccessPoint) {
+          return { status: 'unreachable', reason: 'invalid-access-point' };
+        }
+        const callbackApi = callbackApiAccessPoint!;
+        const callbackWeb = callbackWebAccessPoint!;
+        if (!isAllowedAdobeAccessPoint(callbackApi)) {
+          return { status: 'unreachable', reason: 'invalid-access-point' };
+        }
+        if (!isAllowedAdobeAccessPoint(callbackWeb)) {
+          return { status: 'unreachable', reason: 'invalid-access-point' };
+        }
       }
 
-      const url = `${trimTrailingSlash(input.apiAccessPoint)}${ADOBE_SIGN_OAUTH_TOKEN_PATH}`;
+      const requestApiAccessPoint = callbackApiAccessPoint
+        ? callbackApiAccessPoint
+        : ADOBE_SIGN_OAUTH_TOKEN_FALLBACK_API_ACCESS_POINT;
+      const endpointSource: AdobeSignEndpointSource = callbackApiAccessPoint
+        ? 'callback'
+        : 'configured-fallback';
+      const url = `${trimTrailingSlash(requestApiAccessPoint)}${ADOBE_SIGN_OAUTH_TOKEN_PATH}`;
       const body = new URLSearchParams({
         grant_type: 'authorization_code',
         code: input.authorizationCode,
@@ -215,12 +246,42 @@ export function createAdobeSignLiveOAuthService(
         return { status: 'scope-mismatch', grantedScopes };
       }
 
+      const responseApiAccessPoint = (parsed as AdobeTokenSuccessBody).api_access_point?.trim();
+      const responseWebAccessPoint = (parsed as AdobeTokenSuccessBody).web_access_point?.trim();
+
+      const resolvedApiAccessPointRaw = hasCallbackApiAccessPoint
+        ? callbackApiAccessPoint
+        : responseApiAccessPoint;
+      const resolvedWebAccessPointRaw = hasCallbackWebAccessPoint
+        ? callbackWebAccessPoint
+        : responseWebAccessPoint;
+      const resolvedSource: AdobeSignEndpointSource = hasCallbackApiAccessPoint
+        ? 'callback'
+        : 'token-response';
+
+      if (
+        !resolvedApiAccessPointRaw ||
+        !resolvedWebAccessPointRaw ||
+        !isAllowedAdobeAccessPoint(resolvedApiAccessPointRaw) ||
+        !isAllowedAdobeAccessPoint(resolvedWebAccessPointRaw)
+      ) {
+        return {
+          status: 'unreachable',
+          reason: endpointSource === 'configured-fallback' ? 'missing-access-point' : 'invalid-access-point',
+        };
+      }
+      const resolvedApiAccessPoint = normalizeAllowedAccessPoint(resolvedApiAccessPointRaw);
+      const resolvedWebAccessPoint = normalizeAllowedAccessPoint(resolvedWebAccessPointRaw);
+
       return {
         status: 'ok',
         accessToken: (parsed as AdobeTokenSuccessBody).access_token,
         refreshToken: (parsed as AdobeTokenSuccessBody).refresh_token,
         grantedScopes,
         expiresInSeconds: (parsed as AdobeTokenSuccessBody).expires_in,
+        resolvedApiAccessPoint,
+        resolvedWebAccessPoint,
+        endpointSource: resolvedSource,
       };
     },
   };

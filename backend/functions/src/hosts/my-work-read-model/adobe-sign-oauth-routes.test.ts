@@ -137,6 +137,9 @@ const buildDeps = (
     accessToken: 'at-secret',
     grantedScopes: ['agreement_read', 'agreement_send'],
     expiresInSeconds: 3600,
+    resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
+    resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
+    endpointSource: 'callback',
   };
   const service: IAdobeSignOAuthService = {
     exchangeAuthorizationCode: vi.fn(async () => exchangeResult),
@@ -592,6 +595,52 @@ describe('callback handler', () => {
         code: 'c',
         api_access_point: 'http://api.na1.adobesign.com',
         web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+    expect((response.headers as Record<string, string>).Location).toContain(
+      'adobeSignAuthorization=invalid-state',
+    );
+    expect(seams.service.exchangeAuthorizationCode).not.toHaveBeenCalled();
+  });
+
+  it('allows callback flow when access-point params are absent and delegates fallback to exchange service', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state,
+        code: 'c',
+      }) as any,
+      {} as any,
+    );
+    expect(response.status).toBe(302);
+    expect((response.headers as Record<string, string>).Location).toContain(
+      'adobeSignAuthorization=success',
+    );
+    expect(seams.service.exchangeAuthorizationCode).toHaveBeenCalledTimes(1);
+    expect(seams.service.exchangeAuthorizationCode).toHaveBeenCalledWith(
+      expect.objectContaining({
+        authorizationCode: 'c',
+      }),
+    );
+    const call = (seams.service.exchangeAuthorizationCode as any).mock.calls[0][0];
+    expect(call.apiAccessPoint).toBeUndefined();
+    expect(call.webAccessPoint).toBeUndefined();
+  });
+
+  it('rejects callback when only one access-point param is present', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state,
+        code: 'c',
+        api_access_point: 'https://api.na1.adobesign.com',
       }) as any,
       {} as any,
     );

@@ -338,6 +338,7 @@ const buildRedirect = (
 
 const grantStateForExchange = (exchange: { readonly status: string }): AdobeSignGrantState =>
   exchange.status === 'ok' ? 'active' : 'pending';
+const hasNonEmptyValue = (value: string): boolean => value.trim().length > 0;
 
 export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
   return async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
@@ -349,6 +350,8 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
     const code = request.query.get('code') ?? '';
     const apiAccessPoint = request.query.get('api_access_point') ?? '';
     const webAccessPoint = request.query.get('web_access_point') ?? '';
+    const hasApiAccessPoint = hasNonEmptyValue(apiAccessPoint);
+    const hasWebAccessPoint = hasNonEmptyValue(webAccessPoint);
     const env = deps.resolveConfigEnv();
 
     if (!state || !code) {
@@ -398,13 +401,22 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       );
     }
 
-    // Validate the Adobe-supplied access points BEFORE consuming state or
-    // exchanging the code. A forged callback never reaches the token endpoint.
-    if (!isAllowedAdobeAccessPoint(apiAccessPoint) || !isAllowedAdobeAccessPoint(webAccessPoint)) {
+    // Validate Adobe-supplied access points only when present. The live
+    // callback contract can provide just code+state; in that case the exchange
+    // layer uses a documented fallback endpoint and resolves authoritative
+    // access points from the token response.
+    const callbackAccessPointShapeInvalid =
+      (hasApiAccessPoint && !hasWebAccessPoint) ||
+      (!hasApiAccessPoint && hasWebAccessPoint) ||
+      (hasApiAccessPoint && !isAllowedAdobeAccessPoint(apiAccessPoint)) ||
+      (hasWebAccessPoint && !isAllowedAdobeAccessPoint(webAccessPoint));
+    if (callbackAccessPointShapeInvalid) {
       logger.trackEvent('adobeSign.oauth.callback.invalid-access-point', {
         correlationId: requestId,
-        apiAccessPointAllowed: isAllowedAdobeAccessPoint(apiAccessPoint),
-        webAccessPointAllowed: isAllowedAdobeAccessPoint(webAccessPoint),
+        callbackHasApiAccessPoint: hasApiAccessPoint,
+        callbackHasWebAccessPoint: hasWebAccessPoint,
+        apiAccessPointAllowed: hasApiAccessPoint ? isAllowedAdobeAccessPoint(apiAccessPoint) : false,
+        webAccessPointAllowed: hasWebAccessPoint ? isAllowedAdobeAccessPoint(webAccessPoint) : false,
       });
       return buildRedirect(env, ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH, CALLBACK_UX_STATUS.invalidState);
     }
@@ -434,8 +446,8 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       clientId: env.ADOBE_SIGN_OAUTH_CLIENT_ID as string,
       clientSecret: env.ADOBE_SIGN_OAUTH_CLIENT_SECRET as string,
       redirectUri: env.ADOBE_SIGN_OAUTH_REDIRECT_URI as string,
-      apiAccessPoint,
-      webAccessPoint,
+      ...(hasApiAccessPoint ? { apiAccessPoint: apiAccessPoint.trim() } : {}),
+      ...(hasWebAccessPoint ? { webAccessPoint: webAccessPoint.trim() } : {}),
     });
 
     if (exchange.status !== 'ok') {
@@ -448,6 +460,8 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       logger.trackEvent('adobeSign.oauth.callback.exchange-failed', {
         correlationId: requestId,
         status: exchange.status,
+        callbackHasApiAccessPoint: hasApiAccessPoint,
+        callbackHasWebAccessPoint: hasWebAccessPoint,
       });
       return buildRedirect(env, stateRecord.returnPath, mapped);
     }
@@ -477,8 +491,8 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       actorTenantId,
       actorOid,
       actorKey: stateRecord.actorKey,
-      adobeApiAccessPoint: apiAccessPoint,
-      adobeWebAccessPoint: webAccessPoint,
+      adobeApiAccessPoint: exchange.resolvedApiAccessPoint,
+      adobeWebAccessPoint: exchange.resolvedWebAccessPoint,
       encryptedRefreshTokenRef,
       grantedScopes: exchange.grantedScopes,
       grantedAtUtc: deps.now().toISOString(),
@@ -498,6 +512,9 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       grantState: grant.state,
       scopeCount: grant.grantedScopes.length,
       refreshTokenRefStoreKind: encryptedRefreshTokenRef.storeKind,
+      endpointSource: exchange.endpointSource,
+      callbackHasApiAccessPoint: hasApiAccessPoint,
+      callbackHasWebAccessPoint: hasWebAccessPoint,
     });
 
     return buildRedirect(env, stateRecord.returnPath, CALLBACK_UX_STATUS.success);

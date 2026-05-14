@@ -39,11 +39,13 @@ export interface AdobeSignTokenExchangeInput {
   readonly clientId: string;
   readonly clientSecret: string;
   readonly redirectUri: string;
-  /** Region-specific API access point Adobe returns with the callback. */
-  readonly apiAccessPoint: string;
-  /** Region-specific web access point Adobe returns with the callback. */
-  readonly webAccessPoint: string;
+  /** Region-specific API access point Adobe may return with the callback. */
+  readonly apiAccessPoint?: string;
+  /** Region-specific web access point Adobe may return with the callback. */
+  readonly webAccessPoint?: string;
 }
+
+export type AdobeSignEndpointSource = 'callback' | 'token-response' | 'configured-fallback';
 
 export interface AdobeSignTokenExchangeSuccess {
   readonly status: 'ok';
@@ -51,6 +53,9 @@ export interface AdobeSignTokenExchangeSuccess {
   readonly accessToken: string;
   readonly grantedScopes: readonly string[];
   readonly expiresInSeconds: number;
+  readonly resolvedApiAccessPoint: string;
+  readonly resolvedWebAccessPoint: string;
+  readonly endpointSource: AdobeSignEndpointSource;
 }
 
 export type AdobeSignTokenExchangeResult =

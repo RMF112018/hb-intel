@@ -5,6 +5,7 @@ import {
   type AdobeSignTokenExchangeInput,
 } from './adobe-sign-oauth-service.js';
 import {
+  ADOBE_SIGN_OAUTH_TOKEN_FALLBACK_API_ACCESS_POINT,
   ADOBE_SIGN_OAUTH_TOKEN_PATH,
   createAdobeSignLiveOAuthService,
   isAllowedAdobeAccessPoint,
@@ -24,6 +25,8 @@ const VALID_TOKEN_BODY = {
   refresh_token: 'rt-value',
   expires_in: 3600,
   scope: 'agreement_read agreement_send',
+  api_access_point: 'https://api.na1.adobesign.com/',
+  web_access_point: 'https://secure.na1.adobesign.com/',
 };
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -78,6 +81,20 @@ describe('createAdobeSignLiveOAuthService — request shape', () => {
     expect(calledUrl).toBe(`${VALID_INPUT.apiAccessPoint}${ADOBE_SIGN_OAUTH_TOKEN_PATH}`);
   });
 
+  it('uses configured fallback token endpoint when callback access points are missing', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse(VALID_TOKEN_BODY));
+    const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
+    await service.exchangeAuthorizationCode({
+      ...VALID_INPUT,
+      apiAccessPoint: undefined,
+      webAccessPoint: undefined,
+    });
+    const [calledUrl] = fetchSpy.mock.calls[0]!;
+    expect(calledUrl).toBe(
+      `${ADOBE_SIGN_OAUTH_TOKEN_FALLBACK_API_ACCESS_POINT}${ADOBE_SIGN_OAUTH_TOKEN_PATH}`,
+    );
+  });
+
   it('sends a form-urlencoded body with exactly the five expected keys', async () => {
     const fetchSpy = vi.fn(async () => jsonResponse(VALID_TOKEN_BODY));
     const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
@@ -111,6 +128,9 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
       refreshToken: 'rt-value',
       grantedScopes: ['agreement_read', 'agreement_send'],
       expiresInSeconds: 3600,
+      resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
+      resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
+      endpointSource: 'callback',
     });
   });
 
@@ -146,6 +166,48 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'scope-mismatch',
       grantedScopes: ['agreement_write'],
+    });
+  });
+
+  it('resolves endpoints from token response when callback access points are missing', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse(VALID_TOKEN_BODY));
+    const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
+    const result = await service.exchangeAuthorizationCode({
+      ...VALID_INPUT,
+      apiAccessPoint: undefined,
+      webAccessPoint: undefined,
+    });
+    expect(result).toEqual({
+      status: 'ok',
+      accessToken: 'at-value',
+      refreshToken: 'rt-value',
+      grantedScopes: ['agreement_read', 'agreement_send'],
+      expiresInSeconds: 3600,
+      resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
+      resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
+      endpointSource: 'token-response',
+    });
+  });
+
+  it('fails with missing-access-point when callback access points are absent and token response omits them', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        access_token: 'at-value',
+        refresh_token: 'rt-value',
+        expires_in: 3600,
+        scope: 'agreement_read',
+      }),
+    );
+    const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
+    expect(
+      await service.exchangeAuthorizationCode({
+        ...VALID_INPUT,
+        apiAccessPoint: undefined,
+        webAccessPoint: undefined,
+      }),
+    ).toEqual({
+      status: 'unreachable',
+      reason: 'missing-access-point',
     });
   });
 
@@ -218,6 +280,17 @@ describe('createAdobeSignLiveOAuthService — pre-fetch access-point validation'
     const result = await service.exchangeAuthorizationCode({
       ...VALID_INPUT,
       apiAccessPoint: 'https://attacker.example.com',
+    });
+    expect(result).toEqual({ status: 'unreachable', reason: 'invalid-access-point' });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('rejects partial callback endpoint shape without calling fetch', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse(VALID_TOKEN_BODY));
+    const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
+    const result = await service.exchangeAuthorizationCode({
+      ...VALID_INPUT,
+      webAccessPoint: undefined,
     });
     expect(result).toEqual({ status: 'unreachable', reason: 'invalid-access-point' });
     expect(fetchSpy).not.toHaveBeenCalled();
