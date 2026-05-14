@@ -90,6 +90,7 @@ const FULL_CONFIG_ENV = {
   // env values only need to be non-empty.
   AZURE_TABLE_ENDPOINT: 'https://example.table.core.windows.net',
   ADOBE_SIGN_TOKEN_ENCRYPTION_KEY: 'aGFybmVzcy1jaXBoZXItc2VlbS1zZWFtLW5ldmVyLXJlYWQ=',
+  MY_DASHBOARD_PUBLIC_ORIGIN: 'https://hedrickbrotherscom.sharepoint.com',
 };
 
 const FIXED_NOW = new Date('2026-05-13T12:00:00.000Z');
@@ -405,7 +406,9 @@ describe('callback handler', () => {
 
     expect(response.status).toBe(302);
     const location = (response.headers as Record<string, string>).Location;
-    expect(location.startsWith('/SitePages/MyDashboard.aspx?')).toBe(true);
+    expect(
+      location.startsWith('https://hedrickbrotherscom.sharepoint.com/SitePages/MyDashboard.aspx?'),
+    ).toBe(true);
     expect(location).toContain('adobeSignAuthorization=success');
     // No secret values anywhere in the redirect.
     expect(location).not.toContain(state);
@@ -672,6 +675,47 @@ describe('callback handler', () => {
         address: ACTOR_KEY,
       }),
     ).toBeUndefined();
+  });
+
+  it('returns CONFIGURATION_REQUIRED when MY_DASHBOARD_PUBLIC_ORIGIN is missing', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    deps.resolveConfigEnv = () => {
+      const { MY_DASHBOARD_PUBLIC_ORIGIN: _, ...rest } = FULL_CONFIG_ENV;
+      return rest;
+    };
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(callbackRequest({ code: 'c' }) as any, {} as any);
+    expect(response.status).toBe(503);
+    expect((response.jsonBody as any).code).toBe('CONFIGURATION_REQUIRED');
+    expect((response.jsonBody as any).details.reason).toBe('missing');
+    expect((response.headers as Record<string, string>).Location).toBeUndefined();
+    expect(seams.service.exchangeAuthorizationCode).not.toHaveBeenCalled();
+  });
+
+  it('returns CONFIGURATION_REQUIRED when MY_DASHBOARD_PUBLIC_ORIGIN is invalid', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    deps.resolveConfigEnv = () => ({
+      ...FULL_CONFIG_ENV,
+      MY_DASHBOARD_PUBLIC_ORIGIN: 'http://insecure.example.com/path',
+    });
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state,
+        code: 'c',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+    expect(response.status).toBe(503);
+    expect((response.jsonBody as any).code).toBe('CONFIGURATION_REQUIRED');
+    expect((response.jsonBody as any).details.reason).toBe('not-https');
+    expect((response.headers as Record<string, string>).Location).toBeUndefined();
+    expect(seams.service.exchangeAuthorizationCode).toHaveBeenCalledTimes(1);
   });
 });
 

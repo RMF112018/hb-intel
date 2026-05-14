@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  ADOBE_SIGN_OAUTH_FRONTEND_ORIGIN_ENV_KEY,
   ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH,
   ADOBE_SIGN_OAUTH_RETURN_PATH_ALLOWLIST,
+  buildAdobeSignCallbackRedirectLocation,
+  resolveAdobeSignFrontendOrigin,
   validateAdobeSignReturnPath,
 } from './adobe-sign-oauth-return-path.js';
 
@@ -72,5 +75,47 @@ describe('validateAdobeSignReturnPath', () => {
   it('exports a non-empty default and allowlist', () => {
     expect(ADOBE_SIGN_OAUTH_RETURN_PATH_ALLOWLIST.length).toBeGreaterThan(0);
     expect(ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH).toMatch(/^\//);
+  });
+});
+
+describe('resolveAdobeSignFrontendOrigin', () => {
+  it('accepts an https origin with no path/query/hash', () => {
+    const result = resolveAdobeSignFrontendOrigin({
+      [ADOBE_SIGN_OAUTH_FRONTEND_ORIGIN_ENV_KEY]: 'https://hedrickbrotherscom.sharepoint.com',
+    });
+    expect(result).toEqual({ ok: true, origin: 'https://hedrickbrotherscom.sharepoint.com' });
+  });
+
+  it('rejects missing/invalid/insecure or path-bearing values', () => {
+    expect(resolveAdobeSignFrontendOrigin({}).ok).toBe(false);
+    expect(
+      resolveAdobeSignFrontendOrigin({
+        [ADOBE_SIGN_OAUTH_FRONTEND_ORIGIN_ENV_KEY]: 'not-a-url',
+      }),
+    ).toEqual({ ok: false, reason: 'invalid-url' });
+    expect(
+      resolveAdobeSignFrontendOrigin({
+        [ADOBE_SIGN_OAUTH_FRONTEND_ORIGIN_ENV_KEY]: 'http://contoso.sharepoint.com',
+      }),
+    ).toEqual({ ok: false, reason: 'not-https' });
+    expect(
+      resolveAdobeSignFrontendOrigin({
+        [ADOBE_SIGN_OAUTH_FRONTEND_ORIGIN_ENV_KEY]:
+          'https://contoso.sharepoint.com/sites/MyDashboard',
+      }),
+    ).toEqual({ ok: false, reason: 'has-path' });
+  });
+});
+
+describe('buildAdobeSignCallbackRedirectLocation', () => {
+  it('builds an absolute URL with the oauth status query set by the callback', () => {
+    const location = buildAdobeSignCallbackRedirectLocation({
+      origin: 'https://hedrickbrotherscom.sharepoint.com',
+      returnPath: '/sites/MyDashboard/SitePages/MyDashboard.aspx',
+      status: 'invalid-state',
+    });
+    expect(location).toBe(
+      'https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard/SitePages/MyDashboard.aspx?adobeSignAuthorization=invalid-state',
+    );
   });
 });

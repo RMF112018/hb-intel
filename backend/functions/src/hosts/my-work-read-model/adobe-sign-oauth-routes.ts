@@ -81,6 +81,8 @@ import {
 } from './read-models/adobe-sign/adobe-sign-oauth-state-store.js';
 import {
   ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH,
+  buildAdobeSignCallbackRedirectLocation,
+  resolveAdobeSignFrontendOrigin,
   validateAdobeSignReturnPath,
 } from './read-models/adobe-sign/adobe-sign-oauth-return-path.js';
 
@@ -298,12 +300,37 @@ const CALLBACK_UX_STATUS = {
 
 type CallbackUxStatus = (typeof CALLBACK_UX_STATUS)[keyof typeof CALLBACK_UX_STATUS];
 
-const buildRedirect = (returnPath: string, status: CallbackUxStatus): HttpResponseInit => {
-  const sep = returnPath.includes('?') ? '&' : '?';
+const buildRedirect = (
+  env: Record<string, string | undefined>,
+  returnPath: string,
+  status: CallbackUxStatus,
+): HttpResponseInit => {
+  const frontendOrigin = resolveAdobeSignFrontendOrigin(env);
+  if (!frontendOrigin.ok) {
+    return {
+      status: 503,
+      jsonBody: {
+        code: 'CONFIGURATION_REQUIRED',
+        message: 'Adobe Sign callback redirect origin is not configured.',
+        details: {
+          reason: frontendOrigin.reason,
+        },
+      },
+      headers: {
+        'Cache-Control': 'no-store, max-age=0',
+      },
+    };
+  }
+
+  const location = buildAdobeSignCallbackRedirectLocation({
+    origin: frontendOrigin.origin,
+    returnPath,
+    status,
+  });
   return {
     status: 302,
     headers: {
-      Location: `${returnPath}${sep}adobeSignAuthorization=${encodeURIComponent(status)}`,
+      Location: location,
       'Cache-Control': 'no-store, max-age=0',
     },
   };
@@ -322,6 +349,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
     const code = request.query.get('code') ?? '';
     const apiAccessPoint = request.query.get('api_access_point') ?? '';
     const webAccessPoint = request.query.get('web_access_point') ?? '';
+    const env = deps.resolveConfigEnv();
 
     if (!state || !code) {
       logger.trackEvent('adobeSign.oauth.callback.invalid-input', {
@@ -329,10 +357,9 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         hasState: Boolean(state),
         hasCode: Boolean(code),
       });
-      return buildRedirect(ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH, CALLBACK_UX_STATUS.invalidState);
+      return buildRedirect(env, ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH, CALLBACK_UX_STATUS.invalidState);
     }
 
-    const env = deps.resolveConfigEnv();
     const configReadiness = resolveAdobeSignOAuthConfigReadiness(env);
     if (!isAdobeSignConfigReady(configReadiness)) {
       logger.trackEvent('adobeSign.oauth.callback.configuration-required', {
@@ -341,6 +368,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         missingKeys: configReadiness.missingKeys,
       });
       return buildRedirect(
+        env,
         ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH,
         CALLBACK_UX_STATUS.configurationRequired,
       );
@@ -364,6 +392,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         refreshTokenCipherReady: refreshTokenCipher.readiness === 'ready',
       });
       return buildRedirect(
+        env,
         ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH,
         CALLBACK_UX_STATUS.configurationRequired,
       );
@@ -377,7 +406,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         apiAccessPointAllowed: isAllowedAdobeAccessPoint(apiAccessPoint),
         webAccessPointAllowed: isAllowedAdobeAccessPoint(webAccessPoint),
       });
-      return buildRedirect(ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH, CALLBACK_UX_STATUS.invalidState);
+      return buildRedirect(env, ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH, CALLBACK_UX_STATUS.invalidState);
     }
 
     const takeResult = await stateStore.store.take(state, deps.now());
@@ -395,7 +424,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         correlationId: requestId,
         outcome: takeResult.outcome,
       });
-      return buildRedirect(ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH, mapped);
+      return buildRedirect(env, ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH, mapped);
     }
 
     const stateRecord = takeResult.record;
@@ -420,7 +449,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         correlationId: requestId,
         status: exchange.status,
       });
-      return buildRedirect(stateRecord.returnPath, mapped);
+      return buildRedirect(env, stateRecord.returnPath, mapped);
     }
 
     const [actorTenantId, actorOid] = stateRecord.actorKey.split('::');
@@ -441,7 +470,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       logger.trackEvent('adobeSign.oauth.callback.refresh-token-store-write-failed', {
         correlationId: requestId,
       });
-      return buildRedirect(stateRecord.returnPath, CALLBACK_UX_STATUS.sourceUnavailable);
+      return buildRedirect(env, stateRecord.returnPath, CALLBACK_UX_STATUS.sourceUnavailable);
     }
 
     const grant: IAdobeSignGrantRecord = {
@@ -461,7 +490,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       logger.trackEvent('adobeSign.oauth.callback.grant-store-write-failed', {
         correlationId: requestId,
       });
-      return buildRedirect(stateRecord.returnPath, CALLBACK_UX_STATUS.sourceUnavailable);
+      return buildRedirect(env, stateRecord.returnPath, CALLBACK_UX_STATUS.sourceUnavailable);
     }
 
     logger.trackEvent('adobeSign.oauth.callback.granted', {
@@ -471,7 +500,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       refreshTokenRefStoreKind: encryptedRefreshTokenRef.storeKind,
     });
 
-    return buildRedirect(stateRecord.returnPath, CALLBACK_UX_STATUS.success);
+    return buildRedirect(env, stateRecord.returnPath, CALLBACK_UX_STATUS.success);
   };
 }
 

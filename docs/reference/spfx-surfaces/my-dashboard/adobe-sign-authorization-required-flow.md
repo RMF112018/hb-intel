@@ -102,4 +102,20 @@ The `Connect Adobe Sign` button is suppressed by the surface in all of these cas
 5. Complete consent in Adobe Sign. Confirm the callback returns to the recorded `returnPath` and that `<div data-my-work-adobe-sign-callback="success">` mounts on the dashboard.
 6. Reload the focused module and confirm the guidance card is gone (status flipped to `available`) and the agreement list renders.
 
+## Callback redirect origin configuration
+
+`completeAdobeSignOAuthCallback` now emits absolute redirects built as:
+
+`MY_DASHBOARD_PUBLIC_ORIGIN + validated returnPath + adobeSignAuthorization`
+
+Required backend setting:
+
+- `MY_DASHBOARD_PUBLIC_ORIGIN` = HTTPS origin only (no path/query/fragment), for example `https://hedrickbrotherscom.sharepoint.com`
+
+Security posture:
+
+- caller-supplied `returnPath` remains path-only and allowlisted by `validateAdobeSignReturnPath`;
+- absolute caller return URLs are still rejected;
+- when `MY_DASHBOARD_PUBLIC_ORIGIN` is missing/invalid, callback returns `503 CONFIGURATION_REQUIRED` instead of a relative redirect to the Function App host.
+
 If any marker is missing or has the wrong value, the corresponding row in the **Test-coverage map** is the first place to triage.

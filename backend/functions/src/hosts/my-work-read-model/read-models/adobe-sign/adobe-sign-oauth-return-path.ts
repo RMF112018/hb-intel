@@ -29,6 +29,7 @@ export const ADOBE_SIGN_OAUTH_RETURN_PATH_ALLOWLIST: readonly string[] = [
 ];
 
 export const ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH = '/SitePages/MyDashboard.aspx';
+export const ADOBE_SIGN_OAUTH_FRONTEND_ORIGIN_ENV_KEY = 'MY_DASHBOARD_PUBLIC_ORIGIN';
 
 export type AdobeSignReturnPathRejectionReason =
   | 'empty'
@@ -46,6 +47,19 @@ export interface ValidateAdobeSignReturnPathOptions {
   readonly allowlist?: readonly string[];
   readonly defaultPath?: string;
 }
+
+export type AdobeSignFrontendOriginResult =
+  | { readonly ok: true; readonly origin: string }
+  | {
+      readonly ok: false;
+      readonly reason:
+        | 'missing'
+        | 'invalid-url'
+        | 'not-https'
+        | 'has-path'
+        | 'has-query-or-fragment'
+        | 'has-credentials';
+    };
 
 const FORBIDDEN_CHARS = /[?#]/;
 
@@ -75,3 +89,34 @@ export function validateAdobeSignReturnPath(
 
   return { ok: true, path: raw };
 }
+
+export const resolveAdobeSignFrontendOrigin = (
+  env: Record<string, string | undefined>,
+): AdobeSignFrontendOriginResult => {
+  const raw = env[ADOBE_SIGN_OAUTH_FRONTEND_ORIGIN_ENV_KEY]?.trim();
+  if (!raw) return { ok: false, reason: 'missing' };
+
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return { ok: false, reason: 'invalid-url' };
+  }
+
+  if (parsed.protocol !== 'https:') return { ok: false, reason: 'not-https' };
+  if (parsed.username || parsed.password) return { ok: false, reason: 'has-credentials' };
+  if (parsed.pathname !== '/' && parsed.pathname !== '') return { ok: false, reason: 'has-path' };
+  if (parsed.search || parsed.hash) return { ok: false, reason: 'has-query-or-fragment' };
+
+  return { ok: true, origin: parsed.origin };
+};
+
+export const buildAdobeSignCallbackRedirectLocation = (args: {
+  readonly origin: string;
+  readonly returnPath: string;
+  readonly status: string;
+}): string => {
+  const target = new URL(args.returnPath, `${args.origin}/`);
+  target.searchParams.set('adobeSignAuthorization', args.status);
+  return target.toString();
+};
