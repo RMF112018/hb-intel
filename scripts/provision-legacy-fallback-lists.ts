@@ -5,49 +5,23 @@ import '@pnp/nodejs-commonjs';
 import '@pnp/sp/fields/index.js';
 import '@pnp/sp/lists/index.js';
 import '@pnp/sp/webs/index.js';
-import type { IFieldDefinition, IListDefinition } from '../backend/functions/src/services/sharepoint-service.js';
+import type { IListDefinition } from '../backend/functions/src/services/sharepoint-service.js';
 import {
   LEGACY_FALLBACK_LIST_DESCRIPTORS,
   getLegacyFallbackListHostSiteUrl,
 } from '../backend/functions/src/services/legacy-fallback/list-descriptors.js';
 import {
-  getCompatibleSharePointFieldTypes,
-  isSharePointFieldTypeCompatible,
+  applyFieldSettingsUpdates,
+  buildListFieldPlans,
+  createSharePointField,
   normalizeListTitle,
-} from '../backend/functions/src/services/legacy-fallback/provisioning-compatibility.js';
+  validateProvisionedFields,
+  type ILiveSharePointFieldSnapshot,
+  type IListProvisioningResult,
+  type IProvisioningReport,
+} from '../backend/functions/src/services/sharepoint-schema-provisioning/index.js';
 
 console.error('[legacy-fallback] provisioning script started');
-
-interface IFieldMutation {
-  listTitle: string;
-  fieldInternalName: string;
-  action: 'created' | 'updated' | 'indexed' | 'defaulted' | 'required-updated' | 'choices-updated';
-}
-
-interface IUnresolvedMutation {
-  listTitle: string;
-  fieldInternalName: string;
-  desiredType: IFieldDefinition['type'];
-  liveType: string;
-  reason: string;
-}
-
-interface IListProvisioningResult {
-  targetDescriptorTitle: string;
-  resolvedListTitle: string;
-  createdList: boolean;
-  schemaValidated: boolean;
-  fieldMutations: IFieldMutation[];
-  unresolvedMutations: IUnresolvedMutation[];
-}
-
-interface IProvisioningReport {
-  hostSiteUrl: string;
-  startedAtUtc: string;
-  completedAtUtc: string;
-  listResults: IListProvisioningResult[];
-  unresolvedMutations: IUnresolvedMutation[];
-}
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) => {
@@ -107,112 +81,6 @@ function findEquivalentList(
   return equivalent ?? null;
 }
 
-async function createField(list: any, field: IFieldDefinition): Promise<void> {
-  switch (field.type) {
-    case 'Number':
-      await list.fields.addNumber(field.internalName, {
-        Required: field.required ?? false,
-        Title: field.displayName,
-      });
-      break;
-    case 'DateTime':
-      await list.fields.addDateTime(field.internalName, {
-        Required: field.required ?? false,
-        Title: field.displayName,
-      });
-      break;
-    case 'Boolean':
-      await list.fields.addBoolean(field.internalName, {
-        Required: field.required ?? false,
-        Title: field.displayName,
-      });
-      break;
-    case 'Choice':
-      await list.fields.addChoice(field.internalName, {
-        Required: field.required ?? false,
-        Title: field.displayName,
-        Choices: field.choices ?? [],
-      });
-      break;
-    case 'User':
-      await list.fields.addUser(field.internalName, {
-        Required: field.required ?? false,
-        Title: field.displayName,
-      });
-      break;
-    case 'URL':
-      await list.fields.addUrl(field.internalName, {
-        Required: field.required ?? false,
-        Title: field.displayName,
-      });
-      break;
-    case 'Lookup':
-      throw new Error('Lookup fields are not supported in legacy fallback descriptors during Prompt 02.');
-    case 'MultiLineText':
-      await list.fields.addMultilineText(field.internalName, {
-        Required: field.required ?? false,
-        Title: field.displayName,
-        RichText: false,
-      });
-      break;
-    case 'Text':
-    default:
-      await list.fields.addText(field.internalName, {
-        Required: field.required ?? false,
-        Title: field.displayName,
-      });
-      break;
-  }
-}
-
-async function applyFieldSettings(
-  list: any,
-  field: IFieldDefinition,
-  liveField: any,
-  result: IListProvisioningResult,
-): Promise<void> {
-  if (field.required !== undefined && liveField.Required !== field.required) {
-    await list.fields.getByInternalNameOrTitle(field.internalName).update({ Required: field.required });
-    result.fieldMutations.push({
-      listTitle: result.resolvedListTitle,
-      fieldInternalName: field.internalName,
-      action: 'required-updated',
-    });
-  }
-
-  if (field.type === 'Choice' && field.choices && field.choices.length > 0) {
-    const currentChoices: string[] = Array.isArray(liveField.Choices) ? liveField.Choices : [];
-    const targetChoices = [...field.choices];
-
-    if (JSON.stringify(currentChoices) !== JSON.stringify(targetChoices)) {
-      await list.fields.getByInternalNameOrTitle(field.internalName).update({ Choices: targetChoices });
-      result.fieldMutations.push({
-        listTitle: result.resolvedListTitle,
-        fieldInternalName: field.internalName,
-        action: 'choices-updated',
-      });
-    }
-  }
-
-  if (field.indexed === true && liveField.Indexed !== true) {
-    await list.fields.getByInternalNameOrTitle(field.internalName).update({ Indexed: true });
-    result.fieldMutations.push({
-      listTitle: result.resolvedListTitle,
-      fieldInternalName: field.internalName,
-      action: 'indexed',
-    });
-  }
-
-  if (field.defaultValue !== undefined && liveField.DefaultValue !== field.defaultValue) {
-    await list.fields.getByInternalNameOrTitle(field.internalName).update({ DefaultValue: field.defaultValue });
-    result.fieldMutations.push({
-      listTitle: result.resolvedListTitle,
-      fieldInternalName: field.internalName,
-      action: 'defaulted',
-    });
-  }
-}
-
 async function ensureListDescriptor(
   sp: any,
   descriptor: IListDefinition,
@@ -245,58 +113,39 @@ async function ensureListDescriptor(
 
   const liveFields = (await list.fields
     .select('InternalName', 'Title', 'TypeAsString', 'Required', 'Indexed', 'DefaultValue', 'Choices')
-    .top(5000)()) as Array<{
-      InternalName: string;
-      Title: string;
-      TypeAsString: string;
-      Required: boolean;
-      Indexed: boolean;
-      DefaultValue: string;
-      Choices?: string[];
-    }>;
+    .top(5000)()) as ILiveSharePointFieldSnapshot[];
 
-  for (const field of descriptor.fields) {
-    const liveField =
-      liveFields.find((entry) => entry.InternalName === field.internalName) ??
-      liveFields.find((entry) => entry.Title === field.displayName);
+  const { plans, unresolvedMutations } = buildListFieldPlans(resolvedTitle, descriptor.fields, liveFields);
+  result.unresolvedMutations.push(...unresolvedMutations);
 
-    if (!liveField) {
-      await createField(list, field);
+  for (const plan of plans) {
+    if (plan.kind === 'create') {
+      await createSharePointField(list, plan.field);
       result.fieldMutations.push({
         listTitle: resolvedTitle,
-        fieldInternalName: field.internalName,
+        fieldInternalName: plan.field.internalName,
         action: 'created',
       });
       continue;
     }
 
-    if (!isSharePointFieldTypeCompatible(field.type, liveField.TypeAsString)) {
-      result.unresolvedMutations.push({
-        listTitle: resolvedTitle,
-        fieldInternalName: field.internalName,
-        desiredType: field.type,
-        liveType: liveField.TypeAsString,
-        reason:
-          `Type mismatch cannot be auto-converted safely. ` +
-          `Allowed live types for ${field.type}: ${getCompatibleSharePointFieldTypes(field.type).join(', ')}`,
-      });
+    if (plan.kind === 'update-settings') {
+      const mutations = await applyFieldSettingsUpdates(
+        list,
+        resolvedTitle,
+        plan.field.internalName,
+        plan.updates,
+      );
+      result.fieldMutations.push(...mutations);
       continue;
     }
-
-    await applyFieldSettings(list, field, liveField, result);
   }
 
   const refreshedFields = (await list.fields
     .select('InternalName', 'TypeAsString', 'Indexed')
     .top(5000)()) as Array<{ InternalName: string; TypeAsString: string; Indexed: boolean }>;
 
-  result.schemaValidated = descriptor.fields.every((field) => {
-    const liveField = refreshedFields.find((entry) => entry.InternalName === field.internalName);
-    if (!liveField) return false;
-    if (!isSharePointFieldTypeCompatible(field.type, liveField.TypeAsString)) return false;
-    if (field.indexed === true && liveField.Indexed !== true) return false;
-    return true;
-  });
+  result.schemaValidated = validateProvisionedFields(descriptor.fields, refreshedFields);
 
   return result;
 }

@@ -19,6 +19,7 @@ import {
   isNotFoundError,
   waitForSite,
 } from './sharepoint-common.js';
+import { createSharePointField } from './sharepoint-schema-provisioning/index.js';
 
 export interface IListDefinition {
   title: string;
@@ -453,71 +454,14 @@ export class SharePointProvisioningService implements ISharePointProvisioningSer
   }
 
   async addListField(list: any, field: IFieldDefinition, siteUrl: string): Promise<void> {
-    switch (field.type) {
-      case 'Number':
-        await list.fields.addNumber(field.internalName, {
-          Required: field.required ?? false,
-          Title: field.displayName,
-        });
-        break;
-      case 'DateTime':
-        await list.fields.addDateTime(field.internalName, {
-          Required: field.required ?? false,
-          Title: field.displayName,
-        });
-        break;
-      case 'Boolean':
-        await list.fields.addBoolean(field.internalName, {
-          Required: field.required ?? false,
-          Title: field.displayName,
-        });
-        break;
-      case 'Choice':
-        await list.fields.addChoice(field.internalName, {
-          Required: field.required ?? false,
-          Title: field.displayName,
-          Choices: field.choices ?? [],
-        });
-        break;
-      case 'User':
-        await list.fields.addUser(field.internalName, {
-          Required: field.required ?? false,
-          Title: field.displayName,
-        });
-        break;
-      case 'URL':
-        await list.fields.addUrl(field.internalName, {
-          Required: field.required ?? false,
-          Title: field.displayName,
-        });
-        break;
-      case 'Lookup': {
+    await createSharePointField(list, field, {
+      lookupListIdResolver: async (lookupListTitle) => {
         const sp: any = await this.openPnPContext(siteUrl);
-        const targetList = sp.web.lists.getByTitle(field.lookupListTitle ?? '');
+        const targetList = sp.web.lists.getByTitle(lookupListTitle);
         const targetInfo = await targetList.select('Id')();
-        await list.fields.addLookup(field.internalName, {
-          Required: field.required ?? false,
-          Title: field.displayName,
-          LookupListId: targetInfo.Id,
-          LookupFieldName: field.lookupFieldName ?? 'ID',
-        });
-        break;
-      }
-      case 'MultiLineText':
-        await list.fields.addMultilineText(field.internalName, {
-          Required: field.required ?? false,
-          Title: field.displayName,
-          RichText: false,
-        });
-        break;
-      case 'Text':
-      default:
-        await list.fields.addText(field.internalName, {
-          Required: field.required ?? false,
-          Title: field.displayName,
-        });
-        break;
-    }
+        return String(targetInfo.Id);
+      },
+    });
 
     if (field.indexed === true) {
       await list.fields.getByInternalNameOrTitle(field.internalName).update({ Indexed: true });
