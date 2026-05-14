@@ -32,6 +32,23 @@ import {
   assertProductionRuntimeConfigRequirements,
   isProductionIntendedBackendMode,
 } from './build-spfx-package-production-runtime-config';
+import { loadEnvFileIntoProcessEnv } from './load-env-file';
+
+// ── Repo-root .env loading ─────────────────────────────────────────────────
+// Fill runtime-config env vars (FUNCTION_APP_URL, API_AUDIENCE, BACKEND_MODE,
+// ...) from a gitignored repo-root .env so operators get a stable local
+// workflow without inline `VAR=… npx tsx …` invocations. Explicit env vars
+// always win — the loader only fills keys not already set. Idempotent and
+// safe under the Node 18 re-exec (process.env is inherited; a second load is
+// a no-op). A missing .env is a silent no-op. See .env.example.
+{
+  const envLoad = loadEnvFileIntoProcessEnv(path.join(process.cwd(), '.env'));
+  if (envLoad.loaded.length > 0) {
+    console.log(
+      `[build-spfx-package] Loaded ${envLoad.loaded.length} var(s) from .env: ${envLoad.loaded.join(', ')}`,
+    );
+  }
+}
 
 // ── Domain registry ────────────────────────────────────────────────────────
 

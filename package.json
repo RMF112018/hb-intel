@@ -12,6 +12,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json,yaml}\"",
     "scan-stubs": "tsx tools/scan-stubs.ts",
     "scan-stubs:all": "tsx tools/scan-stubs.ts --include-approved",
+    "package:spfx": "tsx tools/build-spfx-package.ts",
+    "package:spfx:my-dashboard": "tsx tools/build-spfx-package.ts --domain my-dashboard",
     "guarded:commit": "tsx scripts/guarded-auto-commit.ts",
     "e2e": "playwright test",
     "e2e:install": "playwright install --with-deps chromium",

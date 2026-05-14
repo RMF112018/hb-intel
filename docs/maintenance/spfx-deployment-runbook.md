@@ -29,12 +29,12 @@ Build (Vite IIFE)  →  Package (SPFx gulp)  →  Staging (auto)  →  Productio
 
 ### Pipeline Triggers
 
-| Trigger | Workflow | Result |
-|---------|----------|--------|
-| Push to `main` or `develop` (SPFx paths) | `spfx-build.yml` | Build + package + upload artifacts |
-| PR to `main` | `spfx-build.yml` | Build + validate (no deploy) |
-| Successful build on `main` | `spfx-deploy.yml` | Auto-deploy to staging |
-| Manual dispatch | `spfx-deploy.yml` | Deploy to chosen environment |
+| Trigger                                  | Workflow          | Result                             |
+| ---------------------------------------- | ----------------- | ---------------------------------- |
+| Push to `main` or `develop` (SPFx paths) | `spfx-build.yml`  | Build + package + upload artifacts |
+| PR to `main`                             | `spfx-build.yml`  | Build + validate (no deploy)       |
+| Successful build on `main`               | `spfx-deploy.yml` | Auto-deploy to staging             |
+| Manual dispatch                          | `spfx-deploy.yml` | Deploy to chosen environment       |
 
 ---
 
@@ -87,6 +87,28 @@ dist/sppkg/hb-intel-accounting.sppkg    # Accounting package
 dist/sppkg/hb-intel-*.sppkg             # ... all 11 domains
 ```
 
+### Runtime Configuration (my-dashboard and other gated domains)
+
+Some domains (`my-dashboard`, and any other in `DOMAINS_REQUIRING_PRODUCTION_RUNTIME_CONFIG` in `tools/build-spfx-package-production-runtime-config.ts`) **refuse to build a production-intended `.sppkg` without runtime config**. When `BACKEND_MODE` is unset, empty, or `production`, the build requires `FUNCTION_APP_URL` and `API_AUDIENCE` — otherwise it fails at `assertProductionRuntimeConfigRequirements`. This is an intentional guardrail, not a bug.
+
+These are **non-secret** values stamped into the SPFx shell bundle via webpack DefinePlugin. Supply them with a gitignored repo-root `.env` file:
+
+```bash
+# 1. Copy the template and fill in the values
+cp .env.example .env
+# edit .env: API_AUDIENCE must be set; FUNCTION_APP_URL ships with the
+# current dev value; BACKEND_MODE defaults to production
+
+# 2. Package my-dashboard — .env is auto-loaded by tools/build-spfx-package.ts
+pnpm package:spfx:my-dashboard
+# or, all domains:
+pnpm package:spfx
+```
+
+- `tools/build-spfx-package.ts` loads `.env` at the start of every run and fills only keys **not already set** — an explicit `VAR=… npx tsx …` invocation or a CI environment variable always wins over the file.
+- `FUNCTION_APP_URL` for the current dev Function App is documented in `.env.example`. `API_AUDIENCE` is the Entra app registration's Application ID URI / token audience — source it from the Entra app registration, the deployed `backend/functions` app settings, or the GitHub environment configuration.
+- To build an explicit **non-production** artifact (fixture data, no live backend), set `BACKEND_MODE=ui-review` in `.env` or inline — `FUNCTION_APP_URL` / `API_AUDIENCE` are then not required.
+
 ### What the Orchestrator Does
 
 For each domain, `tools/build-spfx-package.ts`:
@@ -125,7 +147,7 @@ Use this checklist when deploying a fixed `.sppkg` that replaces a previously br
 
 - [ ] In the App Catalog, note the solution ID: `d01a9600-a68a-4afe-83a5-514339f47dbb`
 - [ ] In a browser, navigate directly to:
-  `https://{tenant}.sharepoint.com/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js`
+      `https://{tenant}.sharepoint.com/sites/appcatalog/ClientSideAssets/d01a9600-a68a-4afe-83a5-514339f47dbb/estimating-app.js`
 - [ ] Confirm the response is JavaScript (not a 404 or HTML error page)
 - [ ] Confirm the response starts with `var __hbIntel_estimating=`
 
@@ -234,30 +256,39 @@ After deploying to a SharePoint environment, verify each step:
 
 Configure in **Settings > Secrets and variables > Actions**:
 
-| Secret Name | Description |
-|-------------|-------------|
-| `SPFX_STAGING_SITE_URL` | SharePoint admin site URL for staging tenant |
-| `SPFX_STAGING_CLIENT_ID` | Azure AD app registration client ID (staging) |
-| `SPFX_STAGING_CLIENT_SECRET` | Azure AD app registration client secret (staging) |
-| `SPFX_PROD_SITE_URL` | SharePoint admin site URL for production tenant |
-| `SPFX_PROD_CLIENT_ID` | Azure AD app registration client ID (production) |
-| `SPFX_PROD_CLIENT_SECRET` | Azure AD app registration client secret (production) |
+| Secret Name                  | Description                                          |
+| ---------------------------- | ---------------------------------------------------- |
+| `SPFX_STAGING_SITE_URL`      | SharePoint admin site URL for staging tenant         |
+| `SPFX_STAGING_CLIENT_ID`     | Azure AD app registration client ID (staging)        |
+| `SPFX_STAGING_CLIENT_SECRET` | Azure AD app registration client secret (staging)    |
+| `SPFX_PROD_SITE_URL`         | SharePoint admin site URL for production tenant      |
+| `SPFX_PROD_CLIENT_ID`        | Azure AD app registration client ID (production)     |
+| `SPFX_PROD_CLIENT_SECRET`    | Azure AD app registration client secret (production) |
 
 ### Azure AD App Registration Requirements
 
 The app registration must have:
+
 - **API permissions:** `AppCatalog.ReadWrite.All` (SharePoint)
 - **Admin consent:** Granted by a tenant admin
 - **Client secret:** Active (not expired)
+
+### CI Gap — Runtime Config for Gated Domains (flagged)
+
+`.github/workflows/spfx-build.yml` currently invokes `tools/build-spfx-package.ts` **without** setting `FUNCTION_APP_URL` or `API_AUDIENCE`. A production-intended build of a gated domain (e.g. `my-dashboard`) in CI will therefore fail the same `assertProductionRuntimeConfigRequirements` gate that a local build hits without a `.env` file.
+
+To close this: wire `FUNCTION_APP_URL` and `API_AUDIENCE` as **non-secret GitHub environment variables** (not secrets — they are stamped into the shipped bundle) for the packaging step, or set `BACKEND_MODE=ui-review` for non-production CI artifacts. This requires explicit CI-change authorization and is intentionally not done as part of the local-tooling fix.
 
 ---
 
 ## GitHub Environment Configuration
 
 ### `spfx-staging`
+
 - **Protection rules:** None (auto-deploys on successful build)
 
 ### `spfx-production`
+
 - **Protection rules:** Required reviewers (1), wait timer (30 minutes)
 
 ---
@@ -270,6 +301,7 @@ The app registration must have:
    - Download the `spfx-packages` artifact
 
 2. **Re-deploy the previous version:**
+
    ```powershell
    Connect-PnPOnline -Url $SiteUrl -ClientId $ClientId -ClientSecret $ClientSecret
    Add-PnPApp -Path "hb-intel-estimating.sppkg" -Scope Tenant -Overwrite -Publish
@@ -283,45 +315,45 @@ The app registration must have:
 
 ### Build Failures
 
-| Symptom | Cause | Resolution |
-|---------|-------|-----------|
-| `dist/ not found` | Vite build failed | Check TypeScript or import errors |
-| `EXCEEDS 1.5 MB budget` | Bundle too large | Review imports; consider externalizing large deps |
-| `MISSING IIFE GLOBAL` | Vite not using lib mode | Verify `build.lib` config in `vite.config.ts` |
-| `MISSING EXPORTS: mount/unmount` | `mount.tsx` entry not exporting correctly | Check `src/mount.tsx` exports |
-| `ES MODULE FORMAT` | Wrong output format | Verify `build.lib.formats: ['iife']` |
-| `INVALID HOST: SharePointFullPage` | Manifest declares unsupported host | Remove `SharePointFullPage` from `supportedHosts` |
+| Symptom                            | Cause                                     | Resolution                                        |
+| ---------------------------------- | ----------------------------------------- | ------------------------------------------------- |
+| `dist/ not found`                  | Vite build failed                         | Check TypeScript or import errors                 |
+| `EXCEEDS 1.5 MB budget`            | Bundle too large                          | Review imports; consider externalizing large deps |
+| `MISSING IIFE GLOBAL`              | Vite not using lib mode                   | Verify `build.lib` config in `vite.config.ts`     |
+| `MISSING EXPORTS: mount/unmount`   | `mount.tsx` entry not exporting correctly | Check `src/mount.tsx` exports                     |
+| `ES MODULE FORMAT`                 | Wrong output format                       | Verify `build.lib.formats: ['iife']`              |
+| `INVALID HOST: SharePointFullPage` | Manifest declares unsupported host        | Remove `SharePointFullPage` from `supportedHosts` |
 
 ### Packaging Failures
 
-| Symptom | Cause | Resolution |
-|---------|-------|-----------|
-| `gulp bundle` fails | SPFx shell TS compilation error | Check `tools/spfx-shell/src/webparts/shell/ShellWebPart.ts` |
-| `.sppkg missing Vite bundle` | Asset copy timing issue | Verify `assets/` → `temp/deploy/` copy in orchestrator |
-| `npm ci` fails in CI | SPFx shell `package-lock.json` missing | Run `cd tools/spfx-shell && npm install` and commit `package-lock.json` |
+| Symptom                      | Cause                                  | Resolution                                                              |
+| ---------------------------- | -------------------------------------- | ----------------------------------------------------------------------- |
+| `gulp bundle` fails          | SPFx shell TS compilation error        | Check `tools/spfx-shell/src/webparts/shell/ShellWebPart.ts`             |
+| `.sppkg missing Vite bundle` | Asset copy timing issue                | Verify `assets/` → `temp/deploy/` copy in orchestrator                  |
+| `npm ci` fails in CI         | SPFx shell `package-lock.json` missing | Run `cd tools/spfx-shell && npm install` and commit `package-lock.json` |
 
 ### Deployment Failures
 
-| Symptom | Cause | Resolution |
-|---------|-------|-----------|
-| `Access denied` on Connect-PnPOnline | Client secret expired | Rotate secret in Azure Portal; update GitHub secret |
-| `401 Unauthorized` | Missing `AppCatalog.ReadWrite.All` | Grant permission + admin consent |
-| Web part shows "App bundle failed to load" | IIFE global not assigned | Rebuild; verify `var __hbIntel_{domain}=` in bundle head |
-| Web part not in toolbox | Missing `preconfiguredEntries` | Check manifest has title, groupId, icon |
-| 404 on `estimating-app.js` | CDN asset not in .sppkg | Re-run packaging; verify `.sppkg` contains the bundle |
+| Symptom                                    | Cause                              | Resolution                                               |
+| ------------------------------------------ | ---------------------------------- | -------------------------------------------------------- |
+| `Access denied` on Connect-PnPOnline       | Client secret expired              | Rotate secret in Azure Portal; update GitHub secret      |
+| `401 Unauthorized`                         | Missing `AppCatalog.ReadWrite.All` | Grant permission + admin consent                         |
+| Web part shows "App bundle failed to load" | IIFE global not assigned           | Rebuild; verify `var __hbIntel_{domain}=` in bundle head |
+| Web part not in toolbox                    | Missing `preconfiguredEntries`     | Check manifest has title, groupId, icon                  |
+| 404 on `estimating-app.js`                 | CDN asset not in .sppkg            | Re-run packaging; verify `.sppkg` contains the bundle    |
 
 ---
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `tools/build-spfx-package.ts` | Packaging orchestrator (authoritative) |
-| `tools/spfx-shell/` | Isolated SPFx 1.18 project for official packaging |
-| `tools/validate-manifests.ts` | Pre-build manifest and format validation |
-| `tools/spfx-bundle-check.ts` | Bundle size budget enforcement |
-| `tools/package-sppkg.legacy.ts` | Retired custom OPC packager (do not use) |
-| `.github/workflows/spfx-build.yml` | CI build and packaging pipeline |
-| `.github/workflows/spfx-deploy.yml` | CD deployment pipeline |
-| `apps/{domain}/src/mount.tsx` | IIFE production entry point per domain |
-| `apps/{domain}/vite.config.ts` | Build config (lib mode for IIFE) |
+| File                                | Purpose                                           |
+| ----------------------------------- | ------------------------------------------------- |
+| `tools/build-spfx-package.ts`       | Packaging orchestrator (authoritative)            |
+| `tools/spfx-shell/`                 | Isolated SPFx 1.18 project for official packaging |
+| `tools/validate-manifests.ts`       | Pre-build manifest and format validation          |
+| `tools/spfx-bundle-check.ts`        | Bundle size budget enforcement                    |
+| `tools/package-sppkg.legacy.ts`     | Retired custom OPC packager (do not use)          |
+| `.github/workflows/spfx-build.yml`  | CI build and packaging pipeline                   |
+| `.github/workflows/spfx-deploy.yml` | CD deployment pipeline                            |
+| `apps/{domain}/src/mount.tsx`       | IIFE production entry point per domain            |
+| `apps/{domain}/vite.config.ts`      | Build config (lib mode for IIFE)                  |
