@@ -2,14 +2,20 @@
 
 ## Purpose
 
-Provision or alter the Prompt 02 bridge lists at HBCentral so legacy fallback discovery/matching has authoritative storage before sync execution.
+Provision or alter the legacy fallback bridge lists at HBCentral:
+
+1. `Legacy Project Fallback Registry`
+2. `Legacy Project Fallback Sync Runs`
 
 Target site:
 - `https://hedrickbrotherscom.sharepoint.com/sites/HBCentral`
 
-Required lists:
-1. `Legacy Project Fallback Registry`
-2. `Legacy Project Fallback Sync Runs`
+## Scope note
+
+This runbook governs legacy fallback bridge-list provisioning.
+
+For My Projects source-list schema provisioning + backfill sequence, use:
+- `docs/how-to/administrator/provision-my-projects-source-list-schema.md`
 
 ## Entry point
 
@@ -19,43 +25,26 @@ From repo root:
 pnpm exec tsx scripts/provision-legacy-fallback-lists.ts
 ```
 
-Optional:
+Optional unresolved-drift override:
 
 ```bash
 pnpm exec tsx scripts/provision-legacy-fallback-lists.ts --allow-type-drift
 ```
 
-Use `--allow-type-drift` only when an existing column has an incompatible SharePoint type that cannot be safely auto-converted and manual remediation is intentionally deferred.
+Use `--allow-type-drift` only when manual remediation is intentionally deferred.
 
 ## What the script does
 
-- Uses app-only auth via `DefaultAzureCredential`.
-- Enforces host-site lock to HBCentral.
-- Detects existing equivalent lists by normalized title.
-- Creates missing lists.
-- Creates missing fields.
-- Alters compatible existing fields (`Required`, `Indexed`, default value, choice set).
-- Validates post-provisioning schema against governed descriptors.
-- Emits a JSON report with:
-  - host site
-  - per-list create/alter result
-  - field-level mutations
-  - unresolved mutations requiring manual follow-up
+- App-only auth via `DefaultAzureCredential`.
+- HBCentral host-site lock.
+- Equivalent-list detection by normalized title.
+- Missing-list creation.
+- Missing-field creation.
+- Compatible field-setting updates.
+- JSON report output with unresolved mutations.
 
-## Governed field set
+## Identity and secrets posture
 
-The authoritative descriptors are defined in:
-- `backend/functions/src/services/legacy-fallback/list-descriptors.ts`
-
-Those descriptors are the source of truth for:
-- list titles
-- field names
-- field types
-- index flags
-
-## Auth and secrets posture
-
-- Interim pilot identity is `HB SharePoint Creator` (`08c399eb-a394-4087-b859-659d493f8dc7`).
-- Posture is app-only backend execution.
-- No secrets are stored in source control.
-- Credential and secret handling remains environment/Key Vault managed.
+- Current pilot app identity: `HB SharePoint Creator` (`08c399eb-a394-4087-b859-659d493f8dc7`).
+- Runtime provisioning identity and app registration consent context must be validated separately.
+- No tokens or secrets are stored in source control.
