@@ -61,6 +61,7 @@ import {
   evaluateAdobeSignSourceHandoff,
   type AdobeSignSourceHandoffPolicyConfig,
 } from './adobe-sign-source-handoff-policy.js';
+import type { AdobeSignActionQueueResultStage } from './adobe-sign-runtime-diagnostics.js';
 
 /** Items whose `expirationAtUtc` is within this window are counted as "expiring soon". */
 export const ADOBE_SIGN_EXPIRING_SOON_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;
@@ -191,6 +192,18 @@ export function createAdobeSignActionQueueAdapter(
 ): IAdobeSignActionQueueAdapter {
   return {
     async getActionQueue(context, query) {
+      const trackActionQueueResult = (
+        sourceStatus: MyWorkReadModelSourceStatus,
+        resultStage: AdobeSignActionQueueResultStage,
+        warnings?: readonly MyWorkReadModelWarning[],
+      ) => {
+        context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.actionQueue.result', {
+          sourceStatus,
+          resultStage,
+          warningCodes: warnings?.map((w) => w.code),
+        });
+      };
+
       const now = deps.now();
       const generatedAtUtc = now.toISOString();
 
@@ -202,6 +215,7 @@ export function createAdobeSignActionQueueAdapter(
         // Non-resolved principal statuses are 1:1 with My Work warning codes by name.
         const sourceStatus = toMyWorkSourceStatus(resolution.status);
         const warnings: readonly MyWorkReadModelWarning[] = [{ code: resolution.status }];
+        trackActionQueueResult(sourceStatus, 'principal-resolution', warnings);
         return envelope(sourceStatus, warnings, emptyReadModel(generatedAtUtc), generatedAtUtc);
       }
 
@@ -210,22 +224,30 @@ export function createAdobeSignActionQueueAdapter(
       // ---------------------------------------------------------------
       // 2. Access-token acquisition
       // ---------------------------------------------------------------
-      const token = await deps.tokenService.getAccessToken(principal.actor.actorKey, now);
+      const token = await deps.tokenService.getAccessToken(
+        principal.actor.actorKey,
+        now,
+        context.diagnostics,
+      );
       if (token.status === 'authorization-required') {
-        return envelope(
+        const result = envelope(
           'authorization-required',
           [{ code: 'authorization-required' }],
           emptyReadModel(generatedAtUtc),
           generatedAtUtc,
         );
+        trackActionQueueResult(result.sourceStatus, 'token-acquisition', result.warnings);
+        return result;
       }
       if (token.status === 'source-unavailable') {
-        return envelope(
+        const result = envelope(
           'source-unavailable',
           [{ code: 'source-unavailable' }],
           emptyReadModel(generatedAtUtc),
           generatedAtUtc,
         );
+        trackActionQueueResult(result.sourceStatus, 'token-acquisition', result.warnings);
+        return result;
       }
 
       // ---------------------------------------------------------------
@@ -244,7 +266,10 @@ export function createAdobeSignActionQueueAdapter(
       });
 
       if (searchResult.status === 'unauthorized') {
-        return envelope(
+        context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.search.result', {
+          status: 'unauthorized',
+        });
+        const result = envelope(
           'authorization-required',
           [{ code: 'authorization-required' }],
           {
@@ -253,9 +278,15 @@ export function createAdobeSignActionQueueAdapter(
           },
           generatedAtUtc,
         );
+        trackActionQueueResult(result.sourceStatus, 'search', result.warnings);
+        return result;
       }
       if (searchResult.status === 'unreachable') {
-        return envelope(
+        context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.search.result', {
+          status: 'unreachable',
+          reason: searchResult.reason,
+        });
+        const result = envelope(
           'source-unavailable',
           [{ code: 'source-unavailable' }],
           {
@@ -264,7 +295,14 @@ export function createAdobeSignActionQueueAdapter(
           },
           generatedAtUtc,
         );
+        trackActionQueueResult(result.sourceStatus, 'search', result.warnings);
+        return result;
       }
+      context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.search.result', {
+        status: 'ok',
+        itemCount: searchResult.items.length,
+        hasMore: searchResult.nextCursor !== undefined,
+      });
 
       // ---------------------------------------------------------------
       // 4. Map provider results → B04 queue items
@@ -348,7 +386,9 @@ export function createAdobeSignActionQueueAdapter(
         freshness: { state: 'fresh', generatedAtUtc },
       };
 
-      return envelope(status, warnings, readModel, generatedAtUtc);
+      const result = envelope(status, warnings, readModel, generatedAtUtc);
+      trackActionQueueResult(result.sourceStatus, 'mapped-results', result.warnings);
+      return result;
     },
   };
 }

@@ -58,8 +58,8 @@ function actorSummary(): MyWorkActorSummary {
   return { displayName: 'User One', principalName: 'user@example.com' };
 }
 
-function context(): MyWorkReadContext {
-  return { actor: actorSummary(), requestId: 'req-test-1' };
+function context(diagnostics?: MyWorkReadContext['diagnostics']): MyWorkReadContext {
+  return { actor: actorSummary(), requestId: 'req-test-1', ...(diagnostics ? { diagnostics } : {}) };
 }
 
 function delegatedActor(): AdobeSignDelegatedActor {
@@ -711,6 +711,43 @@ describe('createAdobeSignActionQueueAdapter', () => {
       expect(env.data.summary.approvalCount).toBe(1);
       expect(env.data.summary.delegationCount).toBe(1);
       expect(env.data.summary.expiringSoonCount).toBe(1);
+    });
+  });
+
+  describe('runtime result telemetry', () => {
+    it('emits search + actionQueue result events with safe fields on search unauthorized', async () => {
+      const events: Array<{ name: string; properties: Record<string, unknown> }> = [];
+      const diagnostics = {
+        trackAdobeSignRuntimeEvent(name: string, properties: Record<string, unknown>) {
+          events.push({ name, properties });
+        },
+      };
+      const adapter = createAdobeSignActionQueueAdapter(
+        buildDeps({
+          searchClient: createDeterministicMockSearchClient([{ status: 'unauthorized' }]),
+        }),
+      );
+
+      const env = await adapter.getActionQueue(context(diagnostics), QUERY_EMPTY);
+      expect(env.sourceStatus).toBe('authorization-required');
+      expect(events).toEqual([
+        {
+          name: 'adobeSign.read.search.result',
+          properties: { status: 'unauthorized' },
+        },
+        {
+          name: 'adobeSign.read.actionQueue.result',
+          properties: {
+            sourceStatus: 'authorization-required',
+            resultStage: 'search',
+            warningCodes: ['authorization-required'],
+          },
+        },
+      ]);
+      const serialized = JSON.stringify(events);
+      expect(serialized).not.toContain(ACCESS_TOKEN);
+      expect(serialized).not.toContain('agreementId');
+      expect(serialized).not.toContain('senderEmail');
     });
   });
 });

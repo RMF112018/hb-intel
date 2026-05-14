@@ -37,6 +37,7 @@ import {
 import type { AdobeSignGrantStoreReadiness } from './adobe-sign-grant-store.js';
 import { toAdobeSignGrantPublic } from './adobe-sign-grant-record.js';
 import type { AdobeSignPrincipalResolutionResult } from './adobe-sign-principal-resolution.js';
+import { toMyWorkSourceStatus } from './adobe-sign-principal-resolution.js';
 import { AdobeSignRuntimeDiagnosticError } from './adobe-sign-runtime-diagnostics.js';
 
 export interface AdobeSignPrincipalResolverDeps {
@@ -53,12 +54,21 @@ export function createAdobeSignPrincipalResolver(
   deps: AdobeSignPrincipalResolverDeps,
 ): AdobeSignPrincipalResolver {
   return async (context) => {
+    const trackResult = (result: AdobeSignPrincipalResolutionResult): AdobeSignPrincipalResolutionResult => {
+      context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.principalResolution.result', {
+        status: result.status,
+        sourceStatus: toMyWorkSourceStatus(result.status),
+        reason: 'reason' in result ? String(result.reason) : undefined,
+      });
+      return result;
+    };
+
     // ---------------------------------------------------------------
     // 1. Trusted tenant required for actor-key construction.
     // ---------------------------------------------------------------
     const tenantId = deps.resolveTenantId();
     if (typeof tenantId !== 'string' || tenantId.trim().length === 0) {
-      return { status: 'principal-unresolved', reason: 'missing-tenant' };
+      return trackResult({ status: 'principal-unresolved', reason: 'missing-tenant' });
     }
 
     // ---------------------------------------------------------------
@@ -67,11 +77,11 @@ export function createAdobeSignPrincipalResolver(
     const env = deps.resolveConfigEnv();
     const readiness = resolveAdobeSignOAuthConfigReadiness(env);
     if (!isAdobeSignConfigReady(readiness)) {
-      return {
+      return trackResult({
         status: 'configuration-required',
         missingKeys: readiness.missingKeys,
         pendingStoreSelection: readiness.status === 'pending-store-selection',
-      };
+      });
     }
 
     // ---------------------------------------------------------------
@@ -90,7 +100,7 @@ export function createAdobeSignPrincipalResolver(
       },
     });
     if (!actorResult.ok) {
-      return { status: 'principal-unresolved', reason: actorResult.reason };
+      return trackResult({ status: 'principal-unresolved', reason: actorResult.reason });
     }
     const actor = actorResult.actor;
 
@@ -99,11 +109,11 @@ export function createAdobeSignPrincipalResolver(
     // ---------------------------------------------------------------
     const grantStore = deps.resolveGrantStore();
     if (grantStore.readiness !== 'ready') {
-      return {
+      return trackResult({
         status: 'configuration-required',
         missingKeys: [],
         pendingStoreSelection: true,
-      };
+      });
     }
 
     // ---------------------------------------------------------------
@@ -116,24 +126,28 @@ export function createAdobeSignPrincipalResolver(
       if (err instanceof AdobeSignRuntimeDiagnosticError) {
         context.diagnostics?.trackAdobeSignRuntimeEvent('adobe-sign-runtime-failure', err.diagnostic);
       }
-      return { status: 'source-unavailable', reason: 'token-store-unavailable' };
+      return trackResult({ status: 'source-unavailable', reason: 'token-store-unavailable' });
     }
 
     if (!grant) {
-      return { status: 'authorization-required', actor, reason: 'no-grant-found' };
+      return trackResult({ status: 'authorization-required', actor, reason: 'no-grant-found' });
     }
     if (grant.state === 'revoked') {
-      return { status: 'authorization-required', actor, reason: 'grant-revoked' };
+      return trackResult({ status: 'authorization-required', actor, reason: 'grant-revoked' });
     }
     if (grant.state === 'requires-reauth') {
-      return { status: 'authorization-required', actor, reason: 'grant-requires-reauth' };
+      return trackResult({
+        status: 'authorization-required',
+        actor,
+        reason: 'grant-requires-reauth',
+      });
     }
     if (grant.state === 'pending') {
-      return { status: 'authorization-required', actor, reason: 'no-grant-found' };
+      return trackResult({ status: 'authorization-required', actor, reason: 'no-grant-found' });
     }
 
     // grant.state === 'active'
-    return {
+    return trackResult({
       status: 'resolved',
       principal: {
         actor,
@@ -143,6 +157,6 @@ export function createAdobeSignPrincipalResolver(
         grantState: 'active',
       },
       grantPublic: toAdobeSignGrantPublic(grant),
-    };
+    });
   };
 }

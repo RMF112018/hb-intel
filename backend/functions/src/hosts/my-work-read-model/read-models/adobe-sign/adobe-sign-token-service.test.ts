@@ -13,6 +13,7 @@ import {
   toAdobeSignTokenPublicDiagnostic,
   type AdobeSignAccessTokenAcquireResult,
 } from './adobe-sign-token-service.js';
+import type { AdobeSignRuntimeDiagnosticReporter } from './adobe-sign-runtime-diagnostics.js';
 
 const TENANT = '11111111-2222-3333-4444-555555555555';
 const OID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
@@ -62,6 +63,16 @@ const buildService = (
 };
 
 const NOW = new Date('2026-05-13T12:30:00.000Z');
+
+function createReporterCapture() {
+  const events: Array<{ name: string; properties: Record<string, unknown> }> = [];
+  const reporter: AdobeSignRuntimeDiagnosticReporter = {
+    trackAdobeSignRuntimeEvent(name, properties) {
+      events.push({ name, properties });
+    },
+  };
+  return { reporter, events };
+}
 
 describe('token service — active grant with valid cached token', () => {
   it('caches the refreshed access token and skips a second refresh while it is fresh', async () => {
@@ -296,5 +307,38 @@ describe('refresh-client contract: no raw Adobe payload passthrough', () => {
     const failureKeys = Object.keys(failureShape);
     expect(failureKeys).not.toContain('rawResponseBody');
     expect(failureKeys).not.toContain('errorBody');
+  });
+});
+
+describe('token service — runtime result telemetry', () => {
+  it('emits tokenAcquisition + refresh result events for refresh unreachable', async () => {
+    const { service } = buildService(activeGrant(), [{ status: 'unreachable', reason: 'http-5xx' }]);
+    const { reporter, events } = createReporterCapture();
+
+    const result = await service.getAccessToken(ACTOR_KEY, NOW, reporter);
+    expect(result.status).toBe('source-unavailable');
+    expect(events).toEqual([
+      {
+        name: 'adobeSign.read.refresh.result',
+        properties: { status: 'unreachable', reason: 'http-5xx' },
+      },
+      {
+        name: 'adobeSign.read.tokenAcquisition.result',
+        properties: { status: 'source-unavailable', reason: 'adobe-unreachable' },
+      },
+    ]);
+  });
+
+  it('does not leak token material in runtime result telemetry', async () => {
+    const { service } = buildService(activeGrant(), [refreshOk()]);
+    const { reporter, events } = createReporterCapture();
+
+    const result = await service.getAccessToken(ACTOR_KEY, NOW, reporter);
+    expect(result.status).toBe('ok');
+    const serialized = JSON.stringify(events);
+    expect(serialized).not.toContain(SECRET_NEW_ACCESS);
+    expect(serialized).not.toContain('refresh_token');
+    expect(serialized).not.toContain('client_secret');
+    expect(serialized).not.toContain('oauth');
   });
 });

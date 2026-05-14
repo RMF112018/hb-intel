@@ -5,7 +5,13 @@
  * secrets, actor identifiers, tokens, or OAuth artifacts.
  */
 
-export type AdobeSignRuntimeDiagnosticEventName = 'adobe-sign-runtime-failure';
+export type AdobeSignRuntimeDiagnosticEventName =
+  | 'adobe-sign-runtime-failure'
+  | 'adobeSign.read.principalResolution.result'
+  | 'adobeSign.read.tokenAcquisition.result'
+  | 'adobeSign.read.refresh.result'
+  | 'adobeSign.read.search.result'
+  | 'adobeSign.read.actionQueue.result';
 
 export type AdobeSignTableStoreOperation =
   | 'find-grant'
@@ -37,14 +43,27 @@ export type AdobeSignRuntimeErrorClass =
   | 'unknown';
 
 export interface AdobeSignRuntimeDiagnosticProperties {
-  readonly operation: AdobeSignTableStoreOperation;
-  readonly stage: AdobeSignTableStoreStage;
-  readonly errorClass: AdobeSignRuntimeErrorClass;
+  readonly operation?: AdobeSignTableStoreOperation;
+  readonly stage?: AdobeSignTableStoreStage;
+  readonly errorClass?: AdobeSignRuntimeErrorClass;
   readonly statusCode?: number;
   readonly sdkCode?: string;
   readonly tableName?: string;
   readonly endpointHost?: string;
+  readonly status?: string;
+  readonly reason?: string;
+  readonly sourceStatus?: string;
+  readonly resultStage?: AdobeSignActionQueueResultStage;
+  readonly warningCodes?: readonly string[];
+  readonly itemCount?: number;
+  readonly hasMore?: boolean;
 }
+
+export type AdobeSignActionQueueResultStage =
+  | 'principal-resolution'
+  | 'token-acquisition'
+  | 'search'
+  | 'mapped-results';
 
 export interface AdobeSignRuntimeDiagnosticReporter {
   trackAdobeSignRuntimeEvent(

@@ -30,6 +30,7 @@
 import type { AdobeSignActorKey } from './adobe-sign-actor-normalizer.js';
 import type { IAdobeSignGrantStore } from './adobe-sign-grant-store.js';
 import type { IAdobeSignRefreshClient } from './adobe-sign-refresh-client.js';
+import type { AdobeSignRuntimeDiagnosticReporter } from './adobe-sign-runtime-diagnostics.js';
 
 /**
  * Margin before an access token is considered too close to expiry for the
@@ -69,6 +70,7 @@ export interface IAdobeSignTokenService {
   getAccessToken(
     actorKey: AdobeSignActorKey,
     now: Date,
+    diagnostics?: AdobeSignRuntimeDiagnosticReporter,
   ): Promise<AdobeSignAccessTokenAcquireResult>;
 }
 
@@ -114,19 +116,46 @@ export function createAdobeSignTokenService(
   const cache = new Map<AdobeSignActorKey, CachedToken>();
 
   return {
-    async getAccessToken(actorKey, now) {
+    async getAccessToken(actorKey, now, diagnostics) {
+      const trackTokenResult = (result: AdobeSignAccessTokenAcquireResult) => {
+        diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.tokenAcquisition.result', {
+          status: result.status === 'ok' ? 'ok' : result.status,
+          reason: result.status === 'ok' ? undefined : result.reason,
+        });
+      };
+      const trackRefreshResult = (
+        status: 'ok' | 'invalid-grant' | 'unreachable',
+        reason?: string,
+      ) => {
+        diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.refresh.result', {
+          status,
+          reason,
+        });
+      };
+
       const grant = await deps.grantStore.findGrant(actorKey);
       if (!grant) {
-        return { status: 'authorization-required', reason: 'no-grant-found' };
+        const result = { status: 'authorization-required', reason: 'no-grant-found' } as const;
+        trackTokenResult(result);
+        return result;
       }
       if (grant.state === 'revoked') {
-        return { status: 'authorization-required', reason: 'grant-revoked' };
+        const result = { status: 'authorization-required', reason: 'grant-revoked' } as const;
+        trackTokenResult(result);
+        return result;
       }
       if (grant.state === 'requires-reauth') {
-        return { status: 'authorization-required', reason: 'grant-requires-reauth' };
+        const result = {
+          status: 'authorization-required',
+          reason: 'grant-requires-reauth',
+        } as const;
+        trackTokenResult(result);
+        return result;
       }
       if (grant.state === 'pending') {
-        return { status: 'authorization-required', reason: 'no-grant-found' };
+        const result = { status: 'authorization-required', reason: 'no-grant-found' } as const;
+        trackTokenResult(result);
+        return result;
       }
 
       // grant.state === 'active'
@@ -134,12 +163,14 @@ export function createAdobeSignTokenService(
       if (cached) {
         const remainingMs = new Date(cached.expiresAtUtc).getTime() - now.getTime();
         if (remainingMs > margin) {
-          return {
+          const result = {
             status: 'ok',
             accessToken: cached.accessToken,
             expiresAtUtc: cached.expiresAtUtc,
             apiAccessPoint: cached.apiAccessPoint,
-          };
+          } as const;
+          trackTokenResult(result);
+          return result;
         }
         cache.delete(actorKey);
       }
@@ -151,20 +182,31 @@ export function createAdobeSignTokenService(
         // The refresh client is contract-bound to return a normalized
         // result; treat any thrown exception as a source-unavailable
         // outcome so callers cannot leak a stack trace upstream.
-        return { status: 'source-unavailable', reason: 'adobe-unreachable' };
+        trackRefreshResult('unreachable', 'network');
+        const result = { status: 'source-unavailable', reason: 'adobe-unreachable' } as const;
+        trackTokenResult(result);
+        return result;
       }
 
       if (refresh.status === 'invalid-grant') {
+        trackRefreshResult('invalid-grant');
         await deps.grantStore.markReauthorizationRequired(actorKey, {
           kind: 'refresh-failed',
           observedAtUtc: now.toISOString(),
         });
-        return { status: 'authorization-required', reason: 'refresh-invalid' };
+        const result = { status: 'authorization-required', reason: 'refresh-invalid' } as const;
+        trackTokenResult(result);
+        return result;
       }
 
       if (refresh.status === 'unreachable') {
-        return { status: 'source-unavailable', reason: 'adobe-unreachable' };
+        trackRefreshResult('unreachable', refresh.reason);
+        const result = { status: 'source-unavailable', reason: 'adobe-unreachable' } as const;
+        trackTokenResult(result);
+        return result;
       }
+
+      trackRefreshResult('ok');
 
       // refresh.status === 'ok'
       await deps.grantStore.upsertGrant({
@@ -182,12 +224,14 @@ export function createAdobeSignTokenService(
         apiAccessPoint: grant.adobeApiAccessPoint,
       });
 
-      return {
+      const result = {
         status: 'ok',
         accessToken: refresh.accessToken,
         expiresAtUtc: refresh.expiresAtUtc,
         apiAccessPoint: grant.adobeApiAccessPoint,
-      };
+      } as const;
+      trackTokenResult(result);
+      return result;
     },
   };
 }

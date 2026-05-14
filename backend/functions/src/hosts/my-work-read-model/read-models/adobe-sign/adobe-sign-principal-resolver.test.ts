@@ -26,7 +26,10 @@ const FULL_ENV: EnvLike = {
   ADOBE_SIGN_TOKEN_ENCRYPTION_KEY: 'dGVzdC1rZXktdGVzdC1rZXktdGVzdC1rZXktdGVzdC0=',
 };
 
-const context = (overrides: Partial<MyWorkReadContext['actor']> = {}): MyWorkReadContext => ({
+const context = (
+  overrides: Partial<MyWorkReadContext['actor']> = {},
+  diagnostics?: MyWorkReadContext['diagnostics'],
+): MyWorkReadContext => ({
   actor: {
     displayName: 'Avery Operator',
     principalName: 'avery@hbc.test',
@@ -34,6 +37,7 @@ const context = (overrides: Partial<MyWorkReadContext['actor']> = {}): MyWorkRea
     ...overrides,
   },
   requestId: 'req-fixture',
+  ...(diagnostics ? { diagnostics } : {}),
 });
 
 const baseGrant = (overrides: Partial<IAdobeSignGrantRecord> = {}): IAdobeSignGrantRecord => ({
@@ -202,5 +206,31 @@ describe('createAdobeSignPrincipalResolver — no shared-principal fallback', ()
     if (stranger.status !== 'authorization-required') return;
     expect(stranger.reason).toBe('no-grant-found');
     expect(stranger.actor.actorKey).toBe(adobeSignActorKey(TENANT, otherOid));
+  });
+});
+
+describe('createAdobeSignPrincipalResolver — runtime result telemetry', () => {
+  it('emits principalResolution.result for authorization-required without actor identifiers', async () => {
+    const events: Array<{ name: string; properties: Record<string, unknown> }> = [];
+    const diagnostics = {
+      trackAdobeSignRuntimeEvent(name: string, properties: Record<string, unknown>) {
+        events.push({ name, properties });
+      },
+    };
+    const resolve = buildResolver();
+
+    const result = await resolve(context({}, diagnostics));
+    expect(result.status).toBe('authorization-required');
+    expect(events).toHaveLength(1);
+    expect(events[0]?.name).toBe('adobeSign.read.principalResolution.result');
+    expect(events[0]?.properties).toMatchObject({
+      status: 'authorization-required',
+      sourceStatus: 'authorization-required',
+      reason: 'no-grant-found',
+    });
+    const serialized = JSON.stringify(events[0]?.properties);
+    expect(serialized).not.toContain(ACTOR_KEY);
+    expect(serialized).not.toContain('avery@hbc.test');
+    expect(serialized).not.toContain(OID);
   });
 });
