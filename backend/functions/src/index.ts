@@ -44,3 +44,9 @@ import './functions/risk/index.js';
 import './functions/scorecards/index.js';
 import './functions/pmp/index.js';
 import './hosts/pcc-read-model/pcc-read-model-routes.js';
+
+// My Dashboard / My Work protected read-model routes
+import './hosts/my-work-read-model/my-work-read-model-routes.js';
+
+// My Dashboard / Adobe Sign delegated OAuth routes
+import './hosts/my-work-read-model/adobe-sign-oauth-routes.js';
