@@ -114,6 +114,11 @@ export function composeAdobeSignLiveStack(env: EnvLike): AdobeSignLiveStackCompo
 export interface ResolveMyWorkReadModelProviderOptions {
   /** Defaults to `() => new Date()`; the mock provider's now signature is `() => string`. */
   readonly now?: () => Date;
+  /**
+   * Optional injection seam for deterministic tests. Production callers should
+   * omit this and use the default provider construction path.
+   */
+  readonly projectLinksProvider?: Pick<IMyWorkReadModelProvider, 'getMyProjectLinks'>;
 }
 
 const isMockOrTestMode = (env: EnvLike): boolean =>
@@ -127,7 +132,7 @@ function composeLiveProvider(
     actionQueueAdapter: composition.actionQueueAdapter,
     now: options?.now ?? (() => new Date()),
   });
-  const projectLinksProvider = new MyProjectLinksReadModelProvider();
+  const projectLinksProvider = options?.projectLinksProvider ?? new MyProjectLinksReadModelProvider();
   return {
     getMyWorkHome: (context) => adobeProvider.getMyWorkHome(context),
     getAdobeSignActionQueue: (context, query) =>
@@ -140,7 +145,7 @@ function composeFallbackProvider(
   options?: ResolveMyWorkReadModelProviderOptions,
 ): IMyWorkReadModelProvider {
   const mockProvider = new MyWorkMockReadModelProvider({ simulateBackendUnavailable: true });
-  const projectLinksProvider = new MyProjectLinksReadModelProvider();
+  const projectLinksProvider = options?.projectLinksProvider ?? new MyProjectLinksReadModelProvider();
   return {
     getMyWorkHome: (context) => mockProvider.getMyWorkHome(context),
     getAdobeSignActionQueue: (context, query) =>
@@ -153,7 +158,7 @@ function composeMockProvider(
   _options?: ResolveMyWorkReadModelProviderOptions,
 ): IMyWorkReadModelProvider {
   const mockProvider = new MyWorkMockReadModelProvider();
-  const projectLinksProvider = new MyProjectLinksReadModelProvider();
+  const projectLinksProvider = _options?.projectLinksProvider ?? new MyProjectLinksReadModelProvider();
   return {
     getMyWorkHome: (context) => mockProvider.getMyWorkHome(context),
     getAdobeSignActionQueue: (context, query) =>

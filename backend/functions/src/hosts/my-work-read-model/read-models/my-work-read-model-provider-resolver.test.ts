@@ -1,6 +1,8 @@
 import { randomBytes } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 
+import { MY_PROJECT_LINKS_AVAILABLE } from '@hbc/models/myWork/fixtures';
+
 import type { EnvLike } from './adobe-sign/adobe-sign-config.js';
 import { adobeSignActorKey } from './adobe-sign/adobe-sign-actor-normalizer.js';
 import {
@@ -149,16 +151,28 @@ describe('resolveMyWorkReadModelProvider', () => {
   });
 
   it('preserves the project-links delegation across all modes', async () => {
-    const mockProvider = resolveMyWorkReadModelProvider({ NODE_ENV: 'test' });
+    let projectLinksCalls = 0;
+    const deterministicProjectLinksProvider = {
+      async getMyProjectLinks() {
+        projectLinksCalls++;
+        return MY_PROJECT_LINKS_AVAILABLE;
+      },
+    };
+
+    const mockProvider = resolveMyWorkReadModelProvider(
+      { NODE_ENV: 'test' },
+      { projectLinksProvider: deterministicProjectLinksProvider },
+    );
     const projectLinks = await mockProvider.getMyProjectLinks(fixtureContext);
-    expect(projectLinks).toBeDefined();
-    expect(projectLinks.data).toBeDefined();
+    expect(projectLinks).toEqual(MY_PROJECT_LINKS_AVAILABLE);
 
     const fallbackProvider = resolveMyWorkReadModelProvider(
       fullProductionEnv({ ADOBE_SIGN_OAUTH_CLIENT_SECRET: undefined }),
+      { projectLinksProvider: deterministicProjectLinksProvider },
     );
     const fallbackLinks = await fallbackProvider.getMyProjectLinks(fixtureContext);
-    expect(fallbackLinks).toBeDefined();
+    expect(fallbackLinks).toEqual(MY_PROJECT_LINKS_AVAILABLE);
+    expect(projectLinksCalls).toBe(2);
   });
 
   it('the live-mode actor key is derived from (tenantId, hbcUserId), not from any spoofed claim', () => {
