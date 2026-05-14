@@ -1,5 +1,7 @@
 name: Deploy Azure Functions
-# D-PH6-16: Environment-aware Functions deployment pipeline (staging on main, production on tags/manual gate).
+# D-PH6-16: Environment-aware Functions deployment pipeline — invoked explicitly via
+# workflow_dispatch or as a reusable workflow_call; not auto-triggered on push.
+# main_hb-intel-function-app.yml is the governed automatic production deploy path.
 
 on:
   workflow_call:
@@ -8,9 +10,6 @@ on:
         description: 'Target environment'
         required: true
         type: string
-  # D-PH6-16 trigger strategy: auto-deploy staging from main; allow manual environment override.
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       environment:
@@ -77,12 +76,33 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: staging
-    # D-PH6-16 environment strategy: staging deploy on main or explicit staging dispatch.
-    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') || (github.event_name == 'workflow_call' && inputs.environment == 'staging')
+    # D-PH6-16 environment strategy: staging deploys only on explicit workflow_dispatch or
+    # reusable workflow_call with environment=staging (no automatic push trigger).
+    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') || (github.event_name == 'workflow_call' && inputs.environment == 'staging')
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: functions-artifact
+
+      - name: Verify Azure deployment secret contract
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TARGET_FUNCTION_APP_NAME: ${{ secrets.AZURE_FUNCTIONAPP_NAME_STAGING }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for key in AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID TARGET_FUNCTION_APP_NAME; do
+            if [ -z "${!key:-}" ]; then
+              echo "::error::$key is missing for this deploy-functions workflow invocation (staging job)."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::Configure the AZURE_* / AZURE_FUNCTIONAPP_NAME_STAGING secret contract before invoking this workflow."
+            exit 1
+          fi
 
       - name: Azure Login
         # D-PH6-16 secrets: tenant/client/subscription are sourced from GitHub encrypted secrets.
@@ -114,6 +134,26 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: functions-artifact
+
+      - name: Verify Azure deployment secret contract
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          TARGET_FUNCTION_APP_NAME: ${{ secrets.AZURE_FUNCTIONAPP_NAME_PROD }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for key in AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID TARGET_FUNCTION_APP_NAME; do
+            if [ -z "${!key:-}" ]; then
+              echo "::error::$key is missing for this deploy-functions workflow invocation (production job)."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::Configure the AZURE_* / AZURE_FUNCTIONAPP_NAME_PROD secret contract before invoking this workflow."
+            exit 1
+          fi
 
       - name: Azure Login
         uses: azure/login@v2
