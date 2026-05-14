@@ -29,6 +29,21 @@ const BASE = {
     HBC_FUNCTIONS_BUILD_SHA: 'c621aee82bc9ec0dc0434225726b83a632ace5c7',
     HBC_FUNCTIONS_BUILD_TIMESTAMP: '2026-04-23T20:29:59.604Z',
   },
+  // Azure returns app-prefixed names; the verifier suffix-matches against /<name>.
+  myWorkFunctionInventory: [
+    'hb-intel-function-app/getMyWorkHome',
+    'hb-intel-function-app/getMyWorkAdobeSignActionQueue',
+    'hb-intel-function-app/getMyWorkProjectLinks',
+    'hb-intel-function-app/startAdobeSignOAuth',
+    'hb-intel-function-app/completeAdobeSignOAuthCallback',
+  ],
+  myWorkRouteStatuses: [
+    { route: '/api/my-work/me/home', method: 'GET' as const, status: 401 },
+    { route: '/api/my-work/me/project-links', method: 'GET' as const, status: 401 },
+    { route: '/api/my-work/me/adobe-sign/action-queue', method: 'GET' as const, status: 401 },
+    { route: '/api/my-work/me/adobe-sign/oauth/start', method: 'POST' as const, status: 401 },
+    { route: '/api/my-work/adobe-sign/oauth/callback', method: 'GET' as const, status: 302 },
+  ],
   healthBody: {
     status: 'healthy',
     artifact: {
@@ -88,5 +103,92 @@ describe('verify-functions-live-parity contract', () => {
     expect(evidence.commandAuthTruth.nonAdminBearer.issues).toContain(
       'command_auth.non_admin_bearer.provisioning.unexpected_status(expected=403,live=200)',
     );
+  });
+
+  describe('My Dashboard / My Work route registration truth', () => {
+    it('passes when My Work inventory and route probes are all healthy', () => {
+      const evidence = buildParityEvidence({ ...BASE });
+
+      expect(evidence.overallPass).toBe(true);
+      expect(evidence.myWorkRouteTruth.functionInventory.allPresent).toBe(true);
+      expect(evidence.myWorkRouteTruth.functionInventory.missing).toHaveLength(0);
+      expect(evidence.myWorkRouteTruth.routeProbes.allPresent).toBe(true);
+    });
+
+    it('fails when a required My Work function registration is missing from the live inventory', () => {
+      const evidence = buildParityEvidence({
+        ...BASE,
+        myWorkFunctionInventory: [
+          'hb-intel-function-app/getMyWorkHome',
+          'hb-intel-function-app/getMyWorkAdobeSignActionQueue',
+          'hb-intel-function-app/getMyWorkProjectLinks',
+          'hb-intel-function-app/startAdobeSignOAuth',
+        ],
+      });
+
+      expect(evidence.overallPass).toBe(false);
+      expect(evidence.myWorkRouteTruth.functionInventory.missing).toContain(
+        'completeAdobeSignOAuthCallback',
+      );
+      expect(evidence.myWorkRouteTruth.functionInventory.issues).toContain(
+        'my_work.function_inventory.missing(completeAdobeSignOAuthCallback)',
+      );
+    });
+
+    it('fails when a protected My Work route returns 404', () => {
+      const evidence = buildParityEvidence({
+        ...BASE,
+        myWorkRouteStatuses: [
+          { route: '/api/my-work/me/home', method: 'GET', status: 404 },
+          { route: '/api/my-work/me/project-links', method: 'GET', status: 401 },
+          { route: '/api/my-work/me/adobe-sign/action-queue', method: 'GET', status: 401 },
+          { route: '/api/my-work/me/adobe-sign/oauth/start', method: 'POST', status: 401 },
+          { route: '/api/my-work/adobe-sign/oauth/callback', method: 'GET', status: 302 },
+        ],
+      });
+
+      expect(evidence.overallPass).toBe(false);
+      expect(evidence.myWorkRouteTruth.routeProbes.issues).toContain(
+        'my_work.route.missing(GET /api/my-work/me/home status=404)',
+      );
+    });
+
+    it('passes the public OAuth callback on a 302 redirect but fails it on a 404', () => {
+      const passing = buildParityEvidence({ ...BASE });
+      expect(passing.myWorkRouteTruth.routeProbes.issues).toHaveLength(0);
+
+      const failing = buildParityEvidence({
+        ...BASE,
+        myWorkRouteStatuses: [
+          { route: '/api/my-work/me/home', method: 'GET', status: 401 },
+          { route: '/api/my-work/me/project-links', method: 'GET', status: 401 },
+          { route: '/api/my-work/me/adobe-sign/action-queue', method: 'GET', status: 401 },
+          { route: '/api/my-work/me/adobe-sign/oauth/start', method: 'POST', status: 401 },
+          { route: '/api/my-work/adobe-sign/oauth/callback', method: 'GET', status: 404 },
+        ],
+      });
+      expect(failing.overallPass).toBe(false);
+      expect(failing.myWorkRouteTruth.routeProbes.issues).toContain(
+        'my_work.route.missing(GET /api/my-work/adobe-sign/oauth/callback status=404)',
+      );
+    });
+
+    it('forces overallPass false when My Work inventory and route truth fail together', () => {
+      const evidence = buildParityEvidence({
+        ...BASE,
+        myWorkFunctionInventory: [],
+        myWorkRouteStatuses: [
+          { route: '/api/my-work/me/home', method: 'GET', status: 404 },
+          { route: '/api/my-work/me/project-links', method: 'GET', status: 404 },
+          { route: '/api/my-work/me/adobe-sign/action-queue', method: 'GET', status: 404 },
+          { route: '/api/my-work/me/adobe-sign/oauth/start', method: 'POST', status: 404 },
+          { route: '/api/my-work/adobe-sign/oauth/callback', method: 'GET', status: 404 },
+        ],
+      });
+
+      expect(evidence.overallPass).toBe(false);
+      expect(evidence.myWorkRouteTruth.functionInventory.missing).toHaveLength(5);
+      expect(evidence.myWorkRouteTruth.routeProbes.issues).toHaveLength(5);
+    });
   });
 });

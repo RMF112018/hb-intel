@@ -106,6 +106,20 @@ export interface IParityEvidence {
     commitShaMatch: boolean;
     issues: string[];
   };
+  myWorkRouteTruth: {
+    functionInventory: {
+      required: string[];
+      found: string[];
+      missing: string[];
+      allPresent: boolean;
+      issues: string[];
+    };
+    routeProbes: {
+      routes: IRouteProbeResult[];
+      allPresent: boolean;
+      issues: string[];
+    };
+  };
   overallPass: boolean;
 }
 
@@ -127,6 +141,8 @@ export interface IBuildParityEvidenceInput {
   healthReadyAdminBody?: unknown;
   healthReadyNonAdminStatus?: number;
   appSettings: Record<string, string>;
+  myWorkFunctionInventory: ReadonlyArray<string>;
+  myWorkRouteStatuses: ReadonlyArray<{ route: string; method: 'POST' | 'GET'; status: number }>;
 }
 
 interface IOptions {
@@ -337,6 +353,46 @@ function resolveHostName(cwd: string, appName: string, resourceGroup: string): s
   return fromSite;
 }
 
+// My Dashboard / My Work route-registration deployment-proof contract.
+// These function registrations were absent from the executable host in a prior
+// incident; the verifier hard-gates their live presence after every deploy.
+export const MY_WORK_REQUIRED_FUNCTIONS = [
+  'getMyWorkHome',
+  'getMyWorkAdobeSignActionQueue',
+  'getMyWorkProjectLinks',
+  'startAdobeSignOAuth',
+  'completeAdobeSignOAuthCallback',
+] as const;
+
+// Public OAuth callback: deployment-proof requires non-404 only (a 302 redirect
+// is acceptable handler behavior). Protected My Work routes require a 401 denial.
+const MY_WORK_PUBLIC_CALLBACK_ROUTE = '/api/my-work/adobe-sign/oauth/callback';
+
+function fetchMyWorkFunctionInventory(
+  cwd: string,
+  appName: string,
+  resourceGroup: string,
+): string[] {
+  const raw = runAz(
+    [
+      'functionapp',
+      'function',
+      'list',
+      '--resource-group',
+      resourceGroup,
+      '--name',
+      appName,
+      '-o',
+      'json',
+    ],
+    cwd,
+  );
+  const parsed = JSON.parse(raw) as Array<{ name?: unknown }>;
+  return parsed
+    .map((entry) => (typeof entry.name === 'string' ? entry.name : ''))
+    .filter((name) => name.length > 0);
+}
+
 export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEvidence {
   const health = (input.healthBody && typeof input.healthBody === 'object')
     ? (input.healthBody as Record<string, unknown>)
@@ -510,6 +566,40 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
     deployIssues.push(`appsettings.HBC_FUNCTIONS_BUILD_SHA.mismatch(expected=${input.expectedIdentity.commitSha},live=${buildSha})`);
   }
 
+  const myWorkInventoryFound = MY_WORK_REQUIRED_FUNCTIONS.filter((name) =>
+    input.myWorkFunctionInventory.some(
+      (live) => live === name || live.endsWith(`/${name}`),
+    ),
+  );
+  const myWorkInventoryMissing = MY_WORK_REQUIRED_FUNCTIONS.filter(
+    (name) => !myWorkInventoryFound.includes(name),
+  );
+  const myWorkInventoryIssues = myWorkInventoryMissing.map(
+    (name) => `my_work.function_inventory.missing(${name})`,
+  );
+
+  const myWorkRouteProbes: IRouteProbeResult[] = input.myWorkRouteStatuses.map((item) => ({
+    route: item.route,
+    method: item.method,
+    status: item.status,
+    exists: item.status !== 404 && item.status > 0,
+    responseRequestIdPresent: false,
+  }));
+  const myWorkRouteIssues: string[] = [];
+  for (const probe of myWorkRouteProbes) {
+    if (!probe.exists) {
+      myWorkRouteIssues.push(
+        `my_work.route.missing(${probe.method} ${probe.route} status=${probe.status})`,
+      );
+      continue;
+    }
+    if (probe.route !== MY_WORK_PUBLIC_CALLBACK_ROUTE && probe.status !== 401) {
+      myWorkRouteIssues.push(
+        `my_work.route.unexpected_auth_status(${probe.method} ${probe.route} expected=401,live=${probe.status})`,
+      );
+    }
+  }
+
   const overallPass =
     identityIssues.length === 0 &&
     routeIssues.length === 0 &&
@@ -523,7 +613,9 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
     adminRouteIssues.length === 0 &&
     nonAdminRouteIssues.length === 0 &&
     healthPublicIssues.length === 0 &&
-    deployIssues.length === 0;
+    deployIssues.length === 0 &&
+    myWorkInventoryIssues.length === 0 &&
+    myWorkRouteIssues.length === 0;
 
   return {
     appName: input.appName,
@@ -606,6 +698,20 @@ export function buildParityEvidence(input: IBuildParityEvidenceInput): IParityEv
       versionMatch: appVersionMatch,
       commitShaMatch: appShaMatch,
       issues: deployIssues,
+    },
+    myWorkRouteTruth: {
+      functionInventory: {
+        required: [...MY_WORK_REQUIRED_FUNCTIONS],
+        found: myWorkInventoryFound,
+        missing: myWorkInventoryMissing,
+        allPresent: myWorkInventoryMissing.length === 0,
+        issues: myWorkInventoryIssues,
+      },
+      routeProbes: {
+        routes: myWorkRouteProbes,
+        allPresent: myWorkRouteIssues.length === 0,
+        issues: myWorkRouteIssues,
+      },
     },
     overallPass,
   };
@@ -840,6 +946,48 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
   );
   const appSettings = parseAppSettings(appSettingsRaw);
 
+  const myWorkRouteStatuses = [
+    {
+      route: '/api/my-work/me/home',
+      method: 'GET' as const,
+      status: await fetchStatus(`${baseUrl}/api/my-work/me/home`),
+    },
+    {
+      route: '/api/my-work/me/project-links',
+      method: 'GET' as const,
+      status: await fetchStatus(`${baseUrl}/api/my-work/me/project-links`),
+    },
+    {
+      route: '/api/my-work/me/adobe-sign/action-queue',
+      method: 'GET' as const,
+      status: await fetchStatus(`${baseUrl}/api/my-work/me/adobe-sign/action-queue`),
+    },
+    {
+      route: '/api/my-work/me/adobe-sign/oauth/start',
+      method: 'POST' as const,
+      status: await fetchStatus(`${baseUrl}/api/my-work/me/adobe-sign/oauth/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+      }),
+    },
+    {
+      // Public callback: probe without following redirects so a 302 handler
+      // response is captured as-is. Deployment-proof requires non-404 only.
+      route: '/api/my-work/adobe-sign/oauth/callback',
+      method: 'GET' as const,
+      status: await fetchStatus(`${baseUrl}/api/my-work/adobe-sign/oauth/callback`, {
+        redirect: 'manual',
+      }),
+    },
+  ];
+
+  const myWorkFunctionInventory = fetchMyWorkFunctionInventory(
+    cwd,
+    options.appName,
+    options.resourceGroup,
+  );
+
   return buildParityEvidence({
     appName: options.appName,
     resourceGroup: options.resourceGroup,
@@ -858,6 +1006,8 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
     healthReadyAdminBody,
     healthReadyNonAdminStatus,
     appSettings,
+    myWorkFunctionInventory,
+    myWorkRouteStatuses,
   });
 }
 

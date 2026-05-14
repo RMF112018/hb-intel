@@ -1,5 +1,14 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
+#
+# Artifact-truth deploy pipeline (backend/phase-02 Prompt 01 — closes G-01, G-10).
+# The sole producer of the deploy zip is scripts/package-functions-artifact.ts,
+# which stages backend/functions in isolation (clean `pnpm deploy --prod --legacy`)
+# and emits artifact-manifest.json with sha256 + commit + version stamps.
+# Runtime identity is stamped into app settings as a hard gate before deploy,
+# and post-deploy parity checks must prove the live host identity + route surface.
+# This app is Flex-hosted (One Deploy via Functions Action), so parity proof is
+# based on live host/runtime behavior rather than SCM/Kudu deployment history.
 
 name: Build and deploy Node.js project to Azure Function App - hb-intel-function-app
 
@@ -7,75 +16,311 @@ on:
   push:
     branches:
       - main
+    # Limit automatic Function App deployments to backend/runtime/deployment inputs.
+    # Docs-only commits must not restamp or redeploy hb-intel-function-app.
+    paths:
+      - "backend/functions/**"
+      - "packages/acknowledgment/**"
+      - "packages/auth/**"
+      - "packages/bic-next-move/**"
+      - "packages/complexity/**"
+      - "packages/features/safety/**"
+      - "packages/field-annotations/**"
+      - "packages/models/**"
+      - "packages/notification-intelligence/**"
+      - "packages/provisioning/**"
+      - "packages/session-state/**"
+      - "packages/sharepoint-platform/**"
+      - "packages/shell/**"
+      - "packages/ui-kit/**"
+      - "packages/versioned-record/**"
+      - "packages/workflow-handoff/**"
+      - "scripts/package-functions-artifact.ts"
+      - "scripts/verify-functions-live-parity.ts"
+      - ".github/workflows/main_hb-intel-function-app.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "tsconfig.base.json"
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  NODE_VERSION: '22' # set this to the node version to use (supports 8.x, 10.x, 12.x)
+  AZURE_FUNCTIONAPP_NAME: 'hb-intel-function-app'
+  NODE_VERSION: '22'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
+
+    outputs:
+      package-version: ${{ steps.manifest.outputs.packageVersion }}
+      commit-sha: ${{ steps.manifest.outputs.commitSha }}
+      build-timestamp: ${{ steps.manifest.outputs.buildTimestamp }}
+      sha256: ${{ steps.manifest.outputs.sha256 }}
 
     steps:
-      - name: 'Checkout GitHub Action'
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node ${{ env.NODE_VERSION }} Environment
-        uses: actions/setup-node@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
-      - name: 'Resolve Project Dependencies Using Npm'
-        shell: bash
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Linux CI starts without pre-built workspace `dist/` outputs. `@hbc/functions`
+      # typecheck resolves workspace packages via their build artifacts. Keep this
+      # turbo scope identical to scripts/package-functions-artifact.ts so CI matches
+      # the deploy zip producer.
+      - name: Build upstream packages for @hbc/functions
         run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          npm install
-          npm run build --if-present
-          npm run test --if-present
-          popd
+          pnpm turbo run build \
+            --filter=@hbc/models \
+            --filter=@hbc/sharepoint-platform \
+            --filter=@hbc/provisioning \
+            --filter=@hbc/notification-intelligence \
+            --filter=@hbc/acknowledgment \
+            --filter=@hbc/functions
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+      - name: Type-check @hbc/functions
+        run: pnpm --filter @hbc/functions check-types
+
+      - name: Unit test @hbc/functions
+        run: pnpm --filter @hbc/functions test
+
+      - name: Package backend/functions artifact
+        run: |
+          set -euo pipefail
+          pnpm exec tsx scripts/package-functions-artifact.ts \
+            --output "$GITHUB_WORKSPACE/functions-artifact.zip" \
+            --staging "$RUNNER_TEMP/functions-deploy"
+
+      - name: Read artifact manifest
+        id: manifest
+        run: |
+          set -euo pipefail
+          MANIFEST="$GITHUB_WORKSPACE/artifact-manifest.json"
+          if [ ! -f "$MANIFEST" ]; then
+            echo "::error::artifact-manifest.json missing alongside zip"
+            exit 1
+          fi
+          PKG_VERSION=$(jq -r '.packageVersion' "$MANIFEST")
+          COMMIT_SHA=$(jq -r '.commitSha' "$MANIFEST")
+          BUILD_TS=$(jq -r '.buildTimestamp' "$MANIFEST")
+          SHA256=$(jq -r '.sha256' "$MANIFEST")
+          ZIP_BYTES=$(jq -r '.zipBytes' "$MANIFEST")
+          {
+            echo "packageVersion=$PKG_VERSION"
+            echo "commitSha=$COMMIT_SHA"
+            echo "buildTimestamp=$BUILD_TS"
+            echo "sha256=$SHA256"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "### Backend artifact"
+            echo ""
+            echo "| field | value |"
+            echo "| --- | --- |"
+            echo "| packageVersion | \`$PKG_VERSION\` |"
+            echo "| commitSha | \`$COMMIT_SHA\` |"
+            echo "| buildTimestamp | \`$BUILD_TS\` |"
+            echo "| sha256 | \`$SHA256\` |"
+            echo "| zipBytes | \`$ZIP_BYTES\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
-          path: release.zip
+          name: functions-artifact
+          path: |
+            functions-artifact.zip
+            artifact-manifest.json
+          if-no-files-found: error
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: functions-artifact
 
-      - name: Unzip artifact for deployment
-        run: |
-          unzip release.zip
-          rm release.zip
-      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_076380B74CF940E082AC9965927B6EFD }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_952A00437E5F4F7DB66B0CBFF1205C21 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_DB3AE2CA22EA4EA2BB8C13DEE14F91CB }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_AF716E7F1C974D9687EEF6468E309324 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_11ED03B6B9BD43B1B074FC4CE2269E7D }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B18793A8E66B420EBBC60C61906EA367 }}
 
-      - name: 'Run Azure Functions Action'
+      - name: Stamp runtime identity (hard gate)
+        id: stamp
+        env:
+          EXPECTED_VERSION: ${{ needs.build.outputs.package-version }}
+          EXPECTED_SHA: ${{ needs.build.outputs.commit-sha }}
+          EXPECTED_TS: ${{ needs.build.outputs.build-timestamp }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${EXPECTED_VERSION:-}" ] || [ -z "${EXPECTED_SHA:-}" ] || [ -z "${EXPECTED_TS:-}" ]; then
+            echo "::error::missing expected identity inputs from build job"
+            exit 1
+          fi
+
+          # Resolve the resource group once (Flex Consumption: find by name).
+          RESOURCE_GROUP=$(az functionapp list \
+            --query "[?name=='${AZURE_FUNCTIONAPP_NAME}'].resourceGroup | [0]" -o tsv)
+          if [ -z "$RESOURCE_GROUP" ] || [ "$RESOURCE_GROUP" = "null" ]; then
+            echo "::error::could not resolve resource group for ${AZURE_FUNCTIONAPP_NAME}"
+            exit 1
+          fi
+          echo "resolved resource group: $RESOURCE_GROUP"
+
+          # Apply all three settings in one call. Non-zero exit fails the job immediately.
+          az functionapp config appsettings set \
+            --name "$AZURE_FUNCTIONAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --settings \
+              "HBC_FUNCTIONS_BUILD_VERSION=${EXPECTED_VERSION}" \
+              "HBC_FUNCTIONS_BUILD_SHA=${EXPECTED_SHA}" \
+              "HBC_FUNCTIONS_BUILD_TIMESTAMP=${EXPECTED_TS}" \
+            --output none
+
+          # Partial-success guard: re-query and verify each key equals the intended value.
+          APPLIED=$(az functionapp config appsettings list \
+            --name "$AZURE_FUNCTIONAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "[?name=='HBC_FUNCTIONS_BUILD_VERSION' || name=='HBC_FUNCTIONS_BUILD_SHA' || name=='HBC_FUNCTIONS_BUILD_TIMESTAMP']" \
+            -o json)
+
+          LIVE_VERSION=$(echo "$APPLIED" | jq -r '.[] | select(.name=="HBC_FUNCTIONS_BUILD_VERSION") | .value')
+          LIVE_SHA=$(echo "$APPLIED" | jq -r '.[] | select(.name=="HBC_FUNCTIONS_BUILD_SHA") | .value')
+          LIVE_TS=$(echo "$APPLIED" | jq -r '.[] | select(.name=="HBC_FUNCTIONS_BUILD_TIMESTAMP") | .value')
+
+          FAIL=0
+          if [ "$LIVE_VERSION" != "$EXPECTED_VERSION" ]; then
+            echo "::error::HBC_FUNCTIONS_BUILD_VERSION mismatch after set (expected=$EXPECTED_VERSION live=$LIVE_VERSION)"
+            FAIL=1
+          fi
+          if [ "$LIVE_SHA" != "$EXPECTED_SHA" ]; then
+            echo "::error::HBC_FUNCTIONS_BUILD_SHA mismatch after set (expected=$EXPECTED_SHA live=$LIVE_SHA)"
+            FAIL=1
+          fi
+          if [ "$LIVE_TS" != "$EXPECTED_TS" ]; then
+            echo "::error::HBC_FUNCTIONS_BUILD_TIMESTAMP mismatch after set (expected=$EXPECTED_TS live=$LIVE_TS)"
+            FAIL=1
+          fi
+          if [ "$FAIL" -ne 0 ]; then
+            echo "::error::runtime identity stamp partially applied — blocking deploy"
+            exit 1
+          fi
+
+          {
+            echo "### Runtime identity stamp"
+            echo ""
+            echo "| key | expected | live | match |"
+            echo "| --- | --- | --- | --- |"
+            echo "| HBC_FUNCTIONS_BUILD_VERSION | \`$EXPECTED_VERSION\` | \`$LIVE_VERSION\` | ✅ |"
+            echo "| HBC_FUNCTIONS_BUILD_SHA | \`$EXPECTED_SHA\` | \`$LIVE_SHA\` | ✅ |"
+            echo "| HBC_FUNCTIONS_BUILD_TIMESTAMP | \`$EXPECTED_TS\` | \`$LIVE_TS\` | ✅ |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "resourceGroup=$RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy backend artifact to Azure Functions
         uses: Azure/functions-action@v1
         id: fa
         with:
-          app-name: 'hb-intel-function-app'
-          slot-name: 'Production'
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: functions-artifact.zip
+
+      - name: Post-deploy live artifact parity proof (hard gate)
+        env:
+          EXPECTED_VERSION: ${{ needs.build.outputs.package-version }}
+          EXPECTED_SHA: ${{ needs.build.outputs.commit-sha }}
+        run: |
+          set -euo pipefail
+          # Deploy job does not run pnpm install; use dlx so tsx is fetched without workspace devDependencies.
+          pnpm dlx tsx scripts/verify-functions-live-parity.ts \
+            --app-name "$AZURE_FUNCTIONAPP_NAME" \
+            --resource-group "${{ steps.stamp.outputs.resourceGroup }}" \
+            --expected-version "$EXPECTED_VERSION" \
+            --expected-sha "$EXPECTED_SHA" \
+            --output "$RUNNER_TEMP/live-parity-evidence.json"
+
+          {
+            echo "### Post-deploy live parity proof"
+            echo ""
+            echo "Verifier output:"
+            echo ""
+            echo '```json'
+            cat "$RUNNER_TEMP/live-parity-evidence.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Flex Safety reporting-period probe registration proof
+        env:
+          RG: ${{ steps.stamp.outputs.resourceGroup }}
+        run: |
+          set -euo pipefail
+          echo "Recording Azure function inventory (Flex route registration truth)."
+          az functionapp function list \
+            --resource-group "$RG" \
+            --name "$AZURE_FUNCTIONAPP_NAME" \
+            -o json > "$RUNNER_TEMP/azure-function-inventory.json"
+
+          if ! jq -e 'any(.[]; (.name | type == "string") and (.name | endswith("/safetyReportingPeriodProbe")))' \
+            "$RUNNER_TEMP/azure-function-inventory.json" >/dev/null; then
+            echo "::error::Expected function name ending with /safetyReportingPeriodProbe was not found in Azure inventory."
+            jq '.[].name' "$RUNNER_TEMP/azure-function-inventory.json" | head -80 || true
+            exit 1
+          fi
+
+          HOST="https://$(az functionapp show \
+            --resource-group "$RG" \
+            --name "$AZURE_FUNCTIONAPP_NAME" \
+            --query properties.defaultHostName \
+            -o tsv)"
+
+          probe_code="$(curl -sS -o /dev/null -w "%{http_code}" \
+            "$HOST/api/safety-records/reporting-periods/period-1/probe?reportingPeriodSpItemId=1")"
+          if [ "$probe_code" = "404" ]; then
+            echo "::error::GET reporting-period probe returned 404 (route not deployed)."
+            exit 1
+          fi
+          echo "GET reporting-period probe (no auth) HTTP status: $probe_code (expected 401 or 403)"
+
+          {
+            echo "### Flex Safety probe proof"
+            echo ""
+            echo "- Host: \`$HOST\`"
+            echo "- Azure inventory includes \`safetyReportingPeriodProbe\`: yes"
+            echo "- GET \`/api/safety-records/reporting-periods/period-1/probe?reportingPeriodSpItemId=1\` (no auth): \`$probe_code\` (must not be 404)"
+          } >> "$GITHUB_STEP_SUMMARY"
