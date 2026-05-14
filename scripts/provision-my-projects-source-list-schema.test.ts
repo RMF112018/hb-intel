@@ -61,11 +61,13 @@ function fakeAdapter(input: {
   };
 }
 
-function deps(listAdapter: IListAdapter): IMainDeps {
+function deps(listAdapter: IListAdapter, out?: string[]): IMainDeps {
   return {
     listAdapter,
     now: () => '2026-05-14T00:00:00.000Z',
-    stdout: () => {},
+    stdout: (line) => {
+      out?.push(line);
+    },
   };
 }
 
@@ -147,8 +149,66 @@ describe('main behavior', () => {
     expect(registryCreate).toHaveBeenCalled();
   });
 
-  it('wrong-type field fails apply', async () => {
+  it('is idempotent when all required fields already exist', async () => {
     const projectsCreate = vi.fn(async (_f: IFieldDefinition) => {});
+    const registryCreate = vi.fn(async (_f: IFieldDefinition) => {});
+
+    const code = await main(
+      { apply: true, json: true },
+      deps(
+        fakeAdapter({
+          projects: {
+            fields: [
+              field('leadEstimatorUpns', 'Note'),
+              field('estimatorUpns', 'Note'),
+              field('idsManagerUpns', 'Note'),
+              field('projectAccountantUpns', 'Note'),
+              field('projectAdministratorUpns', 'Note'),
+              field('projectCoordinatorUpns', 'Note'),
+              field('superintendentUpns', 'Note'),
+              field('leadSuperintendentUpns', 'Note'),
+              field('projectManagerUpns', 'Note'),
+              field('leadProjectManagerUpns', 'Note'),
+              field('projectExecutiveUpns', 'Note'),
+              field('safetyCoordinatorUpns', 'Note'),
+              field('qcManagerUpns', 'Note'),
+              field('warrantyManagerUpns', 'Note'),
+            ],
+            createSpy: projectsCreate,
+          },
+          registry: {
+            fields: [
+              field('leadEstimatorUpns', 'Note'),
+              field('estimatorUpns', 'Note'),
+              field('idsManagerUpns', 'Note'),
+              field('projectAccountantUpns', 'Note'),
+              field('projectAdministratorUpns', 'Note'),
+              field('projectCoordinatorUpns', 'Note'),
+              field('superintendentUpns', 'Note'),
+              field('leadSuperintendentUpns', 'Note'),
+              field('projectManagerUpns', 'Note'),
+              field('leadProjectManagerUpns', 'Note'),
+              field('projectExecutiveUpns', 'Note'),
+              field('safetyCoordinatorUpns', 'Note'),
+              field('qcManagerUpns', 'Note'),
+              field('warrantyManagerUpns', 'Note'),
+              field('procoreProject', 'Text'),
+            ],
+            createSpy: registryCreate,
+          },
+        }),
+      ),
+      'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+    );
+
+    expect(code).toBe(0);
+    expect(projectsCreate).not.toHaveBeenCalled();
+    expect(registryCreate).not.toHaveBeenCalled();
+  });
+
+  it('wrong-type field fails apply and keeps blocker visible in report output', async () => {
+    const projectsCreate = vi.fn(async (_f: IFieldDefinition) => {});
+    const outputs: string[] = [];
 
     const code = await main(
       { apply: true, json: true },
@@ -157,26 +217,35 @@ describe('main behavior', () => {
           projects: { fields: [field('leadEstimatorUpns', 'Text')], createSpy: projectsCreate },
           registry: { fields: [field('procoreProject', 'Text')] },
         }),
+        outputs,
       ),
       'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
     );
 
     expect(code).toBe(1);
     expect(projectsCreate).not.toHaveBeenCalled();
+    const report = JSON.parse(outputs[0] ?? '{}');
+    expect(report.hasBlockingDrift).toBe(true);
+    expect(report.targets[0].blockers.length).toBeGreaterThan(0);
   });
 
-  it('missing list fails with no mutation', async () => {
+  it('missing list fails with no mutation and list-missing flag', async () => {
+    const outputs: string[] = [];
     const code = await main(
       { apply: true, json: true },
       deps(
         fakeAdapter({
           projects: { fields: [] },
         }),
+        outputs,
       ),
       'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
     );
 
     expect(code).toBe(1);
+    const report = JSON.parse(outputs[0] ?? '{}');
+    expect(report.listsMissing).toBe(true);
+    expect(report.success).toBe(false);
   });
 });
 
@@ -200,6 +269,7 @@ describe('report + exit contract', () => {
 
     expect(report.nextCommands.length).toBeGreaterThan(0);
     expect(report.identityLaneWarning.runtimeLane).toContain('UAMI');
+    expect(report.identityLaneWarning.operatorLane).toContain('HB SharePoint Creator');
     expect(report.success).toBe(true);
     expect(selectExitCode(report)).toBe(0);
   });
@@ -230,6 +300,30 @@ describe('report + exit contract', () => {
       ],
     });
 
+    expect(report.success).toBe(false);
+    expect(report.hasBlockingDrift).toBe(true);
+    expect(selectExitCode(report)).toBe(1);
+  });
+
+  it('marks list-missing as unsuccessful', () => {
+    const report = buildProvisioningReport({
+      siteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+      apply: true,
+      startedAtUtc: '2026-05-14T00:00:00.000Z',
+      completedAtUtc: '2026-05-14T00:00:01.000Z',
+      targets: [
+        {
+          listTitle: 'Legacy Project Fallback Registry',
+          listFound: false,
+          plannedCreates: [],
+          liveVerified: [],
+          blockers: [],
+          appliedCreates: [],
+        },
+      ],
+    });
+
+    expect(report.listsMissing).toBe(true);
     expect(report.success).toBe(false);
     expect(selectExitCode(report)).toBe(1);
   });
