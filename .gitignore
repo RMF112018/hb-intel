@@ -175,3 +175,4 @@ functions-artifact.zip
 .tmp/foleon-wave03a-guid-probe.ps1
 .tmp/foleon-wave03a-manual-views.json
 .tmp/foleon-wave03a-manual-views.ps1
+scripts/debug-default-azure-credential.ts

@@ -93,22 +93,21 @@ function resolveSiteUrl(): string {
 }
 
 /**
- * Default Graph-backed implementation of `IListFieldQuery`. Queries the
- * SharePoint REST endpoint `/_api/web/lists/getByTitle('<list>')/fields`
- * (filtered to internal-name + TypeAsString) via a bearer token issued by
- * the managed-identity service. No PnPjs dependency — keeps the script
- * pure HTTP + token.
+ * Default SharePoint-REST implementation of `IListFieldQuery`. Queries
+ * `/_api/web/lists/getByTitle('<list>')/fields` (filtered to internal-name
+ * + TypeAsString) using a SharePoint app-only bearer token issued by the
+ * managed-identity service. No PnPjs dependency — keeps the script pure
+ * HTTP + token.
  */
 export function createGraphListFieldQuery(options: {
   readonly siteUrl: string;
-  readonly tokenService: { getAccessToken: (resource: string) => Promise<string> };
+  readonly tokenService: { getSharePointToken: (siteUrl: string) => Promise<string> };
   readonly fetchImpl?: typeof fetch;
 }): IListFieldQuery {
   const fetchImpl = options.fetchImpl ?? fetch;
   return {
     async listFields(listTitle: string): Promise<readonly ListFieldSnapshot[]> {
-      const resource = new URL(options.siteUrl).origin;
-      const token = await options.tokenService.getAccessToken(resource);
+      const token = await options.tokenService.getSharePointToken(options.siteUrl);
       const encoded = encodeURIComponent(listTitle);
       const url = `${options.siteUrl}/_api/web/lists/getByTitle('${encoded}')/fields?$select=InternalName,TypeAsString&$top=500`;
       const response = await fetchImpl(url, {
@@ -178,6 +177,18 @@ const invokedDirectly =
   process.argv[1].endsWith('verify-my-project-role-fields.ts');
 
 if (invokedDirectly) {
+  process.on('unhandledRejection', (err) => {
+    console.error(
+      `verify-my-project-role-fields: unhandled rejection — ${err instanceof Error ? err.message : String(err)}`,
+    );
+    process.exit(1);
+  });
+  process.on('uncaughtException', (err) => {
+    console.error(
+      `verify-my-project-role-fields: uncaught exception — ${err instanceof Error ? err.message : String(err)}`,
+    );
+    process.exit(1);
+  });
   runFromCli().catch((err) => {
     console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);

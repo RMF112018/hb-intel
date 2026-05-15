@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { IFieldDefinition } from '../backend/functions/src/services/sharepoint-service.js';
 import {
   buildProvisioningReport,
+  createRestListAdapter,
   main,
   parseArgs,
   resolveSiteUrl,
@@ -12,7 +13,10 @@ import {
   type IProvisionTargetReport,
 } from './provision-my-projects-source-list-schema';
 
-function field(internalName: string, type: 'Text' | 'Note'): {
+function field(
+  internalName: string,
+  type: 'Text' | 'Note',
+): {
   InternalName: string;
   Title: string;
   TypeAsString: string;
@@ -77,7 +81,14 @@ describe('parseArgs', () => {
   });
 
   it('parses apply/json/site-url', () => {
-    expect(parseArgs(['--apply', '--json', '--site-url', 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral'])).toEqual({
+    expect(
+      parseArgs([
+        '--apply',
+        '--json',
+        '--site-url',
+        'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+      ]),
+    ).toEqual({
       apply: true,
       json: true,
       siteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
@@ -91,14 +102,20 @@ describe('parseArgs', () => {
 
 describe('site url resolution', () => {
   it('uses cli site-url over env', () => {
-    expect(resolveSiteUrl({ apply: false, json: false, siteUrl: 'https://x' }, { SHAREPOINT_PROJECTS_SITE_URL: 'https://y' } as NodeJS.ProcessEnv)).toBe('https://x');
+    expect(
+      resolveSiteUrl({ apply: false, json: false, siteUrl: 'https://x' }, {
+        SHAREPOINT_PROJECTS_SITE_URL: 'https://y',
+      } as NodeJS.ProcessEnv),
+    ).toBe('https://x');
   });
 
   it('validates HBCentral lock', () => {
-    expect(validateHBCentralSiteUrl('https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/')).toBe(
-      'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+    expect(
+      validateHBCentralSiteUrl('https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/'),
+    ).toBe('https://hedrickbrotherscom.sharepoint.com/sites/HBCentral');
+    expect(() => validateHBCentralSiteUrl('https://example.com/sites/HBCentral')).toThrow(
+      /must be HBCentral/,
     );
-    expect(() => validateHBCentralSiteUrl('https://example.com/sites/HBCentral')).toThrow(/must be HBCentral/);
   });
 });
 
@@ -246,6 +263,201 @@ describe('main behavior', () => {
     const report = JSON.parse(outputs[0] ?? '{}');
     expect(report.listsMissing).toBe(true);
     expect(report.success).toBe(false);
+  });
+});
+
+describe('createRestListAdapter (SharePoint REST seam)', () => {
+  const SITE_URL = 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral';
+  const TOKEN = 'fake.token';
+
+  function tokenService() {
+    return { getSharePointToken: vi.fn(async (_url: string) => TOKEN) };
+  }
+
+  function jsonResponse(body: unknown, status = 200): Response {
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  function textResponse(text: string, status: number): Response {
+    return new Response(text, { status, headers: { 'Content-Type': 'text/plain' } });
+  }
+
+  it('getList returns null on a 404 status (genuine missing list)', async () => {
+    const fetchImpl = vi.fn(async () => textResponse('Not Found', 404));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    const result = await adapter.getList('Missing List');
+    expect(result).toBeNull();
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    const [url] = fetchImpl.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain(`${SITE_URL}/_api/web/lists/getByTitle('Missing%20List')`);
+  });
+
+  it('getList throws on a 401 status with the HTTP code in the message (never silently null)', async () => {
+    const fetchImpl = vi.fn(async () => textResponse('Unauthorized', 401));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    await expect(adapter.getList('Projects')).rejects.toThrow(/HTTP 401/);
+  });
+
+  it('getList throws on a 403 status with the HTTP code in the message', async () => {
+    const fetchImpl = vi.fn(async () => textResponse('Forbidden', 403));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    await expect(adapter.getList('Projects')).rejects.toThrow(/HTTP 403/);
+  });
+
+  it('listFields maps SharePoint /fields rows into ILiveSharePointFieldSnapshot', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          value: [
+            {
+              InternalName: 'leadEstimatorUpns',
+              Title: 'leadEstimatorUpns',
+              TypeAsString: 'Text',
+              Required: false,
+              Indexed: false,
+              DefaultValue: '',
+              Choices: [],
+            },
+            {
+              InternalName: 'warrantyManagerUpns',
+              Title: 'warrantyManagerUpns',
+              TypeAsString: 'Note',
+              Required: false,
+            },
+          ],
+        }),
+      );
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl,
+    });
+    const list = await adapter.getList('Projects');
+    expect(list).not.toBeNull();
+    const fields = await list!.listFields();
+    expect(fields).toHaveLength(2);
+    expect(fields[0]).toMatchObject({
+      InternalName: 'leadEstimatorUpns',
+      TypeAsString: 'Text',
+    });
+    expect(fields[1]).toMatchObject({
+      InternalName: 'warrantyManagerUpns',
+      TypeAsString: 'Note',
+    });
+    const [fieldsUrl] = fetchImpl.mock.calls[1] as [string, RequestInit];
+    expect(fieldsUrl).toContain(
+      "/_api/web/lists/getByTitle('Projects')/fields?$select=InternalName,Title,TypeAsString,Required,Indexed,DefaultValue,Choices&$top=5000",
+    );
+  });
+
+  it('createField POSTs the SP.FieldCreationInformation envelope with FieldTypeKind 3 + RichText:false for MultiLineText', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'guid' }, 201));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl,
+    });
+    const list = await adapter.getList('Projects');
+    await list!.createField({
+      internalName: 'warrantyManagerUpns',
+      displayName: 'warrantyManagerUpns',
+      type: 'MultiLineText',
+    });
+    const [createUrl, createInit] = fetchImpl.mock.calls[1] as [string, RequestInit];
+    expect(createUrl).toBe(`${SITE_URL}/_api/web/lists/getByTitle('Projects')/fields/add`);
+    expect((createInit.headers as Record<string, string>).Authorization).toBe(`Bearer ${TOKEN}`);
+    const body = JSON.parse(String(createInit.body));
+    expect(body).toEqual({
+      parameters: {
+        __metadata: { type: 'SP.FieldCreationInformation' },
+        FieldTypeKind: 3,
+        Title: 'warrantyManagerUpns',
+        InternalName: 'warrantyManagerUpns',
+        Required: false,
+        RichText: false,
+      },
+    });
+  });
+
+  it('createField POSTs FieldTypeKind 2 (no RichText) for Text', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ Title: 'Legacy Project Fallback Registry' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'guid' }, 201));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl,
+    });
+    const list = await adapter.getList('Legacy Project Fallback Registry');
+    await list!.createField({
+      internalName: 'procoreProject',
+      displayName: 'procoreProject',
+      type: 'Text',
+    });
+    const [, createInit] = fetchImpl.mock.calls[1] as [string, RequestInit];
+    const body = JSON.parse(String(createInit.body));
+    expect(body.parameters.FieldTypeKind).toBe(2);
+    expect(body.parameters).not.toHaveProperty('RichText');
+  });
+
+  it('createField throws when the POST returns a non-OK status (never silently noop)', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(textResponse('column already exists', 400));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl,
+    });
+    const list = await adapter.getList('Projects');
+    await expect(
+      list!.createField({
+        internalName: 'leadEstimatorUpns',
+        displayName: 'leadEstimatorUpns',
+        type: 'MultiLineText',
+      }),
+    ).rejects.toThrow(/HTTP 400/);
+  });
+});
+
+describe('main propagates adapter failures (no silent success path)', () => {
+  it('rejects when getList throws an auth error, leaving stdout empty', async () => {
+    const out: string[] = [];
+    const throwingAdapter: IListAdapter = {
+      async getList(_title: string) {
+        throw new Error('Unauthorized: 401');
+      },
+    };
+    await expect(
+      main(
+        { apply: false, json: true },
+        deps(throwingAdapter, out),
+        'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+      ),
+    ).rejects.toThrow(/Unauthorized/);
+    expect(out).toEqual([]);
   });
 });
 

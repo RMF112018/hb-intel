@@ -380,6 +380,25 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         hasTotalCountField: false,
         hasCurrentPageField: false,
         hasTotalPagesField: false,
+        hasAgreementAssetListField: false,
+        hasAgreementAssetListArray: false,
+        hasAgreementAssetsListField: false,
+        hasAgreementAssetsListArray: false,
+        hasAgreementAssetSearchResultsField: false,
+        hasAgreementAssetSearchResultsArray: false,
+        hasAgreementAssetSearchResultListField: false,
+        hasAgreementAssetSearchResultListArray: false,
+        hasSearchResultField: false,
+        searchResultWasObject: false,
+        searchResultHasAgreementAssetsField: false,
+        searchResultHasAgreementAssetsArray: false,
+        hasPagingInfoField: false,
+        hasPaginationField: false,
+        hasPageDataField: false,
+        hasTotalHitsField: false,
+        hasTotalRecordsField: false,
+        hasStartIndexField: false,
+        hasPageSizeField: false,
       },
     });
   });
@@ -423,6 +442,25 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         hasTotalCountField: false,
         hasCurrentPageField: false,
         hasTotalPagesField: false,
+        hasAgreementAssetListField: false,
+        hasAgreementAssetListArray: false,
+        hasAgreementAssetsListField: false,
+        hasAgreementAssetsListArray: false,
+        hasAgreementAssetSearchResultsField: false,
+        hasAgreementAssetSearchResultsArray: false,
+        hasAgreementAssetSearchResultListField: false,
+        hasAgreementAssetSearchResultListArray: false,
+        hasSearchResultField: false,
+        searchResultWasObject: false,
+        searchResultHasAgreementAssetsField: false,
+        searchResultHasAgreementAssetsArray: false,
+        hasPagingInfoField: false,
+        hasPaginationField: false,
+        hasPageDataField: false,
+        hasTotalHitsField: false,
+        hasTotalRecordsField: false,
+        hasStartIndexField: false,
+        hasPageSizeField: false,
       },
     });
   });
@@ -463,6 +501,25 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         hasTotalCountField: false,
         hasCurrentPageField: false,
         hasTotalPagesField: false,
+        hasAgreementAssetListField: false,
+        hasAgreementAssetListArray: false,
+        hasAgreementAssetsListField: false,
+        hasAgreementAssetsListArray: false,
+        hasAgreementAssetSearchResultsField: false,
+        hasAgreementAssetSearchResultsArray: false,
+        hasAgreementAssetSearchResultListField: false,
+        hasAgreementAssetSearchResultListArray: false,
+        hasSearchResultField: false,
+        searchResultWasObject: false,
+        searchResultHasAgreementAssetsField: false,
+        searchResultHasAgreementAssetsArray: false,
+        hasPagingInfoField: false,
+        hasPaginationField: false,
+        hasPageDataField: false,
+        hasTotalHitsField: false,
+        hasTotalRecordsField: false,
+        hasStartIndexField: false,
+        hasPageSizeField: false,
       },
     });
   });
@@ -503,7 +560,127 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         hasTotalCountField: false,
         hasCurrentPageField: false,
         hasTotalPagesField: false,
+        hasAgreementAssetListField: false,
+        hasAgreementAssetListArray: false,
+        hasAgreementAssetsListField: false,
+        hasAgreementAssetsListArray: false,
+        hasAgreementAssetSearchResultsField: false,
+        hasAgreementAssetSearchResultsArray: false,
+        hasAgreementAssetSearchResultListField: false,
+        hasAgreementAssetSearchResultListArray: false,
+        hasSearchResultField: false,
+        searchResultWasObject: false,
+        searchResultHasAgreementAssetsField: false,
+        searchResultHasAgreementAssetsArray: false,
+        hasPagingInfoField: false,
+        hasPaginationField: false,
+        hasPageDataField: false,
+        hasTotalHitsField: false,
+        hasTotalRecordsField: false,
+        hasStartIndexField: false,
+        hasPageSizeField: false,
       },
+    });
+  });
+
+  it('2xx with agreementAssetList array exposes agreementAssetList diagnostics', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ agreementAssetList: [] }));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('unreachable');
+    if (result.status !== 'unreachable') return;
+    expect(result.reason).toBe('malformed-response');
+    expect(result.malformedSearchResponseDiagnostics).toMatchObject({
+      hasAgreementAssetListField: true,
+      hasAgreementAssetListArray: true,
+    });
+  });
+
+  it('2xx with agreementAssetsList array exposes agreementAssetsList diagnostics', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ agreementAssetsList: [] }));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('unreachable');
+    if (result.status !== 'unreachable') return;
+    expect(result.reason).toBe('malformed-response');
+    expect(result.malformedSearchResponseDiagnostics).toMatchObject({
+      hasAgreementAssetsListField: true,
+      hasAgreementAssetsListArray: true,
+    });
+  });
+
+  it('2xx with agreementAssetSearchResults array exposes agreementAssetSearchResults diagnostics', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ agreementAssetSearchResults: [] }));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('unreachable');
+    if (result.status !== 'unreachable') return;
+    expect(result.reason).toBe('malformed-response');
+    expect(result.malformedSearchResponseDiagnostics).toMatchObject({
+      hasAgreementAssetSearchResultsField: true,
+      hasAgreementAssetSearchResultsArray: true,
+    });
+  });
+
+  it('2xx with agreementAssetSearchResultList array exposes agreementAssetSearchResultList diagnostics', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ agreementAssetSearchResultList: [] }));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('unreachable');
+    if (result.status !== 'unreachable') return;
+    expect(result.reason).toBe('malformed-response');
+    expect(result.malformedSearchResponseDiagnostics).toMatchObject({
+      hasAgreementAssetSearchResultListField: true,
+      hasAgreementAssetSearchResultListArray: true,
+    });
+  });
+
+  it('2xx with searchResult.agreementAssets exposes nested searchResult diagnostics', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        searchResult: {
+          agreementAssets: [],
+        },
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('unreachable');
+    if (result.status !== 'unreachable') return;
+    expect(result.reason).toBe('malformed-response');
+    expect(result.malformedSearchResponseDiagnostics).toMatchObject({
+      hasSearchResultField: true,
+      searchResultWasObject: true,
+      searchResultHasAgreementAssetsField: true,
+      searchResultHasAgreementAssetsArray: true,
+    });
+  });
+
+  it('2xx with metadata candidate fields exposes metadata diagnostics', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        pagingInfo: {},
+        pagination: {},
+        pageData: {},
+        totalHits: 0,
+        totalRecords: 0,
+        startIndex: 0,
+        pageSize: 25,
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('unreachable');
+    if (result.status !== 'unreachable') return;
+    expect(result.reason).toBe('malformed-response');
+    expect(result.malformedSearchResponseDiagnostics).toMatchObject({
+      hasPagingInfoField: true,
+      hasPaginationField: true,
+      hasPageDataField: true,
+      hasTotalHitsField: true,
+      hasTotalRecordsField: true,
+      hasStartIndexField: true,
+      hasPageSizeField: true,
     });
   });
 
@@ -543,6 +720,25 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         hasTotalCountField: true,
         hasCurrentPageField: false,
         hasTotalPagesField: false,
+        hasAgreementAssetListField: false,
+        hasAgreementAssetListArray: false,
+        hasAgreementAssetsListField: false,
+        hasAgreementAssetsListArray: false,
+        hasAgreementAssetSearchResultsField: false,
+        hasAgreementAssetSearchResultsArray: false,
+        hasAgreementAssetSearchResultListField: false,
+        hasAgreementAssetSearchResultListArray: false,
+        hasSearchResultField: false,
+        searchResultWasObject: false,
+        searchResultHasAgreementAssetsField: false,
+        searchResultHasAgreementAssetsArray: false,
+        hasPagingInfoField: false,
+        hasPaginationField: false,
+        hasPageDataField: false,
+        hasTotalHitsField: false,
+        hasTotalRecordsField: false,
+        hasStartIndexField: false,
+        hasPageSizeField: false,
       },
     });
   });
@@ -583,6 +779,25 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         hasTotalCountField: false,
         hasCurrentPageField: false,
         hasTotalPagesField: false,
+        hasAgreementAssetListField: false,
+        hasAgreementAssetListArray: false,
+        hasAgreementAssetsListField: false,
+        hasAgreementAssetsListArray: false,
+        hasAgreementAssetSearchResultsField: false,
+        hasAgreementAssetSearchResultsArray: false,
+        hasAgreementAssetSearchResultListField: false,
+        hasAgreementAssetSearchResultListArray: false,
+        hasSearchResultField: false,
+        searchResultWasObject: false,
+        searchResultHasAgreementAssetsField: false,
+        searchResultHasAgreementAssetsArray: false,
+        hasPagingInfoField: false,
+        hasPaginationField: false,
+        hasPageDataField: false,
+        hasTotalHitsField: false,
+        hasTotalRecordsField: false,
+        hasStartIndexField: false,
+        hasPageSizeField: false,
       },
     });
   });
@@ -623,6 +838,25 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         hasTotalCountField: false,
         hasCurrentPageField: false,
         hasTotalPagesField: false,
+        hasAgreementAssetListField: false,
+        hasAgreementAssetListArray: false,
+        hasAgreementAssetsListField: false,
+        hasAgreementAssetsListArray: false,
+        hasAgreementAssetSearchResultsField: false,
+        hasAgreementAssetSearchResultsArray: false,
+        hasAgreementAssetSearchResultListField: false,
+        hasAgreementAssetSearchResultListArray: false,
+        hasSearchResultField: false,
+        searchResultWasObject: false,
+        searchResultHasAgreementAssetsField: false,
+        searchResultHasAgreementAssetsArray: false,
+        hasPagingInfoField: false,
+        hasPaginationField: false,
+        hasPageDataField: false,
+        hasTotalHitsField: false,
+        hasTotalRecordsField: false,
+        hasStartIndexField: false,
+        hasPageSizeField: false,
       },
     });
   });
@@ -668,6 +902,25 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         hasTotalCountField: false,
         hasCurrentPageField: false,
         hasTotalPagesField: false,
+        hasAgreementAssetListField: false,
+        hasAgreementAssetListArray: false,
+        hasAgreementAssetsListField: false,
+        hasAgreementAssetsListArray: false,
+        hasAgreementAssetSearchResultsField: false,
+        hasAgreementAssetSearchResultsArray: false,
+        hasAgreementAssetSearchResultListField: false,
+        hasAgreementAssetSearchResultListArray: false,
+        hasSearchResultField: false,
+        searchResultWasObject: false,
+        searchResultHasAgreementAssetsField: false,
+        searchResultHasAgreementAssetsArray: false,
+        hasPagingInfoField: false,
+        hasPaginationField: false,
+        hasPageDataField: false,
+        hasTotalHitsField: false,
+        hasTotalRecordsField: false,
+        hasStartIndexField: false,
+        hasPageSizeField: false,
       },
     });
   });
@@ -715,6 +968,25 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         hasTotalCountField: false,
         hasCurrentPageField: false,
         hasTotalPagesField: false,
+        hasAgreementAssetListField: false,
+        hasAgreementAssetListArray: false,
+        hasAgreementAssetsListField: false,
+        hasAgreementAssetsListArray: false,
+        hasAgreementAssetSearchResultsField: false,
+        hasAgreementAssetSearchResultsArray: false,
+        hasAgreementAssetSearchResultListField: false,
+        hasAgreementAssetSearchResultListArray: false,
+        hasSearchResultField: false,
+        searchResultWasObject: false,
+        searchResultHasAgreementAssetsField: false,
+        searchResultHasAgreementAssetsArray: false,
+        hasPagingInfoField: false,
+        hasPaginationField: false,
+        hasPageDataField: false,
+        hasTotalHitsField: false,
+        hasTotalRecordsField: false,
+        hasStartIndexField: false,
+        hasPageSizeField: false,
       },
     });
   });

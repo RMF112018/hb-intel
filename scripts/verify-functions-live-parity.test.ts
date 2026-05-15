@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildParityEvidence } from './verify-functions-live-parity';
+import { buildParityEvidence, isTransientAzErrorMessage } from './verify-functions-live-parity';
 
 const BASE = {
   appName: 'hb-intel-function-app',
@@ -57,6 +57,13 @@ const HEALTHY_BODY = {
 };
 
 describe('verify-functions-live-parity', () => {
+  it('classifies Azure transient/throttling failures for retry', () => {
+    expect(isTransientAzErrorMessage('ERROR: Too Many Requests(Ref A: X Ref B: Y Ref C: 2026-05-15T14:23:57Z)')).toBe(true);
+    expect(isTransientAzErrorMessage('az command failed: HTTP 429 from ARM')).toBe(true);
+    expect(isTransientAzErrorMessage('read ECONNRESET while calling management endpoint')).toBe(true);
+    expect(isTransientAzErrorMessage('ERROR: Resource group not found')).toBe(false);
+  });
+
   it('fails when /api/health is missing artifact identity', () => {
     const evidence = buildParityEvidence({
       ...BASE,

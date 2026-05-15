@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS } from '@hbc/models/myWork';
 
 import {
+  createGraphListFieldQuery,
   formatReport,
   main,
   parseArgs,
@@ -155,6 +156,31 @@ describe('main', () => {
       (e: { internalName: string }) => e.internalName === 'projectManagerUpns',
     );
     expect(entry.state).toBe('missing');
+  });
+
+  it('createGraphListFieldQuery calls getSharePointToken with the site URL and passes the bearer to fetch', async () => {
+    const SITE_URL = 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral';
+    const getSharePointToken = vi.fn(async (siteUrl: string) => `token-for:${siteUrl}`);
+    const fetchImpl = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ value: [{ InternalName: 'Title', TypeAsString: 'Text' }] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+    );
+    const query = createGraphListFieldQuery({
+      siteUrl: SITE_URL,
+      tokenService: { getSharePointToken },
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    const snapshots = await query.listFields('Projects');
+    expect(getSharePointToken).toHaveBeenCalledWith(SITE_URL);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchImpl.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain(`${SITE_URL}/_api/web/lists/getByTitle('Projects')/fields`);
+    const headers = (init.headers ?? {}) as Record<string, string>;
+    expect(headers.Authorization).toBe(`Bearer token-for:${SITE_URL}`);
+    expect(snapshots).toEqual([{ internalName: 'Title', typeAsString: 'Text' }]);
   });
 
   it('queries both lists exactly once', async () => {

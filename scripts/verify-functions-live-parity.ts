@@ -5,6 +5,9 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
+const AZ_RETRY_MAX_ATTEMPTS = 5;
+const AZ_RETRY_BASE_DELAY_MS = 1200;
+
 export interface IExpectedIdentity {
   version: string;
   commitSha: string;
@@ -219,6 +222,54 @@ function runAz(args: string[], cwd: string): string {
   return (result.stdout ?? '').toString().trim();
 }
 
+function sleep(ms: number): void {
+  const start = Date.now();
+  while (Date.now() - start < ms) {
+    // Busy wait is acceptable here because this script is short-lived CLI tooling.
+  }
+}
+
+export function isTransientAzErrorMessage(message: string): boolean {
+  const value = message.toLowerCase();
+  return (
+    value.includes('too many requests') ||
+    value.includes('(429)') ||
+    value.includes(' http 429') ||
+    value.includes('temporarily unavailable') ||
+    value.includes('timed out') ||
+    value.includes('timeout') ||
+    value.includes('connection reset') ||
+    value.includes('connection aborted') ||
+    value.includes('econnreset') ||
+    value.includes('econnrefused') ||
+    value.includes('enotfound') ||
+    value.includes('service unavailable')
+  );
+}
+
+function runAzWithRetry(args: string[], cwd: string): string {
+  let lastError: unknown;
+  const command = `az ${args.join(' ')}`;
+  for (let attempt = 1; attempt <= AZ_RETRY_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      return runAz(args, cwd);
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      const transient = isTransientAzErrorMessage(message);
+      if (!transient || attempt === AZ_RETRY_MAX_ATTEMPTS) {
+        throw error;
+      }
+      const delayMs = AZ_RETRY_BASE_DELAY_MS * attempt;
+      console.warn(
+        `[verify-functions-live-parity] transient Azure CLI failure (attempt ${attempt}/${AZ_RETRY_MAX_ATTEMPTS}) for "${command}": ${message}. Retrying in ${delayMs}ms.`,
+      );
+      sleep(delayMs);
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(`Unknown failure executing ${command}`);
+}
+
 function runGit(args: string[], cwd: string): string | undefined {
   const result = spawnSync('git', args, {
     cwd,
@@ -323,10 +374,10 @@ async function fetchProbe(
 
 function resolveHostName(cwd: string, appName: string, resourceGroup: string): string {
   const listQuery = `[?name=='${appName}' && resourceGroup=='${resourceGroup}'] | [0].defaultHostName`;
-  const fromList = runAz(['functionapp', 'list', '--query', listQuery, '-o', 'tsv'], cwd);
+  const fromList = runAzWithRetry(['functionapp', 'list', '--query', listQuery, '-o', 'tsv'], cwd);
   if (fromList && fromList !== 'null') return fromList;
 
-  const fromSite = runAz(
+  const fromSite = runAzWithRetry(
     [
       'resource',
       'show',
@@ -373,7 +424,7 @@ function fetchMyWorkFunctionInventory(
   appName: string,
   resourceGroup: string,
 ): string[] {
-  const raw = runAz(
+  const raw = runAzWithRetry(
     [
       'functionapp',
       'function',
@@ -929,7 +980,7 @@ async function execute(options: IOptions): Promise<IParityEvidence> {
     ];
   }
 
-  const appSettingsRaw = runAz(
+  const appSettingsRaw = runAzWithRetry(
     [
       'functionapp',
       'config',
