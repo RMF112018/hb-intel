@@ -460,6 +460,9 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       logger.trackEvent('adobeSign.oauth.callback.exchange-failed', {
         correlationId: requestId,
         status: exchange.status,
+        ...(exchange.status === 'unreachable' && exchange.reason
+          ? { reason: exchange.reason }
+          : {}),
         callbackHasApiAccessPoint: hasApiAccessPoint,
         callbackHasWebAccessPoint: hasWebAccessPoint,
       });

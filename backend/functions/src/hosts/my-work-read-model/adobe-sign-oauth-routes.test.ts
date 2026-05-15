@@ -26,6 +26,7 @@ import {
 // ---------------------------------------------------------------------------
 
 const registrations: Array<{ name: string; config: any }> = [];
+let loggerTrackEventSpy: ReturnType<typeof vi.fn>;
 
 vi.mock('@azure/functions', () => ({
   app: {
@@ -61,13 +62,16 @@ vi.mock('../../middleware/auth.js', () => ({
 }));
 
 vi.mock('../../utils/logger.js', () => ({
-  createLogger: () => ({
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    trackEvent: vi.fn(),
-    trackMetric: vi.fn(),
-  }),
+  createLogger: () => {
+    loggerTrackEventSpy = vi.fn();
+    return {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      trackEvent: loggerTrackEventSpy,
+      trackMetric: vi.fn(),
+    };
+  },
 }));
 
 // ---------------------------------------------------------------------------
@@ -524,7 +528,7 @@ describe('callback handler', () => {
     const { deps, seams } = buildDeps();
     (seams.service.exchangeAuthorizationCode as any).mockResolvedValueOnce({
       status: 'unreachable',
-      reason: 'connect-timeout',
+      reason: 'http-4xx',
     });
     const { state } = await issueState(mod, deps, seams);
     const callback = mod.createCallbackHandler(deps);
@@ -541,6 +545,18 @@ describe('callback handler', () => {
       'adobeSignAuthorization=source-unavailable',
     );
     expect(await seams.grantStore.findGrant(ACTOR_KEY)).toBeUndefined();
+    expect(loggerTrackEventSpy).toHaveBeenCalledWith('adobeSign.oauth.callback.exchange-failed', {
+      correlationId: 'req-oauth',
+      status: 'unreachable',
+      reason: 'http-4xx',
+      callbackHasApiAccessPoint: true,
+      callbackHasWebAccessPoint: true,
+    });
+    const serializedPayload = JSON.stringify((loggerTrackEventSpy as any).mock.calls);
+    expect(serializedPayload).not.toContain('sensitive-code-value');
+    expect(serializedPayload).not.toContain('super-secret-do-not-echo');
+    expect(serializedPayload).not.toContain('rt-secret');
+    expect(serializedPayload).not.toContain('at-secret');
   });
 
   it('never echoes raw query values into the redirect Location', async () => {
