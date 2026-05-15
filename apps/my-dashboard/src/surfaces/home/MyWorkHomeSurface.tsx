@@ -107,7 +107,7 @@ export function MyWorkHomeSurface({
     return (
       <>
         {statusMarker}
-        <MyProjectsHomeCard getApiToken={getApiToken} />
+        <MyProjectsHomeCard getApiToken={getApiToken} footprint="full" />
         <WorkSummaryCard spanOverrides={HOME_READY_WORK_SUMMARY_OVERRIDES} vm={workSummaryVm} />
         {adobeCard}
       </>
@@ -117,7 +117,7 @@ export function MyWorkHomeSurface({
   return (
     <>
       {statusMarker}
-      <MyProjectsHomeCard getApiToken={getApiToken} />
+      <MyProjectsHomeCard getApiToken={getApiToken} footprint="full" />
       <WorkSummaryCard spanOverrides={HOME_NON_READY_WORK_SUMMARY_OVERRIDES} vm={workSummaryVm} />
       {adobeCard}
       <SourceReadinessCard

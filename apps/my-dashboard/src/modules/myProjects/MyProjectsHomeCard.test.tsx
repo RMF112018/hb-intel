@@ -9,6 +9,7 @@ import {
   MY_PROJECT_LINKS_NO_ASSIGNED_PROJECTS,
   MY_PROJECT_LINKS_PARTIAL_SOURCE_READINESS,
   MY_PROJECT_LINKS_PRINCIPAL_UNRESOLVED,
+  MY_PROJECT_LINKS_SOURCE_UNAVAILABLE,
 } from '@hbc/models/myWork/fixtures';
 import { MyWorkBentoGrid } from '../../layout/MyWorkBentoGrid.js';
 import type { MyWorkResponsiveMode } from '../../layout/useMyWorkContainerBreakpoint.js';
@@ -67,11 +68,28 @@ function makeInvalidProcoreEnvelope(): MyWorkReadModelEnvelope<MyProjectLinksRea
   };
 }
 
+const EMPTY_COPY = 'No assigned projects were found for your current project-role assignments.';
+
 describe('MyProjectsHomeCard', () => {
-  it('shows loading launch-shell text before the read model resolves', () => {
+  it('renders locked support copy', async () => {
+    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
+    const { container } = renderCard();
+    await waitFor(() =>
+      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+    );
+    expect(container.textContent).toContain(
+      'Open the projects you are assigned to in SharePoint or Procore.',
+    );
+  });
+
+  it('shows compact loading block with verbatim copy and no metrics or launch region', () => {
     getMyProjectLinksMock.mockImplementation(() => new Promise(() => {}));
     const { container } = renderCard();
-    expect(container.textContent).toContain('Loading project launches…');
+    const loadingBlock = container.querySelector('[data-my-projects-compact-state="loading"]');
+    expect(loadingBlock).not.toBeNull();
+    expect(loadingBlock?.textContent).toContain('Loading your project links…');
+    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
   it('renders one row with both action slots and available links with correct target/rel', async () => {
@@ -161,12 +179,12 @@ describe('MyProjectsHomeCard', () => {
     }
   });
 
-  it('shows six rows initially and supports expand/collapse disclosure', async () => {
+  it('shows five rows initially and supports expand/collapse disclosure', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS);
     const { container, getByText } = renderCard();
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBe(6),
+      expect(container.querySelectorAll('[data-my-projects-row]').length).toBe(5),
     );
 
     const expand = getByText('View all My Projects') as HTMLButtonElement;
@@ -182,62 +200,124 @@ describe('MyProjectsHomeCard', () => {
 
     const collapse = getByText('Show fewer') as HTMLButtonElement;
     fireEvent.click(collapse);
-    await waitFor(() => expect(container.querySelectorAll('[data-my-projects-row]').length).toBe(6));
+    await waitFor(() => expect(container.querySelectorAll('[data-my-projects-row]').length).toBe(5));
     expect(document.activeElement).toBe(collapse);
   });
 
-  it('renders required empty-state copy', async () => {
+  it('renders compact empty block with verbatim copy and no metrics, no launch region, no banner', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_NO_ASSIGNED_PROJECTS);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.textContent).toContain(
-        'No assigned projects were found for your current project-role assignments.',
-      ),
+      expect(container.querySelector('[data-my-projects-compact-state="empty"]')).not.toBeNull(),
     );
+    expect(container.querySelector('[data-my-projects-compact-state="empty"]')?.textContent).toContain(
+      EMPTY_COPY,
+    );
+    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-readiness-banner]')).toBeNull();
   });
 
-  it('renders required partial-state copy', async () => {
+  it('renders partial-with-rows as populated body with verbatim partial banner copy and metrics visible', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_PARTIAL_SOURCE_READINESS);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.textContent).toContain(
-        'Your assigned projects are available. Some launch destinations could not be fully verified.',
-      ),
+      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
     );
+
+    const banner = container.querySelector('[data-my-projects-readiness-banner="partial"]');
+    expect(banner).not.toBeNull();
+    expect(banner?.textContent).toContain(
+      'Some launch destinations could not be fully verified. Available project links are shown below.',
+    );
+    expect(banner?.getAttribute('data-my-projects-compact-state')).toBeNull();
+    expect(container.querySelector('[data-my-projects-launch-region]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).not.toBeNull();
   });
 
-  it('renders required principal-unresolved copy', async () => {
+  it('renders principal-unresolved with banner only — no empty copy, no launch region, no metrics', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_PRINCIPAL_UNRESOLVED);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.textContent).toContain(
-        'We could not confirm your project assignment identity for this view.',
-      ),
+      expect(
+        container.querySelector('[data-my-projects-compact-state="banner-only"]'),
+      ).not.toBeNull(),
     );
+    const banner = container.querySelector('[data-my-projects-compact-state="banner-only"]');
+    expect(banner?.getAttribute('data-my-projects-readiness-banner')).toBe('principal-unresolved');
+    expect(banner?.textContent).toContain(
+      'We could not confirm your project assignment identity for this view.',
+    );
+    expect(container.textContent).not.toContain(EMPTY_COPY);
+    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
-  it('renders required bounded-source copy', async () => {
-    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_BOUNDED_SOURCE_PARTIAL_WARNING);
+  it('renders source-unavailable with banner only — no empty copy, no launch region, no metrics', async () => {
+    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_SOURCE_UNAVAILABLE);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.textContent).toContain(
-        'Your project list is available, but the source inventory exceeded the current review limit. Some assignments may not yet be shown.',
-      ),
+      expect(
+        container.querySelector('[data-my-projects-compact-state="banner-only"]'),
+      ).not.toBeNull(),
     );
+    const banner = container.querySelector('[data-my-projects-compact-state="banner-only"]');
+    expect(banner?.getAttribute('data-my-projects-readiness-banner')).toBe('source-unavailable');
+    expect(banner?.textContent).toContain(
+      'Project launch sources are temporarily unavailable. Try again shortly.',
+    );
+    expect(container.textContent).not.toContain(EMPTY_COPY);
+    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
-  it('renders backend-unavailable fallback banner', async () => {
+  it('renders backend-unavailable with banner only — no empty copy, no launch region, no metrics', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_BACKEND_UNAVAILABLE);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.querySelector('[data-my-projects-readiness-banner="backend-unavailable"]'))
-        .not.toBeNull(),
+      expect(
+        container.querySelector('[data-my-projects-compact-state="banner-only"]'),
+      ).not.toBeNull(),
     );
+    const banner = container.querySelector('[data-my-projects-compact-state="banner-only"]');
+    expect(banner?.getAttribute('data-my-projects-readiness-banner')).toBe('backend-unavailable');
+    expect(banner?.textContent).toContain(
+      'Project links are temporarily unavailable while the My Dashboard service is unreachable.',
+    );
+    expect(container.textContent).not.toContain(EMPTY_COPY);
+    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
+  });
+
+  it('renders bounded-source-with-rows as populated body with bounded warning banner preserved verbatim', async () => {
+    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_BOUNDED_SOURCE_PARTIAL_WARNING);
+    const { container } = renderCard();
+
+    await waitFor(() =>
+      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+    );
+    expect(container.textContent).toContain(
+      'Your project list is available, but the source inventory exceeded the current review limit. Some assignments may not yet be shown.',
+    );
+    expect(container.querySelector('[data-my-projects-launch-region]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).not.toBeNull();
+  });
+
+  it('populated state renders metrics and launch region with no compact-state marker on the card body', async () => {
+    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
+    const { container } = renderCard();
+
+    await waitFor(() =>
+      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+    );
+    expect(container.querySelector('[data-my-projects-launch-region]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-compact-state]')).toBeNull();
   });
 
   it('maps procore-project-invalid warning to an unavailable row action with accessible explanation', async () => {

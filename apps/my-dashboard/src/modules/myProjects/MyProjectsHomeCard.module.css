@@ -284,6 +284,22 @@
   overflow-wrap: anywhere;
 }
 
+.compactBlock {
+  border: 1px dashed var(--my-work-color-border);
+  border-radius: var(--my-work-radius-md);
+  padding: 10px 12px;
+  background: var(--my-work-color-card);
+  min-width: 0;
+}
+
+.compactBlockText {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--my-work-color-text-primary);
+  overflow-wrap: anywhere;
+}
+
 :global([data-my-work-mode='smallLaptop']) .actionRail,
 :global([data-my-work-mode='tabletLandscape']) .actionRail {
   min-width: 160px;
