@@ -66,19 +66,26 @@ describe('MyWorkSurfaceRouter — single primary-page command surface', () => {
     const stub = makeStubClient();
     const { container } = renderRouter(stub);
     await waitFor(() =>
-      expect(container.querySelector('[data-my-work-card-role="work-summary"]')).not.toBeNull(),
+      expect(
+        container.querySelector('[data-my-work-card-role="my-projects-home"]'),
+      ).not.toBeNull(),
     );
     // The retired focused-Adobe queue-summary card must NOT appear.
     expect(
       container.querySelector('[data-my-work-card-role="adobe-sign-queue-summary"]'),
     ).toBeNull();
+    // Retired surface cards (Work Summary, Source Readiness) must NOT appear.
+    expect(container.querySelector('[data-my-work-card-role="work-summary"]')).toBeNull();
+    expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
   });
 
   it('does not introduce a router-owned wrapper element or data attribute', async () => {
     const stub = makeStubClient();
     const { container } = renderRouter(stub);
     await waitFor(() =>
-      expect(container.querySelector('[data-my-work-card-role="work-summary"]')).not.toBeNull(),
+      expect(
+        container.querySelector('[data-my-work-card-role="my-projects-home"]'),
+      ).not.toBeNull(),
     );
     expect(container.querySelector('[data-my-work-surface-router]')).toBeNull();
   });
@@ -91,7 +98,6 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
     await waitFor(() =>
       expect(getCardRoles(container)).toEqual([
         'my-projects-home',
-        'work-summary',
         'adobe-sign-action-queue',
       ]),
     );
@@ -109,7 +115,6 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
     );
     expect(getCardRoles(container)).toEqual([
       'my-projects-home',
-      'work-summary',
       'adobe-sign-action-queue',
     ]);
   });
@@ -126,10 +131,10 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
     );
     expect(getCardRoles(container)).toEqual([
       'my-projects-home',
-      'work-summary',
       'adobe-sign-action-queue',
-      'source-readiness',
     ]);
+    // Source Readiness card retired by Prompt 05.
+    expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
   });
 
   it('renders only the loading marker while getMyWorkHome has not resolved (no false ready flash)', () => {

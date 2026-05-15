@@ -214,7 +214,7 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     expect(main.querySelectorAll('[data-my-work-bento-grid]')).toHaveLength(1);
   });
 
-  it("routes to the home surface (non-ready cards under the default provider's backend-unavailable envelope)", async () => {
+  it("routes to the home surface (two-card tree under the default provider's backend-unavailable envelope)", async () => {
     const { container } = renderShell(<MyWorkShell />);
     await waitFor(() => {
       const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
@@ -223,9 +223,7 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
       );
       expect(roles).toEqual([
         'my-projects-home',
-        'work-summary',
         'adobe-sign-action-queue',
-        'source-readiness',
       ]);
     });
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
@@ -238,6 +236,9 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     expect(
       grid.querySelector('[data-my-work-card-role="adobe-sign-connection-guidance"]'),
     ).toBeNull();
+    // Retired surface cards (Work Summary, Source Readiness) must not appear.
+    expect(grid.querySelector('[data-my-work-card-role="work-summary"]')).toBeNull();
+    expect(grid.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
   });
 
   it('keeps the active-panel marker exclusively on the shell <main>', () => {
@@ -256,11 +257,11 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
     const child = grid.querySelector('[data-test-child]');
     expect(child?.textContent).toBe('child');
-    // Wait for the ready home tree to mount so the work-summary positional anchor exists.
+    // Wait for the home tree to mount so the my-projects-home positional anchor exists.
     await waitFor(() =>
-      expect(grid.querySelector('[data-my-work-card-role="work-summary"]')).not.toBeNull(),
+      expect(grid.querySelector('[data-my-work-card-role="my-projects-home"]')).not.toBeNull(),
     );
-    const firstCard = grid.querySelector('[data-my-work-card-role="work-summary"]');
+    const firstCard = grid.querySelector('[data-my-work-card-role="my-projects-home"]');
     const position = firstCard!.compareDocumentPosition(child!);
     expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(0);
   });

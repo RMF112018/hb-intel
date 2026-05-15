@@ -7,10 +7,7 @@ import type {
 import type { MyWorkCardSpanOverrides } from '../../layout/myWorkFootprints.js';
 import { AdobeSignActionQueueCard } from '../../modules/adobeSign/AdobeSignActionQueueCard.js';
 import { MyProjectsHomeCard } from '../../modules/myProjects/MyProjectsHomeCard.js';
-import { selectSourceReadinessVm, selectWorkSummaryVm } from '../../state/myWorkCardViewModel.js';
 import type { MyWorkSurfaceReadinessVariant } from '../../state/myWorkSurfaceReadiness.js';
-import { SourceReadinessCard } from './SourceReadinessCard.js';
-import { WorkSummaryCard } from './WorkSummaryCard.js';
 
 export type { MyWorkSurfaceReadinessVariant };
 
@@ -41,25 +38,26 @@ export interface MyWorkHomeSurfaceProps {
   readonly onConnectAdobeSign?: () => Promise<void>;
 }
 
-const HOME_READY_WORK_SUMMARY_OVERRIDES: MyWorkCardSpanOverrides = {
-  largeLaptop: 4,
-  desktop: 4,
-  ultrawide: 4,
-  standardLaptop: 3,
+const MY_PROJECTS_HOME_SPAN_OVERRIDES: MyWorkCardSpanOverrides = {
+  phone: 1,
+  tabletPortrait: 2,
+  tabletLandscape: 6,
+  smallLaptop: 8,
+  standardLaptop: 6,
+  largeLaptop: 7,
+  desktop: 7,
+  ultrawide: 7,
 };
 
-const HOME_NON_READY_WORK_SUMMARY_OVERRIDES: MyWorkCardSpanOverrides = {
-  largeLaptop: 3,
-  desktop: 3,
-  ultrawide: 3,
-  standardLaptop: 3,
-};
-
-const HOME_NON_READY_SOURCE_READINESS_OVERRIDES: MyWorkCardSpanOverrides = {
-  largeLaptop: 3,
-  desktop: 3,
-  ultrawide: 3,
-  standardLaptop: 3,
+const ADOBE_SIGN_HOME_SPAN_OVERRIDES: MyWorkCardSpanOverrides = {
+  phone: 1,
+  tabletPortrait: 2,
+  tabletLandscape: 6,
+  smallLaptop: 8,
+  standardLaptop: 4,
+  largeLaptop: 5,
+  desktop: 5,
+  ultrawide: 5,
 };
 
 export function MyWorkHomeSurface({
@@ -73,15 +71,13 @@ export function MyWorkHomeSurface({
     <span hidden data-my-work-source-status={sourceStatus} />
   ) : null;
 
-  const workSummaryVm = selectWorkSummaryVm(homeEnvelope);
-  const sourceReadinessVm = selectSourceReadinessVm(homeEnvelope);
-
   const adobeCard = (
     <AdobeSignActionQueueCard
       readinessVariant={readinessVariant}
       homeEnvelope={homeEnvelope}
       sourceStatus={sourceStatus}
       onConnect={onConnectAdobeSign}
+      spanOverrides={ADOBE_SIGN_HOME_SPAN_OVERRIDES}
     />
   );
 
@@ -103,27 +99,15 @@ export function MyWorkHomeSurface({
     );
   }
 
-  if (readinessVariant === 'ready') {
-    return (
-      <>
-        {statusMarker}
-        <MyProjectsHomeCard getApiToken={getApiToken} footprint="full" />
-        <WorkSummaryCard spanOverrides={HOME_READY_WORK_SUMMARY_OVERRIDES} vm={workSummaryVm} />
-        {adobeCard}
-      </>
-    );
-  }
-
   return (
     <>
       {statusMarker}
-      <MyProjectsHomeCard getApiToken={getApiToken} footprint="full" />
-      <WorkSummaryCard spanOverrides={HOME_NON_READY_WORK_SUMMARY_OVERRIDES} vm={workSummaryVm} />
-      {adobeCard}
-      <SourceReadinessCard
-        spanOverrides={HOME_NON_READY_SOURCE_READINESS_OVERRIDES}
-        vm={sourceReadinessVm}
+      <MyProjectsHomeCard
+        getApiToken={getApiToken}
+        footprint="full"
+        spanOverrides={MY_PROJECTS_HOME_SPAN_OVERRIDES}
       />
+      {adobeCard}
     </>
   );
 }
