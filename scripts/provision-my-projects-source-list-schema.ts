@@ -4,11 +4,11 @@ import {
   type ILiveSharePointFieldSnapshot,
   type IUnresolvedMutation,
 } from '../backend/functions/src/services/sharepoint-schema-provisioning/index.js';
-import type { IFieldDefinition } from '../backend/functions/src/services/sharepoint-service.js';
 import {
   MY_PROJECTS_SOURCE_LIST_SCHEMA_DESCRIPTOR,
   type MyProjectsSourceListTarget,
 } from '../backend/functions/src/services/my-projects/my-projects-source-list-schema.js';
+import { createFieldViaRest } from './sharepoint-field-rest-contract.js';
 
 export interface IProvisionArgs {
   readonly apply: boolean;
@@ -301,15 +301,6 @@ export interface IRestListAdapterDeps {
   readonly fetchImpl?: typeof fetch;
 }
 
-function fieldTypeKindFor(type: IFieldDefinition['type']): number {
-  if (type === 'Text') return 2;
-  if (type === 'MultiLineText') return 3;
-  throw new Error(
-    `provision-my-projects-source-list-schema: REST adapter does not support FieldTypeKind for IFieldDefinition.type='${type}'. ` +
-      `Extend fieldTypeKindFor before adding such fields to the descriptor.`,
-  );
-}
-
 async function readErrorBody(response: Response): Promise<string> {
   try {
     const text = await response.text();
@@ -327,7 +318,9 @@ export function createRestListAdapter(deps: IRestListAdapterDeps): IListAdapter 
   return {
     async getList(listTitle: string): Promise<IListRef | null> {
       const token = await deps.tokenService.getSharePointToken(deps.siteUrl);
-      const probe = await fetchImpl(`${listEndpoint(listTitle)}?$select=Title`, {
+      // Probe with $select=Id so the same call confirms existence AND captures
+      // the list GUID used for the GUID-addressed field create + MERGE rename.
+      const probe = await fetchImpl(`${listEndpoint(listTitle)}?$select=Id`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -343,6 +336,13 @@ export function createRestListAdapter(deps: IRestListAdapterDeps): IListAdapter 
           `provision-my-projects-source-list-schema: list lookup failed for '${listTitle}' — HTTP ${probe.status}: ${body}`,
         );
       }
+      const probePayload = (await probe.json()) as { Id?: unknown };
+      if (typeof probePayload.Id !== 'string' || probePayload.Id.length === 0) {
+        throw new Error(
+          `provision-my-projects-source-list-schema: list lookup for '${listTitle}' returned no Id in response payload.`,
+        );
+      }
+      const listGuid = probePayload.Id;
       return {
         title: listTitle,
         async listFields(): Promise<ILiveSharePointFieldSnapshot[]> {
@@ -394,33 +394,17 @@ export function createRestListAdapter(deps: IRestListAdapterDeps): IListAdapter 
           return snapshots;
         },
         async createField(field): Promise<void> {
-          const innerToken = await deps.tokenService.getSharePointToken(deps.siteUrl);
-          const url = `${listEndpoint(listTitle)}/fields/add`;
-          const body = JSON.stringify({
-            parameters: {
-              __metadata: { type: 'SP.FieldCreationInformation' },
-              FieldTypeKind: fieldTypeKindFor(field.type),
-              Title: field.displayName,
-              InternalName: field.internalName,
-              Required: field.required ?? false,
-              ...(field.type === 'MultiLineText' ? { RichText: false } : {}),
+          await createFieldViaRest(
+            {
+              fetchImpl,
+              tokenResolver: () => deps.tokenService.getSharePointToken(deps.siteUrl),
+              errorPrefix: 'provision-my-projects-source-list-schema',
             },
-          });
-          const response = await fetchImpl(url, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${innerToken}`,
-              Accept: 'application/json;odata=nometadata',
-              'Content-Type': 'application/json;odata=verbose',
-            },
-            body,
-          });
-          if (!response.ok) {
-            const errBody = await readErrorBody(response);
-            throw new Error(
-              `provision-my-projects-source-list-schema: field create failed for '${listTitle}'.'${field.internalName}' — HTTP ${response.status}: ${errBody}`,
-            );
-          }
+            deps.siteUrl,
+            listGuid,
+            listTitle,
+            field,
+          );
         },
       };
     },

@@ -25,6 +25,7 @@ import { ManagedIdentityTokenService } from '../backend/functions/src/services/m
 import { PROJECTS_LIST_NAME } from '../backend/functions/src/services/projects-list-contract.js';
 import type { IFieldDefinition } from '../backend/functions/src/services/sharepoint-service.js';
 import { MY_PROJECTS_SOURCE_LIST_ROLE_FIELDS } from '../backend/functions/src/services/my-projects/my-projects-source-list-schema.js';
+import { createFieldViaRest } from './sharepoint-field-rest-contract.js';
 
 // -------------------------------------------------------------------------
 // Approved destructive remediation manifest
@@ -196,7 +197,11 @@ export type IRemediationBlocker =
   | { readonly kind: 'list-missing'; readonly listTitle: string }
   | { readonly kind: 'missing'; readonly internalName: string }
   | { readonly kind: 'already-note'; readonly internalName: string }
-  | { readonly kind: 'unexpected-type'; readonly internalName: string; readonly observedType: string }
+  | {
+      readonly kind: 'unexpected-type';
+      readonly internalName: string;
+      readonly observedType: string;
+    }
   | { readonly kind: 'duplicate-match'; readonly internalName: string; readonly matchCount: number }
   | { readonly kind: 'count-mismatch'; readonly expected: number; readonly observed: number };
 
@@ -431,9 +436,7 @@ function formatReport(report: IRemediationReport, asJson: boolean): string {
     }
   }
   if (report.failure) {
-    const tail = report.failure.internalName
-      ? ` internalName=${report.failure.internalName}`
-      : '';
+    const tail = report.failure.internalName ? ` internalName=${report.failure.internalName}` : '';
     lines.push(`  failure: stage=${report.failure.stage}${tail}`);
     lines.push(`    message: ${report.failure.message}`);
   }
@@ -551,7 +554,9 @@ export function createRestRemediationAdapter(
   return {
     async getList(listTitle: string): Promise<IRemediationListRef | null> {
       const token = await deps.tokenService.getSharePointToken(deps.siteUrl);
-      const probe = await fetchImpl(`${listEndpoint(listTitle)}?$select=Title`, {
+      // Probe with $select=Id so the same call confirms existence AND captures
+      // the list GUID used for the GUID-addressed field create + MERGE rename.
+      const probe = await fetchImpl(`${listEndpoint(listTitle)}?$select=Id`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -567,6 +572,13 @@ export function createRestRemediationAdapter(
           `remediate-my-projects-projects-role-field-types: list lookup failed for '${listTitle}' — HTTP ${probe.status}: ${body}`,
         );
       }
+      const probePayload = (await probe.json()) as { Id?: unknown };
+      if (typeof probePayload.Id !== 'string' || probePayload.Id.length === 0) {
+        throw new Error(
+          `remediate-my-projects-projects-role-field-types: list lookup for '${listTitle}' returned no Id in response payload.`,
+        );
+      }
+      const listGuid = probePayload.Id;
 
       return {
         title: listTitle,
@@ -640,33 +652,17 @@ export function createRestRemediationAdapter(
               `remediate-my-projects-projects-role-field-types: REST adapter only recreates MultiLineText; received '${field.type}'.`,
             );
           }
-          const innerToken = await deps.tokenService.getSharePointToken(deps.siteUrl);
-          const url = `${listEndpoint(listTitle)}/fields/add`;
-          const body = JSON.stringify({
-            parameters: {
-              __metadata: { type: 'SP.FieldCreationInformation' },
-              FieldTypeKind: 3,
-              Title: field.displayName,
-              InternalName: field.internalName,
-              Required: field.required ?? false,
-              RichText: false,
+          await createFieldViaRest(
+            {
+              fetchImpl,
+              tokenResolver: () => deps.tokenService.getSharePointToken(deps.siteUrl),
+              errorPrefix: 'remediate-my-projects-projects-role-field-types',
             },
-          });
-          const response = await fetchImpl(url, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${innerToken}`,
-              Accept: 'application/json;odata=nometadata',
-              'Content-Type': 'application/json;odata=verbose',
-            },
-            body,
-          });
-          if (!response.ok) {
-            const errBody = await readErrorBody(response);
-            throw new Error(
-              `remediate-my-projects-projects-role-field-types: field create failed for '${listTitle}'.'${field.internalName}' — HTTP ${response.status}: ${errBody}`,
-            );
-          }
+            deps.siteUrl,
+            listGuid,
+            listTitle,
+            field,
+          );
         },
       };
     },

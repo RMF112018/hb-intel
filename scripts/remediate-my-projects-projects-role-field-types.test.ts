@@ -49,10 +49,12 @@ function fakeAdapter(projects: IFakeListInput | null): {
       let listFieldsCallCount = 0;
       return {
         title: listTitle,
-        listFields: projects.listFieldsImpl ?? (async () => {
-          listFieldsCallCount += 1;
-          return projects.fields;
-        }),
+        listFields:
+          projects.listFieldsImpl ??
+          (async () => {
+            listFieldsCallCount += 1;
+            return projects.fields;
+          }),
         deleteField: deleteSpy,
         createField: createSpy,
       } satisfies IRemediationListRef & { listFieldsCallCount?: number };
@@ -219,7 +221,10 @@ describe('validateHBCentralSiteUrl', () => {
 
 describe('buildRemediationPlan', () => {
   it('returns 13 deletes + 13 creates when all 13 fields are Text', () => {
-    const plan = buildRemediationPlan(PROJECTS_WRONG_TYPE_REMEDIATION_MANIFEST, allThirteenAs('Text'));
+    const plan = buildRemediationPlan(
+      PROJECTS_WRONG_TYPE_REMEDIATION_MANIFEST,
+      allThirteenAs('Text'),
+    );
     expect(plan.safeToApply).toBe(true);
     expect(plan.plannedDeletes.length).toBe(13);
     expect(plan.plannedCreates.length).toBe(13);
@@ -232,7 +237,9 @@ describe('buildRemediationPlan', () => {
     expect(plan.safeToApply).toBe(false);
     expect(plan.plannedDeletes).toEqual([]);
     expect(plan.plannedCreates).toEqual([]);
-    expect(plan.blockers.some((b) => b.kind === 'missing' && b.internalName === 'leadEstimatorUpns')).toBe(true);
+    expect(
+      plan.blockers.some((b) => b.kind === 'missing' && b.internalName === 'leadEstimatorUpns'),
+    ).toBe(true);
   });
 
   it('refuses when one of 13 is already Note', () => {
@@ -241,7 +248,9 @@ describe('buildRemediationPlan', () => {
     );
     const plan = buildRemediationPlan(PROJECTS_WRONG_TYPE_REMEDIATION_MANIFEST, live);
     expect(plan.safeToApply).toBe(false);
-    expect(plan.blockers.some((b) => b.kind === 'already-note' && b.internalName === 'estimatorUpns')).toBe(true);
+    expect(
+      plan.blockers.some((b) => b.kind === 'already-note' && b.internalName === 'estimatorUpns'),
+    ).toBe(true);
   });
 
   it('refuses when one of 13 has an unexpected type (e.g. User)', () => {
@@ -250,7 +259,9 @@ describe('buildRemediationPlan', () => {
     );
     const plan = buildRemediationPlan(PROJECTS_WRONG_TYPE_REMEDIATION_MANIFEST, live);
     expect(plan.safeToApply).toBe(false);
-    const blocker = plan.blockers.find((b) => b.kind === 'unexpected-type' && b.internalName === 'idsManagerUpns');
+    const blocker = plan.blockers.find(
+      (b) => b.kind === 'unexpected-type' && b.internalName === 'idsManagerUpns',
+    );
     expect(blocker).toBeDefined();
     expect(blocker && blocker.kind === 'unexpected-type' && blocker.observedType).toBe('User');
   });
@@ -407,9 +418,9 @@ describe('executeRemediation', () => {
     expect(outcome.failure?.stage).toBe('post-verify');
     expect(outcome.appliedDeletes.length).toBe(13);
     expect(outcome.appliedCreates.length).toBe(13);
-    expect(outcome.postVerification?.find((p) => p.internalName === 'projectManagerUpns')?.verified).toBe(
-      false,
-    );
+    expect(
+      outcome.postVerification?.find((p) => p.internalName === 'projectManagerUpns')?.verified,
+    ).toBe(false);
   });
 
   it('fails when post-verify listFields throws', async () => {
@@ -464,7 +475,11 @@ describe('main — dry-run', () => {
   });
 
   it('list missing → exit 1, list-missing blocker, no mutation', async () => {
-    const adapter: IRemediationListAdapter = { async getList(_t) { return null; } };
+    const adapter: IRemediationListAdapter = {
+      async getList(_t) {
+        return null;
+      },
+    };
     const out: string[] = [];
     const code = await main({ apply: false, json: true }, deps(adapter, out), HBCENTRAL);
     expect(code).toBe(1);
@@ -475,7 +490,9 @@ describe('main — dry-run', () => {
 
   it('propagates adapter throws (e.g. 401 Unauthorized) — no JSON emitted', async () => {
     const adapter: IRemediationListAdapter = {
-      async getList(_t) { throw new Error('HTTP 401 Unauthorized'); },
+      async getList(_t) {
+        throw new Error('HTTP 401 Unauthorized');
+      },
     };
     const out: string[] = [];
     await expect(main({ apply: false, json: true }, deps(adapter, out), HBCENTRAL)).rejects.toThrow(
@@ -581,8 +598,7 @@ describe('main — apply', () => {
         if (listTitle !== 'Projects') return null;
         return {
           title: listTitle,
-          listFields: async () =>
-            phase === 'before' ? allThirteenAs('Text') : [],
+          listFields: async () => (phase === 'before' ? allThirteenAs('Text') : []),
           deleteField: vi.fn(async (_n: string) => {
             // After the 13th delete the list would effectively be empty.
             // (not strictly observed by main, but reflects reality)
@@ -643,7 +659,11 @@ describe('main — apply', () => {
   });
 
   it('list missing during apply → exit 1, no mutation', async () => {
-    const adapter: IRemediationListAdapter = { async getList(_t) { return null; } };
+    const adapter: IRemediationListAdapter = {
+      async getList(_t) {
+        return null;
+      },
+    };
     const out: string[] = [];
     const code = await main({ apply: true, json: true }, deps(adapter, out), HBCENTRAL);
     expect(code).toBe(1);
@@ -734,7 +754,7 @@ describe('createRestRemediationAdapter', () => {
   it('listFields maps rows from /fields query', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }))
       .mockResolvedValueOnce(
         jsonResponse({
           value: [
@@ -770,7 +790,7 @@ describe('createRestRemediationAdapter', () => {
   it('deleteField POST-tunnels DELETE with IF-MATCH:* and Bearer token', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }))
       .mockResolvedValueOnce(jsonResponse({}, 200));
     const adapter = createRestRemediationAdapter({
       siteUrl: SITE_URL,
@@ -793,7 +813,7 @@ describe('createRestRemediationAdapter', () => {
   it('deleteField throws when POST returns non-OK', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }))
       .mockResolvedValueOnce(textResponse('column locked', 400));
     const adapter = createRestRemediationAdapter({
       siteUrl: SITE_URL,
@@ -804,11 +824,12 @@ describe('createRestRemediationAdapter', () => {
     await expect(list!.deleteField('leadEstimatorUpns')).rejects.toThrow(/HTTP 400/);
   });
 
-  it('createField POSTs SP.FieldCreationInformation with FieldTypeKind 3 + RichText:false', async () => {
+  it('createField POSTs a flat SP.Field body to GUID-addressed /Fields then MERGE-renames Title to the display name', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
-      .mockResolvedValueOnce(jsonResponse({ Id: 'guid' }, 201));
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'field-guid' }, 201))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
     const adapter = createRestRemediationAdapter({
       siteUrl: SITE_URL,
       tokenService: tokenService(),
@@ -820,26 +841,41 @@ describe('createRestRemediationAdapter', () => {
       displayName: 'Lead Estimator Upns',
       type: 'MultiLineText',
     });
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+
     const [createUrl, createInit] = fetchImpl.mock.calls[1] as [string, RequestInit];
-    expect(createUrl).toBe(`${SITE_URL}/_api/web/lists/getByTitle('Projects')/fields/add`);
+    expect(createUrl).toBe(`${SITE_URL}/_api/web/lists(guid'list-guid')/Fields`);
     expect((createInit.headers as Record<string, string>).Authorization).toBe(`Bearer ${TOKEN}`);
-    const body = JSON.parse(String(createInit.body));
-    expect(body).toEqual({
-      parameters: {
-        __metadata: { type: 'SP.FieldCreationInformation' },
-        FieldTypeKind: 3,
-        Title: 'Lead Estimator Upns',
-        InternalName: 'leadEstimatorUpns',
-        Required: false,
-        RichText: false,
-      },
+    expect(JSON.parse(String(createInit.body))).toEqual({
+      __metadata: { type: 'SP.Field' },
+      Title: 'leadEstimatorUpns',
+      FieldTypeKind: 3,
+      Required: false,
+      StaticName: 'leadEstimatorUpns',
     });
+
+    const [renameUrl, renameInit] = fetchImpl.mock.calls[2] as [string, RequestInit];
+    expect(renameUrl).toBe(`${SITE_URL}/_api/web/lists(guid'list-guid')/Fields(guid'field-guid')`);
+    expect((renameInit.headers as Record<string, string>)['X-HTTP-Method']).toBe('MERGE');
+    expect((renameInit.headers as Record<string, string>)['IF-MATCH']).toBe('*');
+    expect(JSON.parse(String(renameInit.body))).toEqual({
+      __metadata: { type: 'SP.Field' },
+      Title: 'Lead Estimator Upns',
+    });
+
+    const allUrls = fetchImpl.mock.calls.map((c) => c[0] as string).join('\n');
+    const allBodies = fetchImpl.mock.calls
+      .map((c) => String((c[1] as RequestInit | undefined)?.body ?? ''))
+      .join('\n');
+    expect(allUrls).not.toMatch(/\/fields\/add($|\?)/i);
+    expect(allBodies).not.toContain('SP.FieldCreationInformation');
+    expect(allBodies).not.toMatch(/"parameters"\s*:\s*\{/);
   });
 
-  it('createField throws on non-OK response', async () => {
+  it('createField throws when the create POST returns non-OK', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }))
       .mockResolvedValueOnce(textResponse('column already exists', 400));
     const adapter = createRestRemediationAdapter({
       siteUrl: SITE_URL,
@@ -853,13 +889,34 @@ describe('createRestRemediationAdapter', () => {
         displayName: 'Lead Estimator Upns',
         type: 'MultiLineText',
       }),
-    ).rejects.toThrow(/HTTP 400/);
+    ).rejects.toThrow(/field create failed.*HTTP 400/);
+  });
+
+  it('createField throws when the MERGE rename returns non-OK', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'field-guid' }, 201))
+      .mockResolvedValueOnce(textResponse('conflict', 409));
+    const adapter = createRestRemediationAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl,
+    });
+    const list = await adapter.getList('Projects');
+    await expect(
+      list!.createField({
+        internalName: 'leadEstimatorUpns',
+        displayName: 'Lead Estimator Upns',
+        type: 'MultiLineText',
+      }),
+    ).rejects.toThrow(/field rename failed.*HTTP 409/);
   });
 
   it('createField refuses non-MultiLineText (defense-in-depth)', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }));
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }));
     const adapter = createRestRemediationAdapter({
       siteUrl: SITE_URL,
       tokenService: tokenService(),
@@ -873,7 +930,7 @@ describe('createRestRemediationAdapter', () => {
         type: 'Text',
       }),
     ).rejects.toThrow(/only recreates MultiLineText/);
-    // Only the getList probe should have been called; no POST to /fields/add.
+    // Only the getList probe should have been called; no POST to the field-create path.
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 });

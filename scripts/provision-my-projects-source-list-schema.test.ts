@@ -322,7 +322,7 @@ describe('createRestListAdapter (SharePoint REST seam)', () => {
   it('listFields maps SharePoint /fields rows into ILiveSharePointFieldSnapshot', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }))
       .mockResolvedValueOnce(
         jsonResponse({
           value: [
@@ -367,11 +367,12 @@ describe('createRestListAdapter (SharePoint REST seam)', () => {
     );
   });
 
-  it('createField POSTs the SP.FieldCreationInformation envelope with FieldTypeKind 3 + RichText:false for MultiLineText', async () => {
+  it('createField POSTs a flat SP.Field body to GUID-addressed /Fields then MERGE-renames Title to the display name', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
-      .mockResolvedValueOnce(jsonResponse({ Id: 'guid' }, 201));
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'field-guid' }, 201))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
     const adapter = createRestListAdapter({
       siteUrl: SITE_URL,
       tokenService: tokenService(),
@@ -380,30 +381,46 @@ describe('createRestListAdapter (SharePoint REST seam)', () => {
     const list = await adapter.getList('Projects');
     await list!.createField({
       internalName: 'warrantyManagerUpns',
-      displayName: 'warrantyManagerUpns',
+      displayName: 'Warranty Manager Upns',
       type: 'MultiLineText',
     });
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+
     const [createUrl, createInit] = fetchImpl.mock.calls[1] as [string, RequestInit];
-    expect(createUrl).toBe(`${SITE_URL}/_api/web/lists/getByTitle('Projects')/fields/add`);
+    expect(createUrl).toBe(`${SITE_URL}/_api/web/lists(guid'list-guid')/Fields`);
     expect((createInit.headers as Record<string, string>).Authorization).toBe(`Bearer ${TOKEN}`);
-    const body = JSON.parse(String(createInit.body));
-    expect(body).toEqual({
-      parameters: {
-        __metadata: { type: 'SP.FieldCreationInformation' },
-        FieldTypeKind: 3,
-        Title: 'warrantyManagerUpns',
-        InternalName: 'warrantyManagerUpns',
-        Required: false,
-        RichText: false,
-      },
+    expect(JSON.parse(String(createInit.body))).toEqual({
+      __metadata: { type: 'SP.Field' },
+      Title: 'warrantyManagerUpns',
+      FieldTypeKind: 3,
+      Required: false,
+      StaticName: 'warrantyManagerUpns',
     });
+
+    const [renameUrl, renameInit] = fetchImpl.mock.calls[2] as [string, RequestInit];
+    expect(renameUrl).toBe(`${SITE_URL}/_api/web/lists(guid'list-guid')/Fields(guid'field-guid')`);
+    expect((renameInit.headers as Record<string, string>)['X-HTTP-Method']).toBe('MERGE');
+    expect((renameInit.headers as Record<string, string>)['IF-MATCH']).toBe('*');
+    expect(JSON.parse(String(renameInit.body))).toEqual({
+      __metadata: { type: 'SP.Field' },
+      Title: 'Warranty Manager Upns',
+    });
+
+    const allUrls = fetchImpl.mock.calls.map((c) => c[0] as string).join('\n');
+    const allBodies = fetchImpl.mock.calls
+      .map((c) => String((c[1] as RequestInit | undefined)?.body ?? ''))
+      .join('\n');
+    expect(allUrls).not.toMatch(/\/fields\/add($|\?)/i);
+    expect(allBodies).not.toContain('SP.FieldCreationInformation');
+    expect(allBodies).not.toMatch(/"parameters"\s*:\s*\{/);
   });
 
-  it('createField POSTs FieldTypeKind 2 (no RichText) for Text', async () => {
+  it('createField emits FieldTypeKind 2 with no RichText for Text fields', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ Title: 'Legacy Project Fallback Registry' }))
-      .mockResolvedValueOnce(jsonResponse({ Id: 'guid' }, 201));
+      .mockResolvedValueOnce(jsonResponse({ Id: 'registry-guid' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'field-guid' }, 201))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
     const adapter = createRestListAdapter({
       siteUrl: SITE_URL,
       tokenService: tokenService(),
@@ -412,19 +429,25 @@ describe('createRestListAdapter (SharePoint REST seam)', () => {
     const list = await adapter.getList('Legacy Project Fallback Registry');
     await list!.createField({
       internalName: 'procoreProject',
-      displayName: 'procoreProject',
+      displayName: 'Procore Project',
       type: 'Text',
     });
     const [, createInit] = fetchImpl.mock.calls[1] as [string, RequestInit];
-    const body = JSON.parse(String(createInit.body));
-    expect(body.parameters.FieldTypeKind).toBe(2);
-    expect(body.parameters).not.toHaveProperty('RichText');
+    const createBody = JSON.parse(String(createInit.body));
+    expect(createBody).toEqual({
+      __metadata: { type: 'SP.Field' },
+      Title: 'procoreProject',
+      FieldTypeKind: 2,
+      Required: false,
+      StaticName: 'procoreProject',
+    });
+    expect(createBody).not.toHaveProperty('RichText');
   });
 
-  it('createField throws when the POST returns a non-OK status (never silently noop)', async () => {
+  it('createField throws when the create POST returns a non-OK status (never silently noop)', async () => {
     const fetchImpl = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }))
       .mockResolvedValueOnce(textResponse('column already exists', 400));
     const adapter = createRestListAdapter({
       siteUrl: SITE_URL,
@@ -435,10 +458,31 @@ describe('createRestListAdapter (SharePoint REST seam)', () => {
     await expect(
       list!.createField({
         internalName: 'leadEstimatorUpns',
-        displayName: 'leadEstimatorUpns',
+        displayName: 'Lead Estimator Upns',
         type: 'MultiLineText',
       }),
-    ).rejects.toThrow(/HTTP 400/);
+    ).rejects.toThrow(/field create failed.*HTTP 400/);
+  });
+
+  it('createField throws when the MERGE rename returns a non-OK status', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ Id: 'list-guid' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'field-guid' }, 201))
+      .mockResolvedValueOnce(textResponse('conflict', 409));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl,
+    });
+    const list = await adapter.getList('Projects');
+    await expect(
+      list!.createField({
+        internalName: 'leadEstimatorUpns',
+        displayName: 'Lead Estimator Upns',
+        type: 'MultiLineText',
+      }),
+    ).rejects.toThrow(/field rename failed.*HTTP 409/);
   });
 });
 
