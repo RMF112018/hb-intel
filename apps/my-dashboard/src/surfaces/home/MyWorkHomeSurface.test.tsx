@@ -107,15 +107,20 @@ describe('MyWorkHomeSurface — locked bento choreography', () => {
     expect(spanOf(ultra.container, 'adobe-sign-action-queue')).toBe('5');
   });
 
-  it('applies full-mode-width spans on smallLaptop (8 + 8) and tabletLandscape (6 + 6)', () => {
+  it('applies full-mode-width spans on tabletPortrait (2 + 2), tabletLandscape (6 + 6), and smallLaptop (8 + 8)', () => {
+    const tabletPortrait = renderHome({}, 'tabletPortrait');
+    expect(spanOf(tabletPortrait.container, 'my-projects-home')).toBe('2');
+    expect(spanOf(tabletPortrait.container, 'adobe-sign-action-queue')).toBe('2');
+    tabletPortrait.unmount();
+
+    const tabletLandscape = renderHome({}, 'tabletLandscape');
+    expect(spanOf(tabletLandscape.container, 'my-projects-home')).toBe('6');
+    expect(spanOf(tabletLandscape.container, 'adobe-sign-action-queue')).toBe('6');
+    tabletLandscape.unmount();
+
     const small = renderHome({}, 'smallLaptop');
     expect(spanOf(small.container, 'my-projects-home')).toBe('8');
     expect(spanOf(small.container, 'adobe-sign-action-queue')).toBe('8');
-    small.unmount();
-
-    const tablet = renderHome({}, 'tabletLandscape');
-    expect(spanOf(tablet.container, 'my-projects-home')).toBe('6');
-    expect(spanOf(tablet.container, 'adobe-sign-action-queue')).toBe('6');
   });
 });
 
