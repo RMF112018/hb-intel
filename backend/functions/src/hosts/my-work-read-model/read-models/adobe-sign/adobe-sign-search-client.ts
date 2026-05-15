@@ -121,6 +121,19 @@ export type AdobeSignSearchResult =
         readonly hasSearchAgreementsResponseField?: boolean;
         readonly hasNextCursorField?: boolean;
         readonly bodyWasJsonObject?: boolean;
+        readonly topLevelKeyCount?: number;
+        readonly hasAgreementAssetsField?: boolean;
+        readonly hasAgreementAssetsArray?: boolean;
+        readonly hasResultsField?: boolean;
+        readonly hasResultsArray?: boolean;
+        readonly hasSearchResultsField?: boolean;
+        readonly hasSearchResultsArray?: boolean;
+        readonly hasResultListField?: boolean;
+        readonly hasResultListArray?: boolean;
+        readonly hasPageInfoField?: boolean;
+        readonly hasTotalCountField?: boolean;
+        readonly hasCurrentPageField?: boolean;
+        readonly hasTotalPagesField?: boolean;
       };
     };
 

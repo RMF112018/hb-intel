@@ -167,20 +167,46 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
   if (parsed === null || typeof parsed !== 'object') {
     return {
       bodyWasJsonObject: false,
+      topLevelKeyCount: 0,
       hasTopLevelAgreementsArray: false,
       hasSearchAgreementsResponseField: false,
       hasNextCursorField: false,
+      hasAgreementAssetsField: false,
+      hasAgreementAssetsArray: false,
+      hasResultsField: false,
+      hasResultsArray: false,
+      hasSearchResultsField: false,
+      hasSearchResultsArray: false,
+      hasResultListField: false,
+      hasResultListArray: false,
+      hasPageInfoField: false,
+      hasTotalCountField: false,
+      hasCurrentPageField: false,
+      hasTotalPagesField: false,
     };
   }
   const body = parsed as Record<string, unknown>;
   return {
     bodyWasJsonObject: true,
+    topLevelKeyCount: Object.keys(body).length,
     hasTopLevelAgreementsArray: Array.isArray(body.agreements),
     hasSearchAgreementsResponseField: Object.prototype.hasOwnProperty.call(
       body,
       'searchAgreementsResponse',
     ),
     hasNextCursorField: Object.prototype.hasOwnProperty.call(body, 'nextCursor'),
+    hasAgreementAssetsField: Object.prototype.hasOwnProperty.call(body, 'agreementAssets'),
+    hasAgreementAssetsArray: Array.isArray(body.agreementAssets),
+    hasResultsField: Object.prototype.hasOwnProperty.call(body, 'results'),
+    hasResultsArray: Array.isArray(body.results),
+    hasSearchResultsField: Object.prototype.hasOwnProperty.call(body, 'searchResults'),
+    hasSearchResultsArray: Array.isArray(body.searchResults),
+    hasResultListField: Object.prototype.hasOwnProperty.call(body, 'resultList'),
+    hasResultListArray: Array.isArray(body.resultList),
+    hasPageInfoField: Object.prototype.hasOwnProperty.call(body, 'pageInfo'),
+    hasTotalCountField: Object.prototype.hasOwnProperty.call(body, 'totalCount'),
+    hasCurrentPageField: Object.prototype.hasOwnProperty.call(body, 'currentPage'),
+    hasTotalPagesField: Object.prototype.hasOwnProperty.call(body, 'totalPages'),
   };
 }
 

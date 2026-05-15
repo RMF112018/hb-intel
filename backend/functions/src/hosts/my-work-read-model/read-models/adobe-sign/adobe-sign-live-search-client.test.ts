@@ -353,9 +353,22 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
       searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
       malformedSearchResponseDiagnostics: {
         bodyWasJsonObject: true,
+        topLevelKeyCount: 1,
         hasTopLevelAgreementsArray: false,
         hasSearchAgreementsResponseField: true,
         hasNextCursorField: false,
+        hasAgreementAssetsField: false,
+        hasAgreementAssetsArray: false,
+        hasResultsField: false,
+        hasResultsArray: false,
+        hasSearchResultsField: false,
+        hasSearchResultsArray: false,
+        hasResultListField: false,
+        hasResultListArray: false,
+        hasPageInfoField: false,
+        hasTotalCountField: false,
+        hasCurrentPageField: false,
+        hasTotalPagesField: false,
       },
     });
   });
@@ -372,9 +385,109 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
       searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
       malformedSearchResponseDiagnostics: {
         bodyWasJsonObject: false,
+        topLevelKeyCount: 0,
         hasTopLevelAgreementsArray: false,
         hasSearchAgreementsResponseField: false,
         hasNextCursorField: false,
+        hasAgreementAssetsField: false,
+        hasAgreementAssetsArray: false,
+        hasResultsField: false,
+        hasResultsArray: false,
+        hasSearchResultsField: false,
+        hasSearchResultsArray: false,
+        hasResultListField: false,
+        hasResultListArray: false,
+        hasPageInfoField: false,
+        hasTotalCountField: false,
+        hasCurrentPageField: false,
+        hasTotalPagesField: false,
+      },
+    });
+  });
+
+  it('2xx with agreementAssets array exposes agreementAssets candidate diagnostics', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ agreementAssets: [] }));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'malformed-response',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+      malformedSearchResponseDiagnostics: {
+        bodyWasJsonObject: true,
+        topLevelKeyCount: 1,
+        hasTopLevelAgreementsArray: false,
+        hasSearchAgreementsResponseField: false,
+        hasNextCursorField: false,
+        hasAgreementAssetsField: true,
+        hasAgreementAssetsArray: true,
+        hasResultsField: false,
+        hasResultsArray: false,
+        hasSearchResultsField: false,
+        hasSearchResultsArray: false,
+        hasResultListField: false,
+        hasResultListArray: false,
+        hasPageInfoField: false,
+        hasTotalCountField: false,
+        hasCurrentPageField: false,
+        hasTotalPagesField: false,
+      },
+    });
+  });
+
+  it('2xx with results array exposes results candidate diagnostics', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ results: [] }));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'malformed-response',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+      malformedSearchResponseDiagnostics: {
+        bodyWasJsonObject: true,
+        topLevelKeyCount: 1,
+        hasTopLevelAgreementsArray: false,
+        hasSearchAgreementsResponseField: false,
+        hasNextCursorField: false,
+        hasAgreementAssetsField: false,
+        hasAgreementAssetsArray: false,
+        hasResultsField: true,
+        hasResultsArray: true,
+        hasSearchResultsField: false,
+        hasSearchResultsArray: false,
+        hasResultListField: false,
+        hasResultListArray: false,
+        hasPageInfoField: false,
+        hasTotalCountField: false,
+        hasCurrentPageField: false,
+        hasTotalPagesField: false,
+      },
+    });
+  });
+
+  it('2xx with agreementAssets and totalCount exposes bounded metadata diagnostics', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ agreementAssets: [], totalCount: 0 }));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'malformed-response',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+      malformedSearchResponseDiagnostics: {
+        bodyWasJsonObject: true,
+        topLevelKeyCount: 2,
+        hasTopLevelAgreementsArray: false,
+        hasSearchAgreementsResponseField: false,
+        hasNextCursorField: false,
+        hasAgreementAssetsField: true,
+        hasAgreementAssetsArray: true,
+        hasResultsField: false,
+        hasResultsArray: false,
+        hasSearchResultsField: false,
+        hasSearchResultsArray: false,
+        hasResultListField: false,
+        hasResultListArray: false,
+        hasPageInfoField: false,
+        hasTotalCountField: true,
+        hasCurrentPageField: false,
+        hasTotalPagesField: false,
       },
     });
   });

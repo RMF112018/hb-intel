@@ -341,6 +341,8 @@ export function createAdobeSignActionQueueAdapter(
             ? {
                 searchMalformedBodyWasJsonObject:
                   searchResult.malformedSearchResponseDiagnostics.bodyWasJsonObject,
+                searchMalformedTopLevelKeyCount:
+                  searchResult.malformedSearchResponseDiagnostics.topLevelKeyCount,
                 searchMalformedHasTopLevelAgreementsArray:
                   searchResult.malformedSearchResponseDiagnostics.hasTopLevelAgreementsArray,
                 searchMalformedHasSearchAgreementsResponseField:
@@ -348,6 +350,30 @@ export function createAdobeSignActionQueueAdapter(
                     .hasSearchAgreementsResponseField,
                 searchMalformedHasNextCursorField:
                   searchResult.malformedSearchResponseDiagnostics.hasNextCursorField,
+                searchMalformedHasAgreementAssetsField:
+                  searchResult.malformedSearchResponseDiagnostics.hasAgreementAssetsField,
+                searchMalformedHasAgreementAssetsArray:
+                  searchResult.malformedSearchResponseDiagnostics.hasAgreementAssetsArray,
+                searchMalformedHasResultsField:
+                  searchResult.malformedSearchResponseDiagnostics.hasResultsField,
+                searchMalformedHasResultsArray:
+                  searchResult.malformedSearchResponseDiagnostics.hasResultsArray,
+                searchMalformedHasSearchResultsField:
+                  searchResult.malformedSearchResponseDiagnostics.hasSearchResultsField,
+                searchMalformedHasSearchResultsArray:
+                  searchResult.malformedSearchResponseDiagnostics.hasSearchResultsArray,
+                searchMalformedHasResultListField:
+                  searchResult.malformedSearchResponseDiagnostics.hasResultListField,
+                searchMalformedHasResultListArray:
+                  searchResult.malformedSearchResponseDiagnostics.hasResultListArray,
+                searchMalformedHasPageInfoField:
+                  searchResult.malformedSearchResponseDiagnostics.hasPageInfoField,
+                searchMalformedHasTotalCountField:
+                  searchResult.malformedSearchResponseDiagnostics.hasTotalCountField,
+                searchMalformedHasCurrentPageField:
+                  searchResult.malformedSearchResponseDiagnostics.hasCurrentPageField,
+                searchMalformedHasTotalPagesField:
+                  searchResult.malformedSearchResponseDiagnostics.hasTotalPagesField,
               }
             : {}),
         });
