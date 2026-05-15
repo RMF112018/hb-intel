@@ -463,6 +463,9 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         ...(exchange.status === 'unreachable' && exchange.reason
           ? { reason: exchange.reason }
           : {}),
+        ...(exchange.status === 'unreachable' && exchange.providerErrorCode
+          ? { providerErrorCode: exchange.providerErrorCode }
+          : {}),
         callbackHasApiAccessPoint: hasApiAccessPoint,
         callbackHasWebAccessPoint: hasWebAccessPoint,
       });

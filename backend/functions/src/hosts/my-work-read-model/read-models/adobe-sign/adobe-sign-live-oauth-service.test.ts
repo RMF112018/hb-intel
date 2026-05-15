@@ -220,11 +220,31 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
   });
 
   it('maps HTTP 400 + unknown Adobe error to "unreachable" + "http-4xx"', async () => {
-    const fetchSpy = vi.fn(async () => jsonResponse({ error: 'unknown_error' }, 400));
+    const fetchSpy = vi.fn(async () => jsonResponse({ error: 'invalid_client' }, 400));
     const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'http-4xx',
+      providerErrorCode: 'invalid_client',
+    });
+  });
+
+  it('drops non-code-like HTTP 400 Adobe error values from providerErrorCode', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ error: 'Client secret is invalid' }, 400));
+    const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
+    expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'http-4xx',
+    });
+  });
+
+  it('maps HTTP 400 + Adobe error invalid_authorization_code to "invalid-code"', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({ error: 'invalid_authorization_code' }, 400),
+    );
+    const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
+    expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
+      status: 'invalid-code',
     });
   });
 

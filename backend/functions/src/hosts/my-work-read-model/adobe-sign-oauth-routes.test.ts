@@ -529,6 +529,7 @@ describe('callback handler', () => {
     (seams.service.exchangeAuthorizationCode as any).mockResolvedValueOnce({
       status: 'unreachable',
       reason: 'http-4xx',
+      providerErrorCode: 'invalid_client',
     });
     const { state } = await issueState(mod, deps, seams);
     const callback = mod.createCallbackHandler(deps);
@@ -549,6 +550,7 @@ describe('callback handler', () => {
       correlationId: 'req-oauth',
       status: 'unreachable',
       reason: 'http-4xx',
+      providerErrorCode: 'invalid_client',
       callbackHasApiAccessPoint: true,
       callbackHasWebAccessPoint: true,
     });

@@ -62,7 +62,11 @@ export type AdobeSignTokenExchangeResult =
   | AdobeSignTokenExchangeSuccess
   | { readonly status: 'invalid-code' }
   | { readonly status: 'scope-mismatch'; readonly grantedScopes: readonly string[] }
-  | { readonly status: 'unreachable'; readonly reason?: string };
+  | {
+      readonly status: 'unreachable';
+      readonly reason?: string;
+      readonly providerErrorCode?: string;
+    };
 
 export interface IAdobeSignOAuthService {
   exchangeAuthorizationCode(

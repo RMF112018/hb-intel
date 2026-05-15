@@ -145,6 +145,13 @@ function readErrorCodeFromAdobeBody(body: unknown): string | undefined {
   return typeof raw === 'string' ? raw : undefined;
 }
 
+function normalizeSafeProviderErrorCode(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const normalized = raw.trim().toLowerCase();
+  if (normalized.length === 0 || normalized.length > 64) return undefined;
+  return /^[a-z0-9_-]+$/.test(normalized) ? normalized : undefined;
+}
+
 export function createAdobeSignLiveOAuthService(
   deps: AdobeSignLiveOAuthServiceDeps = {},
 ): IAdobeSignOAuthService {
@@ -228,7 +235,12 @@ export function createAdobeSignLiveOAuthService(
         if (errorCode === 'invalid_grant' || errorCode === 'invalid_authorization_code') {
           return { status: 'invalid-code' };
         }
-        return { status: 'unreachable', reason: 'http-4xx' };
+        const providerErrorCode = normalizeSafeProviderErrorCode(errorCode);
+        return {
+          status: 'unreachable',
+          reason: 'http-4xx',
+          ...(providerErrorCode ? { providerErrorCode } : {}),
+        };
       }
 
       let parsed: unknown;
