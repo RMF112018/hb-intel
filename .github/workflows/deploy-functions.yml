@@ -76,6 +76,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: staging
+    env:
+      AZURE_CLIENT_ID_RESOLVED: ${{ secrets.AZURE_CLIENT_ID || vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID_RESOLVED: ${{ secrets.AZURE_TENANT_ID || vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID_RESOLVED: ${{ secrets.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}
+      TARGET_FUNCTION_APP_NAME_RESOLVED: ${{ secrets.AZURE_FUNCTIONAPP_NAME_STAGING || vars.AZURE_FUNCTIONAPP_NAME_STAGING }}
     # D-PH6-16 environment strategy: staging deploys only on explicit workflow_dispatch or
     # reusable workflow_call with environment=staging (no automatic push trigger).
     if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') || (github.event_name == 'workflow_call' && inputs.environment == 'staging')
@@ -86,10 +91,10 @@ jobs:
 
       - name: Verify Azure deployment secret contract
         env:
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          TARGET_FUNCTION_APP_NAME: ${{ secrets.AZURE_FUNCTIONAPP_NAME_STAGING }}
+          AZURE_CLIENT_ID: ${{ env.AZURE_CLIENT_ID_RESOLVED }}
+          AZURE_TENANT_ID: ${{ env.AZURE_TENANT_ID_RESOLVED }}
+          AZURE_SUBSCRIPTION_ID: ${{ env.AZURE_SUBSCRIPTION_ID_RESOLVED }}
+          TARGET_FUNCTION_APP_NAME: ${{ env.TARGET_FUNCTION_APP_NAME_RESOLVED }}
         run: |
           set -euo pipefail
           missing=0
@@ -100,7 +105,7 @@ jobs:
             fi
           done
           if [ "$missing" -ne 0 ]; then
-            echo "::error::Configure the AZURE_* / AZURE_FUNCTIONAPP_NAME_STAGING secret contract before invoking this workflow."
+            echo "::error::Configure the AZURE_* / AZURE_FUNCTIONAPP_NAME_STAGING secrets or variables contract before invoking this workflow."
             exit 1
           fi
 
@@ -108,9 +113,9 @@ jobs:
         # D-PH6-16 secrets: tenant/client/subscription are sourced from GitHub encrypted secrets.
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID_RESOLVED }}
+          tenant-id: ${{ env.AZURE_TENANT_ID_RESOLVED }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID_RESOLVED }}
 
       # Target hosting model: Azure Functions Flex Consumption (see infra/legacy-fallback-hosting.bicep).
       # azure/functions-action@v1 performs OneDeploy against the Flex app; do not substitute config-zip.
@@ -120,7 +125,7 @@ jobs:
       - name: Deploy to Staging Function App
         uses: azure/functions-action@v1
         with:
-          app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME_STAGING }}
+          app-name: ${{ env.TARGET_FUNCTION_APP_NAME_RESOLVED }}
           package: functions-artifact.zip
           respect-funcignore: true
 
@@ -128,6 +133,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: production
+    env:
+      AZURE_CLIENT_ID_RESOLVED: ${{ secrets.AZURE_CLIENT_ID || vars.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID_RESOLVED: ${{ secrets.AZURE_TENANT_ID || vars.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID_RESOLVED: ${{ secrets.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}
+      TARGET_FUNCTION_APP_NAME_RESOLVED: ${{ secrets.AZURE_FUNCTIONAPP_NAME_PROD || vars.AZURE_FUNCTIONAPP_NAME_PROD }}
     # D-PH6-16 release gate: production deploy allowed only for semantic version tags or explicit production dispatch.
     if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production') || (github.event_name == 'workflow_call' && inputs.environment == 'production')
     steps:
@@ -137,10 +147,10 @@ jobs:
 
       - name: Verify Azure deployment secret contract
         env:
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          TARGET_FUNCTION_APP_NAME: ${{ secrets.AZURE_FUNCTIONAPP_NAME_PROD }}
+          AZURE_CLIENT_ID: ${{ env.AZURE_CLIENT_ID_RESOLVED }}
+          AZURE_TENANT_ID: ${{ env.AZURE_TENANT_ID_RESOLVED }}
+          AZURE_SUBSCRIPTION_ID: ${{ env.AZURE_SUBSCRIPTION_ID_RESOLVED }}
+          TARGET_FUNCTION_APP_NAME: ${{ env.TARGET_FUNCTION_APP_NAME_RESOLVED }}
         run: |
           set -euo pipefail
           missing=0
@@ -151,16 +161,16 @@ jobs:
             fi
           done
           if [ "$missing" -ne 0 ]; then
-            echo "::error::Configure the AZURE_* / AZURE_FUNCTIONAPP_NAME_PROD secret contract before invoking this workflow."
+            echo "::error::Configure the AZURE_* / AZURE_FUNCTIONAPP_NAME_PROD secrets or variables contract before invoking this workflow."
             exit 1
           fi
 
       - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID_RESOLVED }}
+          tenant-id: ${{ env.AZURE_TENANT_ID_RESOLVED }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID_RESOLVED }}
 
       # Target hosting model: Azure Functions Flex Consumption (see infra/legacy-fallback-hosting.bicep).
       # azure/functions-action@v1 performs OneDeploy against the Flex app; do not substitute config-zip.
@@ -170,6 +180,6 @@ jobs:
       - name: Deploy to Production Function App
         uses: azure/functions-action@v1
         with:
-          app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME_PROD }}
+          app-name: ${{ env.TARGET_FUNCTION_APP_NAME_RESOLVED }}
           package: functions-artifact.zip
           respect-funcignore: true
