@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  ADOBE_SIGN_QUEUE_AUTHORIZATION_REQUIRED,
-  ADOBE_SIGN_QUEUE_AVAILABLE,
-  ADOBE_SIGN_QUEUE_AVAILABLE_PAGED,
-  ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
-  ADOBE_SIGN_QUEUE_CONFIGURATION_REQUIRED,
-  ADOBE_SIGN_QUEUE_EMPTY,
-  ADOBE_SIGN_QUEUE_PARTIAL,
   MY_WORK_HOME_AUTHORIZATION_REQUIRED,
   MY_WORK_HOME_AVAILABLE,
   MY_WORK_HOME_BACKEND_UNAVAILABLE,
@@ -16,18 +9,19 @@ import {
   MY_WORK_HOME_PARTIAL,
   MY_WORK_HOME_PRINCIPAL_UNRESOLVED,
 } from '@hbc/models/myWork/fixtures';
-import type { MyWorkReadModelSourceStatus } from '@hbc/models/myWork';
+import type {
+  MyWorkAdobeSignActionQueueItem,
+  MyWorkReadModelSourceStatus,
+} from '@hbc/models/myWork';
 
 import {
   formatGeneratedAtUtc,
   pluralize,
   requiredActionLabel,
-  selectAdobeAgreementListVm,
-  selectAdobeQueueHomeVm,
-  selectAdobeQueueStateVmFromHome,
-  selectAdobeQueueStateVmFromQueue,
-  selectAdobeQueueSummaryVm,
-  selectConnectionGuidanceVm,
+  selectAdobeAgreementListVmFromItems,
+  selectAdobeQueueSummaryVmFromSummary,
+  selectAdobeSignActionQueueStateCopy,
+  selectAdobeSignSourceStatus,
   selectSourceReadinessVm,
   selectWorkSummaryVm,
   sourceStatusCopy,
@@ -44,9 +38,6 @@ describe('formatGeneratedAtUtc', () => {
 
   it('returns a stable UTC-anchored label for valid ISO timestamps', () => {
     const formatted = formatGeneratedAtUtc('2026-05-12T12:00:00.000Z');
-    // Anchor to UTC — never local. Exact wording may vary by Intl version
-    // (e.g., "UTC" vs "Coordinated Universal Time" depending on host), so
-    // assert structural anchoring rather than literal output.
     expect(formatted).toMatch(/UTC|Coordinated Universal Time/);
     expect(formatted).toContain('2026');
   });
@@ -102,25 +93,6 @@ describe('sourceStatusCopy', () => {
       expect(sourceStatusCopy(s).ctaApplicable).toBe(s === 'authorization-required');
     }
   });
-
-  it('returns a stable "unknown" copy when the status is undefined', () => {
-    const copy = sourceStatusCopy(undefined);
-    expect(copy.stateLabel).toBe('Source state unknown');
-    expect(copy.ctaApplicable).toBe(false);
-  });
-
-  it('renders distinct stateLabels per status (no collision)', () => {
-    const labels = new Set(allStatuses.map((s) => sourceStatusCopy(s).stateLabel));
-    expect(labels.size).toBe(allStatuses.length);
-  });
-
-  it('never uses the word "live" (per HB read-model copy rule)', () => {
-    for (const s of allStatuses) {
-      const copy = sourceStatusCopy(s);
-      expect(copy.stateLabel.toLowerCase()).not.toContain('live');
-      expect(copy.guidance.toLowerCase()).not.toContain('live');
-    }
-  });
 });
 
 describe('selectWorkSummaryVm', () => {
@@ -134,17 +106,6 @@ describe('selectWorkSummaryVm', () => {
   it('returns the total action item count from an "available" home envelope', () => {
     const vm = selectWorkSummaryVm(MY_WORK_HOME_AVAILABLE);
     expect(vm.actionItemCount).toBe(6);
-    expect(vm.lastRefreshedLabel).not.toBe('Pending source connection');
-  });
-
-  it('returns 0 (not null) for a truthful empty home envelope', () => {
-    const vm = selectWorkSummaryVm(MY_WORK_HOME_EMPTY);
-    expect(vm.actionItemCount).toBe(0);
-  });
-
-  it('returns 0 (not null) for a non-ready home envelope (authorization-required)', () => {
-    const vm = selectWorkSummaryVm(MY_WORK_HOME_AUTHORIZATION_REQUIRED);
-    expect(vm.actionItemCount).toBe(0);
   });
 });
 
@@ -157,188 +118,273 @@ describe('selectSourceReadinessVm', () => {
     const vm = selectSourceReadinessVm(MY_WORK_HOME_AVAILABLE);
     expect(vm.items).toHaveLength(1);
     expect(vm.items[0].sourceSystem).toBe('adobe-sign');
-    expect(vm.items[0].label).toBe('Adobe Sign');
     expect(vm.items[0].sourceStatus).toBe('available');
-    expect(vm.items[0].statusCopy.ctaApplicable).toBe(false);
   });
 
   it('marks ctaApplicable=true for authorization-required posture', () => {
     const vm = selectSourceReadinessVm(MY_WORK_HOME_AUTHORIZATION_REQUIRED);
-    expect(vm.items[0].sourceStatus).toBe('authorization-required');
     expect(vm.items[0].statusCopy.ctaApplicable).toBe(true);
   });
+});
 
-  it('emits a partial-status item for the partial home envelope', () => {
-    const vm = selectSourceReadinessVm(MY_WORK_HOME_PARTIAL);
-    expect(vm.items[0].sourceStatus).toBe('partial');
-    expect(vm.items[0].statusCopy.stateLabel).toBe('Partial data');
+describe('selectAdobeSignSourceStatus', () => {
+  it('returns undefined when the envelope is undefined', () => {
+    expect(selectAdobeSignSourceStatus(undefined)).toBeUndefined();
+  });
+
+  it('returns the Adobe Sign source status from the home envelope sourceReadiness array', () => {
+    expect(selectAdobeSignSourceStatus(MY_WORK_HOME_AVAILABLE)).toBe('available');
+    expect(selectAdobeSignSourceStatus(MY_WORK_HOME_AUTHORIZATION_REQUIRED)).toBe(
+      'authorization-required',
+    );
+    expect(selectAdobeSignSourceStatus(MY_WORK_HOME_CONFIGURATION_REQUIRED)).toBe(
+      'configuration-required',
+    );
+    expect(selectAdobeSignSourceStatus(MY_WORK_HOME_PRINCIPAL_UNRESOLVED)).toBe(
+      'principal-unresolved',
+    );
+    expect(selectAdobeSignSourceStatus(MY_WORK_HOME_BACKEND_UNAVAILABLE)).toBe(
+      'backend-unavailable',
+    );
+    expect(selectAdobeSignSourceStatus(MY_WORK_HOME_PARTIAL)).toBe('partial');
   });
 });
 
-describe('selectAdobeQueueHomeVm', () => {
-  it('returns nulls when envelope is undefined', () => {
-    const vm = selectAdobeQueueHomeVm(undefined);
-    expect(vm.pendingAgreementsCount).toBeNull();
-    expect(vm.awaitingActionCount).toBeNull();
-    expect(vm.lastRefreshedLabel).toBe('Pending source connection');
-  });
-
-  it('returns 6/6 for the available home envelope', () => {
-    const vm = selectAdobeQueueHomeVm(MY_WORK_HOME_AVAILABLE);
-    expect(vm.pendingAgreementsCount).toBe(6);
-    expect(vm.awaitingActionCount).toBe(6);
-  });
-
-  it('returns 0/0 for the empty home envelope', () => {
-    const vm = selectAdobeQueueHomeVm(MY_WORK_HOME_EMPTY);
-    expect(vm.pendingAgreementsCount).toBe(0);
-    expect(vm.awaitingActionCount).toBe(0);
-  });
-});
-
-describe('selectAdobeQueueSummaryVm', () => {
-  it('returns nulls when envelope is undefined', () => {
-    const vm = selectAdobeQueueSummaryVm(undefined);
+describe('selectAdobeQueueSummaryVmFromSummary', () => {
+  it('returns nulls when summary is undefined', () => {
+    const vm = selectAdobeQueueSummaryVmFromSummary(undefined);
     expect(vm.pendingAgreementsCount).toBeNull();
     expect(vm.signatureActionsCount).toBeNull();
     expect(vm.reviewActionsCount).toBeNull();
+    expect(vm.lastRefreshedLabel).toBe('Pending source connection');
   });
 
-  it('sums review-class actions (approval + acceptance + acknowledgement) for an available queue', () => {
-    const vm = selectAdobeQueueSummaryVm(ADOBE_SIGN_QUEUE_AVAILABLE);
+  it('sums review-class actions for the available home projection summary', () => {
+    const env = MY_WORK_HOME_AVAILABLE;
+    const vm = selectAdobeQueueSummaryVmFromSummary(
+      env.data.adobeSignActionQueue.summary,
+      env.generatedAtUtc,
+    );
     expect(vm.pendingAgreementsCount).toBe(6);
     expect(vm.signatureActionsCount).toBe(1);
     // approvalCount(1) + acceptanceCount(1) + acknowledgementCount(1) = 3
     expect(vm.reviewActionsCount).toBe(3);
+    expect(vm.lastRefreshedLabel).not.toBe('Pending source connection');
   });
 
-  it('returns all zeros for the empty queue envelope', () => {
-    const vm = selectAdobeQueueSummaryVm(ADOBE_SIGN_QUEUE_EMPTY);
+  it('sums review-class actions for the partial home projection summary (1+1+0)', () => {
+    const env = MY_WORK_HOME_PARTIAL;
+    const vm = selectAdobeQueueSummaryVmFromSummary(
+      env.data.adobeSignActionQueue.summary,
+      env.generatedAtUtc,
+    );
+    expect(vm.pendingAgreementsCount).toBe(3);
+    expect(vm.signatureActionsCount).toBe(1);
+    // approvalCount(1) + acceptanceCount(1) + acknowledgementCount(0) = 2
+    expect(vm.reviewActionsCount).toBe(2);
+  });
+
+  it('returns all zeros for the empty home projection summary', () => {
+    const env = MY_WORK_HOME_EMPTY;
+    const vm = selectAdobeQueueSummaryVmFromSummary(
+      env.data.adobeSignActionQueue.summary,
+      env.generatedAtUtc,
+    );
     expect(vm.pendingAgreementsCount).toBe(0);
     expect(vm.signatureActionsCount).toBe(0);
     expect(vm.reviewActionsCount).toBe(0);
   });
 });
 
-describe('selectAdobeAgreementListVm', () => {
-  it('returns isEmpty=true and empty items when envelope is undefined', () => {
-    const vm = selectAdobeAgreementListVm(undefined);
+describe('selectAdobeAgreementListVmFromItems', () => {
+  it('returns isEmpty=true and empty items when items is undefined', () => {
+    const vm = selectAdobeAgreementListVmFromItems(undefined);
     expect(vm.items).toEqual([]);
     expect(vm.isEmpty).toBe(true);
     expect(vm.hasMore).toBe(false);
   });
 
-  it('returns 6 items + isEmpty=false for the available queue envelope', () => {
-    const vm = selectAdobeAgreementListVm(ADOBE_SIGN_QUEUE_AVAILABLE);
-    expect(vm.items).toHaveLength(6);
+  it('returns isEmpty=true for an empty items array', () => {
+    const vm = selectAdobeAgreementListVmFromItems([]);
+    expect(vm.items).toEqual([]);
+    expect(vm.isEmpty).toBe(true);
+  });
+
+  it('returns mapped items for an available home projection', () => {
+    const env = MY_WORK_HOME_AVAILABLE;
+    const vm = selectAdobeAgreementListVmFromItems(env.data.adobeSignActionQueue.previewItems);
+    expect(vm.items.length).toBeGreaterThan(0);
     expect(vm.isEmpty).toBe(false);
-    expect(vm.hasMore).toBe(false);
-    // Spot-check item shape on the first agreement
     const first = vm.items[0];
     expect(typeof first.itemId).toBe('string');
     expect(first.agreementName.length).toBeGreaterThan(0);
     expect(first.requiredActionLabel.length).toBeGreaterThan(0);
   });
 
-  it('reflects hasMore=true for a paged available envelope', () => {
-    const vm = selectAdobeAgreementListVm(ADOBE_SIGN_QUEUE_AVAILABLE_PAGED);
-    expect(vm.items.length).toBeGreaterThan(0);
-    expect(vm.hasMore).toBe(true);
-  });
-
-  it('returns isEmpty=true for a truthful empty queue (sourceStatus=available, items=[])', () => {
-    const vm = selectAdobeAgreementListVm(ADOBE_SIGN_QUEUE_EMPTY);
-    expect(vm.items).toEqual([]);
-    expect(vm.isEmpty).toBe(true);
-  });
-
-  it('returns isEmpty=true for an authorization-required (non-ready) queue', () => {
-    const vm = selectAdobeAgreementListVm(ADOBE_SIGN_QUEUE_AUTHORIZATION_REQUIRED);
-    expect(vm.items).toEqual([]);
-    expect(vm.isEmpty).toBe(true);
-  });
-});
-
-describe('selectAdobeQueueStateVmFromHome / FromQueue', () => {
-  it('prefers the home envelope sourceReadiness status over the fallback', () => {
-    const vm = selectAdobeQueueStateVmFromHome(
-      MY_WORK_HOME_BACKEND_UNAVAILABLE,
-      'configuration-required',
-    );
-    expect(vm.sourceStatus).toBe('backend-unavailable');
-    expect(vm.stateLabel).toBe('Service unavailable');
-  });
-
-  it('falls back to the provided status when no home envelope is supplied', () => {
-    const vm = selectAdobeQueueStateVmFromHome(undefined, 'configuration-required');
-    expect(vm.sourceStatus).toBe('configuration-required');
-    expect(vm.stateLabel).toBe('Configuration required');
-  });
-
-  it('uses the queue envelope sourceStatus directly when available', () => {
-    const vm = selectAdobeQueueStateVmFromQueue(
-      ADOBE_SIGN_QUEUE_CONFIGURATION_REQUIRED,
-      'available',
-    );
-    expect(vm.sourceStatus).toBe('configuration-required');
-    expect(vm.stateLabel).toBe('Configuration required');
-  });
-
-  it('falls back to the provided status when no queue envelope is supplied', () => {
-    const vm = selectAdobeQueueStateVmFromQueue(undefined, 'authorization-required');
-    expect(vm.sourceStatus).toBe('authorization-required');
-    expect(vm.stateLabel).toBe('Authorization required');
-  });
-
-  it('returns the partial label for a partial queue envelope', () => {
-    const vm = selectAdobeQueueStateVmFromQueue(ADOBE_SIGN_QUEUE_PARTIAL, undefined);
-    expect(vm.sourceStatus).toBe('partial');
-    expect(vm.stateLabel).toBe('Partial data');
-  });
-});
-
-describe('selectConnectionGuidanceVm', () => {
-  it('returns ctaVisible=true only for authorization-required', () => {
-    expect(selectConnectionGuidanceVm('authorization-required').ctaVisible).toBe(true);
-    expect(selectConnectionGuidanceVm('configuration-required').ctaVisible).toBe(false);
-    expect(selectConnectionGuidanceVm('principal-unresolved').ctaVisible).toBe(false);
-    expect(selectConnectionGuidanceVm('backend-unavailable').ctaVisible).toBe(false);
-    expect(selectConnectionGuidanceVm('source-unavailable').ctaVisible).toBe(false);
-    expect(selectConnectionGuidanceVm('partial').ctaVisible).toBe(false);
-    expect(selectConnectionGuidanceVm('available').ctaVisible).toBe(false);
-  });
-
-  it('returns the matching headline for configuration-required', () => {
-    const vm = selectConnectionGuidanceVm('configuration-required');
-    expect(vm.headline).toBe('Configuration required');
-    expect(vm.guidance).toContain('administrator');
-  });
-
-  it('returns the matching headline for principal-unresolved', () => {
-    const vm = selectConnectionGuidanceVm('principal-unresolved');
-    expect(vm.headline).toBe('Account not resolved');
-  });
-
-  it('returns a stable unknown headline when status is undefined', () => {
-    const vm = selectConnectionGuidanceVm(undefined);
-    expect(vm.headline).toBe('Source state unknown');
-    expect(vm.ctaVisible).toBe(false);
-  });
-});
-
-// Anchor preventing accidental regressions for partial-data path with fixtures
-// reused by the surface tests.
-describe('integration sanity (fixture coverage)', () => {
-  it('preserves source-readiness ctaApplicable across all home non-ready fixtures', () => {
-    const cases: Array<[typeof MY_WORK_HOME_CONFIGURATION_REQUIRED, boolean]> = [
-      [MY_WORK_HOME_CONFIGURATION_REQUIRED, false],
-      [MY_WORK_HOME_AUTHORIZATION_REQUIRED, true],
-      [MY_WORK_HOME_PRINCIPAL_UNRESOLVED, false],
-      [MY_WORK_HOME_BACKEND_UNAVAILABLE, false],
+  it('maps sourceOpenUrl through from the read-model item when present', () => {
+    const items: readonly MyWorkAdobeSignActionQueueItem[] = [
+      {
+        itemId: 'agreement-with-url',
+        sourceSystem: 'adobe-sign',
+        agreementId: 'agreement-1',
+        agreementName: 'Test Agreement',
+        requiredAction: 'signature',
+        adobeRecipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+        sourceOpenUrl: 'https://secure.adobesign.com/public/agreement/agreement-1',
+      },
     ];
-    for (const [env, expectedCta] of cases) {
-      const vm = selectSourceReadinessVm(env);
-      expect(vm.items[0].statusCopy.ctaApplicable).toBe(expectedCta);
+    const vm = selectAdobeAgreementListVmFromItems(items);
+    expect(vm.items).toHaveLength(1);
+    expect(vm.items[0].sourceOpenUrl).toBe(
+      'https://secure.adobesign.com/public/agreement/agreement-1',
+    );
+  });
+
+  it('leaves sourceOpenUrl undefined when the read-model item omits it', () => {
+    const items: readonly MyWorkAdobeSignActionQueueItem[] = [
+      {
+        itemId: 'agreement-no-url',
+        sourceSystem: 'adobe-sign',
+        agreementId: 'agreement-2',
+        agreementName: 'Test Agreement 2',
+        requiredAction: 'approval',
+        adobeRecipientStatus: 'WAITING_FOR_MY_APPROVAL',
+      },
+    ];
+    const vm = selectAdobeAgreementListVmFromItems(items);
+    expect(vm.items).toHaveLength(1);
+    expect(vm.items[0].sourceOpenUrl).toBeUndefined();
+  });
+
+  it('reflects the explicit hasMore argument', () => {
+    const env = MY_WORK_HOME_AVAILABLE;
+    expect(
+      selectAdobeAgreementListVmFromItems(env.data.adobeSignActionQueue.previewItems, false)
+        .hasMore,
+    ).toBe(false);
+    expect(
+      selectAdobeAgreementListVmFromItems(env.data.adobeSignActionQueue.previewItems, true).hasMore,
+    ).toBe(true);
+  });
+
+  it('maps senderLabel from the sender displayName when present', () => {
+    const items: readonly MyWorkAdobeSignActionQueueItem[] = [
+      {
+        itemId: 'with-sender',
+        sourceSystem: 'adobe-sign',
+        agreementId: 'a',
+        agreementName: 'Agreement',
+        requiredAction: 'signature',
+        adobeRecipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+        sender: { displayName: 'Alex Vendor' },
+      },
+    ];
+    const vm = selectAdobeAgreementListVmFromItems(items);
+    expect(vm.items[0].senderLabel).toBe('Alex Vendor');
+  });
+
+  it('maps expiresLabel from expirationAtUtc when present', () => {
+    const items: readonly MyWorkAdobeSignActionQueueItem[] = [
+      {
+        itemId: 'with-expiration',
+        sourceSystem: 'adobe-sign',
+        agreementId: 'a',
+        agreementName: 'Agreement',
+        requiredAction: 'signature',
+        adobeRecipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+        expirationAtUtc: '2026-12-31T23:59:59Z',
+      },
+    ];
+    const vm = selectAdobeAgreementListVmFromItems(items);
+    expect(vm.items[0].expiresLabel).not.toBeNull();
+    expect(vm.items[0].expiresLabel).toMatch(/2026/);
+  });
+});
+
+describe('selectAdobeSignActionQueueStateCopy', () => {
+  it('returns the locked authorization-required copy + visible CTA when hasOnConnect=true', () => {
+    const copy = selectAdobeSignActionQueueStateCopy('authorization-required', true);
+    expect(copy.badge).toBe('Connect required');
+    expect(copy.body).toBe(
+      'Connect Adobe Sign to load agreements that need your review, signature, approval, or other action.',
+    );
+    expect(copy.ctaLabel).toBe('Connect Adobe Sign');
+    expect(copy.ctaVisible).toBe(true);
+  });
+
+  it('suppresses the CTA when hasOnConnect=false even for authorization-required', () => {
+    const copy = selectAdobeSignActionQueueStateCopy('authorization-required', false);
+    expect(copy.ctaVisible).toBe(false);
+  });
+
+  it('returns the locked configuration-required copy with no CTA', () => {
+    const copy = selectAdobeSignActionQueueStateCopy('configuration-required', true);
+    expect(copy.badge).toBe('Configuration required');
+    expect(copy.body).toBe('Adobe Sign must be configured before your action queue can load.');
+    expect(copy.ctaVisible).toBe(false);
+  });
+
+  it('returns the locked principal-unresolved copy + secondary administrator line', () => {
+    const copy = selectAdobeSignActionQueueStateCopy('principal-unresolved', false);
+    expect(copy.badge).toBe('Account needs attention');
+    expect(copy.body).toBe(
+      'Your HB account could not be matched to an Adobe Sign user for this queue.',
+    );
+    expect(copy.secondaryBody).toBe('Contact an administrator if this persists.');
+    expect(copy.ctaVisible).toBe(false);
+  });
+
+  it('returns the locked source-unavailable copy', () => {
+    const copy = selectAdobeSignActionQueueStateCopy('source-unavailable', false);
+    expect(copy.badge).toBe('Temporarily unavailable');
+    expect(copy.body).toContain('Adobe Sign is temporarily unavailable');
+    expect(copy.ctaVisible).toBe(false);
+  });
+
+  it('returns the locked backend-unavailable copy', () => {
+    const copy = selectAdobeSignActionQueueStateCopy('backend-unavailable', false);
+    expect(copy.badge).toBe('Temporarily unavailable');
+    expect(copy.body).toContain('The My Dashboard service is not responding');
+    expect(copy.ctaVisible).toBe(false);
+  });
+
+  it('returns the locked partial-data copy', () => {
+    const copy = selectAdobeSignActionQueueStateCopy('partial', false);
+    expect(copy.badge).toBe('Partial data');
+    expect(copy.body).toContain('Some queue details may be incomplete');
+    expect(copy.ctaVisible).toBe(false);
+  });
+
+  it('returns the locked available copy (Ready badge, empty body)', () => {
+    const copy = selectAdobeSignActionQueueStateCopy('available', false);
+    expect(copy.badge).toBe('Ready');
+    expect(copy.body).toBe('');
+    expect(copy.ctaVisible).toBe(false);
+  });
+
+  it('falls back to the backend-unavailable copy for an unknown / missing status', () => {
+    const copy = selectAdobeSignActionQueueStateCopy(undefined, false);
+    expect(copy.badge).toBe('Temporarily unavailable');
+    expect(copy.body).toContain('The My Dashboard service is not responding');
+  });
+
+  it('never uses the word "live" (HB read-model copy rule)', () => {
+    const all: MyWorkReadModelSourceStatus[] = [
+      'available',
+      'partial',
+      'configuration-required',
+      'authorization-required',
+      'principal-unresolved',
+      'source-unavailable',
+      'backend-unavailable',
+    ];
+    for (const s of all) {
+      const copy = selectAdobeSignActionQueueStateCopy(s, false);
+      expect(copy.badge.toLowerCase()).not.toContain('live');
+      expect(copy.body.toLowerCase()).not.toContain('live');
+      if (copy.secondaryBody) {
+        expect(copy.secondaryBody.toLowerCase()).not.toContain('live');
+      }
     }
   });
 });

@@ -224,12 +224,20 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
       expect(roles).toEqual([
         'my-projects-home',
         'work-summary',
-        'adobe-sign-queue-state',
+        'adobe-sign-action-queue',
         'source-readiness',
       ]);
     });
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
+    // Retired Adobe card roles must not appear under the live shell.
     expect(grid.querySelector('[data-my-work-card-role="adobe-sign-queue-summary"]')).toBeNull();
+    expect(
+      grid.querySelector('[data-my-work-card-role="adobe-sign-action-queue-home"]'),
+    ).toBeNull();
+    expect(grid.querySelector('[data-my-work-card-role="adobe-sign-queue-state"]')).toBeNull();
+    expect(
+      grid.querySelector('[data-my-work-card-role="adobe-sign-connection-guidance"]'),
+    ).toBeNull();
   });
 
   it('keeps the active-panel marker exclusively on the shell <main>', () => {

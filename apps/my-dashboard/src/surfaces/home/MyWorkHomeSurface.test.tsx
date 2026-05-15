@@ -34,83 +34,68 @@ function spanOf(container: HTMLElement, role: string): string | null {
 }
 
 describe('MyWorkHomeSurface — default (non-ready) variant', () => {
-  it('emits the four non-ready cards in order with My Projects first', () => {
+  it('emits the four non-ready cards in order with My Projects first and the consolidated Adobe card', () => {
     const { container } = renderHome();
     expect(getCardRoles(container)).toEqual([
       'my-projects-home',
       'work-summary',
-      'adobe-sign-queue-state',
+      'adobe-sign-action-queue',
       'source-readiness',
     ]);
+    // Retired Adobe card roles must not appear.
     expect(
       container.querySelector('[data-my-work-card-role="adobe-sign-action-queue-home"]'),
     ).toBeNull();
-  });
-
-  it('resolves flagship full-width + non-ready spans on desktop (12 / 3 / 6 / 3)', () => {
-    const { container } = renderHome();
-    expect(spanOf(container, 'my-projects-home')).toBe('12');
-    expect(spanOf(container, 'work-summary')).toBe('3');
-    expect(spanOf(container, 'adobe-sign-queue-state')).toBe('6');
-    expect(spanOf(container, 'source-readiness')).toBe('3');
-  });
-
-  it('resolves flagship full-width + non-ready spans on standardLaptop (10 / 3 / 4 / 3)', () => {
-    const { container } = renderHome({}, 'standardLaptop');
-    expect(spanOf(container, 'my-projects-home')).toBe('10');
-    expect(spanOf(container, 'work-summary')).toBe('3');
-    expect(spanOf(container, 'adobe-sign-queue-state')).toBe('4');
-    expect(spanOf(container, 'source-readiness')).toBe('3');
+    expect(container.querySelector('[data-my-work-card-role="adobe-sign-queue-state"]')).toBeNull();
   });
 
   it('clamps every card to 1 column on phone', () => {
     const { container } = renderHome({}, 'phone');
     expect(spanOf(container, 'my-projects-home')).toBe('1');
     expect(spanOf(container, 'work-summary')).toBe('1');
-    expect(spanOf(container, 'adobe-sign-queue-state')).toBe('1');
+    expect(spanOf(container, 'adobe-sign-action-queue')).toBe('1');
     expect(spanOf(container, 'source-readiness')).toBe('1');
   });
 });
 
 describe('MyWorkHomeSurface — ready variant', () => {
-  it('emits the three ready cards in order with My Projects first', () => {
+  it('emits the three ready cards in order with My Projects first and the consolidated Adobe card', () => {
     const { container } = renderHome({ readinessVariant: 'ready' });
     expect(getCardRoles(container)).toEqual([
       'my-projects-home',
       'work-summary',
-      'adobe-sign-action-queue-home',
+      'adobe-sign-action-queue',
     ]);
     expect(container.querySelector('[data-my-work-card-role="adobe-sign-queue-state"]')).toBeNull();
     expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
+    // Retired ready-variant Adobe card role must not appear.
+    expect(
+      container.querySelector('[data-my-work-card-role="adobe-sign-action-queue-home"]'),
+    ).toBeNull();
+  });
+});
+
+describe('MyWorkHomeSurface — Adobe consolidation', () => {
+  it('renders the Connect CTA on non-ready + authorization-required when onConnectAdobeSign is supplied', async () => {
+    const { MY_WORK_HOME_AUTHORIZATION_REQUIRED } = await import('@hbc/models/myWork/fixtures');
+    const onConnectAdobeSign = vi.fn().mockResolvedValue(undefined);
+    const { container } = renderHome({
+      readinessVariant: 'non-ready',
+      homeEnvelope: MY_WORK_HOME_AUTHORIZATION_REQUIRED,
+      sourceStatus: 'authorization-required',
+      onConnectAdobeSign,
+    });
+    expect(container.querySelector('[data-adobe-sign-connect-action="start"]')).not.toBeNull();
   });
 
-  it('resolves flagship full-width + ready spans on desktop (12 / 4 / 8)', () => {
-    const { container } = renderHome({ readinessVariant: 'ready' });
-    expect(spanOf(container, 'my-projects-home')).toBe('12');
-    expect(spanOf(container, 'work-summary')).toBe('4');
-    expect(spanOf(container, 'adobe-sign-action-queue-home')).toBe('8');
-  });
-
-  it('resolves flagship full-width + ready spans on standardLaptop (10 / 3 / 7)', () => {
-    const { container } = renderHome({ readinessVariant: 'ready' }, 'standardLaptop');
-    expect(spanOf(container, 'my-projects-home')).toBe('10');
-    expect(spanOf(container, 'work-summary')).toBe('3');
-    expect(spanOf(container, 'adobe-sign-action-queue-home')).toBe('7');
-  });
-
-  it('"View queue" CTA fires onSelectModule exactly once', () => {
-    const onSelectModule = vi.fn();
-    const { getByText } = renderHome({ readinessVariant: 'ready', onSelectModule });
-    fireEvent.click(getByText('View queue'));
-    expect(onSelectModule).toHaveBeenCalledTimes(1);
-    expect(onSelectModule).toHaveBeenCalledWith('adobe-sign-action-queue');
-  });
-
-  it('CTA renders aria-disabled when onSelectModule is not provided', () => {
-    const { getByText } = renderHome({ readinessVariant: 'ready' });
-    const cta = getByText('View queue');
-    expect(cta.getAttribute('aria-disabled')).toBe('true');
-    expect((cta as HTMLButtonElement).disabled).toBe(true);
+  it('suppresses the Connect CTA when onConnectAdobeSign is not supplied (fixture posture)', async () => {
+    const { MY_WORK_HOME_AUTHORIZATION_REQUIRED } = await import('@hbc/models/myWork/fixtures');
+    const { container } = renderHome({
+      readinessVariant: 'non-ready',
+      homeEnvelope: MY_WORK_HOME_AUTHORIZATION_REQUIRED,
+      sourceStatus: 'authorization-required',
+    });
+    expect(container.querySelector('[data-adobe-sign-connect-action="start"]')).toBeNull();
   });
 });
 
@@ -135,7 +120,7 @@ describe('MyWorkHomeSurface — copy posture', () => {
 });
 
 describe('MyWorkHomeSurface — data-driven content via homeEnvelope', () => {
-  it('renders the action item count from the home envelope in both the work-summary and action-queue-home cards (ready)', async () => {
+  it('renders the action item count from the home envelope in the work-summary card (ready)', async () => {
     const { MY_WORK_HOME_AVAILABLE } = await import('@hbc/models/myWork/fixtures');
     const { container } = renderHome({
       readinessVariant: 'ready',
@@ -146,11 +131,11 @@ describe('MyWorkHomeSurface — data-driven content via homeEnvelope', () => {
     ) as HTMLElement;
     expect(workSummary.getAttribute('data-my-work-card')).toBe('');
     expect(workSummary.querySelector('[data-my-work-action-item-count="6"]')).not.toBeNull();
-    const queueHome = container.querySelector(
-      '[data-my-work-card-role="adobe-sign-action-queue-home"]',
+    // The consolidated Adobe card publishes its own metrics under the new card role.
+    const adobeCard = container.querySelector(
+      '[data-my-work-card-role="adobe-sign-action-queue"]',
     ) as HTMLElement;
-    expect(queueHome.querySelector('[data-adobe-queue-pending-count="6"]')).not.toBeNull();
-    expect(queueHome.querySelector('[data-adobe-queue-awaiting-action-count="6"]')).not.toBeNull();
+    expect(adobeCard.querySelector('[data-adobe-queue-summary-pending]')?.textContent).toBe('6');
   });
 
   it('renders distinct source-readiness copy for authorization-required vs configuration-required (non-ready)', async () => {
@@ -184,28 +169,33 @@ describe('MyWorkHomeSurface — data-driven content via homeEnvelope', () => {
     expect(configCard.textContent).toContain('Configuration required');
     expect(configCard.textContent).not.toContain('Authorization required');
   });
-
-  it('preserves the em-dash placeholder when no homeEnvelope is supplied (legacy/preview fallback)', () => {
-    const { container } = renderHome({ readinessVariant: 'ready' });
-    const queueHome = container.querySelector(
-      '[data-my-work-card-role="adobe-sign-action-queue-home"]',
-    ) as HTMLElement;
-    expect(queueHome.textContent).toContain('—');
-  });
 });
 
 describe('MyWorkHomeSurface — envelope-state variants', () => {
-  it('loading variant renders only the loading marker (never any non-ready cards)', () => {
+  it('loading variant renders the loading marker AND the consolidated Adobe card (the card owns its loading state)', () => {
     const { container } = renderHome({ readinessVariant: 'loading' });
     expect(container.querySelector('[data-my-work-readiness-state="loading"]')).not.toBeNull();
-    expect(getCardRoles(container)).toEqual([]);
+    // The Adobe card mounts in every readiness state so it owns its full state matrix.
+    expect(getCardRoles(container)).toEqual(['adobe-sign-action-queue']);
+    const adobeCard = container.querySelector(
+      '[data-my-work-card-role="adobe-sign-action-queue"]',
+    ) as HTMLElement;
+    expect(adobeCard.getAttribute('data-adobe-sign-action-queue-state')).toBe('loading');
+    // Other cards do not render in loading state.
+    expect(container.querySelector('[data-my-work-card-role="my-projects-home"]')).toBeNull();
     expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
   });
 
-  it('error variant renders only the error marker', () => {
+  it('error variant renders the error marker AND the consolidated Adobe card with backend-unavailable state', () => {
     const { container } = renderHome({ readinessVariant: 'error' });
     expect(container.querySelector('[data-my-work-readiness-state="error"]')).not.toBeNull();
-    expect(getCardRoles(container)).toEqual([]);
+    expect(getCardRoles(container)).toEqual(['adobe-sign-action-queue']);
+    const adobeCard = container.querySelector(
+      '[data-my-work-card-role="adobe-sign-action-queue"]',
+    ) as HTMLElement;
+    expect(adobeCard.getAttribute('data-adobe-sign-action-queue-state')).toBe(
+      'backend-unavailable',
+    );
   });
 
   it('ready + sourceStatus="partial" emits the ready tree plus a hidden source-status marker', () => {
@@ -216,7 +206,7 @@ describe('MyWorkHomeSurface — envelope-state variants', () => {
     expect(getCardRoles(container)).toEqual([
       'my-projects-home',
       'work-summary',
-      'adobe-sign-action-queue-home',
+      'adobe-sign-action-queue',
     ]);
     expect(container.querySelector('[data-my-work-source-status="partial"]')).not.toBeNull();
   });

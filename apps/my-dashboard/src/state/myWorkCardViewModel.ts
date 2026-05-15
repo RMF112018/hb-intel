@@ -19,7 +19,8 @@
 
 import type {
   MyProjectLinksReadModel,
-  MyWorkAdobeSignActionQueueReadModel,
+  MyWorkAdobeSignActionQueueItem,
+  MyWorkAdobeSignActionQueueSummary,
   MyWorkAdobeSignRequiredAction,
   MyWorkHomeReadModel,
   MyWorkReadModelEnvelope,
@@ -195,41 +196,15 @@ export function selectSourceReadinessVm(
   return { items };
 }
 
-// ─── Adobe Sign action queue — home card ──────────────────────────────────
+// ─── Adobe Sign action queue — consolidated card (Prompt 03) ──────────────
 
-export interface AdobeQueueHomeVm {
-  readonly pendingAgreementsCount: number | null;
-  readonly awaitingActionCount: number | null;
-  readonly lastRefreshedLabel: string;
-}
-
-const ADOBE_QUEUE_HOME_FALLBACK: AdobeQueueHomeVm = {
-  pendingAgreementsCount: null,
-  awaitingActionCount: null,
-  lastRefreshedLabel: PENDING_REFRESH_FALLBACK,
-};
-
-export function selectAdobeQueueHomeVm(
-  env: MyWorkReadModelEnvelope<MyWorkHomeReadModel> | undefined,
-): AdobeQueueHomeVm {
-  if (!env) return ADOBE_QUEUE_HOME_FALLBACK;
-  const total = env.data.adobeSignActionQueue.summary.totalActionItemCount;
-  return {
-    pendingAgreementsCount: total,
-    awaitingActionCount: total,
-    lastRefreshedLabel: formatGeneratedAtUtc(env.generatedAtUtc),
-  };
-}
-
-// ─── Adobe Sign queue state (used in both non-ready surfaces) ─────────────
-
-export interface AdobeQueueStateVm {
-  readonly sourceStatus: MyWorkReadModelSourceStatus | undefined;
-  readonly stateLabel: string;
-  readonly guidance: string;
-}
-
-function selectAdobeReadinessStatusFromHome(
+/**
+ * Extracts the Adobe Sign source's specific status from the home envelope's
+ * `sourceReadiness` array. Returns `undefined` when the envelope is absent
+ * or the lookup fails — the consolidated card falls back to an explicit
+ * `sourceStatus` prop in that case.
+ */
+export function selectAdobeSignSourceStatus(
   env: MyWorkReadModelEnvelope<MyWorkHomeReadModel> | undefined,
 ): MyWorkReadModelSourceStatus | undefined {
   if (!env) return undefined;
@@ -237,25 +212,7 @@ function selectAdobeReadinessStatusFromHome(
   return item?.sourceStatus;
 }
 
-export function selectAdobeQueueStateVmFromHome(
-  env: MyWorkReadModelEnvelope<MyWorkHomeReadModel> | undefined,
-  fallbackStatus: MyWorkReadModelSourceStatus | undefined,
-): AdobeQueueStateVm {
-  const status = selectAdobeReadinessStatusFromHome(env) ?? fallbackStatus;
-  const copy = sourceStatusCopy(status);
-  return { sourceStatus: status, stateLabel: copy.stateLabel, guidance: copy.guidance };
-}
-
-export function selectAdobeQueueStateVmFromQueue(
-  env: MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel> | undefined,
-  fallbackStatus: MyWorkReadModelSourceStatus | undefined,
-): AdobeQueueStateVm {
-  const status = env?.sourceStatus ?? fallbackStatus;
-  const copy = sourceStatusCopy(status);
-  return { sourceStatus: status, stateLabel: copy.stateLabel, guidance: copy.guidance };
-}
-
-// ─── Adobe Sign queue summary (focused module ready) ──────────────────────
+// ─── Adobe Sign queue summary (consolidated card metrics) ─────────────────
 
 export interface AdobeQueueSummaryVm {
   readonly pendingAgreementsCount: number | null;
@@ -272,20 +229,26 @@ const ADOBE_QUEUE_SUMMARY_FALLBACK: AdobeQueueSummaryVm = {
   lastRefreshedLabel: PENDING_REFRESH_FALLBACK,
 };
 
-export function selectAdobeQueueSummaryVm(
-  env: MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel> | undefined,
+/**
+ * Derives the metrics view-model directly from a summary object so the
+ * consolidated card can consume the home projection's
+ * `adobeSignActionQueue.summary` without a queue envelope.
+ */
+export function selectAdobeQueueSummaryVmFromSummary(
+  summary: MyWorkAdobeSignActionQueueSummary | undefined,
+  generatedAtUtc?: string,
 ): AdobeQueueSummaryVm {
-  if (!env) return ADOBE_QUEUE_SUMMARY_FALLBACK;
-  const s = env.data.summary;
+  if (!summary) return ADOBE_QUEUE_SUMMARY_FALLBACK;
   return {
-    pendingAgreementsCount: s.totalActionItemCount,
-    signatureActionsCount: s.signatureCount,
-    reviewActionsCount: s.approvalCount + s.acceptanceCount + s.acknowledgementCount,
-    lastRefreshedLabel: formatGeneratedAtUtc(env.generatedAtUtc),
+    pendingAgreementsCount: summary.totalActionItemCount,
+    signatureActionsCount: summary.signatureCount,
+    reviewActionsCount:
+      summary.approvalCount + summary.acceptanceCount + summary.acknowledgementCount,
+    lastRefreshedLabel: formatGeneratedAtUtc(generatedAtUtc),
   };
 }
 
-// ─── Adobe Sign agreement list (focused module ready) ─────────────────────
+// ─── Adobe Sign agreement list (consolidated card items) ──────────────────
 
 export interface AdobeAgreementListItem {
   readonly itemId: string;
@@ -294,6 +257,12 @@ export interface AdobeAgreementListItem {
   readonly requiredActionLabel: string;
   readonly senderLabel: string | null;
   readonly expiresLabel: string | null;
+  /**
+   * Policy-approved, backend-derived row-level launch URL. When present the
+   * consolidated card renders an `Open in Adobe Sign` anchor; when absent
+   * the card renders no anchor (no synthesized URLs).
+   */
+  readonly sourceOpenUrl?: string;
 }
 
 export interface AdobeAgreementListVm {
@@ -302,48 +271,116 @@ export interface AdobeAgreementListVm {
   readonly hasMore: boolean;
 }
 
-const ADOBE_AGREEMENT_LIST_FALLBACK: AdobeAgreementListVm = {
-  items: [],
-  isEmpty: true,
-  hasMore: false,
-};
-
-export function selectAdobeAgreementListVm(
-  env: MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel> | undefined,
+/**
+ * Projects raw queue items (from either the home projection's `previewItems`
+ * or a focused-queue envelope's `items`) into the view-model. `sourceOpenUrl`
+ * is mapped through verbatim from the read-model.
+ */
+export function selectAdobeAgreementListVmFromItems(
+  items: readonly MyWorkAdobeSignActionQueueItem[] | undefined,
+  hasMore = false,
 ): AdobeAgreementListVm {
-  if (!env) return ADOBE_AGREEMENT_LIST_FALLBACK;
-  const items = env.data.items.map<AdobeAgreementListItem>((it) => ({
+  if (!items) {
+    return { items: [], isEmpty: true, hasMore: false };
+  }
+  const mapped = items.map<AdobeAgreementListItem>((it) => ({
     itemId: it.itemId,
     agreementName: it.agreementName,
     requiredAction: it.requiredAction,
     requiredActionLabel: requiredActionLabel(it.requiredAction),
     senderLabel: it.sender?.displayName ?? null,
     expiresLabel: it.expirationAtUtc ? formatGeneratedAtUtc(it.expirationAtUtc) : null,
+    sourceOpenUrl: it.sourceOpenUrl,
   }));
   return {
-    items,
-    isEmpty: items.length === 0,
-    hasMore: env.data.pagination.hasMore,
+    items: mapped,
+    isEmpty: mapped.length === 0,
+    hasMore,
   };
 }
 
-// ─── Adobe Sign connection guidance (focused module non-ready) ────────────
+// ─── Adobe Sign state copy (consolidated card badge + body) ───────────────
 
-export interface ConnectionGuidanceVm {
-  readonly sourceStatus: MyWorkReadModelSourceStatus | undefined;
-  readonly headline: string;
-  readonly guidance: string;
+export interface AdobeSignActionQueueStateCopy {
+  /** Locked badge label (e.g. `Ready`, `Connect required`, `Loading`). */
+  readonly badge: string;
+  /** Primary body copy. Empty string when the state suppresses body copy in favor of metrics + item list. */
+  readonly body: string;
+  /** Optional secondary line (currently used only for `principal-unresolved`). */
+  readonly secondaryBody?: string;
+  /** CTA button label when present. */
+  readonly ctaLabel?: string;
+  /** Whether the Connect CTA renders. False unless `sourceStatus === 'authorization-required'` AND `hasOnConnect`. */
   readonly ctaVisible: boolean;
 }
 
-export function selectConnectionGuidanceVm(
+/**
+ * Closed-set copy table for the consolidated Adobe Sign Action Queue card.
+ * Mirrors `docs/05-Target-Module-State-Matrices.md` + `docs/06-Target-Copy-Library.md`
+ * verbatim. Source-status only — the `available-empty` vs `available-items`
+ * display distinction and the `loading` / backend `error` states are
+ * resolved inside `AdobeSignActionQueueCard` (the selector does not know
+ * the item count or readiness variant).
+ */
+export function selectAdobeSignActionQueueStateCopy(
   status: MyWorkReadModelSourceStatus | undefined,
-): ConnectionGuidanceVm {
-  const copy = sourceStatusCopy(status);
-  return {
-    sourceStatus: status,
-    headline: copy.stateLabel,
-    guidance: copy.guidance,
-    ctaVisible: copy.ctaApplicable,
-  };
+  hasOnConnect: boolean,
+): AdobeSignActionQueueStateCopy {
+  switch (status) {
+    case 'available':
+      return { badge: 'Ready', body: '', ctaVisible: false };
+    case 'partial':
+      return {
+        badge: 'Partial data',
+        body: 'Some queue details may be incomplete. Showing the latest available Adobe Sign results.',
+        ctaVisible: false,
+      };
+    case 'authorization-required':
+      return {
+        badge: 'Connect required',
+        body: 'Connect Adobe Sign to load agreements that need your review, signature, approval, or other action.',
+        ctaLabel: 'Connect Adobe Sign',
+        ctaVisible: hasOnConnect,
+      };
+    case 'configuration-required':
+      return {
+        badge: 'Configuration required',
+        body: 'Adobe Sign must be configured before your action queue can load.',
+        ctaVisible: false,
+      };
+    case 'principal-unresolved':
+      return {
+        badge: 'Account needs attention',
+        body: 'Your HB account could not be matched to an Adobe Sign user for this queue.',
+        secondaryBody: 'Contact an administrator if this persists.',
+        ctaVisible: false,
+      };
+    case 'source-unavailable':
+      return {
+        badge: 'Temporarily unavailable',
+        body: 'Adobe Sign is temporarily unavailable. Your queue will resume once the source is reachable.',
+        ctaVisible: false,
+      };
+    case 'backend-unavailable':
+      return {
+        badge: 'Temporarily unavailable',
+        body: 'The My Dashboard service is not responding right now. Try again shortly.',
+        ctaVisible: false,
+      };
+    default:
+      // Defensive: unknown / missing status — treat as backend-unavailable so the user
+      // sees a truthful "service down" message rather than a silent empty card.
+      return {
+        badge: 'Temporarily unavailable',
+        body: 'The My Dashboard service is not responding right now. Try again shortly.',
+        ctaVisible: false,
+      };
+  }
 }
+
+/** Zero-item ready-state body copy (selector cannot see item count). */
+export const ADOBE_SIGN_ACTION_QUEUE_READY_EMPTY_BODY =
+  'No Adobe Sign agreements currently need your action.';
+
+/** Loading-state body copy. */
+export const ADOBE_SIGN_ACTION_QUEUE_LOADING_BODY = 'Loading your Adobe Sign queue…';

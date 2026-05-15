@@ -92,7 +92,7 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
       expect(getCardRoles(container)).toEqual([
         'my-projects-home',
         'work-summary',
-        'adobe-sign-action-queue-home',
+        'adobe-sign-action-queue',
       ]),
     );
     expect(container.querySelector('[data-my-work-source-status="available"]')).not.toBeNull();
@@ -110,7 +110,7 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
     expect(getCardRoles(container)).toEqual([
       'my-projects-home',
       'work-summary',
-      'adobe-sign-action-queue-home',
+      'adobe-sign-action-queue',
     ]);
   });
 
@@ -127,7 +127,7 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
     expect(getCardRoles(container)).toEqual([
       'my-projects-home',
       'work-summary',
-      'adobe-sign-queue-state',
+      'adobe-sign-action-queue',
       'source-readiness',
     ]);
   });

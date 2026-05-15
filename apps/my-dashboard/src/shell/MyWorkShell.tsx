@@ -1,5 +1,6 @@
-import { useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
+import { createMyWorkReadModelClient } from '../api/myWorkReadModelClientFactory.js';
 import { useMyWorkShellState } from '../state/useMyWorkShellState.js';
 import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
 import { AdobeSignCallbackBanner } from './AdobeSignCallbackBanner.js';
@@ -85,6 +86,23 @@ export function MyWorkShell({
     [spfxContext],
   );
 
+  // Adobe Sign OAuth start. Only wired in backend posture (a real bearer-token
+  // provider is present); fixture/test renders omit `getApiToken`, so the
+  // Connect CTA on the consolidated Adobe card stays suppressed.
+  const onConnectAdobeSign = useCallback(async (): Promise<void> => {
+    if (typeof getApiToken !== 'function') {
+      throw new Error('adobe-sign-oauth-start-not-available-in-fixture-mode');
+    }
+    const client = createMyWorkReadModelClient({ readModelMode: 'backend', getApiToken });
+    const returnPath =
+      typeof window !== 'undefined' && window.location ? window.location.pathname : '/';
+    const result = await client.startAdobeSignOAuth({ returnPath });
+    if (typeof window !== 'undefined' && window.location) {
+      window.location.assign(result.authorizationUrl);
+    }
+  }, [getApiToken]);
+  const handleConnectAdobeSign = typeof getApiToken === 'function' ? onConnectAdobeSign : undefined;
+
   return (
     <div
       ref={shellRef}
@@ -104,6 +122,7 @@ export function MyWorkShell({
               <MyWorkSurfaceRouter
                 activePrimarySurfaceId={activePrimarySurfaceId}
                 getApiToken={getApiToken}
+                onConnectAdobeSign={handleConnectAdobeSign}
               />
               {children}
             </MyWorkBentoGrid>

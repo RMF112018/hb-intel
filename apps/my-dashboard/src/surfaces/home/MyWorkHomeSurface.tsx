@@ -5,15 +5,9 @@ import type {
   MyWorkReadModelSourceStatus,
 } from '@hbc/models/myWork';
 import type { MyWorkCardSpanOverrides } from '../../layout/myWorkFootprints.js';
-import { AdobeSignActionQueueHomeCard } from '../../modules/adobeSign/AdobeSignActionQueueHomeCard.js';
-import { AdobeSignQueueStateCard } from '../../modules/adobeSign/AdobeSignQueueStateCard.js';
+import { AdobeSignActionQueueCard } from '../../modules/adobeSign/AdobeSignActionQueueCard.js';
 import { MyProjectsHomeCard } from '../../modules/myProjects/MyProjectsHomeCard.js';
-import {
-  selectAdobeQueueHomeVm,
-  selectAdobeQueueStateVmFromHome,
-  selectSourceReadinessVm,
-  selectWorkSummaryVm,
-} from '../../state/myWorkCardViewModel.js';
+import { selectSourceReadinessVm, selectWorkSummaryVm } from '../../state/myWorkCardViewModel.js';
 import type { MyWorkSurfaceReadinessVariant } from '../../state/myWorkSurfaceReadiness.js';
 import { SourceReadinessCard } from './SourceReadinessCard.js';
 import { WorkSummaryCard } from './WorkSummaryCard.js';
@@ -28,7 +22,7 @@ export interface MyWorkHomeSurfaceProps {
    * legacy callers that pre-date the live-envelope wiring.
    */
   readonly readinessVariant?: MyWorkSurfaceReadinessVariant;
-  /** Source-status marker forwarded for partial-state signaling in Prompt 04. */
+  /** Source-status marker forwarded for partial-state signaling. */
   readonly sourceStatus?: MyWorkReadModelSourceStatus;
   /**
    * Read-model envelope for the home route. When provided, cards render
@@ -39,6 +33,12 @@ export interface MyWorkHomeSurfaceProps {
   readonly homeEnvelope?: MyWorkReadModelEnvelope<MyWorkHomeReadModel>;
   readonly onSelectModule?: (id: MyWorkModuleId) => void;
   readonly getApiToken?: () => Promise<string>;
+  /**
+   * Shell-wired Adobe Sign OAuth start callback. Threaded down to
+   * `AdobeSignActionQueueCard`, which renders the Connect CTA only when
+   * `sourceStatus === 'authorization-required'` AND this prop is supplied.
+   */
+  readonly onConnectAdobeSign?: () => Promise<void>;
 }
 
 const HOME_READY_WORK_SUMMARY_OVERRIDES: MyWorkCardSpanOverrides = {
@@ -55,13 +55,6 @@ const HOME_NON_READY_WORK_SUMMARY_OVERRIDES: MyWorkCardSpanOverrides = {
   standardLaptop: 3,
 };
 
-const HOME_NON_READY_QUEUE_STATE_OVERRIDES: MyWorkCardSpanOverrides = {
-  largeLaptop: 6,
-  desktop: 6,
-  ultrawide: 6,
-  standardLaptop: 4,
-};
-
 const HOME_NON_READY_SOURCE_READINESS_OVERRIDES: MyWorkCardSpanOverrides = {
   largeLaptop: 3,
   desktop: 3,
@@ -73,49 +66,60 @@ export function MyWorkHomeSurface({
   readinessVariant = 'non-ready',
   sourceStatus,
   homeEnvelope,
-  onSelectModule,
   getApiToken,
+  onConnectAdobeSign,
 }: MyWorkHomeSurfaceProps) {
-  if (readinessVariant === 'loading') {
-    return (
-      <div data-my-work-readiness-state="loading" role="status" aria-live="polite">
-        Loading…
-      </div>
-    );
-  }
-  if (readinessVariant === 'error') {
-    return (
-      <div data-my-work-readiness-state="error" role="alert">
-        Unable to load.
-      </div>
-    );
-  }
   const statusMarker = sourceStatus ? (
     <span hidden data-my-work-source-status={sourceStatus} />
   ) : null;
+
   const workSummaryVm = selectWorkSummaryVm(homeEnvelope);
+  const sourceReadinessVm = selectSourceReadinessVm(homeEnvelope);
+
+  const adobeCard = (
+    <AdobeSignActionQueueCard
+      readinessVariant={readinessVariant}
+      homeEnvelope={homeEnvelope}
+      sourceStatus={sourceStatus}
+      onConnect={onConnectAdobeSign}
+    />
+  );
+
+  if (readinessVariant === 'loading') {
+    return (
+      <>
+        <span hidden data-my-work-readiness-state="loading" role="status" aria-live="polite" />
+        {adobeCard}
+      </>
+    );
+  }
+
+  if (readinessVariant === 'error') {
+    return (
+      <>
+        <span hidden data-my-work-readiness-state="error" role="alert" />
+        {adobeCard}
+      </>
+    );
+  }
+
   if (readinessVariant === 'ready') {
-    const queueHomeVm = selectAdobeQueueHomeVm(homeEnvelope);
     return (
       <>
         {statusMarker}
         <MyProjectsHomeCard getApiToken={getApiToken} />
         <WorkSummaryCard spanOverrides={HOME_READY_WORK_SUMMARY_OVERRIDES} vm={workSummaryVm} />
-        <AdobeSignActionQueueHomeCard vm={queueHomeVm} onSelectModule={onSelectModule} />
+        {adobeCard}
       </>
     );
   }
-  const queueStateVm = selectAdobeQueueStateVmFromHome(homeEnvelope, sourceStatus);
-  const sourceReadinessVm = selectSourceReadinessVm(homeEnvelope);
+
   return (
     <>
       {statusMarker}
       <MyProjectsHomeCard getApiToken={getApiToken} />
       <WorkSummaryCard spanOverrides={HOME_NON_READY_WORK_SUMMARY_OVERRIDES} vm={workSummaryVm} />
-      <AdobeSignQueueStateCard
-        spanOverrides={HOME_NON_READY_QUEUE_STATE_OVERRIDES}
-        vm={queueStateVm}
-      />
+      {adobeCard}
       <SourceReadinessCard
         spanOverrides={HOME_NON_READY_SOURCE_READINESS_OVERRIDES}
         vm={sourceReadinessVm}

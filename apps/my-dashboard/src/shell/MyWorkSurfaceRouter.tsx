@@ -7,6 +7,8 @@ export interface MyWorkSurfaceRouterProps {
   readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
   readonly onSelectModule?: (id: MyWorkModuleId) => void;
   readonly getApiToken?: () => Promise<string>;
+  /** Shell-wired Adobe Sign OAuth start callback. Forwarded transparently to the home surface. */
+  readonly onConnectAdobeSign?: () => Promise<void>;
 }
 
 /**
@@ -21,7 +23,11 @@ export interface MyWorkSurfaceRouterProps {
  * `MyWorkActiveEnvelopeProvider` (mounted by the shell), so the hero band
  * shares the same fetch.
  */
-export function MyWorkSurfaceRouter({ onSelectModule, getApiToken }: MyWorkSurfaceRouterProps) {
+export function MyWorkSurfaceRouter({
+  onSelectModule,
+  getApiToken,
+  onConnectAdobeSign,
+}: MyWorkSurfaceRouterProps) {
   const state = useMyWorkHomeEnvelopeContext();
   const readiness = selectSurfaceReadiness(state);
   return (
@@ -31,6 +37,7 @@ export function MyWorkSurfaceRouter({ onSelectModule, getApiToken }: MyWorkSurfa
       homeEnvelope={readiness.envelope}
       onSelectModule={onSelectModule}
       getApiToken={getApiToken}
+      onConnectAdobeSign={onConnectAdobeSign}
     />
   );
 }

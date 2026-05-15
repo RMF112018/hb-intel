@@ -9,9 +9,7 @@ import { MyWorkReadModelClientProvider } from '../runtime/MyWorkReadModelClientP
 
 import {
   MyWorkActiveEnvelopeProvider,
-  MyWorkFocusedAdobeEnvelopeProvider,
   MyWorkHomeEnvelopeProvider,
-  useMyWorkFocusedAdobeEnvelopeContext,
   useMyWorkHomeEnvelopeContext,
 } from './MyWorkActiveEnvelopeContext.js';
 
@@ -42,15 +40,6 @@ function HomeProbe() {
   );
 }
 
-function FocusedProbe() {
-  const state = useMyWorkFocusedAdobeEnvelopeContext();
-  return (
-    <span data-probe="focused" data-status={state.status}>
-      {state.status === 'success' ? state.envelope.sourceStatus : ''}
-    </span>
-  );
-}
-
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -76,36 +65,13 @@ describe('MyWorkActiveEnvelopeContext — providers', () => {
     expect(client.getAdobeSignActionQueue).not.toHaveBeenCalled();
   });
 
-  it('focused Adobe provider publishes the queue envelope and fetches it exactly once', async () => {
-    const client = makeStubClient();
-    const { container } = render(
-      <MyWorkReadModelClientProvider client={client}>
-        <MyWorkFocusedAdobeEnvelopeProvider>
-          <FocusedProbe />
-        </MyWorkFocusedAdobeEnvelopeProvider>
-      </MyWorkReadModelClientProvider>,
-    );
-    await waitFor(() =>
-      expect(container.querySelector('[data-probe="focused"]')?.getAttribute('data-status')).toBe(
-        'success',
-      ),
-    );
-    expect(container.querySelector('[data-probe="focused"]')?.textContent).toBe('available');
-    expect(client.getAdobeSignActionQueue).toHaveBeenCalledTimes(1);
-    expect(client.getMyWorkHome).not.toHaveBeenCalled();
-  });
-
-  it('consumer hook throws when used outside its matching provider', () => {
+  it('home consumer hook throws when used outside its provider', () => {
     // React's error reporting routes uncaught render errors through
     // console.error. Stub it to keep test output clean while still asserting
     // the throw via Testing Library's render-catch.
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
       expect(() => render(<HomeProbe />)).toThrow(/missing <MyWorkHomeEnvelopeProvider>/);
-      cleanup();
-      expect(() => render(<FocusedProbe />)).toThrow(
-        /missing <MyWorkFocusedAdobeEnvelopeProvider>/,
-      );
     } finally {
       errorSpy.mockRestore();
     }
