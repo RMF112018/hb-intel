@@ -92,7 +92,10 @@ export type AdobeSignSearchResult =
         | 'malformed-response'
         | 'invalid-access-point'
         | 'unknown';
+      readonly providerStatusCode?: number;
       readonly providerErrorCode?: string;
+      readonly providerResponseHasErrorField?: boolean;
+      readonly providerResponseHasCodeField?: boolean;
       readonly searchRequestDiagnostics?: {
         readonly endpointHost?: string;
         readonly endpointPath?: string;

@@ -199,7 +199,24 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
     expect(await client.search(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'http-4xx',
+      providerStatusCode: 400,
       providerErrorCode: 'invalid_request',
+      providerResponseHasErrorField: true,
+      providerResponseHasCodeField: false,
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+    });
+  });
+
+  it('HTTP 400 code shape → normalized providerErrorCode + code field presence', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ code: 'INVALID_REQUEST' }, 400));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'http-4xx',
+      providerStatusCode: 400,
+      providerErrorCode: 'invalid_request',
+      providerResponseHasErrorField: false,
+      providerResponseHasCodeField: true,
       searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
     });
   });
@@ -212,6 +229,25 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
     expect(await client.search(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'http-4xx',
+      providerStatusCode: 400,
+      providerResponseHasErrorField: true,
+      providerResponseHasCodeField: false,
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+    });
+  });
+
+  it('HTTP 400 non-JSON body → http-4xx with false/false provider field presence', async () => {
+    const fetchSpy = vi.fn(
+      async () =>
+        new Response('bad request', { status: 400, headers: { 'content-type': 'text/plain' } }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'http-4xx',
+      providerStatusCode: 400,
+      providerResponseHasErrorField: false,
+      providerResponseHasCodeField: false,
       searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
     });
   });
@@ -222,7 +258,26 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
     expect(await client.search(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'rate-limited',
+      providerStatusCode: 429,
       providerErrorCode: 'rate_limited',
+      providerResponseHasErrorField: true,
+      providerResponseHasCodeField: false,
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+    });
+  });
+
+  it('HTTP 429 non-JSON body → rate-limited with false/false provider field presence', async () => {
+    const fetchSpy = vi.fn(
+      async () =>
+        new Response('rate limited', { status: 429, headers: { 'content-type': 'text/plain' } }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'rate-limited',
+      providerStatusCode: 429,
+      providerResponseHasErrorField: false,
+      providerResponseHasCodeField: false,
       searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
     });
   });
@@ -233,6 +288,7 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
     expect(await client.search(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'http-5xx',
+      providerStatusCode: 500,
       searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
     });
   });

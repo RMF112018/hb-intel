@@ -285,8 +285,22 @@ export function createAdobeSignActionQueueAdapter(
         context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.search.result', {
           status: 'unreachable',
           reason: searchResult.reason,
+          ...(searchResult.providerStatusCode !== undefined
+            ? { providerStatusCode: searchResult.providerStatusCode }
+            : {}),
           ...(searchResult.providerErrorCode
             ? { providerErrorCode: searchResult.providerErrorCode }
+            : {}),
+          ...(searchResult.providerResponseHasErrorField !== undefined
+            ? {
+                searchProviderResponseHasErrorField:
+                  searchResult.providerResponseHasErrorField,
+              }
+            : {}),
+          ...(searchResult.providerResponseHasCodeField !== undefined
+            ? {
+                searchProviderResponseHasCodeField: searchResult.providerResponseHasCodeField,
+              }
             : {}),
           ...(searchResult.searchRequestDiagnostics
             ? {

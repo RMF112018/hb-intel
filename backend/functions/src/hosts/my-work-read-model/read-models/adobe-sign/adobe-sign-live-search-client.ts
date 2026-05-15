@@ -96,8 +96,28 @@ function normalizeSafeProviderErrorCode(raw: string | undefined): string | undef
 
 function readErrorCodeFromAdobeBody(body: unknown): string | undefined {
   if (body === null || typeof body !== 'object') return undefined;
-  const raw = (body as Record<string, unknown>).error;
-  return typeof raw === 'string' ? raw : undefined;
+  const asRecord = body as Record<string, unknown>;
+  const error = asRecord.error;
+  if (typeof error === 'string') return error;
+  const code = asRecord.code;
+  return typeof code === 'string' ? code : undefined;
+}
+
+function readProviderErrorFieldPresence(body: unknown): {
+  readonly providerResponseHasErrorField: boolean;
+  readonly providerResponseHasCodeField: boolean;
+} {
+  if (body === null || typeof body !== 'object') {
+    return {
+      providerResponseHasErrorField: false,
+      providerResponseHasCodeField: false,
+    };
+  }
+  const asRecord = body as Record<string, unknown>;
+  return {
+    providerResponseHasErrorField: Object.prototype.hasOwnProperty.call(asRecord, 'error'),
+    providerResponseHasCodeField: Object.prototype.hasOwnProperty.call(asRecord, 'code'),
+  };
 }
 
 function buildSearchRequestDiagnostics(url: string, body: Record<string, unknown>, method: string) {
@@ -230,7 +250,12 @@ export function createAdobeSignLiveSearchClient(
         return { status: 'unauthorized' };
       }
       if (response.status >= 500) {
-        return { status: 'unreachable', reason: 'http-5xx', searchRequestDiagnostics };
+        return {
+          status: 'unreachable',
+          reason: 'http-5xx',
+          providerStatusCode: response.status,
+          searchRequestDiagnostics,
+        };
       }
       if (response.status === 429) {
         let parsed: unknown;
@@ -240,10 +265,13 @@ export function createAdobeSignLiveSearchClient(
           parsed = undefined;
         }
         const providerErrorCode = normalizeSafeProviderErrorCode(readErrorCodeFromAdobeBody(parsed));
+        const providerFieldPresence = readProviderErrorFieldPresence(parsed);
         return {
           status: 'unreachable',
           reason: 'rate-limited',
+          providerStatusCode: 429,
           ...(providerErrorCode ? { providerErrorCode } : {}),
+          ...providerFieldPresence,
           searchRequestDiagnostics,
         };
       }
@@ -255,10 +283,13 @@ export function createAdobeSignLiveSearchClient(
           parsed = undefined;
         }
         const providerErrorCode = normalizeSafeProviderErrorCode(readErrorCodeFromAdobeBody(parsed));
+        const providerFieldPresence = readProviderErrorFieldPresence(parsed);
         return {
           status: 'unreachable',
           reason: 'http-4xx',
+          providerStatusCode: response.status,
           ...(providerErrorCode ? { providerErrorCode } : {}),
+          ...providerFieldPresence,
           searchRequestDiagnostics,
         };
       }

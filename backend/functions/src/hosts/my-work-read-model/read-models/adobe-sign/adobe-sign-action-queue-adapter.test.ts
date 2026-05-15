@@ -761,10 +761,13 @@ describe('createAdobeSignActionQueueAdapter', () => {
         buildDeps({
           searchClient: createDeterministicMockSearchClient([
             {
-              status: 'unreachable',
-              reason: 'malformed-response',
-              providerErrorCode: 'invalid_request',
-              searchRequestDiagnostics: {
+            status: 'unreachable',
+            reason: 'malformed-response',
+            providerStatusCode: 400,
+            providerErrorCode: 'invalid_request',
+            providerResponseHasErrorField: true,
+            providerResponseHasCodeField: false,
+            searchRequestDiagnostics: {
                 endpointHost: 'api.na4.adobesign.com',
                 endpointPath: '/api/rest/v6/search',
                 method: 'POST',
@@ -795,7 +798,10 @@ describe('createAdobeSignActionQueueAdapter', () => {
           properties: {
             status: 'unreachable',
             reason: 'malformed-response',
+            providerStatusCode: 400,
             providerErrorCode: 'invalid_request',
+            searchProviderResponseHasErrorField: true,
+            searchProviderResponseHasCodeField: false,
             searchEndpointHost: 'api.na4.adobesign.com',
             searchEndpointPath: '/api/rest/v6/search',
             searchMethod: 'POST',

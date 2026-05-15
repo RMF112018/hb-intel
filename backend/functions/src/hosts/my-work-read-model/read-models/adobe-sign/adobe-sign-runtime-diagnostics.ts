@@ -52,6 +52,7 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly endpointHost?: string;
   readonly status?: string;
   readonly reason?: string;
+  readonly providerStatusCode?: number;
   readonly providerErrorCode?: string;
   readonly refreshEndpointHost?: string;
   readonly refreshEndpointPath?: string;
@@ -78,6 +79,8 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly searchMalformedHasTopLevelAgreementsArray?: boolean;
   readonly searchMalformedHasSearchAgreementsResponseField?: boolean;
   readonly searchMalformedHasNextCursorField?: boolean;
+  readonly searchProviderResponseHasErrorField?: boolean;
+  readonly searchProviderResponseHasCodeField?: boolean;
   readonly sourceStatus?: string;
   readonly resultStage?: AdobeSignActionQueueResultStage;
   readonly warningCodes?: readonly string[];
