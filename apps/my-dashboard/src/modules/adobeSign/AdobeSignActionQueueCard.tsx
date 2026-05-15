@@ -129,10 +129,7 @@ export function AdobeSignActionQueueCard({
   const isConnecting = connectState === 'connecting';
   const ctaLabel = isConnecting ? 'Connecting…' : (stateCopy.ctaLabel ?? 'Connect Adobe Sign');
 
-  const showMetrics =
-    stateMarker === 'partial' ||
-    stateMarker === 'available-items' ||
-    stateMarker === 'available-empty';
+  const showMetrics = stateMarker === 'partial' || stateMarker === 'available-items';
 
   const showItemList = stateMarker === 'partial' || stateMarker === 'available-items';
 

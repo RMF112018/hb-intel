@@ -10,7 +10,11 @@ import {
   MY_WORK_HOME_PRINCIPAL_UNRESOLVED,
   MY_WORK_HOME_SOURCE_UNAVAILABLE,
 } from '@hbc/models/myWork/fixtures';
-import type { MyWorkHomeReadModel, MyWorkReadModelEnvelope } from '@hbc/models/myWork';
+import type {
+  MyWorkAdobeSignActionQueueItem,
+  MyWorkHomeReadModel,
+  MyWorkReadModelEnvelope,
+} from '@hbc/models/myWork';
 
 import { MyWorkBentoGrid } from '../../layout/MyWorkBentoGrid.js';
 
@@ -279,6 +283,8 @@ describe('AdobeSignActionQueueCard — available + zero items', () => {
     expect(card.textContent).toContain('No Adobe Sign agreements currently need your action.');
     expect(container.querySelector('[data-my-work-empty-queue]')).not.toBeNull();
     expect(container.querySelector('[data-my-work-agreement-list]')).toBeNull();
+    // State matrix 1.8: metrics are omitted in the ready + zero-items state.
+    expect(container.querySelector('[data-adobe-sign-action-queue-metrics]')).toBeNull();
   });
 });
 
@@ -305,9 +311,12 @@ describe('AdobeSignActionQueueCard — item handoff anchor', () => {
       readinessVariant: 'ready',
       homeEnvelope: MY_WORK_HOME_AVAILABLE,
     });
-    // The available fixture is expected to include at least one item with sourceOpenUrl.
-    // If not, the anchor selector will simply find none — the test asserts the rendering rule.
     const anchors = container.querySelectorAll('[data-adobe-sign-item-open-action="start"]');
+    // Positive existence: at least one preview item in MY_WORK_HOME_AVAILABLE carries a
+    // policy-approved sourceOpenUrl, so the consolidated card must render at least one
+    // handoff anchor. Asserting nonzero guards against a regression that strips all
+    // anchors (which the prior forEach-only check silently allowed).
+    expect(anchors.length).toBeGreaterThan(0);
     anchors.forEach((anchor) => {
       expect(anchor.tagName).toBe('A');
       expect(anchor.getAttribute('target')).toBe('_blank');
@@ -317,17 +326,33 @@ describe('AdobeSignActionQueueCard — item handoff anchor', () => {
     });
   });
 
-  it('renders no anchor when no item exposes sourceOpenUrl (no synthesized URLs)', () => {
-    // ADOBE_SIGN_QUEUE_PARTIAL fixture's preview items do not carry sourceOpenUrl
-    // unless the model defines one. The assertion is conditional: any anchors present
-    // must have an href; if none are present, that is also acceptable.
+  it('renders no handoff anchor when populated items omit sourceOpenUrl (no synthesized URLs)', () => {
+    // Clone the available envelope and strip sourceOpenUrl from every preview item so
+    // the card still receives a populated list but no truthful row-level URLs. This
+    // proves Guardrail #5 (no synthesized URLs) by forcing the populated-items path
+    // through a zero-URL fixture — far stronger than the previous test, which relied
+    // on a fixture that may or may not have carried sourceOpenUrl.
+    const sanitizedPreviewItems = MY_WORK_HOME_AVAILABLE.data.adobeSignActionQueue.previewItems.map(
+      ({ sourceOpenUrl: _sourceOpenUrl, ...item }) => item as MyWorkAdobeSignActionQueueItem,
+    );
+    const noOpenUrlEnvelope: MyWorkReadModelEnvelope<MyWorkHomeReadModel> = {
+      ...MY_WORK_HOME_AVAILABLE,
+      data: {
+        ...MY_WORK_HOME_AVAILABLE.data,
+        adobeSignActionQueue: {
+          ...MY_WORK_HOME_AVAILABLE.data.adobeSignActionQueue,
+          previewItems: sanitizedPreviewItems,
+        },
+      },
+    };
     const { container } = renderCard({
       readinessVariant: 'ready',
-      homeEnvelope: MY_WORK_HOME_PARTIAL,
+      homeEnvelope: noOpenUrlEnvelope,
     });
-    container.querySelectorAll('[data-adobe-sign-item-open-action="start"]').forEach((anchor) => {
-      expect(anchor.getAttribute('href')).toBeTruthy();
-    });
+    // The item list still renders (populated, ready).
+    expect(container.querySelectorAll('[data-my-work-agreement-item]').length).toBeGreaterThan(0);
+    // But no handoff anchor renders because no item carries a truthful URL.
+    expect(container.querySelector('[data-adobe-sign-item-open-action="start"]')).toBeNull();
   });
 });
 
