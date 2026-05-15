@@ -312,7 +312,23 @@ describe('refresh-client contract: no raw Adobe payload passthrough', () => {
 
 describe('token service — runtime result telemetry', () => {
   it('emits tokenAcquisition + refresh result events for refresh unreachable', async () => {
-    const { service } = buildService(activeGrant(), [{ status: 'unreachable', reason: 'http-5xx' }]);
+    const { service } = buildService(activeGrant(), [
+      {
+        status: 'unreachable',
+        reason: 'http-4xx',
+        providerErrorCode: 'invalid_request',
+        refreshRequestDiagnostics: {
+          endpointHost: 'api.na1.adobesign.com',
+          endpointPath: '/oauth/v2/refresh',
+          endpointSelectionMode: 'grant-api-access-point',
+          bodyFieldCount: 4,
+          hasGrantTypeField: true,
+          hasRefreshTokenField: true,
+          hasClientIdField: true,
+          hasClientSecretField: true,
+        },
+      },
+    ]);
     const { reporter, events } = createReporterCapture();
 
     const result = await service.getAccessToken(ACTOR_KEY, NOW, reporter);
@@ -320,7 +336,19 @@ describe('token service — runtime result telemetry', () => {
     expect(events).toEqual([
       {
         name: 'adobeSign.read.refresh.result',
-        properties: { status: 'unreachable', reason: 'http-5xx' },
+        properties: {
+          status: 'unreachable',
+          reason: 'http-4xx',
+          providerErrorCode: 'invalid_request',
+          refreshEndpointHost: 'api.na1.adobesign.com',
+          refreshEndpointPath: '/oauth/v2/refresh',
+          refreshEndpointSelectionMode: 'grant-api-access-point',
+          refreshBodyFieldCount: 4,
+          refreshHasGrantTypeField: true,
+          refreshHasRefreshTokenField: true,
+          refreshHasClientIdField: true,
+          refreshHasClientSecretField: true,
+        },
       },
       {
         name: 'adobeSign.read.tokenAcquisition.result',
@@ -339,6 +367,9 @@ describe('token service — runtime result telemetry', () => {
     expect(serialized).not.toContain(SECRET_NEW_ACCESS);
     expect(serialized).not.toContain('refresh_token');
     expect(serialized).not.toContain('client_secret');
+    expect(serialized).not.toContain('super-secret-do-not-leak');
+    expect(serialized).not.toContain('rt-old-do-not-leak');
+    expect(serialized).not.toContain('rt-new-do-not-leak');
     expect(serialized).not.toContain('oauth');
   });
 });

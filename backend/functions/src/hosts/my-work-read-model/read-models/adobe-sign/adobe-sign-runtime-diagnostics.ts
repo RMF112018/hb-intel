@@ -52,6 +52,15 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly endpointHost?: string;
   readonly status?: string;
   readonly reason?: string;
+  readonly providerErrorCode?: string;
+  readonly refreshEndpointHost?: string;
+  readonly refreshEndpointPath?: string;
+  readonly refreshEndpointSelectionMode?: string;
+  readonly refreshBodyFieldCount?: number;
+  readonly refreshHasGrantTypeField?: boolean;
+  readonly refreshHasRefreshTokenField?: boolean;
+  readonly refreshHasClientIdField?: boolean;
+  readonly refreshHasClientSecretField?: boolean;
   readonly sourceStatus?: string;
   readonly resultStage?: AdobeSignActionQueueResultStage;
   readonly warningCodes?: readonly string[];

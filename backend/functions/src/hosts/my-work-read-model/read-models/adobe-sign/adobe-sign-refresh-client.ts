@@ -71,7 +71,26 @@ export type AdobeSignRefreshResult =
        */
       readonly status: 'unreachable';
       /** Closed enum; never a raw vendor body string. */
-      readonly reason?: 'network' | 'http-5xx' | 'store-unavailable' | 'unknown';
+      readonly reason?:
+        | 'network'
+        | 'timeout'
+        | 'http-4xx'
+        | 'http-5xx'
+        | 'store-unavailable'
+        | 'malformed-response'
+        | 'invalid-access-point'
+        | 'unknown';
+      readonly providerErrorCode?: string;
+      readonly refreshRequestDiagnostics?: {
+        readonly endpointHost?: string;
+        readonly endpointPath?: string;
+        readonly endpointSelectionMode?: string;
+        readonly bodyFieldCount?: number;
+        readonly hasGrantTypeField?: boolean;
+        readonly hasRefreshTokenField?: boolean;
+        readonly hasClientIdField?: boolean;
+        readonly hasClientSecretField?: boolean;
+      };
     };
 
 export interface IAdobeSignRefreshClient {

@@ -55,6 +55,19 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
+function expectedRefreshDiagnostics() {
+  return {
+    endpointHost: 'api.na1.adobesign.com',
+    endpointPath: '/oauth/v2/refresh',
+    endpointSelectionMode: 'grant-api-access-point',
+    bodyFieldCount: 4,
+    hasGrantTypeField: true,
+    hasRefreshTokenField: true,
+    hasClientIdField: true,
+    hasClientSecretField: true,
+  };
+}
+
 interface FakeStore extends IAdobeSignRefreshTokenStore {
   readonly getCalls: AdobeSignRefreshTokenCiphertextEnvelope[];
   readonly putCalls: Array<{ actorKey: string; envelope: AdobeSignRefreshTokenCiphertextEnvelope }>;
@@ -223,13 +236,26 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
     });
   });
 
-  it('HTTP 400 with unknown error → unreachable + unknown', async () => {
+  it('HTTP 400 invalid_request → unreachable + http-4xx + diagnostics', async () => {
     const { deps, fetch } = buildDeps();
-    fetch.mockResolvedValueOnce(jsonResponse({ error: 'something_else' }, 400));
+    fetch.mockResolvedValueOnce(jsonResponse({ error: 'invalid_request' }, 400));
     const client = createAdobeSignLiveRefreshClient(deps);
     expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
       status: 'unreachable',
-      reason: 'unknown',
+      reason: 'http-4xx',
+      providerErrorCode: 'invalid_request',
+      refreshRequestDiagnostics: expectedRefreshDiagnostics(),
+    });
+  });
+
+  it('HTTP 400 with unsafe provider error value omits providerErrorCode', async () => {
+    const { deps, fetch } = buildDeps();
+    fetch.mockResolvedValueOnce(jsonResponse({ error: 'Client secret is invalid' }, 400));
+    const client = createAdobeSignLiveRefreshClient(deps);
+    expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
+      status: 'unreachable',
+      reason: 'http-4xx',
+      refreshRequestDiagnostics: expectedRefreshDiagnostics(),
     });
   });
 
@@ -240,6 +266,7 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
     expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
       status: 'unreachable',
       reason: 'http-5xx',
+      refreshRequestDiagnostics: expectedRefreshDiagnostics(),
     });
   });
 
@@ -250,10 +277,11 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
     expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
       status: 'unreachable',
       reason: 'network',
+      refreshRequestDiagnostics: expectedRefreshDiagnostics(),
     });
   });
 
-  it('AbortError throw → unreachable + network (refresh union has no timeout enum)', async () => {
+  it('AbortError throw → unreachable + timeout', async () => {
     const { deps, fetch } = buildDeps();
     const err = new Error('aborted') as Error & { name: string };
     err.name = 'AbortError';
@@ -261,11 +289,12 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
     const client = createAdobeSignLiveRefreshClient(deps);
     expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
       status: 'unreachable',
-      reason: 'network',
+      reason: 'timeout',
+      refreshRequestDiagnostics: expectedRefreshDiagnostics(),
     });
   });
 
-  it('Malformed (non-JSON) 200 body → unreachable + unknown', async () => {
+  it('Malformed (non-JSON) 200 body → unreachable + malformed-response', async () => {
     const { deps, fetch } = buildDeps();
     fetch.mockResolvedValueOnce(
       new Response('not json', { status: 200, headers: { 'content-type': 'text/plain' } }),
@@ -273,17 +302,19 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
     const client = createAdobeSignLiveRefreshClient(deps);
     expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
       status: 'unreachable',
-      reason: 'unknown',
+      reason: 'malformed-response',
+      refreshRequestDiagnostics: expectedRefreshDiagnostics(),
     });
   });
 
-  it('HTTP 200 missing required field → unreachable + unknown', async () => {
+  it('HTTP 200 missing required field → unreachable + malformed-response', async () => {
     const { deps, fetch } = buildDeps();
     fetch.mockResolvedValueOnce(jsonResponse({ access_token: 'x', expires_in: 3600 }));
     const client = createAdobeSignLiveRefreshClient(deps);
     expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
       status: 'unreachable',
-      reason: 'unknown',
+      reason: 'malformed-response',
+      refreshRequestDiagnostics: expectedRefreshDiagnostics(),
     });
   });
 
@@ -350,7 +381,7 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
     expect(result).toEqual({ status: 'unreachable', reason: 'store-unavailable' });
   });
 
-  it('rejects a non-allow-listed adobeApiAccessPoint with unreachable + unknown; no decrypt or fetch', async () => {
+  it('rejects a non-allow-listed adobeApiAccessPoint with unreachable + invalid-access-point; no decrypt or fetch', async () => {
     const { deps, refreshTokenStore, cipher, fetch } = buildDeps();
     const client = createAdobeSignLiveRefreshClient(deps);
     const result = await client.refresh({
@@ -358,13 +389,13 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
       grant: grantFixture({ adobeApiAccessPoint: 'https://attacker.example.com' }),
       now: NOW,
     });
-    expect(result).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(result).toEqual({ status: 'unreachable', reason: 'invalid-access-point' });
     expect(cipher.decryptCalls).toEqual([]);
     expect(refreshTokenStore.getCalls).toEqual([]);
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it('rejects a non-HTTPS adobeApiAccessPoint with unreachable + unknown', async () => {
+  it('rejects a non-HTTPS adobeApiAccessPoint with unreachable + invalid-access-point', async () => {
     const { deps, fetch } = buildDeps();
     const client = createAdobeSignLiveRefreshClient(deps);
     const result = await client.refresh({
@@ -372,7 +403,7 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
       grant: grantFixture({ adobeApiAccessPoint: 'http://api.na1.adobesign.com' }),
       now: NOW,
     });
-    expect(result).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(result).toEqual({ status: 'unreachable', reason: 'invalid-access-point' });
     expect(fetch).not.toHaveBeenCalled();
   });
 });

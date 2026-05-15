@@ -94,6 +94,13 @@ function readErrorCodeFromAdobeBody(body: unknown): string | undefined {
   return typeof raw === 'string' ? raw : undefined;
 }
 
+function normalizeSafeProviderErrorCode(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const normalized = raw.trim().toLowerCase();
+  if (normalized.length === 0 || normalized.length > 64) return undefined;
+  return /^[a-z0-9_-]+$/.test(normalized) ? normalized : undefined;
+}
+
 function parseScopes(raw: unknown): readonly string[] {
   if (typeof raw !== 'string' || raw.trim().length === 0) return [];
   return Array.from(
@@ -106,6 +113,20 @@ function parseScopes(raw: unknown): readonly string[] {
   );
 }
 
+function buildRefreshRequestDiagnostics(url: string, body: URLSearchParams) {
+  const parsed = new URL(url);
+  return {
+    endpointHost: parsed.hostname,
+    endpointPath: parsed.pathname,
+    endpointSelectionMode: 'grant-api-access-point',
+    bodyFieldCount: Array.from(body.keys()).length,
+    hasGrantTypeField: body.has('grant_type'),
+    hasRefreshTokenField: body.has('refresh_token'),
+    hasClientIdField: body.has('client_id'),
+    hasClientSecretField: body.has('client_secret'),
+  };
+}
+
 export function createAdobeSignLiveRefreshClient(
   deps: AdobeSignLiveRefreshClientDeps,
 ): IAdobeSignRefreshClient {
@@ -116,7 +137,7 @@ export function createAdobeSignLiveRefreshClient(
     async refresh(input: AdobeSignRefreshInput): Promise<AdobeSignRefreshResult> {
       const apiAccessPoint = input.grant.adobeApiAccessPoint;
       if (!isAllowedAdobeAccessPoint(apiAccessPoint)) {
-        return { status: 'unreachable', reason: 'unknown' };
+        return { status: 'unreachable', reason: 'invalid-access-point' };
       }
 
       // ---------------------------------------------------------------
@@ -159,6 +180,7 @@ export function createAdobeSignLiveRefreshClient(
         client_id: deps.clientId,
         client_secret: deps.clientSecret,
       });
+      const refreshRequestDiagnostics = buildRefreshRequestDiagnostics(url, body);
 
       const controller = new AbortController();
       const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
@@ -175,11 +197,10 @@ export function createAdobeSignLiveRefreshClient(
         });
       } catch (err: unknown) {
         const name = (err as { name?: string }).name;
-        // Refresh union has no 'timeout' enum; map to 'network'.
         if (name === 'AbortError') {
-          return { status: 'unreachable', reason: 'network' };
+          return { status: 'unreachable', reason: 'timeout', refreshRequestDiagnostics };
         }
-        return { status: 'unreachable', reason: 'network' };
+        return { status: 'unreachable', reason: 'network', refreshRequestDiagnostics };
       } finally {
         clearTimeout(timeoutHandle);
       }
@@ -188,7 +209,7 @@ export function createAdobeSignLiveRefreshClient(
       // 4. Response mapping.
       // ---------------------------------------------------------------
       if (response.status >= 500) {
-        return { status: 'unreachable', reason: 'http-5xx' };
+        return { status: 'unreachable', reason: 'http-5xx', refreshRequestDiagnostics };
       }
       if (response.status >= 400) {
         let parsed: unknown;
@@ -201,17 +222,23 @@ export function createAdobeSignLiveRefreshClient(
         if (errorCode === 'invalid_grant' || errorCode === 'invalid_token') {
           return { status: 'invalid-grant' };
         }
-        return { status: 'unreachable', reason: 'unknown' };
+        const providerErrorCode = normalizeSafeProviderErrorCode(errorCode);
+        return {
+          status: 'unreachable',
+          reason: 'http-4xx',
+          ...(providerErrorCode ? { providerErrorCode } : {}),
+          refreshRequestDiagnostics,
+        };
       }
 
       let parsed: unknown;
       try {
         parsed = await response.json();
       } catch {
-        return { status: 'unreachable', reason: 'unknown' };
+        return { status: 'unreachable', reason: 'malformed-response', refreshRequestDiagnostics };
       }
       if (!isAdobeRefreshSuccessBody(parsed)) {
-        return { status: 'unreachable', reason: 'unknown' };
+        return { status: 'unreachable', reason: 'malformed-response', refreshRequestDiagnostics };
       }
 
       const successBody = parsed;

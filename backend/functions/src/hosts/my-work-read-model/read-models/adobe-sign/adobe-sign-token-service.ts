@@ -29,7 +29,7 @@
 
 import type { AdobeSignActorKey } from './adobe-sign-actor-normalizer.js';
 import type { IAdobeSignGrantStore } from './adobe-sign-grant-store.js';
-import type { IAdobeSignRefreshClient } from './adobe-sign-refresh-client.js';
+import type { AdobeSignRefreshResult, IAdobeSignRefreshClient } from './adobe-sign-refresh-client.js';
 import type { AdobeSignRuntimeDiagnosticReporter } from './adobe-sign-runtime-diagnostics.js';
 
 /**
@@ -124,12 +124,32 @@ export function createAdobeSignTokenService(
         });
       };
       const trackRefreshResult = (
-        status: 'ok' | 'invalid-grant' | 'unreachable',
-        reason?: string,
+        refresh:
+          | { readonly status: 'ok' }
+          | { readonly status: 'invalid-grant' }
+          | Extract<AdobeSignRefreshResult, { readonly status: 'unreachable' }>,
       ) => {
         diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.refresh.result', {
-          status,
-          reason,
+          status: refresh.status,
+          ...(refresh.status === 'unreachable' ? { reason: refresh.reason } : {}),
+          ...(refresh.status === 'unreachable' && refresh.providerErrorCode
+            ? { providerErrorCode: refresh.providerErrorCode }
+            : {}),
+          ...(refresh.status === 'unreachable' && refresh.refreshRequestDiagnostics
+            ? {
+                refreshEndpointHost: refresh.refreshRequestDiagnostics.endpointHost,
+                refreshEndpointPath: refresh.refreshRequestDiagnostics.endpointPath,
+                refreshEndpointSelectionMode:
+                  refresh.refreshRequestDiagnostics.endpointSelectionMode,
+                refreshBodyFieldCount: refresh.refreshRequestDiagnostics.bodyFieldCount,
+                refreshHasGrantTypeField: refresh.refreshRequestDiagnostics.hasGrantTypeField,
+                refreshHasRefreshTokenField:
+                  refresh.refreshRequestDiagnostics.hasRefreshTokenField,
+                refreshHasClientIdField: refresh.refreshRequestDiagnostics.hasClientIdField,
+                refreshHasClientSecretField:
+                  refresh.refreshRequestDiagnostics.hasClientSecretField,
+              }
+            : {}),
         });
       };
 
@@ -182,14 +202,14 @@ export function createAdobeSignTokenService(
         // The refresh client is contract-bound to return a normalized
         // result; treat any thrown exception as a source-unavailable
         // outcome so callers cannot leak a stack trace upstream.
-        trackRefreshResult('unreachable', 'network');
+        trackRefreshResult({ status: 'unreachable', reason: 'network' });
         const result = { status: 'source-unavailable', reason: 'adobe-unreachable' } as const;
         trackTokenResult(result);
         return result;
       }
 
       if (refresh.status === 'invalid-grant') {
-        trackRefreshResult('invalid-grant');
+        trackRefreshResult({ status: 'invalid-grant' });
         await deps.grantStore.markReauthorizationRequired(actorKey, {
           kind: 'refresh-failed',
           observedAtUtc: now.toISOString(),
@@ -200,13 +220,13 @@ export function createAdobeSignTokenService(
       }
 
       if (refresh.status === 'unreachable') {
-        trackRefreshResult('unreachable', refresh.reason);
+        trackRefreshResult(refresh);
         const result = { status: 'source-unavailable', reason: 'adobe-unreachable' } as const;
         trackTokenResult(result);
         return result;
       }
 
-      trackRefreshResult('ok');
+      trackRefreshResult({ status: 'ok' });
 
       // refresh.status === 'ok'
       await deps.grantStore.upsertGrant({
