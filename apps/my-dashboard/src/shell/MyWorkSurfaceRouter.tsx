@@ -1,11 +1,10 @@
-import type { MyWorkModuleId, MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
+import type { MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
 import { selectSurfaceReadiness } from '../state/myWorkSurfaceReadiness.js';
 import { MyWorkHomeSurface } from '../surfaces/home/MyWorkHomeSurface.js';
 import { useMyWorkHomeEnvelopeContext } from './MyWorkActiveEnvelopeContext.js';
 
 export interface MyWorkSurfaceRouterProps {
   readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
-  readonly onSelectModule?: (id: MyWorkModuleId) => void;
   readonly getApiToken?: () => Promise<string>;
   /** Shell-wired Adobe Sign OAuth start callback. Forwarded transparently to the home surface. */
   readonly onConnectAdobeSign?: () => Promise<void>;
@@ -24,7 +23,6 @@ export interface MyWorkSurfaceRouterProps {
  * shares the same fetch.
  */
 export function MyWorkSurfaceRouter({
-  onSelectModule,
   getApiToken,
   onConnectAdobeSign,
 }: MyWorkSurfaceRouterProps) {
@@ -35,7 +33,6 @@ export function MyWorkSurfaceRouter({
       readinessVariant={readiness.variant}
       sourceStatus={readiness.sourceStatus}
       homeEnvelope={readiness.envelope}
-      onSelectModule={onSelectModule}
       getApiToken={getApiToken}
       onConnectAdobeSign={onConnectAdobeSign}
     />

@@ -22,8 +22,6 @@ import {
   selectAdobeQueueSummaryVmFromSummary,
   selectAdobeSignActionQueueStateCopy,
   selectAdobeSignSourceStatus,
-  selectSourceReadinessVm,
-  selectWorkSummaryVm,
   sourceStatusCopy,
 } from './myWorkCardViewModel.js';
 
@@ -92,38 +90,6 @@ describe('sourceStatusCopy', () => {
     for (const s of allStatuses) {
       expect(sourceStatusCopy(s).ctaApplicable).toBe(s === 'authorization-required');
     }
-  });
-});
-
-describe('selectWorkSummaryVm', () => {
-  it('returns null actionItemCount + pending refresh when envelope is undefined', () => {
-    const vm = selectWorkSummaryVm(undefined);
-    expect(vm.actionItemCount).toBeNull();
-    expect(vm.lastRefreshedLabel).toBe('Pending source connection');
-    expect(vm.connectedSourcesLabel).toBe('Adobe Sign');
-  });
-
-  it('returns the total action item count from an "available" home envelope', () => {
-    const vm = selectWorkSummaryVm(MY_WORK_HOME_AVAILABLE);
-    expect(vm.actionItemCount).toBe(6);
-  });
-});
-
-describe('selectSourceReadinessVm', () => {
-  it('returns empty items when envelope is undefined', () => {
-    expect(selectSourceReadinessVm(undefined).items).toEqual([]);
-  });
-
-  it('emits one item per source (adobe-sign) when home envelope is available', () => {
-    const vm = selectSourceReadinessVm(MY_WORK_HOME_AVAILABLE);
-    expect(vm.items).toHaveLength(1);
-    expect(vm.items[0].sourceSystem).toBe('adobe-sign');
-    expect(vm.items[0].sourceStatus).toBe('available');
-  });
-
-  it('marks ctaApplicable=true for authorization-required posture', () => {
-    const vm = selectSourceReadinessVm(MY_WORK_HOME_AUTHORIZATION_REQUIRED);
-    expect(vm.items[0].statusCopy.ctaApplicable).toBe(true);
   });
 });
 

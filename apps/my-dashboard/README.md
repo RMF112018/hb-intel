@@ -1,34 +1,73 @@
 # @hbc/spfx-my-dashboard
 
-Standalone SPFx app domain for the HB Intel **My Dashboard** surface, hosted
-on the SharePoint **MyDashboard** communication site as a full-width
-section on the site home page.
+Standalone SPFx app domain for the HB Intel **My Dashboard** surface,
+hosted on the SharePoint **MyDashboard** communication site as a
+full-bleed section on the site home page.
 
-## Scope (B02)
+## What this is
 
-B02 is the **runtime/package/auth foundation** batch for this app. This
-package is brought into existence at B02 to carry:
+A single-page personal launch pad. The app renders one primary surface —
+**My Work** — composed of a compact personalized greeting header and a
+two-card bento grid:
 
-- The standalone SPFx package/manifest identity (`hb-intel-my-dashboard.sppkg`).
-- The runtime configuration and production-readiness primitives (Prompt 02).
-- The `mount.tsx` bootstrap with the protected-API token-provider seam (Prompt 03).
-- The packaging-orchestrator/domain-registry/runtime-marker integration (Prompt 04).
-- B02 closeout and packaging-validation posture (Prompt 05).
+1. **My Projects** — assigned projects with dual SharePoint + Procore
+   launch handoffs.
+2. **Adobe Sign Action Queue** — pending agreements that need the user's
+   signature, approval, acceptance, acknowledgement, form-filling, or
+   delegation.
 
-**B02 does NOT implement:**
+There is no visible tab navigation, no module dropdown launcher, and no
+focused-module route. Each card owns its full state matrix (loading,
+unavailable, authorization-required, configuration-required,
+principal-unresolved, partial, empty, populated) inline on the home
+page.
 
-- My Work shell UI, navigation, router state, or queue UI.
-- Adobe Sign Action Queue UI or Adobe OAuth/provider/token-store machinery.
-- Backend `/api/my-work/me/...` routes.
-- Microsoft Graph / PnP / SharePoint REST runtime.
-- Procore / Document Crunch runtime.
-- Read-model contracts beyond compile safety.
-- SharePoint page authoring.
-- Hosted Playwright evidence lane.
-- Any property-pane configuration surface.
+## Current rendered posture
 
-UI shell, navigation, read models, backend routes, and provider wiring are
-delivered by **later batches (B03 – B08)** built on top of this foundation.
+- **Header.** `MyWorkHeroBand` — authenticated time-of-day personalized
+  greeting (no telemetry strip, no governance microcopy lane).
+- **Body.** `MyWorkBentoGrid` containing exactly two production cards in
+  static order: My Projects → Adobe Sign Action Queue.
+- **Span choreography.** Locked per responsive mode via
+  `MyWorkCardSpanOverrides` declared in
+  `src/surfaces/home/MyWorkHomeSurface.tsx`:
+
+  | Mode | My Projects | Adobe Sign |
+  | --- | ---: | ---: |
+  | phone | 1 | 1 |
+  | tabletPortrait | 2 | 2 |
+  | tabletLandscape | 6 | 6 |
+  | smallLaptop | 8 | 8 |
+  | standardLaptop | 6 | 4 |
+  | largeLaptop | 7 | 5 |
+  | desktop | 7 | 5 |
+  | ultrawide | 7 | 5 |
+
+- **Envelope-state variants.** When the read-model envelope is loading
+  or in error, only the Adobe Sign card renders (it owns its loading
+  and backend-unavailable states); My Projects rejoins as soon as the
+  envelope resolves.
+
+## Source-of-record handoff
+
+The app renders launch affordances; it does not own the source systems.
+
+- My Projects launches **SharePoint** and **Procore** via per-row
+  read-model action items. Anchors are policy-approved, backend-derived
+  URLs only — no synthesized handoffs.
+- Adobe Sign agreement rows expose an `Open in Adobe Sign` anchor when
+  the read-model item supplies a `sourceOpenUrl`; otherwise no anchor is
+  rendered.
+
+## Authentication
+
+- Web API permission request: `HB SharePoint Creator` (scope
+  `access_as_user`).
+- Adobe Sign OAuth start is shell-wired (`MyWorkShell.onConnectAdobeSign`
+  → backend `POST /api/my-work/me/adobe-sign/oauth/start`). The
+  consolidated Adobe Sign card renders the **Connect Adobe Sign** CTA
+  only when `sourceStatus === 'authorization-required'` AND the shell
+  supplies the callback.
 
 ## Identity
 
@@ -39,22 +78,14 @@ delivered by **later batches (B03 – B08)** built on top of this foundation.
 | Package artifact | `solution/hb-intel-my-dashboard.sppkg` |
 | Web-part alias | `MyDashboardWebPart` |
 | Toolbox group | HB Intel |
-| Target host | SharePointWebPart (full-bleed, MyDashboard communication-site home) |
+| Target host | SharePointWebPart (full-bleed, MyDashboard
+  communication-site home) |
 
-## Protected API posture
+The SPFx manifest version is owned by `config/package-solution.json`.
+Package-local commands below do not generate the `.sppkg` artifact;
+SPFx packaging is a separate lane.
 
-The package declares the following web-API permission request, consumed
-once the runtime auth bootstrap lands in Prompt 03:
-
-| Resource | Scope |
-| --- | --- |
-| `HB SharePoint Creator` | `access_as_user` |
-
-No live API call is issued from this app at B02 Prompt 01. Provider, token
-store, and bootstrap-time auth handshake land in later prompts of this
-batch and are gated by a B02-level integration plan.
-
-## File Tree (B02 Prompt 01 scaffold)
+## Source tree
 
 ```text
 apps/my-dashboard/
@@ -62,13 +93,53 @@ apps/my-dashboard/
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
+├── vitest.config.ts
 ├── config/
 │   └── package-solution.json
 └── src/
-    └── webparts/
-        └── myDashboard/
-            └── MyDashboardWebPart.manifest.json
+    ├── api/                  Backend read-model client + factory.
+    ├── layout/               MyWorkBentoGrid, MyWorkCard, footprints,
+    │                         container-breakpoint hook.
+    ├── modules/
+    │   ├── adobeSign/        Consolidated AdobeSignActionQueueCard.
+    │   └── myProjects/       MyProjectsHomeCard (compressed launch pad).
+    ├── runtime/              Read-model client provider, callback hook,
+    │                         data-path stamping.
+    ├── shell/                MyWorkShell, surface router, hero band,
+    │                         OAuth callback banner, active-envelope
+    │                         context.
+    ├── state/                Pure selectors / view-models, source-status
+    │                         copy, surface readiness, shell state hook.
+    └── surfaces/home/        MyWorkHomeSurface (composes the two-card
+                              bento under the locked choreography).
 ```
 
-`src/mount.tsx`, `src/MyDashboardApp.tsx`, and any runtime config / token
-provider / read-model client land in Prompts 02 – 04 of B02.
+## Validation
+
+Run from the repo root:
+
+```bash
+pnpm --filter @hbc/spfx-my-dashboard check-types
+pnpm --filter @hbc/spfx-my-dashboard test
+pnpm --filter @hbc/spfx-my-dashboard build
+```
+
+- `check-types` — `tsc --noEmit`.
+- `test` — Vitest run against `src/**/*.test.tsx?`.
+- `build` — `tsc --noEmit && vite build` (package-local TypeScript +
+  Vite build). Does **not** run SPFx gulp bundling and does **not**
+  produce the `.sppkg` artifact; SPFx packaging is performed by a
+  separate command in the packaging closeout lane.
+
+Hosted-tenant evidence (app catalog upload, `.sppkg` upload, real
+SharePoint screenshot proof) is operator-pending and is not produced by
+the package-local commands above.
+
+## Reference docs
+
+Operator and diagnostic references that ship with this app live under:
+
+- `docs/reference/spfx-surfaces/my-dashboard/adobe-sign-authorization-required-flow.md`
+- `docs/reference/spfx-surfaces/my-dashboard/my-projects-schema-readiness.md`
+- `docs/reference/spfx-surfaces/my-dashboard/my-projects-diagnostics.md`
+- `docs/reference/spfx-surfaces/my-dashboard/data-path-diagnostic.md`

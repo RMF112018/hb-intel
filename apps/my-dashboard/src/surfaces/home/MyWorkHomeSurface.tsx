@@ -1,6 +1,5 @@
 import type {
   MyWorkHomeReadModel,
-  MyWorkModuleId,
   MyWorkReadModelEnvelope,
   MyWorkReadModelSourceStatus,
 } from '@hbc/models/myWork';
@@ -28,7 +27,6 @@ export interface MyWorkHomeSurfaceProps {
    * contexts that do not supply data).
    */
   readonly homeEnvelope?: MyWorkReadModelEnvelope<MyWorkHomeReadModel>;
-  readonly onSelectModule?: (id: MyWorkModuleId) => void;
   readonly getApiToken?: () => Promise<string>;
   /**
    * Shell-wired Adobe Sign OAuth start callback. Threaded down to

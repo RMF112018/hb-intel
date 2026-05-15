@@ -1,0 +1,57 @@
+{
+  "packageName": "@hbc/functions",
+  "packageVersion": "00.000.151",
+  "commitSha": "2afd0a4be2037d1e99ddd5f6a6d279a5c9c5e83c",
+  "buildTimestamp": "2026-05-14T23:25:32.215Z",
+  "zipPath": "functions-artifact.zip",
+  "zipBytes": 135413275,
+  "sha256": "c485fc6aba5474ac541678743dde4f6619c5a0483d70c141f6cc23b7e5cd7aed",
+  "entrypoint": "./dist/backend/functions/src/index.js",
+  "hostJson": "host.json",
+  "stagedWorkspacePackages": [
+    {
+      "name": "@hbc/acknowledgment",
+      "version": "0.1.1"
+    },
+    {
+      "name": "@hbc/auth",
+      "version": "0.7.0"
+    },
+    {
+      "name": "@hbc/bic-next-move",
+      "version": "0.1.0"
+    },
+    {
+      "name": "@hbc/complexity",
+      "version": "0.1.4"
+    },
+    {
+      "name": "@hbc/field-annotations",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@hbc/models",
+      "version": "0.5.1"
+    },
+    {
+      "name": "@hbc/notification-intelligence",
+      "version": "0.0.2"
+    },
+    {
+      "name": "@hbc/provisioning",
+      "version": "0.3.3"
+    },
+    {
+      "name": "@hbc/session-state",
+      "version": "0.0.1"
+    },
+    {
+      "name": "@hbc/ui-kit",
+      "version": "2.6.5"
+    },
+    {
+      "name": "@hbc/workflow-handoff",
+      "version": "0.1.0"
+    }
+  ]
+}

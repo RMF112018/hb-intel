@@ -141,61 +141,6 @@ export function requiredActionLabel(action: MyWorkAdobeSignRequiredAction): stri
   return REQUIRED_ACTION_LABEL[action];
 }
 
-// ─── Work summary (home) ──────────────────────────────────────────────────
-
-export interface WorkSummaryVm {
-  readonly actionItemCount: number | null;
-  readonly connectedSourcesLabel: string;
-  readonly lastRefreshedLabel: string;
-}
-
-const WORK_SUMMARY_FALLBACK: WorkSummaryVm = {
-  actionItemCount: null,
-  connectedSourcesLabel: 'Adobe Sign',
-  lastRefreshedLabel: PENDING_REFRESH_FALLBACK,
-};
-
-export function selectWorkSummaryVm(
-  env: MyWorkReadModelEnvelope<MyWorkHomeReadModel> | undefined,
-): WorkSummaryVm {
-  if (!env) return WORK_SUMMARY_FALLBACK;
-  return {
-    actionItemCount: env.data.summary.totalActionItemCount,
-    connectedSourcesLabel: 'Adobe Sign',
-    lastRefreshedLabel: formatGeneratedAtUtc(env.generatedAtUtc),
-  };
-}
-
-// ─── Source readiness (home non-ready) ────────────────────────────────────
-
-export interface SourceReadinessVmItem {
-  readonly sourceSystem: 'adobe-sign';
-  readonly label: string;
-  readonly sourceStatus: MyWorkReadModelSourceStatus;
-  readonly statusCopy: SourceStatusCopy;
-}
-
-export interface SourceReadinessVm {
-  readonly items: readonly SourceReadinessVmItem[];
-}
-
-const SOURCE_LABEL_BY_SYSTEM: Readonly<Record<'adobe-sign', string>> = {
-  'adobe-sign': 'Adobe Sign',
-};
-
-export function selectSourceReadinessVm(
-  env: MyWorkReadModelEnvelope<MyWorkHomeReadModel> | undefined,
-): SourceReadinessVm {
-  if (!env) return { items: [] };
-  const items = env.data.sourceReadiness.map((item) => ({
-    sourceSystem: item.sourceSystem,
-    label: SOURCE_LABEL_BY_SYSTEM[item.sourceSystem],
-    sourceStatus: item.sourceStatus,
-    statusCopy: sourceStatusCopy(item.sourceStatus),
-  }));
-  return { items };
-}
-
 // ─── Adobe Sign action queue — consolidated card (Prompt 03) ──────────────
 
 /**
