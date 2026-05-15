@@ -250,6 +250,19 @@ After deploying to a SharePoint environment, verify each step:
 - [ ] Existing web part instances on pages automatically use the new version
 - [ ] No manual per-site update action needed (tenant-wide deployment)
 
+### My Dashboard runtime-config posture (gated domains only)
+
+After deploying a `my-dashboard` build, verify the rebuilt bundle is actually reaching the backend (not silently falling back to fixture data because the deployed bundle was compiled with empty `FUNCTION_APP_URL` / `API_AUDIENCE`):
+
+- [ ] Open the My Dashboard page in a tenant browser session
+- [ ] DevTools → Elements → locate `<main id="my-work-active-surface-panel">`
+- [ ] Confirm `data-my-work-data-path="backend-live"` (not `backend-unavailable-fallback` or `fixture-ui-review`)
+- [ ] Confirm `data-my-work-runtime-config-missing` is **absent** from the same `<main>`. If present, its value names the missing key(s): `function-app-url`, `api-audience`, and/or `api-token-provider` — see `docs/reference/spfx-surfaces/my-dashboard/data-path-diagnostic.md` for the precondition triage matrix
+- [ ] DevTools → Console → confirm no `[HB-Intel] My Dashboard mounted in production mode but runtime config is incomplete` warning
+- [ ] DevTools → Network → fresh page reload should issue `GET /api/my-work/me/home`, `GET /api/my-work/me/project-links`, and (when applicable) the Adobe Sign queue route to the Function App host
+
+If `data-my-work-runtime-config-missing` is present, the rebuild was performed with one or more env vars unset. Repeat §"Runtime Configuration" with the named keys exported and re-upload the `.sppkg`.
+
 ---
 
 ## Required GitHub Secrets

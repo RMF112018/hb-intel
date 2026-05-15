@@ -13,7 +13,11 @@ import {
   createSpfxApiTokenProvider,
 } from '@hbc/auth/spfx';
 import { MyDashboardApp } from './MyDashboardApp.js';
-import { setRuntimeConfig, getApiAudience } from './config/runtimeConfig.js';
+import {
+  getApiAudience,
+  getProductionConfigMissingKeys,
+  setRuntimeConfig,
+} from './config/runtimeConfig.js';
 
 /** Packaging runtime marker — must match MyDashboardWebPart.manifest.json `id`. */
 const MY_DASHBOARD_RUNTIME_MARKER_WEBPART_ID = '412eb9fd-2eb2-4f7d-a4f1-7865e339a369';
@@ -44,6 +48,42 @@ function teardownMountedInstance(): void {
   mountedInstance.root?.unmount();
   mountedInstance.root = null;
   mountedInstance.hostElement = null;
+}
+
+/**
+ * Last comma-joined missing-keys signature emitted by `warnIfRuntimeConfigIncomplete`.
+ * SPFx may invoke `mount()` more than once across the webpart lifecycle (initial
+ * render, property-pane changes, theme refresh). Re-emitting the same warning on
+ * every re-mount would clutter DevTools; re-emitting when the missing-keys
+ * posture changes is the operator-useful signal.
+ *
+ * `null` = no warning has been emitted yet (or `_resetWarnedConfigSignature` was
+ * called from tests). Empty-string sentinel `''` is reserved for "healthy
+ * production" and is only set after a successful no-op evaluation, so a healthy
+ * → unhealthy transition still warns once.
+ */
+let _lastWarnedMissingSignature: string | null = null;
+
+export function warnIfRuntimeConfigIncomplete(hasTokenProvider: boolean): void {
+  const missing = getProductionConfigMissingKeys(Boolean(getApiAudience()), hasTokenProvider);
+  const signature = missing.join(',');
+  if (signature === _lastWarnedMissingSignature) {
+    return;
+  }
+  _lastWarnedMissingSignature = signature;
+  if (missing.length === 0) {
+    return;
+  }
+  // Token-free, value-free: only the discrete key names are emitted.
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[HB-Intel] My Dashboard mounted in production mode but runtime config is incomplete. Missing: ${signature}. See docs/maintenance/spfx-deployment-runbook.md`,
+  );
+}
+
+/** Test-only reset for the duplicate-warn signature cache. */
+export function _resetWarnedConfigSignature(): void {
+  _lastWarnedMissingSignature = null;
 }
 
 /**
@@ -82,6 +122,11 @@ export async function mount(
       getApiToken = createSpfxApiTokenProvider(spfxContext, apiAudience);
     }
   }
+
+  // Surface incomplete production runtime-config to operator DevTools console
+  // with the discrete key names. Guarded against duplicate emission on the
+  // SPFx webpart re-mount lifecycle; re-warns once when the posture changes.
+  warnIfRuntimeConfigIncomplete(typeof getApiToken === 'function');
 
   if (mountedInstance.hostElement && mountedInstance.hostElement !== el) {
     teardownMountedInstance();

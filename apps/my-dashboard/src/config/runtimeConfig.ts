@@ -87,8 +87,7 @@ export function getBackendMode(): BackendMode {
   }
 
   const envMode =
-    typeof import.meta !== 'undefined' &&
-    normalizeBackendMode(import.meta.env?.VITE_BACKEND_MODE);
+    typeof import.meta !== 'undefined' && normalizeBackendMode(import.meta.env?.VITE_BACKEND_MODE);
   if (envMode) {
     return envMode;
   }
@@ -127,9 +126,7 @@ export function getFunctionAppUrl(): string {
   }
 
   // 2. Vite build-time env (dev mode or CI-injected)
-  const envUrl =
-    typeof import.meta !== 'undefined' &&
-    import.meta.env?.VITE_FUNCTION_APP_URL;
+  const envUrl = typeof import.meta !== 'undefined' && import.meta.env?.VITE_FUNCTION_APP_URL;
   if (envUrl && envUrl !== 'undefined') {
     return envUrl.replace(/\/+$/, '');
   }
@@ -137,9 +134,9 @@ export function getFunctionAppUrl(): string {
   // 3. No configuration source — fail with actionable diagnostic
   throw new ConfigError(
     '[HB-Intel] Function App URL is not configured for My Dashboard. ' +
-    'In SPFx runtime, the shell webpart must provide functionAppUrl via mount config. ' +
-    'In Vite dev mode, set VITE_FUNCTION_APP_URL in .env.local. ' +
-    'See apps/my-dashboard/README.md for B02 runtime-config posture.'
+      'In SPFx runtime, the shell webpart must provide functionAppUrl via mount config. ' +
+      'In Vite dev mode, set VITE_FUNCTION_APP_URL in .env.local. ' +
+      'See apps/my-dashboard/README.md for B02 runtime-config posture.',
   );
 }
 
@@ -163,9 +160,7 @@ export function getApiAudience(): string | undefined {
     return _config.apiAudience;
   }
 
-  const envAudience =
-    typeof import.meta !== 'undefined' &&
-    import.meta.env?.VITE_API_AUDIENCE;
+  const envAudience = typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_AUDIENCE;
   if (envAudience && envAudience !== 'undefined') {
     return envAudience;
   }
@@ -195,12 +190,51 @@ export function checkProductionReadiness(hasTokenProvider: boolean): IProduction
   if (!hasTokenProvider) {
     issues.push(
       'API token provider is not available. ' +
-      'In SPFx runtime, ensure apiAudience is configured and the API permission is approved in SharePoint admin center. ' +
-      'In Vite dev mode, set VITE_API_AUDIENCE in .env.local.',
+        'In SPFx runtime, ensure apiAudience is configured and the API permission is approved in SharePoint admin center. ' +
+        'In Vite dev mode, set VITE_API_AUDIENCE in .env.local.',
     );
   }
 
   return { ready: issues.length === 0, issues };
+}
+
+/**
+ * Discrete production-runtime-config preconditions that the My Dashboard SPFx
+ * surface depends on. Used to surface which precondition was missing in the
+ * deployed bundle when the read-model client silently degrades to the
+ * `backend-unavailable-fallback` posture.
+ */
+export type ProductionConfigKey = 'function-app-url' | 'api-audience' | 'api-token-provider';
+
+/**
+ * Resolve the ordered list of production runtime-config keys that are absent
+ * for the My Dashboard surface. Returns an empty array when posture is
+ * `ui-review` (the surface intentionally renders fixtures) or when all
+ * preconditions are satisfied.
+ *
+ * Order is deterministic: `function-app-url`, `api-audience`,
+ * `api-token-provider`. The shell joins the result with `,` to populate
+ * `data-my-work-runtime-config-missing`; mount.tsx names the same keys in a
+ * single token-free console.warn.
+ */
+export function getProductionConfigMissingKeys(
+  hasApiAudience: boolean,
+  hasTokenProvider: boolean,
+): ProductionConfigKey[] {
+  if (getBackendMode() !== 'production') {
+    return [];
+  }
+  const missing: ProductionConfigKey[] = [];
+  let functionAppUrl = '';
+  try {
+    functionAppUrl = getFunctionAppUrl();
+  } catch {
+    // ConfigError thrown when no source provides the URL — treat as missing.
+  }
+  if (!functionAppUrl) missing.push('function-app-url');
+  if (!hasApiAudience) missing.push('api-audience');
+  if (!hasTokenProvider) missing.push('api-token-provider');
+  return missing;
 }
 
 /** Reset config — used only in tests. */

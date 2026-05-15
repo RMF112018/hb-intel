@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, waitFor } from '@testing-library/react';
 import {
   ADOBE_SIGN_QUEUE_AVAILABLE,
@@ -12,12 +12,23 @@ import type {
   MyWorkReadModelEnvelope,
 } from '@hbc/models/myWork';
 import type { IMyWorkReadModelClient } from '../api/myWorkReadModelClient.js';
+import { _resetConfig, setRuntimeConfig } from '../config/runtimeConfig.js';
 import { MyWorkReadModelClientProvider } from '../runtime/MyWorkReadModelClientProvider.js';
 import { MY_WORK_ACTIVE_PANEL_ID, MyWorkShell } from './MyWorkShell.js';
 
 afterEach(() => {
   cleanup();
 });
+
+function getMissingConfigAttr(container: HTMLElement): string | null {
+  return (
+    container
+      .querySelector('[data-my-work-active-surface-panel]')
+      ?.getAttribute('data-my-work-runtime-config-missing') ?? null
+  );
+}
+
+const NOOP_TOKEN_PROVIDER = async (): Promise<string> => 'token';
 
 /**
  * Wraps shell renders with the read-model provider so the surface router's
@@ -221,10 +232,7 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
       const roles = Array.from(grid.querySelectorAll('[data-my-work-card-role]')).map((el) =>
         el.getAttribute('data-my-work-card-role'),
       );
-      expect(roles).toEqual([
-        'my-projects-home',
-        'adobe-sign-action-queue',
-      ]);
+      expect(roles).toEqual(['my-projects-home', 'adobe-sign-action-queue']);
     });
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
     // Retired Adobe card roles must not appear under the live shell.
@@ -323,5 +331,82 @@ describe('MyWorkShell — data-path DOM marker', () => {
     await waitFor(() => {
       expect(getActivePanelDataPath(container)).toBe('fixture-ui-review');
     });
+  });
+});
+
+describe('MyWorkShell — runtime-config-missing DOM marker', () => {
+  beforeEach(() => {
+    _resetConfig();
+    vi.stubEnv('VITE_BACKEND_MODE', '');
+    vi.stubEnv('VITE_FUNCTION_APP_URL', '');
+    vi.stubEnv('VITE_API_AUDIENCE', '');
+  });
+
+  afterEach(() => {
+    _resetConfig();
+    vi.unstubAllEnvs();
+  });
+
+  it('omits the marker entirely in ui-review posture, regardless of getApiToken', () => {
+    setRuntimeConfig({ backendMode: 'ui-review' });
+    const stub = makeStubClient();
+    const { container } = renderShellWithStub(stub, <MyWorkShell />);
+    expect(getMissingConfigAttr(container)).toBeNull();
+  });
+
+  it('lists all three keys in deterministic order when production posture is fully unconfigured', () => {
+    setRuntimeConfig({ backendMode: 'production' });
+    const stub = makeStubClient();
+    const { container } = renderShellWithStub(stub, <MyWorkShell />);
+    expect(getMissingConfigAttr(container)).toBe(
+      'function-app-url,api-audience,api-token-provider',
+    );
+  });
+
+  it('drops function-app-url from the list when only the URL is configured', () => {
+    setRuntimeConfig({
+      backendMode: 'production',
+      functionAppUrl: 'https://hb-intel.example.invalid',
+    });
+    const stub = makeStubClient();
+    const { container } = renderShellWithStub(stub, <MyWorkShell />);
+    expect(getMissingConfigAttr(container)).toBe('api-audience,api-token-provider');
+  });
+
+  it('reports api-token-provider only when URL and audience are set but no getApiToken prop is provided', () => {
+    setRuntimeConfig({
+      backendMode: 'production',
+      functionAppUrl: 'https://hb-intel.example.invalid',
+      apiAudience: 'api://example',
+    });
+    const stub = makeStubClient();
+    const { container } = renderShellWithStub(stub, <MyWorkShell />);
+    expect(getMissingConfigAttr(container)).toBe('api-token-provider');
+  });
+
+  it('omits the marker when production posture is fully configured', () => {
+    setRuntimeConfig({
+      backendMode: 'production',
+      functionAppUrl: 'https://hb-intel.example.invalid',
+      apiAudience: 'api://example',
+    });
+    const stub = makeStubClient();
+    const { container } = renderShellWithStub(
+      stub,
+      <MyWorkShell getApiToken={NOOP_TOKEN_PROVIDER} />,
+    );
+    expect(getMissingConfigAttr(container)).toBeNull();
+  });
+
+  it('preserves the data-my-work-data-path marker independently of the missing-config marker', () => {
+    setRuntimeConfig({ backendMode: 'production' });
+    const stub = makeStubClient({
+      getMyWorkHome: vi.fn<IMyWorkReadModelClient['getMyWorkHome']>(() => new Promise(() => {})),
+    });
+    const { container } = renderShellWithStub(stub, <MyWorkShell />);
+    expect(getActivePanelDataPath(container)).toBe('unknown');
+    expect(getMissingConfigAttr(container)).toBe(
+      'function-app-url,api-audience,api-token-provider',
+    );
   });
 });

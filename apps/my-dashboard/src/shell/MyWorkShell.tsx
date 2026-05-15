@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
 import { createMyWorkReadModelClient } from '../api/myWorkReadModelClientFactory.js';
+import { getApiAudience, getProductionConfigMissingKeys } from '../config/runtimeConfig.js';
 import { useMyWorkShellState } from '../state/useMyWorkShellState.js';
 import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
 import { AdobeSignCallbackBanner } from './AdobeSignCallbackBanner.js';
@@ -103,6 +104,18 @@ export function MyWorkShell({
   }, [getApiToken]);
   const handleConnectAdobeSign = typeof getApiToken === 'function' ? onConnectAdobeSign : undefined;
 
+  // Production-mode runtime-config posture for hosted operator triage. When
+  // the deployed bundle was built without one or more of FUNCTION_APP_URL,
+  // API_AUDIENCE, or with a token-provider that failed to construct, the
+  // factory degrades silently to `backend-unavailable-fallback`. This list
+  // names the specific precondition(s) absent so operator DevTools inspection
+  // shows the cause directly. Empty list = healthy or `ui-review` posture.
+  const productionConfigMissing = useMemo(
+    () =>
+      getProductionConfigMissingKeys(Boolean(getApiAudience()), typeof getApiToken === 'function'),
+    [getApiToken],
+  );
+
   return (
     <div
       ref={shellRef}
@@ -116,7 +129,10 @@ export function MyWorkShell({
           <MyWorkHeroBand mode={mode} identity={pageHeaderIdentity} now={now} />
         </section>
         <div className={styles.canvas} data-my-work-canvas="">
-          <MyWorkActiveSurfacePanel activePrimarySurfaceId={activePrimarySurfaceId}>
+          <MyWorkActiveSurfacePanel
+            activePrimarySurfaceId={activePrimarySurfaceId}
+            productionConfigMissing={productionConfigMissing}
+          >
             <AdobeSignCallbackBanner />
             <MyWorkBentoGrid mode={mode}>
               <MyWorkSurfaceRouter
@@ -138,15 +154,27 @@ export function MyWorkShell({
  * classification (`backend-live`, `backend-unavailable-fallback`,
  * `fixture-ui-review`, or `unknown`) alongside the active-surface marker
  * so hosted screenshots unambiguously prove the data path.
+ *
+ * Also stamps `data-my-work-runtime-config-missing` (comma-list) when
+ * production-mode posture is active but one or more runtime-config
+ * preconditions are absent. The attribute is omitted when the list is
+ * empty (healthy production posture or `ui-review` mode), so its presence
+ * alone is the operator signal.
  */
 function MyWorkActiveSurfacePanel({
   activePrimarySurfaceId,
+  productionConfigMissing,
   children,
 }: {
   readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
+  readonly productionConfigMissing: readonly string[];
   readonly children: ReactNode;
 }) {
   const dataPath = useMyWorkActiveEnvelopeDataPath();
+  const missingAttr =
+    productionConfigMissing.length > 0
+      ? { 'data-my-work-runtime-config-missing': productionConfigMissing.join(',') }
+      : undefined;
   return (
     <main
       id={MY_WORK_ACTIVE_PANEL_ID}
@@ -154,6 +182,7 @@ function MyWorkActiveSurfacePanel({
       className={styles.activePanel}
       data-my-work-active-surface-panel={activePrimarySurfaceId}
       data-my-work-data-path={dataPath}
+      {...missingAttr}
     >
       {children}
     </main>

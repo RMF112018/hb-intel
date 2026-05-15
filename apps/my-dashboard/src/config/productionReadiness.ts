@@ -9,7 +9,9 @@
  */
 export {
   checkProductionReadiness,
+  getProductionConfigMissingKeys,
   type IProductionModeReadiness,
+  type ProductionConfigKey,
 } from './runtimeConfig.js';
 
 import type { IProductionModeReadiness } from './runtimeConfig.js';
