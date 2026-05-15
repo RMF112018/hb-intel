@@ -749,5 +749,82 @@ describe('createAdobeSignActionQueueAdapter', () => {
       expect(serialized).not.toContain('agreementId');
       expect(serialized).not.toContain('senderEmail');
     });
+
+    it('emits flattened search diagnostics on search unreachable', async () => {
+      const events: Array<{ name: string; properties: Record<string, unknown> }> = [];
+      const diagnostics = {
+        trackAdobeSignRuntimeEvent(name: string, properties: Record<string, unknown>) {
+          events.push({ name, properties });
+        },
+      };
+      const adapter = createAdobeSignActionQueueAdapter(
+        buildDeps({
+          searchClient: createDeterministicMockSearchClient([
+            {
+              status: 'unreachable',
+              reason: 'malformed-response',
+              providerErrorCode: 'invalid_request',
+              searchRequestDiagnostics: {
+                endpointHost: 'api.na4.adobesign.com',
+                endpointPath: '/api/rest/v6/search',
+                method: 'POST',
+                bodyTopLevelKeyCount: 3,
+                hasMatchingFiltersInfoField: true,
+                hasAgreementOriginInfoField: true,
+                hasRecipientStatusFilterField: true,
+                hasPageSizeField: true,
+                hasCursorField: true,
+                approvedStatusCount: 6,
+              },
+              malformedSearchResponseDiagnostics: {
+                bodyWasJsonObject: true,
+                hasTopLevelAgreementsArray: false,
+                hasSearchAgreementsResponseField: true,
+                hasNextCursorField: false,
+              },
+            },
+          ]),
+        }),
+      );
+
+      const env = await adapter.getActionQueue(context(diagnostics), QUERY_EMPTY);
+      expect(env.sourceStatus).toBe('source-unavailable');
+      expect(events).toEqual([
+        {
+          name: 'adobeSign.read.search.result',
+          properties: {
+            status: 'unreachable',
+            reason: 'malformed-response',
+            providerErrorCode: 'invalid_request',
+            searchEndpointHost: 'api.na4.adobesign.com',
+            searchEndpointPath: '/api/rest/v6/search',
+            searchMethod: 'POST',
+            searchBodyTopLevelKeyCount: 3,
+            searchHasMatchingFiltersInfoField: true,
+            searchHasAgreementOriginInfoField: true,
+            searchHasRecipientStatusFilterField: true,
+            searchHasPageSizeField: true,
+            searchHasCursorField: true,
+            searchApprovedStatusCount: 6,
+            searchMalformedBodyWasJsonObject: true,
+            searchMalformedHasTopLevelAgreementsArray: false,
+            searchMalformedHasSearchAgreementsResponseField: true,
+            searchMalformedHasNextCursorField: false,
+          },
+        },
+        {
+          name: 'adobeSign.read.actionQueue.result',
+          properties: {
+            sourceStatus: 'source-unavailable',
+            resultStage: 'search',
+            warningCodes: ['source-unavailable'],
+          },
+        },
+      ]);
+      const serialized = JSON.stringify(events);
+      expect(serialized).not.toContain(ACCESS_TOKEN);
+      expect(serialized).not.toContain('Contract A');
+      expect(serialized).not.toContain('alice@example.com');
+    });
   });
 });

@@ -83,7 +83,34 @@ export type AdobeSignSearchResult =
        * transport-level failure. Adapter surfaces `source-unavailable`.
        */
       readonly status: 'unreachable';
-      readonly reason?: 'network' | 'http-5xx' | 'unknown';
+      readonly reason?:
+        | 'network'
+        | 'timeout'
+        | 'http-4xx'
+        | 'http-5xx'
+        | 'rate-limited'
+        | 'malformed-response'
+        | 'invalid-access-point'
+        | 'unknown';
+      readonly providerErrorCode?: string;
+      readonly searchRequestDiagnostics?: {
+        readonly endpointHost?: string;
+        readonly endpointPath?: string;
+        readonly method?: string;
+        readonly bodyTopLevelKeyCount?: number;
+        readonly hasMatchingFiltersInfoField?: boolean;
+        readonly hasAgreementOriginInfoField?: boolean;
+        readonly hasRecipientStatusFilterField?: boolean;
+        readonly hasPageSizeField?: boolean;
+        readonly hasCursorField?: boolean;
+        readonly approvedStatusCount?: number;
+      };
+      readonly malformedSearchResponseDiagnostics?: {
+        readonly hasTopLevelAgreementsArray?: boolean;
+        readonly hasSearchAgreementsResponseField?: boolean;
+        readonly hasNextCursorField?: boolean;
+        readonly bodyWasJsonObject?: boolean;
+      };
     };
 
 export interface IAdobeSignSearchClient {

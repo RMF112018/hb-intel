@@ -285,6 +285,40 @@ export function createAdobeSignActionQueueAdapter(
         context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.search.result', {
           status: 'unreachable',
           reason: searchResult.reason,
+          ...(searchResult.providerErrorCode
+            ? { providerErrorCode: searchResult.providerErrorCode }
+            : {}),
+          ...(searchResult.searchRequestDiagnostics
+            ? {
+                searchEndpointHost: searchResult.searchRequestDiagnostics.endpointHost,
+                searchEndpointPath: searchResult.searchRequestDiagnostics.endpointPath,
+                searchMethod: searchResult.searchRequestDiagnostics.method,
+                searchBodyTopLevelKeyCount:
+                  searchResult.searchRequestDiagnostics.bodyTopLevelKeyCount,
+                searchHasMatchingFiltersInfoField:
+                  searchResult.searchRequestDiagnostics.hasMatchingFiltersInfoField,
+                searchHasAgreementOriginInfoField:
+                  searchResult.searchRequestDiagnostics.hasAgreementOriginInfoField,
+                searchHasRecipientStatusFilterField:
+                  searchResult.searchRequestDiagnostics.hasRecipientStatusFilterField,
+                searchHasPageSizeField: searchResult.searchRequestDiagnostics.hasPageSizeField,
+                searchHasCursorField: searchResult.searchRequestDiagnostics.hasCursorField,
+                searchApprovedStatusCount: searchResult.searchRequestDiagnostics.approvedStatusCount,
+              }
+            : {}),
+          ...(searchResult.malformedSearchResponseDiagnostics
+            ? {
+                searchMalformedBodyWasJsonObject:
+                  searchResult.malformedSearchResponseDiagnostics.bodyWasJsonObject,
+                searchMalformedHasTopLevelAgreementsArray:
+                  searchResult.malformedSearchResponseDiagnostics.hasTopLevelAgreementsArray,
+                searchMalformedHasSearchAgreementsResponseField:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .hasSearchAgreementsResponseField,
+                searchMalformedHasNextCursorField:
+                  searchResult.malformedSearchResponseDiagnostics.hasNextCursorField,
+              }
+            : {}),
         });
         const result = envelope(
           'source-unavailable',

@@ -38,6 +38,25 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
+function expectedSearchRequestDiagnostics(overrides?: {
+  bodyTopLevelKeyCount?: number;
+  hasCursorField?: boolean;
+}) {
+  return {
+    endpointHost: 'api.na1.adobesign.com',
+    endpointPath: '/api/rest/v6/search',
+    method: 'POST',
+    bodyTopLevelKeyCount: 2,
+    hasMatchingFiltersInfoField: true,
+    hasAgreementOriginInfoField: true,
+    hasRecipientStatusFilterField: true,
+    hasPageSizeField: true,
+    hasCursorField: false,
+    approvedStatusCount: 6,
+    ...overrides,
+  };
+}
+
 describe('createAdobeSignLiveSearchClient — request shape', () => {
   it('targets {apiAccessPoint}/api/rest/v6/search exactly', async () => {
     const fetchSpy = vi.fn(async () => jsonResponse({ agreements: [] }));
@@ -174,10 +193,38 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
     expect(await client.search(VALID_INPUT)).toEqual({ status: 'unauthorized' });
   });
 
-  it('HTTP 429 → unreachable + unknown (rate-limit deferred to B06 hardening)', async () => {
+  it('HTTP 400 invalid_request → unreachable + http-4xx + providerErrorCode + diagnostics', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ error: 'invalid_request' }, 400));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'http-4xx',
+      providerErrorCode: 'invalid_request',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+    });
+  });
+
+  it('HTTP 400 with unsafe provider error narrative omits providerErrorCode', async () => {
+    const fetchSpy = vi.fn(
+      async () => jsonResponse({ error: 'Request body is not valid for this endpoint' }, 400),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'http-4xx',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+    });
+  });
+
+  it('HTTP 429 → unreachable + rate-limited', async () => {
     const fetchSpy = vi.fn(async () => jsonResponse({ error: 'rate_limited' }, 429));
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
-    expect(await client.search(VALID_INPUT)).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'rate-limited',
+      providerErrorCode: 'rate_limited',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+    });
   });
 
   it('HTTP 500 → unreachable + http-5xx', async () => {
@@ -186,6 +233,7 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
     expect(await client.search(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'http-5xx',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
     });
   });
 
@@ -197,10 +245,11 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
     expect(await client.search(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'network',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
     });
   });
 
-  it('AbortError throw → unreachable + network', async () => {
+  it('AbortError throw → unreachable + timeout', async () => {
     const fetchSpy = vi.fn(async () => {
       const err = new Error('aborted') as Error & { name: string };
       err.name = 'AbortError';
@@ -209,23 +258,44 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
     expect(await client.search(VALID_INPUT)).toEqual({
       status: 'unreachable',
-      reason: 'network',
+      reason: 'timeout',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
     });
   });
 
-  it('200 without an agreements array → unreachable + unknown', async () => {
-    const fetchSpy = vi.fn(async () => jsonResponse({}));
+  it('200 without an agreements array → unreachable + malformed-response', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ searchAgreementsResponse: {} }));
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
-    expect(await client.search(VALID_INPUT)).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'malformed-response',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+      malformedSearchResponseDiagnostics: {
+        bodyWasJsonObject: true,
+        hasTopLevelAgreementsArray: false,
+        hasSearchAgreementsResponseField: true,
+        hasNextCursorField: false,
+      },
+    });
   });
 
-  it('Malformed (non-JSON) 200 body → unreachable + unknown', async () => {
+  it('Malformed (non-JSON) 200 body → unreachable + malformed-response', async () => {
     const fetchSpy = vi.fn(
       async () =>
         new Response('not json', { status: 200, headers: { 'content-type': 'text/plain' } }),
     );
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
-    expect(await client.search(VALID_INPUT)).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(await client.search(VALID_INPUT)).toEqual({
+      status: 'unreachable',
+      reason: 'malformed-response',
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+      malformedSearchResponseDiagnostics: {
+        bodyWasJsonObject: false,
+        hasTopLevelAgreementsArray: false,
+        hasSearchAgreementsResponseField: false,
+        hasNextCursorField: false,
+      },
+    });
   });
 });
 
@@ -237,7 +307,7 @@ describe('createAdobeSignLiveSearchClient — pre-fetch access-point validation'
       ...VALID_INPUT,
       apiAccessPoint: 'http://api.na1.adobesign.com',
     });
-    expect(result).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(result).toEqual({ status: 'unreachable', reason: 'invalid-access-point' });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
@@ -248,7 +318,7 @@ describe('createAdobeSignLiveSearchClient — pre-fetch access-point validation'
       ...VALID_INPUT,
       apiAccessPoint: 'https://attacker.example.com',
     });
-    expect(result).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(result).toEqual({ status: 'unreachable', reason: 'invalid-access-point' });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

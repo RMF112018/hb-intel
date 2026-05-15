@@ -87,6 +87,71 @@ function readNextCursor(body: unknown): string | undefined {
   );
 }
 
+function normalizeSafeProviderErrorCode(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const normalized = raw.trim().toLowerCase();
+  if (normalized.length === 0 || normalized.length > 64) return undefined;
+  return /^[a-z0-9_-]+$/.test(normalized) ? normalized : undefined;
+}
+
+function readErrorCodeFromAdobeBody(body: unknown): string | undefined {
+  if (body === null || typeof body !== 'object') return undefined;
+  const raw = (body as Record<string, unknown>).error;
+  return typeof raw === 'string' ? raw : undefined;
+}
+
+function buildSearchRequestDiagnostics(url: string, body: Record<string, unknown>, method: string) {
+  const parsed = new URL(url);
+  const matchingFiltersInfo = body.matchingFiltersInfo;
+  const matchingFiltersInfoObj =
+    matchingFiltersInfo !== null && typeof matchingFiltersInfo === 'object'
+      ? (matchingFiltersInfo as Record<string, unknown>)
+      : undefined;
+  const recipientStatusFilter = matchingFiltersInfoObj?.recipientStatusFilter;
+  const recipientStatusFilterObj =
+    recipientStatusFilter !== null && typeof recipientStatusFilter === 'object'
+      ? (recipientStatusFilter as Record<string, unknown>)
+      : undefined;
+  const values = recipientStatusFilterObj?.values;
+  return {
+    endpointHost: parsed.hostname,
+    endpointPath: parsed.pathname,
+    method,
+    bodyTopLevelKeyCount: Object.keys(body).length,
+    hasMatchingFiltersInfoField: Object.prototype.hasOwnProperty.call(body, 'matchingFiltersInfo'),
+    hasAgreementOriginInfoField:
+      matchingFiltersInfoObj !== undefined &&
+      Object.prototype.hasOwnProperty.call(matchingFiltersInfoObj, 'agreementOriginInfo'),
+    hasRecipientStatusFilterField:
+      matchingFiltersInfoObj !== undefined &&
+      Object.prototype.hasOwnProperty.call(matchingFiltersInfoObj, 'recipientStatusFilter'),
+    hasPageSizeField: Object.prototype.hasOwnProperty.call(body, 'pageSize'),
+    hasCursorField: Object.prototype.hasOwnProperty.call(body, 'cursor'),
+    approvedStatusCount: Array.isArray(values) ? values.length : 0,
+  };
+}
+
+function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
+  if (parsed === null || typeof parsed !== 'object') {
+    return {
+      bodyWasJsonObject: false,
+      hasTopLevelAgreementsArray: false,
+      hasSearchAgreementsResponseField: false,
+      hasNextCursorField: false,
+    };
+  }
+  const body = parsed as Record<string, unknown>;
+  return {
+    bodyWasJsonObject: true,
+    hasTopLevelAgreementsArray: Array.isArray(body.agreements),
+    hasSearchAgreementsResponseField: Object.prototype.hasOwnProperty.call(
+      body,
+      'searchAgreementsResponse',
+    ),
+    hasNextCursorField: Object.prototype.hasOwnProperty.call(body, 'nextCursor'),
+  };
+}
+
 function mapRow(row: unknown): AdobeSignSearchClientItem | undefined {
   const agreementId = readStringField(row, 'id');
   const agreementName = readStringField(row, 'name');
@@ -122,10 +187,11 @@ export function createAdobeSignLiveSearchClient(
   return {
     async search(input: AdobeSignSearchClientInput): Promise<AdobeSignSearchResult> {
       if (!isAllowedAdobeAccessPoint(input.apiAccessPoint)) {
-        return { status: 'unreachable', reason: 'unknown' };
+        return { status: 'unreachable', reason: 'invalid-access-point' };
       }
 
       const url = `${trimTrailingSlash(input.apiAccessPoint)}${ADOBE_SIGN_AGREEMENT_SEARCH_PATH}`;
+      const method = 'POST' as const;
       const body = {
         matchingFiltersInfo: {
           agreementOriginInfo: { scope: 'PERSONAL' },
@@ -134,13 +200,14 @@ export function createAdobeSignLiveSearchClient(
         pageSize: input.request.pageSize,
         ...(input.request.cursor !== undefined ? { cursor: input.request.cursor } : {}),
       };
+      const searchRequestDiagnostics = buildSearchRequestDiagnostics(url, body, method);
 
       const controller = new AbortController();
       const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
       let response: Response;
       try {
         response = await fetchImpl(url, {
-          method: 'POST',
+          method,
           headers: {
             authorization: `Bearer ${input.accessToken}`,
             'content-type': 'application/json',
@@ -151,11 +218,10 @@ export function createAdobeSignLiveSearchClient(
         });
       } catch (err: unknown) {
         const name = (err as { name?: string }).name;
-        // Search result union has no 'timeout' enum — map to 'network'.
         if (name === 'AbortError') {
-          return { status: 'unreachable', reason: 'network' };
+          return { status: 'unreachable', reason: 'timeout', searchRequestDiagnostics };
         }
-        return { status: 'unreachable', reason: 'network' };
+        return { status: 'unreachable', reason: 'network', searchRequestDiagnostics };
       } finally {
         clearTimeout(timeoutHandle);
       }
@@ -164,25 +230,66 @@ export function createAdobeSignLiveSearchClient(
         return { status: 'unauthorized' };
       }
       if (response.status >= 500) {
-        return { status: 'unreachable', reason: 'http-5xx' };
+        return { status: 'unreachable', reason: 'http-5xx', searchRequestDiagnostics };
+      }
+      if (response.status === 429) {
+        let parsed: unknown;
+        try {
+          parsed = await response.json();
+        } catch {
+          parsed = undefined;
+        }
+        const providerErrorCode = normalizeSafeProviderErrorCode(readErrorCodeFromAdobeBody(parsed));
+        return {
+          status: 'unreachable',
+          reason: 'rate-limited',
+          ...(providerErrorCode ? { providerErrorCode } : {}),
+          searchRequestDiagnostics,
+        };
       }
       if (response.status >= 400) {
-        // Includes 429 — rate-limit specialisation deferred to B06.
-        return { status: 'unreachable', reason: 'unknown' };
+        let parsed: unknown;
+        try {
+          parsed = await response.json();
+        } catch {
+          parsed = undefined;
+        }
+        const providerErrorCode = normalizeSafeProviderErrorCode(readErrorCodeFromAdobeBody(parsed));
+        return {
+          status: 'unreachable',
+          reason: 'http-4xx',
+          ...(providerErrorCode ? { providerErrorCode } : {}),
+          searchRequestDiagnostics,
+        };
       }
 
       let parsed: unknown;
       try {
         parsed = await response.json();
       } catch {
-        return { status: 'unreachable', reason: 'unknown' };
+        return {
+          status: 'unreachable',
+          reason: 'malformed-response',
+          searchRequestDiagnostics,
+          malformedSearchResponseDiagnostics: buildMalformedSearchResponseDiagnostics(undefined),
+        };
       }
       if (parsed === null || typeof parsed !== 'object') {
-        return { status: 'unreachable', reason: 'unknown' };
+        return {
+          status: 'unreachable',
+          reason: 'malformed-response',
+          searchRequestDiagnostics,
+          malformedSearchResponseDiagnostics: buildMalformedSearchResponseDiagnostics(parsed),
+        };
       }
       const rawAgreements = (parsed as Record<string, unknown>).agreements;
       if (!Array.isArray(rawAgreements)) {
-        return { status: 'unreachable', reason: 'unknown' };
+        return {
+          status: 'unreachable',
+          reason: 'malformed-response',
+          searchRequestDiagnostics,
+          malformedSearchResponseDiagnostics: buildMalformedSearchResponseDiagnostics(parsed),
+        };
       }
 
       const items: AdobeSignSearchClientItem[] = [];
