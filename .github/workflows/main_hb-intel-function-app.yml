@@ -224,6 +224,14 @@ jobs:
           LIVE_SHA=$(echo "$APPLIED" | jq -r '.[] | select(.name=="HBC_FUNCTIONS_BUILD_SHA") | .value')
           LIVE_TS=$(echo "$APPLIED" | jq -r '.[] | select(.name=="HBC_FUNCTIONS_BUILD_TIMESTAMP") | .value')
 
+          # Azure may normalize trailing zeros in fractional seconds (e.g. .800Z -> .8Z).
+          # Canonicalize both timestamps before equality comparison to avoid false mismatches.
+          canonicalize_timestamp() {
+            echo "$1" | sed -E 's/\.([0-9]*[1-9])0+Z$/.\1Z/; s/\.0+Z$/Z/'
+          }
+          EXPECTED_TS_CANONICAL=$(canonicalize_timestamp "$EXPECTED_TS")
+          LIVE_TS_CANONICAL=$(canonicalize_timestamp "$LIVE_TS")
+
           FAIL=0
           if [ "$LIVE_VERSION" != "$EXPECTED_VERSION" ]; then
             echo "::error::HBC_FUNCTIONS_BUILD_VERSION mismatch after set (expected=$EXPECTED_VERSION live=$LIVE_VERSION)"
@@ -233,7 +241,7 @@ jobs:
             echo "::error::HBC_FUNCTIONS_BUILD_SHA mismatch after set (expected=$EXPECTED_SHA live=$LIVE_SHA)"
             FAIL=1
           fi
-          if [ "$LIVE_TS" != "$EXPECTED_TS" ]; then
+          if [ "$LIVE_TS_CANONICAL" != "$EXPECTED_TS_CANONICAL" ]; then
             echo "::error::HBC_FUNCTIONS_BUILD_TIMESTAMP mismatch after set (expected=$EXPECTED_TS live=$LIVE_TS)"
             FAIL=1
           fi
