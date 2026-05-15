@@ -350,6 +350,31 @@ export function createAdobeSignActionQueueAdapter(
                     .hasSearchAgreementsResponseField,
                 searchMalformedHasNextCursorField:
                   searchResult.malformedSearchResponseDiagnostics.hasNextCursorField,
+                searchMalformedHasPageField:
+                  searchResult.malformedSearchResponseDiagnostics.hasPageField,
+                searchMalformedPageWasObject:
+                  searchResult.malformedSearchResponseDiagnostics.pageWasObject,
+                searchMalformedPageHasNextCursorField:
+                  searchResult.malformedSearchResponseDiagnostics.pageHasNextCursorField,
+                searchMalformedHasUserAgreementListField:
+                  searchResult.malformedSearchResponseDiagnostics.hasUserAgreementListField,
+                searchMalformedHasUserAgreementListArray:
+                  searchResult.malformedSearchResponseDiagnostics.hasUserAgreementListArray,
+                searchMalformedUserAgreementListHasAtLeastOneItem:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .userAgreementListHasAtLeastOneItem,
+                searchMalformedFirstUserAgreementWasObject:
+                  searchResult.malformedSearchResponseDiagnostics.firstUserAgreementWasObject,
+                searchMalformedFirstUserAgreementHasIdField:
+                  searchResult.malformedSearchResponseDiagnostics.firstUserAgreementHasIdField,
+                searchMalformedFirstUserAgreementHasNameField:
+                  searchResult.malformedSearchResponseDiagnostics.firstUserAgreementHasNameField,
+                searchMalformedFirstUserAgreementHasStatusField:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .firstUserAgreementHasStatusField,
+                searchMalformedFirstUserAgreementHasRecipientStatusField:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .firstUserAgreementHasRecipientStatusField,
                 searchMalformedHasAgreementAssetsField:
                   searchResult.malformedSearchResponseDiagnostics.hasAgreementAssetsField,
                 searchMalformedHasAgreementAssetsArray:

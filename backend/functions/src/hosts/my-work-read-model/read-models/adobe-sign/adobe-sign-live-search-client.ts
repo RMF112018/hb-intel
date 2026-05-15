@@ -171,6 +171,17 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
       hasTopLevelAgreementsArray: false,
       hasSearchAgreementsResponseField: false,
       hasNextCursorField: false,
+      hasPageField: false,
+      pageWasObject: false,
+      pageHasNextCursorField: false,
+      hasUserAgreementListField: false,
+      hasUserAgreementListArray: false,
+      userAgreementListHasAtLeastOneItem: false,
+      firstUserAgreementWasObject: false,
+      firstUserAgreementHasIdField: false,
+      firstUserAgreementHasNameField: false,
+      firstUserAgreementHasStatusField: false,
+      firstUserAgreementHasRecipientStatusField: false,
       hasAgreementAssetsField: false,
       hasAgreementAssetsArray: false,
       hasResultsField: false,
@@ -186,6 +197,18 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
     };
   }
   const body = parsed as Record<string, unknown>;
+  const page = body.page;
+  const pageWasObject = page !== null && typeof page === 'object';
+  const userAgreementList = body.userAgreementList;
+  const hasUserAgreementListArray = Array.isArray(userAgreementList);
+  const userAgreementListHasAtLeastOneItem =
+    hasUserAgreementListArray && userAgreementList.length > 0;
+  const firstUserAgreement = userAgreementListHasAtLeastOneItem ? userAgreementList[0] : undefined;
+  const firstUserAgreementWasObject =
+    firstUserAgreement !== null && typeof firstUserAgreement === 'object';
+  const firstUserAgreementRecord = firstUserAgreementWasObject
+    ? (firstUserAgreement as Record<string, unknown>)
+    : undefined;
   return {
     bodyWasJsonObject: true,
     topLevelKeyCount: Object.keys(body).length,
@@ -195,6 +218,26 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
       'searchAgreementsResponse',
     ),
     hasNextCursorField: Object.prototype.hasOwnProperty.call(body, 'nextCursor'),
+    hasPageField: Object.prototype.hasOwnProperty.call(body, 'page'),
+    pageWasObject,
+    pageHasNextCursorField:
+      pageWasObject && Object.prototype.hasOwnProperty.call(page as Record<string, unknown>, 'nextCursor'),
+    hasUserAgreementListField: Object.prototype.hasOwnProperty.call(body, 'userAgreementList'),
+    hasUserAgreementListArray,
+    userAgreementListHasAtLeastOneItem,
+    firstUserAgreementWasObject,
+    firstUserAgreementHasIdField:
+      firstUserAgreementRecord !== undefined &&
+      Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'id'),
+    firstUserAgreementHasNameField:
+      firstUserAgreementRecord !== undefined &&
+      Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'name'),
+    firstUserAgreementHasStatusField:
+      firstUserAgreementRecord !== undefined &&
+      Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'status'),
+    firstUserAgreementHasRecipientStatusField:
+      firstUserAgreementRecord !== undefined &&
+      Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'recipientStatus'),
     hasAgreementAssetsField: Object.prototype.hasOwnProperty.call(body, 'agreementAssets'),
     hasAgreementAssetsArray: Array.isArray(body.agreementAssets),
     hasResultsField: Object.prototype.hasOwnProperty.call(body, 'results'),

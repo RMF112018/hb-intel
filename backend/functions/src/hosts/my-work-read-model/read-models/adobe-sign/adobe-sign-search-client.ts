@@ -122,6 +122,17 @@ export type AdobeSignSearchResult =
         readonly hasNextCursorField?: boolean;
         readonly bodyWasJsonObject?: boolean;
         readonly topLevelKeyCount?: number;
+        readonly hasPageField?: boolean;
+        readonly pageWasObject?: boolean;
+        readonly pageHasNextCursorField?: boolean;
+        readonly hasUserAgreementListField?: boolean;
+        readonly hasUserAgreementListArray?: boolean;
+        readonly userAgreementListHasAtLeastOneItem?: boolean;
+        readonly firstUserAgreementWasObject?: boolean;
+        readonly firstUserAgreementHasIdField?: boolean;
+        readonly firstUserAgreementHasNameField?: boolean;
+        readonly firstUserAgreementHasStatusField?: boolean;
+        readonly firstUserAgreementHasRecipientStatusField?: boolean;
         readonly hasAgreementAssetsField?: boolean;
         readonly hasAgreementAssetsArray?: boolean;
         readonly hasResultsField?: boolean;

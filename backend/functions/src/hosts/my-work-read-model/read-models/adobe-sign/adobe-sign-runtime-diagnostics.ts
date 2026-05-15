@@ -88,6 +88,17 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly searchMalformedHasTopLevelAgreementsArray?: boolean;
   readonly searchMalformedHasSearchAgreementsResponseField?: boolean;
   readonly searchMalformedHasNextCursorField?: boolean;
+  readonly searchMalformedHasPageField?: boolean;
+  readonly searchMalformedPageWasObject?: boolean;
+  readonly searchMalformedPageHasNextCursorField?: boolean;
+  readonly searchMalformedHasUserAgreementListField?: boolean;
+  readonly searchMalformedHasUserAgreementListArray?: boolean;
+  readonly searchMalformedUserAgreementListHasAtLeastOneItem?: boolean;
+  readonly searchMalformedFirstUserAgreementWasObject?: boolean;
+  readonly searchMalformedFirstUserAgreementHasIdField?: boolean;
+  readonly searchMalformedFirstUserAgreementHasNameField?: boolean;
+  readonly searchMalformedFirstUserAgreementHasStatusField?: boolean;
+  readonly searchMalformedFirstUserAgreementHasRecipientStatusField?: boolean;
   readonly searchMalformedHasAgreementAssetsField?: boolean;
   readonly searchMalformedHasAgreementAssetsArray?: boolean;
   readonly searchMalformedHasResultsField?: boolean;
