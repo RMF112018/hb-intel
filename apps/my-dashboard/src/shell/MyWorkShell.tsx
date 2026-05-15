@@ -1,13 +1,11 @@
 import { useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
 import { useMyWorkShellState } from '../state/useMyWorkShellState.js';
-import { selectMyWorkHomeHeroViewModel } from '../state/myWorkHeroViewModel.js';
 import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
 import { AdobeSignCallbackBanner } from './AdobeSignCallbackBanner.js';
 import {
   MyWorkActiveEnvelopeProvider,
   useMyWorkActiveEnvelopeDataPath,
-  useMyWorkHomeEnvelopeContext,
 } from './MyWorkActiveEnvelopeContext.js';
 import { MyWorkHeroBand } from './MyWorkHeroBand.js';
 import { MyWorkSurfaceRouter } from './MyWorkSurfaceRouter.js';
@@ -78,7 +76,7 @@ export function MyWorkShell({
     >
       <MyWorkActiveEnvelopeProvider>
         <section className={styles.commandSurface} data-my-work-command-surface="">
-          <MyWorkHomeHeroBand mode={mode} />
+          <MyWorkHeroBand mode={mode} />
         </section>
         <div className={styles.canvas} data-my-work-canvas="">
           <MyWorkActiveSurfacePanel activePrimarySurfaceId={activePrimarySurfaceId}>
@@ -95,16 +93,6 @@ export function MyWorkShell({
       </MyWorkActiveEnvelopeProvider>
     </div>
   );
-}
-
-/**
- * Selects the home hero view-model from the shell-mounted home envelope
- * context. Single primary-page command surface — no route-aware branching.
- */
-function MyWorkHomeHeroBand({ mode }: { readonly mode: MyWorkResponsiveMode }) {
-  const state = useMyWorkHomeEnvelopeContext();
-  const viewModel = useMemo(() => selectMyWorkHomeHeroViewModel(state), [state]);
-  return <MyWorkHeroBand mode={mode} viewModel={viewModel} />;
 }
 
 /**

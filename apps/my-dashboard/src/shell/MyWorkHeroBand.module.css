@@ -1,30 +1,33 @@
-.heroBand {
+.pageHeader {
   display: flex;
   flex-direction: column;
-  padding: var(--my-work-space-lg) var(--my-work-space-xl);
-  border-top: 1px solid
-    color-mix(in srgb, var(--my-work-color-border) 60%, transparent);
+  gap: var(--my-work-space-xs);
+  padding: var(--my-work-space-md) var(--my-work-space-xl);
+  border-inline-start: 3px solid var(--my-work-color-rail-accent);
+  border-bottom: 1px solid color-mix(in srgb, var(--my-work-color-border) 60%, transparent);
+  background: var(--my-work-color-card);
 }
 
-.heroBand[data-my-work-hero-density='compact'] {
-  padding: var(--my-work-space-md) var(--my-work-space-lg);
+.pageHeader[data-my-work-page-header-density='compact'] {
+  padding: var(--my-work-space-sm) var(--my-work-space-lg);
 }
 
 .identity {
   display: flex;
   flex-direction: column;
   gap: var(--my-work-space-xs);
+  min-width: 0;
 }
 
-.primaryTitle {
-  font-size: 12px;
+.eyebrow {
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--my-work-color-text-muted);
 }
 
-.secondaryTitle {
+.title {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
@@ -32,76 +35,14 @@
   line-height: 1.2;
 }
 
-.heroBand[data-my-work-hero-density='compact'] .secondaryTitle {
+.pageHeader[data-my-work-page-header-density='compact'] .title {
   font-size: 17px;
 }
 
-.description {
+.support {
   margin: 0;
   font-size: 13px;
   font-weight: 500;
   color: var(--my-work-color-text-muted);
   line-height: 1.4;
-}
-
-.highlights {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--my-work-space-sm) var(--my-work-space-md);
-  margin: var(--my-work-space-md) 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.heroBand[data-my-work-hero-density='compact'] .highlights {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--my-work-space-xs) var(--my-work-space-sm);
-}
-
-.highlight {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  border-inline-start: 2px solid var(--my-work-color-rail-accent);
-  padding-inline-start: var(--my-work-space-sm);
-  min-width: 0;
-}
-
-.highlightLabel {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--my-work-color-text-muted);
-}
-
-.highlightValue {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--my-work-color-text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.governance {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--my-work-space-xs) var(--my-work-space-md);
-  margin-top: var(--my-work-space-md);
-}
-
-.governanceItem {
-  font-size: 12px;
-  font-style: italic;
-  color: var(--my-work-color-text-muted);
-  line-height: 1.4;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .heroBand,
-  .highlight,
-  .governanceItem {
-    transition: none;
-  }
 }

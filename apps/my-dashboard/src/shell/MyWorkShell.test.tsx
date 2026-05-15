@@ -54,12 +54,6 @@ function renderShellWithStub(stub: IMyWorkReadModelClient, node: ReactElement = 
   );
 }
 
-function getHeroHighlightValue(container: HTMLElement, id: string): string | null {
-  const node = container.querySelector(`[data-my-work-hero-highlight="${id}"]`);
-  // The second span is the value (label is first).
-  return node?.children[1]?.textContent ?? null;
-}
-
 function withDataPath<T>(
   env: MyWorkReadModelEnvelope<T>,
   dataPath: MyWorkReadModelDataPath,
@@ -131,22 +125,52 @@ describe('MyWorkShell — composition and data-attribute contract', () => {
   });
 });
 
-describe('MyWorkShell — hero band composition', () => {
-  it('mounts the hero band inside the command surface', () => {
+describe('MyWorkShell — page header composition', () => {
+  it('mounts the page header inside the command surface', () => {
     const { container } = renderShell(<MyWorkShell />);
     const commandSurface = container.querySelector('[data-my-work-command-surface]')!;
-    const hero = commandSurface.querySelector('[data-my-work-hero]');
-    expect(hero).not.toBeNull();
+    const header = commandSurface.querySelector('[data-my-work-page-header]');
+    expect(header).not.toBeNull();
   });
 
-  it('shows the home hero copy on the single primary page', () => {
+  it('renders the locked compact header copy verbatim', () => {
     const { container } = renderShell(<MyWorkShell />);
-    expect(container.querySelector('[data-my-work-hero-secondary-title]')?.textContent).toBe(
+    expect(container.querySelector('[data-my-work-page-header-eyebrow]')?.textContent).toBe(
+      'My Dashboard',
+    );
+    expect(container.querySelector('[data-my-work-page-header-title]')?.textContent).toBe(
       'My Work',
     );
-    const governance = container.querySelector('[data-my-work-hero-governance-copy]');
-    expect(governance?.textContent).toBe(
-      'Read-only work visibility · Source actions remain in their governing systems.',
+    expect(container.querySelector('[data-my-work-page-header-support]')?.textContent).toBe(
+      'Your personal launch pad for project access and work requiring attention.',
+    );
+  });
+
+  it('emits no retired hero markers under the live shell', () => {
+    const { container } = renderShell(<MyWorkShell />);
+    expect(container.querySelector('[data-my-work-hero]')).toBeNull();
+    expect(container.querySelector('[data-my-work-hero-highlight]')).toBeNull();
+    expect(container.querySelector('[data-my-work-hero-governance-copy]')).toBeNull();
+    expect(container.querySelector('[data-my-work-hero-secondary-title]')).toBeNull();
+  });
+
+  it('does not load the home envelope to render the static header (header is envelope-agnostic)', async () => {
+    // Stalled envelope client: if the page header tried to consume the envelope
+    // context, the header would block on `loading` rather than rendering its
+    // static copy synchronously.
+    const stub = makeStubClient({
+      getMyWorkHome: vi.fn<IMyWorkReadModelClient['getMyWorkHome']>(() => new Promise(() => {})),
+    });
+    const { container } = renderShellWithStub(stub);
+    // Header copy must be present immediately, before the envelope resolves.
+    expect(container.querySelector('[data-my-work-page-header-eyebrow]')?.textContent).toBe(
+      'My Dashboard',
+    );
+    expect(container.querySelector('[data-my-work-page-header-title]')?.textContent).toBe(
+      'My Work',
+    );
+    expect(container.querySelector('[data-my-work-page-header-support]')?.textContent).toBe(
+      'Your personal launch pad for project access and work requiring attention.',
     );
   });
 });
@@ -205,46 +229,6 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     const { container } = renderShell(<MyWorkShell forceMode="phone" />);
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
     expect(grid.getAttribute('data-my-work-mode')).toBe('phone');
-  });
-});
-
-describe('MyWorkShell — envelope-derived hero band', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it('home + `available` envelope drives the live actionable-items count and Connected source-health', async () => {
-    const stub = makeStubClient();
-    const { container } = renderShellWithStub(stub);
-    await waitFor(() => {
-      expect(getHeroHighlightValue(container, 'actionable-items')).toBe('6');
-    });
-    expect(getHeroHighlightValue(container, 'source-health')).toBe('Connected');
-    expect(getHeroHighlightValue(container, 'connected-sources')).toBe('Adobe Sign');
-    // The single primary-page command surface fetches the home envelope only.
-    expect(stub.getMyWorkHome).toHaveBeenCalledTimes(1);
-    expect(stub.getAdobeSignActionQueue).not.toHaveBeenCalled();
-  });
-
-  it('home + `authorization-required` envelope drives status-derived hero highlights', async () => {
-    const stub = makeStubClient({
-      getMyWorkHome: vi.fn().mockResolvedValue(MY_WORK_HOME_AUTHORIZATION_REQUIRED),
-    });
-    const { container } = renderShellWithStub(stub);
-    await waitFor(() => {
-      expect(getHeroHighlightValue(container, 'actionable-items')).toBe('Authorization required');
-    });
-    expect(getHeroHighlightValue(container, 'source-health')).toBe('Authorization required');
-  });
-
-  it('never emits the legacy "Pending source connection" copy in hero highlights when the envelope has resolved', async () => {
-    const stub = makeStubClient();
-    const { container } = renderShellWithStub(stub);
-    await waitFor(() => {
-      expect(getHeroHighlightValue(container, 'actionable-items')).toBe('6');
-    });
-    const heroText = container.querySelector('[data-my-work-hero]')?.textContent ?? '';
-    expect(heroText.includes('Pending source connection')).toBe(false);
   });
 });
 
