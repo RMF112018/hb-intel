@@ -68,6 +68,23 @@ function makeInvalidProcoreEnvelope(): MyWorkReadModelEnvelope<MyProjectLinksRea
   };
 }
 
+function makePartialZeroRowsEnvelope(): MyWorkReadModelEnvelope<MyProjectLinksReadModel> {
+  return {
+    ...MY_PROJECT_LINKS_PARTIAL_SOURCE_READINESS,
+    data: {
+      ...MY_PROJECT_LINKS_PARTIAL_SOURCE_READINESS.data,
+      items: [],
+      summary: {
+        ...MY_PROJECT_LINKS_PARTIAL_SOURCE_READINESS.data.summary,
+        assignedProjectCount: 0,
+        dualLaunchReadyCount: 0,
+        sharePointReadyCount: 0,
+        procoreReadyCount: 0,
+      },
+    },
+  };
+}
+
 const EMPTY_COPY = 'No assigned projects were found for your current project-role assignments.';
 
 describe('MyProjectsHomeCard', () => {
@@ -288,6 +305,25 @@ describe('MyProjectsHomeCard', () => {
     expect(banner?.getAttribute('data-my-projects-readiness-banner')).toBe('backend-unavailable');
     expect(banner?.textContent).toContain(
       'Project links are temporarily unavailable while the My Dashboard service is unreachable.',
+    );
+    expect(container.textContent).not.toContain(EMPTY_COPY);
+    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
+  });
+
+  it('renders partial-with-zero-rows with banner only — no empty copy, no launch region, no metrics', async () => {
+    getMyProjectLinksMock.mockResolvedValue(makePartialZeroRowsEnvelope());
+    const { container } = renderCard();
+
+    await waitFor(() =>
+      expect(
+        container.querySelector('[data-my-projects-compact-state="banner-only"]'),
+      ).not.toBeNull(),
+    );
+    const banner = container.querySelector('[data-my-projects-compact-state="banner-only"]');
+    expect(banner?.getAttribute('data-my-projects-readiness-banner')).toBe('partial');
+    expect(banner?.textContent).toContain(
+      'Some launch destinations could not be fully verified. Available project links are shown below.',
     );
     expect(container.textContent).not.toContain(EMPTY_COPY);
     expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
