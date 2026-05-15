@@ -409,7 +409,8 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         new Response('not json', { status: 200, headers: { 'content-type': 'text/plain' } }),
     );
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
-    expect(await client.search(VALID_INPUT)).toEqual({
+    const result = await client.search(VALID_INPUT);
+    expect(result).toEqual({
       status: 'unreachable',
       reason: 'malformed-response',
       searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
@@ -463,6 +464,11 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
         hasPageSizeField: false,
       },
     });
+    expect(result.status).toBe('unreachable');
+    if (result.status !== 'unreachable') return;
+    expect(result.malformedSearchResponseDiagnostics?.topLevelKeyNamesCsv).toBe('');
+    expect(result.malformedSearchResponseDiagnostics?.topLevelKeyTypesCsv).toBe('');
+    expect(result.malformedSearchResponseDiagnostics?.topLevelObjectChildKeyTypesCsv).toBe('');
   });
 
   it('2xx with agreementAssets array exposes agreementAssets candidate diagnostics', async () => {
@@ -682,6 +688,43 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
       hasStartIndexField: true,
       hasPageSizeField: true,
     });
+  });
+
+  it('2xx with top-level primitive and object fields emits deterministic top-level key/type telemetry', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        alpha: 1,
+        beta: { inner: 'x' },
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('unreachable');
+    if (result.status !== 'unreachable') return;
+    expect(result.reason).toBe('malformed-response');
+    expect(result.malformedSearchResponseDiagnostics?.topLevelKeyNamesCsv).toBe('alpha,beta');
+    expect(result.malformedSearchResponseDiagnostics?.topLevelKeyTypesCsv).toBe(
+      'alpha:number,beta:object',
+    );
+  });
+
+  it('2xx with top-level object having nested array child emits first-level child key/type telemetry', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        envelope: {
+          rows: [],
+          meta: {},
+        },
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('unreachable');
+    if (result.status !== 'unreachable') return;
+    expect(result.reason).toBe('malformed-response');
+    expect(result.malformedSearchResponseDiagnostics?.topLevelObjectChildKeyTypesCsv).toBe(
+      'envelope.meta:object,envelope.rows:array',
+    );
   });
 
   it('2xx with agreementAssets and totalCount exposes bounded metadata diagnostics', async () => {

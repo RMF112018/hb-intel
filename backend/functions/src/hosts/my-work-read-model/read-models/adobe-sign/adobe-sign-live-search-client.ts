@@ -164,8 +164,78 @@ function buildSearchRequestDiagnostics(url: string, body: Record<string, unknown
 }
 
 function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
+  const sanitizeTelemetryKey = (key: string): string => {
+    const trimmed = key.trim().slice(0, 64);
+    if (trimmed.length === 0) return 'empty_key';
+    return trimmed.replace(/[^a-zA-Z0-9_.-]/g, '_');
+  };
+
+  const classifyValueType = (
+    value: unknown,
+  ): 'array' | 'object' | 'string' | 'number' | 'boolean' | 'null' | 'unknown' => {
+    if (value === null) return 'null';
+    if (Array.isArray(value)) return 'array';
+    switch (typeof value) {
+      case 'object':
+        return 'object';
+      case 'string':
+        return 'string';
+      case 'number':
+        return 'number';
+      case 'boolean':
+        return 'boolean';
+      default:
+        return 'unknown';
+    }
+  };
+
+  const attachDeterministicShapeDiagnostics = (
+    diagnostics: Record<string, unknown>,
+    body: Record<string, unknown> | undefined,
+  ) => {
+    if (!body) {
+      Object.defineProperties(diagnostics, {
+        topLevelKeyNamesCsv: { value: '', enumerable: false },
+        topLevelKeyTypesCsv: { value: '', enumerable: false },
+        topLevelObjectChildKeyTypesCsv: { value: '', enumerable: false },
+      });
+      return diagnostics;
+    }
+    const topLevelEntries = Object.entries(body).slice(0, 16);
+    const topLevelKeyNamesCsv = topLevelEntries
+      .map(([k]) => sanitizeTelemetryKey(k))
+      .sort()
+      .join(',');
+    const topLevelKeyTypesCsv = topLevelEntries
+      .map(([k, v]) => `${sanitizeTelemetryKey(k)}:${classifyValueType(v)}`)
+      .sort()
+      .join(',');
+    const topLevelObjectChildKeyTypes: string[] = [];
+    for (const [key, value] of topLevelEntries) {
+      if (value === null || typeof value !== 'object' || Array.isArray(value)) continue;
+      const parent = sanitizeTelemetryKey(key);
+      const childEntries = Object.entries(value as Record<string, unknown>).slice(0, 12);
+      for (const [childKey, childValue] of childEntries) {
+        topLevelObjectChildKeyTypes.push(
+          `${parent}.${sanitizeTelemetryKey(childKey)}:${classifyValueType(childValue)}`,
+        );
+      }
+      if (topLevelObjectChildKeyTypes.length >= 64) break;
+    }
+    Object.defineProperties(diagnostics, {
+      topLevelKeyNamesCsv: { value: topLevelKeyNamesCsv, enumerable: false },
+      topLevelKeyTypesCsv: { value: topLevelKeyTypesCsv, enumerable: false },
+      topLevelObjectChildKeyTypesCsv: {
+        value: topLevelObjectChildKeyTypes.slice(0, 64).sort().join(','),
+        enumerable: false,
+      },
+    });
+    return diagnostics;
+  };
+
   if (parsed === null || typeof parsed !== 'object') {
-    return {
+    return attachDeterministicShapeDiagnostics(
+      {
       bodyWasJsonObject: false,
       topLevelKeyCount: 0,
       hasTopLevelAgreementsArray: false,
@@ -213,7 +283,9 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
       hasTotalRecordsField: false,
       hasStartIndexField: false,
       hasPageSizeField: false,
-    };
+      },
+      undefined,
+    );
   }
   const body = parsed as Record<string, unknown>;
   const page = body.page;
@@ -233,7 +305,8 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
   const searchResultRecord = searchResultWasObject
     ? (searchResult as Record<string, unknown>)
     : undefined;
-  return {
+  return attachDeterministicShapeDiagnostics(
+    {
     bodyWasJsonObject: true,
     topLevelKeyCount: Object.keys(body).length,
     hasTopLevelAgreementsArray: Array.isArray(body.agreements),
@@ -302,7 +375,9 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
     hasTotalRecordsField: Object.prototype.hasOwnProperty.call(body, 'totalRecords'),
     hasStartIndexField: Object.prototype.hasOwnProperty.call(body, 'startIndex'),
     hasPageSizeField: Object.prototype.hasOwnProperty.call(body, 'pageSize'),
-  };
+    },
+    body,
+  );
 }
 
 function mapRow(row: unknown): AdobeSignSearchClientItem | undefined {

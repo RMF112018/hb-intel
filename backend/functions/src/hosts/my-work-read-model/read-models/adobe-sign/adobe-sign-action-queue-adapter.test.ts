@@ -835,6 +835,10 @@ describe('createAdobeSignActionQueueAdapter', () => {
                 hasTotalRecordsField: true,
                 hasStartIndexField: false,
                 hasPageSizeField: false,
+                topLevelKeyNamesCsv: 'page,searchResult',
+                topLevelKeyTypesCsv: 'page:object,searchResult:object',
+                topLevelObjectChildKeyTypesCsv:
+                  'page.nextCursor:string,searchResult.agreementAssets:array',
               },
             },
           ]),
@@ -918,6 +922,10 @@ describe('createAdobeSignActionQueueAdapter', () => {
             searchMalformedHasTotalRecordsField: true,
             searchMalformedHasStartIndexField: false,
             searchMalformedHasPageSizeField: false,
+            searchMalformedTopLevelKeyNamesCsv: 'page,searchResult',
+            searchMalformedTopLevelKeyTypesCsv: 'page:object,searchResult:object',
+            searchMalformedTopLevelObjectChildKeyTypesCsv:
+              'page.nextCursor:string,searchResult.agreementAssets:array',
           },
         },
         {
@@ -933,6 +941,7 @@ describe('createAdobeSignActionQueueAdapter', () => {
       expect(serialized).not.toContain(ACCESS_TOKEN);
       expect(serialized).not.toContain('Contract A');
       expect(serialized).not.toContain('alice@example.com');
+      expect(serialized).not.toContain('https://');
     });
   });
 });

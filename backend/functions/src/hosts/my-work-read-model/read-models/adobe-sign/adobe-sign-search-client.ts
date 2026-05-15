@@ -164,6 +164,9 @@ export type AdobeSignSearchResult =
         readonly hasTotalRecordsField?: boolean;
         readonly hasStartIndexField?: boolean;
         readonly hasPageSizeField?: boolean;
+        readonly topLevelKeyNamesCsv?: string;
+        readonly topLevelKeyTypesCsv?: string;
+        readonly topLevelObjectChildKeyTypesCsv?: string;
       };
     };
 

@@ -443,6 +443,13 @@ export function createAdobeSignActionQueueAdapter(
                   searchResult.malformedSearchResponseDiagnostics.hasStartIndexField,
                 searchMalformedHasPageSizeField:
                   searchResult.malformedSearchResponseDiagnostics.hasPageSizeField,
+                searchMalformedTopLevelKeyNamesCsv:
+                  searchResult.malformedSearchResponseDiagnostics.topLevelKeyNamesCsv,
+                searchMalformedTopLevelKeyTypesCsv:
+                  searchResult.malformedSearchResponseDiagnostics.topLevelKeyTypesCsv,
+                searchMalformedTopLevelObjectChildKeyTypesCsv:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .topLevelObjectChildKeyTypesCsv,
               }
             : {}),
         });

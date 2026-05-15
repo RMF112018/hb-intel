@@ -130,6 +130,9 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly searchMalformedHasTotalRecordsField?: boolean;
   readonly searchMalformedHasStartIndexField?: boolean;
   readonly searchMalformedHasPageSizeField?: boolean;
+  readonly searchMalformedTopLevelKeyNamesCsv?: string;
+  readonly searchMalformedTopLevelKeyTypesCsv?: string;
+  readonly searchMalformedTopLevelObjectChildKeyTypesCsv?: string;
   readonly searchProviderResponseHasErrorField?: boolean;
   readonly searchProviderResponseHasCodeField?: boolean;
   readonly sourceStatus?: string;
