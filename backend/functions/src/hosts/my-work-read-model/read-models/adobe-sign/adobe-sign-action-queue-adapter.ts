@@ -309,6 +309,23 @@ export function createAdobeSignActionQueueAdapter(
                 searchMethod: searchResult.searchRequestDiagnostics.method,
                 searchBodyTopLevelKeyCount:
                   searchResult.searchRequestDiagnostics.bodyTopLevelKeyCount,
+                searchHasScopeField: searchResult.searchRequestDiagnostics.hasScopeField,
+                searchScopeAgreementAssetsCount:
+                  searchResult.searchRequestDiagnostics.scopeAgreementAssetsCount,
+                searchHasAgreementAssetsCriteriaField:
+                  searchResult.searchRequestDiagnostics.hasAgreementAssetsCriteriaField,
+                searchAgreementAssetsCriteriaHasPageSizeField:
+                  searchResult.searchRequestDiagnostics
+                    .agreementAssetsCriteriaHasPageSizeField,
+                searchAgreementAssetsCriteriaHasStartIndexField:
+                  searchResult.searchRequestDiagnostics
+                    .agreementAssetsCriteriaHasStartIndexField,
+                searchAgreementAssetsCriteriaHasStatusField:
+                  searchResult.searchRequestDiagnostics.agreementAssetsCriteriaHasStatusField,
+                searchAgreementAssetsCriteriaHasRoleField:
+                  searchResult.searchRequestDiagnostics.agreementAssetsCriteriaHasRoleField,
+                searchAgreementAssetsCriteriaHasTypeField:
+                  searchResult.searchRequestDiagnostics.agreementAssetsCriteriaHasTypeField,
                 searchHasMatchingFiltersInfoField:
                   searchResult.searchRequestDiagnostics.hasMatchingFiltersInfoField,
                 searchHasAgreementOriginInfoField:

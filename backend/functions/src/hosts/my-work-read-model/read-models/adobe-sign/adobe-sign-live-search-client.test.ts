@@ -47,12 +47,20 @@ function expectedSearchRequestDiagnostics(overrides?: {
     endpointPath: '/api/rest/v6/search',
     method: 'POST',
     bodyTopLevelKeyCount: 2,
-    hasMatchingFiltersInfoField: true,
-    hasAgreementOriginInfoField: true,
-    hasRecipientStatusFilterField: true,
-    hasPageSizeField: true,
+    hasScopeField: true,
+    scopeAgreementAssetsCount: 1,
+    hasAgreementAssetsCriteriaField: true,
+    agreementAssetsCriteriaHasPageSizeField: true,
+    agreementAssetsCriteriaHasStartIndexField: true,
+    agreementAssetsCriteriaHasStatusField: false,
+    agreementAssetsCriteriaHasRoleField: false,
+    agreementAssetsCriteriaHasTypeField: false,
+    hasMatchingFiltersInfoField: false,
+    hasAgreementOriginInfoField: false,
+    hasRecipientStatusFilterField: false,
+    hasPageSizeField: false,
     hasCursorField: false,
-    approvedStatusCount: 6,
+    approvedStatusCount: 0,
     ...overrides,
   };
 }
@@ -67,7 +75,7 @@ describe('createAdobeSignLiveSearchClient — request shape', () => {
     expect(calledUrl).toBe(`${VALID_INPUT.apiAccessPoint}${ADOBE_SIGN_AGREEMENT_SEARCH_PATH}`);
   });
 
-  it('sends POST with Bearer authorization, JSON content-type, and pageSize + status filter in body', async () => {
+  it('sends POST with Bearer authorization and scope + agreementAssetsCriteria body', async () => {
     const fetchSpy = vi.fn(async () => jsonResponse({ agreements: [] }));
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
     await client.search(VALID_INPUT);
@@ -78,29 +86,46 @@ describe('createAdobeSignLiveSearchClient — request shape', () => {
     expect(headers.authorization).toBe(`Bearer ${ACCESS_TOKEN}`);
     expect(headers['content-type']).toBe('application/json');
     const bodyJson = JSON.parse(initObj.body as string);
-    expect(bodyJson.pageSize).toBe(25);
-    expect(bodyJson.matchingFiltersInfo.recipientStatusFilter.values).toEqual([
-      'WAITING_FOR_MY_SIGNATURE',
-      'WAITING_FOR_MY_APPROVAL',
-      'WAITING_FOR_MY_ACCEPTANCE',
-      'WAITING_FOR_MY_ACKNOWLEDGEMENT',
-      'WAITING_FOR_MY_FORM_FILLING',
-      'WAITING_FOR_MY_DELEGATION',
-    ]);
+    expect(bodyJson.scope).toEqual(['AGREEMENT_ASSETS']);
+    expect(bodyJson.agreementAssetsCriteria).toEqual({
+      pageSize: 25,
+      startIndex: 0,
+    });
+    expect(bodyJson.matchingFiltersInfo).toBeUndefined();
+    expect(bodyJson.pageSize).toBeUndefined();
     expect(bodyJson.cursor).toBeUndefined();
   });
 
-  it('includes cursor in the body only when provided', async () => {
+  it('decodes backend-generated cursor into agreementAssetsCriteria.startIndex', async () => {
     const fetchSpy = vi.fn(async () => jsonResponse({ agreements: [] }));
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
     await client.search({
       ...VALID_INPUT,
-      request: buildAdobeSignSearchRequest({ pageSize: 50, cursor: 'opaque-cursor' }),
+      request: buildAdobeSignSearchRequest({
+        pageSize: 50,
+        cursor: 'adobe-search-start-index:75',
+      }),
     });
     const [, init] = fetchSpy.mock.calls[0]!;
     const bodyJson = JSON.parse((init as RequestInit).body as string);
-    expect(bodyJson.pageSize).toBe(50);
-    expect(bodyJson.cursor).toBe('opaque-cursor');
+    expect(bodyJson.scope).toEqual(['AGREEMENT_ASSETS']);
+    expect(bodyJson.agreementAssetsCriteria).toEqual({
+      pageSize: 50,
+      startIndex: 75,
+    });
+    expect(bodyJson.cursor).toBeUndefined();
+  });
+
+  it('rejects malformed cursor values without dispatching a malformed Adobe request', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ agreements: [] }));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    expect(
+      await client.search({
+        ...VALID_INPUT,
+        request: buildAdobeSignSearchRequest({ pageSize: 50, cursor: 'opaque-cursor' }),
+      }),
+    ).toEqual({ status: 'unreachable', reason: 'unknown' });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
 
@@ -150,7 +175,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
     expect(result.items[2]?.sourceOpenUrlCandidate).toBe(
       'https://secure.na1.adobesign.com/x?aid=3',
     );
-    expect(result.nextCursor).toBe('next-page-token');
+    expect(result.nextCursor).toBeUndefined();
   });
 
   it('silently drops a row that is missing a required field; the rest survive', async () => {

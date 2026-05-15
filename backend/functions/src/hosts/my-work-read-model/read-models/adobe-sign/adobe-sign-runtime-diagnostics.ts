@@ -69,6 +69,14 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly searchEndpointPath?: string;
   readonly searchMethod?: string;
   readonly searchBodyTopLevelKeyCount?: number;
+  readonly searchHasScopeField?: boolean;
+  readonly searchScopeAgreementAssetsCount?: number;
+  readonly searchHasAgreementAssetsCriteriaField?: boolean;
+  readonly searchAgreementAssetsCriteriaHasPageSizeField?: boolean;
+  readonly searchAgreementAssetsCriteriaHasStartIndexField?: boolean;
+  readonly searchAgreementAssetsCriteriaHasStatusField?: boolean;
+  readonly searchAgreementAssetsCriteriaHasRoleField?: boolean;
+  readonly searchAgreementAssetsCriteriaHasTypeField?: boolean;
   readonly searchHasMatchingFiltersInfoField?: boolean;
   readonly searchHasAgreementOriginInfoField?: boolean;
   readonly searchHasRecipientStatusFilterField?: boolean;

@@ -80,13 +80,6 @@ function readSourceOpenUrlCandidate(row: unknown): string | undefined {
   return readStringField(row, 'viewURL') ?? readStringField(row, 'agreementViewUrl');
 }
 
-function readNextCursor(body: unknown): string | undefined {
-  return (
-    readStringField(body, 'nextCursor') ??
-    readNestedString(body, 'searchAgreementsResponse', 'nextCursor')
-  );
-}
-
 function normalizeSafeProviderErrorCode(raw: string | undefined): string | undefined {
   if (!raw) return undefined;
   const normalized = raw.trim().toLowerCase();
@@ -120,34 +113,53 @@ function readProviderErrorFieldPresence(body: unknown): {
   };
 }
 
+const ADOBE_SEARCH_CURSOR_PREFIX = 'adobe-search-start-index:' as const;
+
+function decodeSearchStartIndex(cursor: string | undefined): number | 'invalid' {
+  if (cursor === undefined) return 0;
+  if (!cursor.startsWith(ADOBE_SEARCH_CURSOR_PREFIX)) return 'invalid';
+  const raw = cursor.slice(ADOBE_SEARCH_CURSOR_PREFIX.length);
+  if (!/^\d+$/.test(raw)) return 'invalid';
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : 'invalid';
+}
+
 function buildSearchRequestDiagnostics(url: string, body: Record<string, unknown>, method: string) {
   const parsed = new URL(url);
-  const matchingFiltersInfo = body.matchingFiltersInfo;
-  const matchingFiltersInfoObj =
-    matchingFiltersInfo !== null && typeof matchingFiltersInfo === 'object'
-      ? (matchingFiltersInfo as Record<string, unknown>)
+  const scope = body.scope;
+  const scopeValues = Array.isArray(scope) ? scope.filter((s) => s === 'AGREEMENT_ASSETS') : [];
+  const criteria = body.agreementAssetsCriteria;
+  const criteriaObj =
+    criteria !== null && typeof criteria === 'object'
+      ? (criteria as Record<string, unknown>)
       : undefined;
-  const recipientStatusFilter = matchingFiltersInfoObj?.recipientStatusFilter;
-  const recipientStatusFilterObj =
-    recipientStatusFilter !== null && typeof recipientStatusFilter === 'object'
-      ? (recipientStatusFilter as Record<string, unknown>)
-      : undefined;
-  const values = recipientStatusFilterObj?.values;
   return {
     endpointHost: parsed.hostname,
     endpointPath: parsed.pathname,
     method,
     bodyTopLevelKeyCount: Object.keys(body).length,
+    hasScopeField: Object.prototype.hasOwnProperty.call(body, 'scope'),
+    scopeAgreementAssetsCount: scopeValues.length,
+    hasAgreementAssetsCriteriaField: Object.prototype.hasOwnProperty.call(
+      body,
+      'agreementAssetsCriteria',
+    ),
+    agreementAssetsCriteriaHasPageSizeField:
+      criteriaObj !== undefined && Object.prototype.hasOwnProperty.call(criteriaObj, 'pageSize'),
+    agreementAssetsCriteriaHasStartIndexField:
+      criteriaObj !== undefined && Object.prototype.hasOwnProperty.call(criteriaObj, 'startIndex'),
+    agreementAssetsCriteriaHasStatusField:
+      criteriaObj !== undefined && Object.prototype.hasOwnProperty.call(criteriaObj, 'status'),
+    agreementAssetsCriteriaHasRoleField:
+      criteriaObj !== undefined && Object.prototype.hasOwnProperty.call(criteriaObj, 'role'),
+    agreementAssetsCriteriaHasTypeField:
+      criteriaObj !== undefined && Object.prototype.hasOwnProperty.call(criteriaObj, 'type'),
     hasMatchingFiltersInfoField: Object.prototype.hasOwnProperty.call(body, 'matchingFiltersInfo'),
-    hasAgreementOriginInfoField:
-      matchingFiltersInfoObj !== undefined &&
-      Object.prototype.hasOwnProperty.call(matchingFiltersInfoObj, 'agreementOriginInfo'),
-    hasRecipientStatusFilterField:
-      matchingFiltersInfoObj !== undefined &&
-      Object.prototype.hasOwnProperty.call(matchingFiltersInfoObj, 'recipientStatusFilter'),
+    hasAgreementOriginInfoField: false,
+    hasRecipientStatusFilterField: false,
     hasPageSizeField: Object.prototype.hasOwnProperty.call(body, 'pageSize'),
     hasCursorField: Object.prototype.hasOwnProperty.call(body, 'cursor'),
-    approvedStatusCount: Array.isArray(values) ? values.length : 0,
+    approvedStatusCount: 0,
   };
 }
 
@@ -210,15 +222,19 @@ export function createAdobeSignLiveSearchClient(
         return { status: 'unreachable', reason: 'invalid-access-point' };
       }
 
+      const startIndex = decodeSearchStartIndex(input.request.cursor);
+      if (startIndex === 'invalid') {
+        return { status: 'unreachable', reason: 'unknown' };
+      }
+
       const url = `${trimTrailingSlash(input.apiAccessPoint)}${ADOBE_SIGN_AGREEMENT_SEARCH_PATH}`;
       const method = 'POST' as const;
       const body = {
-        matchingFiltersInfo: {
-          agreementOriginInfo: { scope: 'PERSONAL' },
-          recipientStatusFilter: { values: [...input.request.approvedStatuses] },
+        scope: ['AGREEMENT_ASSETS'],
+        agreementAssetsCriteria: {
+          pageSize: input.request.pageSize,
+          startIndex,
         },
-        pageSize: input.request.pageSize,
-        ...(input.request.cursor !== undefined ? { cursor: input.request.cursor } : {}),
       };
       const searchRequestDiagnostics = buildSearchRequestDiagnostics(url, body, method);
 
@@ -329,11 +345,9 @@ export function createAdobeSignLiveSearchClient(
         if (mapped !== undefined) items.push(mapped);
       }
 
-      const nextCursor = readNextCursor(parsed);
       return {
         status: 'ok',
         items,
-        ...(nextCursor !== undefined ? { nextCursor } : {}),
       };
     },
   };

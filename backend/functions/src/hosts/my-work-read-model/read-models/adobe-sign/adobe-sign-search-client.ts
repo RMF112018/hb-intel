@@ -101,6 +101,14 @@ export type AdobeSignSearchResult =
         readonly endpointPath?: string;
         readonly method?: string;
         readonly bodyTopLevelKeyCount?: number;
+        readonly hasScopeField?: boolean;
+        readonly scopeAgreementAssetsCount?: number;
+        readonly hasAgreementAssetsCriteriaField?: boolean;
+        readonly agreementAssetsCriteriaHasPageSizeField?: boolean;
+        readonly agreementAssetsCriteriaHasStartIndexField?: boolean;
+        readonly agreementAssetsCriteriaHasStatusField?: boolean;
+        readonly agreementAssetsCriteriaHasRoleField?: boolean;
+        readonly agreementAssetsCriteriaHasTypeField?: boolean;
         readonly hasMatchingFiltersInfoField?: boolean;
         readonly hasAgreementOriginInfoField?: boolean;
         readonly hasRecipientStatusFilterField?: boolean;
