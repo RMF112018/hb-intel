@@ -194,6 +194,25 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
       hasTotalCountField: false,
       hasCurrentPageField: false,
       hasTotalPagesField: false,
+      hasAgreementAssetListField: false,
+      hasAgreementAssetListArray: false,
+      hasAgreementAssetsListField: false,
+      hasAgreementAssetsListArray: false,
+      hasAgreementAssetSearchResultsField: false,
+      hasAgreementAssetSearchResultsArray: false,
+      hasAgreementAssetSearchResultListField: false,
+      hasAgreementAssetSearchResultListArray: false,
+      hasSearchResultField: false,
+      searchResultWasObject: false,
+      searchResultHasAgreementAssetsField: false,
+      searchResultHasAgreementAssetsArray: false,
+      hasPagingInfoField: false,
+      hasPaginationField: false,
+      hasPageDataField: false,
+      hasTotalHitsField: false,
+      hasTotalRecordsField: false,
+      hasStartIndexField: false,
+      hasPageSizeField: false,
     };
   }
   const body = parsed as Record<string, unknown>;
@@ -208,6 +227,11 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
     firstUserAgreement !== null && typeof firstUserAgreement === 'object';
   const firstUserAgreementRecord = firstUserAgreementWasObject
     ? (firstUserAgreement as Record<string, unknown>)
+    : undefined;
+  const searchResult = body.searchResult;
+  const searchResultWasObject = searchResult !== null && typeof searchResult === 'object';
+  const searchResultRecord = searchResultWasObject
+    ? (searchResult as Record<string, unknown>)
     : undefined;
   return {
     bodyWasJsonObject: true,
@@ -250,6 +274,34 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
     hasTotalCountField: Object.prototype.hasOwnProperty.call(body, 'totalCount'),
     hasCurrentPageField: Object.prototype.hasOwnProperty.call(body, 'currentPage'),
     hasTotalPagesField: Object.prototype.hasOwnProperty.call(body, 'totalPages'),
+    hasAgreementAssetListField: Object.prototype.hasOwnProperty.call(body, 'agreementAssetList'),
+    hasAgreementAssetListArray: Array.isArray(body.agreementAssetList),
+    hasAgreementAssetsListField: Object.prototype.hasOwnProperty.call(body, 'agreementAssetsList'),
+    hasAgreementAssetsListArray: Array.isArray(body.agreementAssetsList),
+    hasAgreementAssetSearchResultsField: Object.prototype.hasOwnProperty.call(
+      body,
+      'agreementAssetSearchResults',
+    ),
+    hasAgreementAssetSearchResultsArray: Array.isArray(body.agreementAssetSearchResults),
+    hasAgreementAssetSearchResultListField: Object.prototype.hasOwnProperty.call(
+      body,
+      'agreementAssetSearchResultList',
+    ),
+    hasAgreementAssetSearchResultListArray: Array.isArray(body.agreementAssetSearchResultList),
+    hasSearchResultField: Object.prototype.hasOwnProperty.call(body, 'searchResult'),
+    searchResultWasObject,
+    searchResultHasAgreementAssetsField:
+      searchResultRecord !== undefined &&
+      Object.prototype.hasOwnProperty.call(searchResultRecord, 'agreementAssets'),
+    searchResultHasAgreementAssetsArray:
+      searchResultRecord !== undefined && Array.isArray(searchResultRecord.agreementAssets),
+    hasPagingInfoField: Object.prototype.hasOwnProperty.call(body, 'pagingInfo'),
+    hasPaginationField: Object.prototype.hasOwnProperty.call(body, 'pagination'),
+    hasPageDataField: Object.prototype.hasOwnProperty.call(body, 'pageData'),
+    hasTotalHitsField: Object.prototype.hasOwnProperty.call(body, 'totalHits'),
+    hasTotalRecordsField: Object.prototype.hasOwnProperty.call(body, 'totalRecords'),
+    hasStartIndexField: Object.prototype.hasOwnProperty.call(body, 'startIndex'),
+    hasPageSizeField: Object.prototype.hasOwnProperty.call(body, 'pageSize'),
   };
 }
 

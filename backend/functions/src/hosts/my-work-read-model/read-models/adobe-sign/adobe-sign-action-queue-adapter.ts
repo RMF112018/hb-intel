@@ -399,6 +399,50 @@ export function createAdobeSignActionQueueAdapter(
                   searchResult.malformedSearchResponseDiagnostics.hasCurrentPageField,
                 searchMalformedHasTotalPagesField:
                   searchResult.malformedSearchResponseDiagnostics.hasTotalPagesField,
+                searchMalformedHasAgreementAssetListField:
+                  searchResult.malformedSearchResponseDiagnostics.hasAgreementAssetListField,
+                searchMalformedHasAgreementAssetListArray:
+                  searchResult.malformedSearchResponseDiagnostics.hasAgreementAssetListArray,
+                searchMalformedHasAgreementAssetsListField:
+                  searchResult.malformedSearchResponseDiagnostics.hasAgreementAssetsListField,
+                searchMalformedHasAgreementAssetsListArray:
+                  searchResult.malformedSearchResponseDiagnostics.hasAgreementAssetsListArray,
+                searchMalformedHasAgreementAssetSearchResultsField:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .hasAgreementAssetSearchResultsField,
+                searchMalformedHasAgreementAssetSearchResultsArray:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .hasAgreementAssetSearchResultsArray,
+                searchMalformedHasAgreementAssetSearchResultListField:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .hasAgreementAssetSearchResultListField,
+                searchMalformedHasAgreementAssetSearchResultListArray:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .hasAgreementAssetSearchResultListArray,
+                searchMalformedHasSearchResultField:
+                  searchResult.malformedSearchResponseDiagnostics.hasSearchResultField,
+                searchMalformedSearchResultWasObject:
+                  searchResult.malformedSearchResponseDiagnostics.searchResultWasObject,
+                searchMalformedSearchResultHasAgreementAssetsField:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .searchResultHasAgreementAssetsField,
+                searchMalformedSearchResultHasAgreementAssetsArray:
+                  searchResult.malformedSearchResponseDiagnostics
+                    .searchResultHasAgreementAssetsArray,
+                searchMalformedHasPagingInfoField:
+                  searchResult.malformedSearchResponseDiagnostics.hasPagingInfoField,
+                searchMalformedHasPaginationField:
+                  searchResult.malformedSearchResponseDiagnostics.hasPaginationField,
+                searchMalformedHasPageDataField:
+                  searchResult.malformedSearchResponseDiagnostics.hasPageDataField,
+                searchMalformedHasTotalHitsField:
+                  searchResult.malformedSearchResponseDiagnostics.hasTotalHitsField,
+                searchMalformedHasTotalRecordsField:
+                  searchResult.malformedSearchResponseDiagnostics.hasTotalRecordsField,
+                searchMalformedHasStartIndexField:
+                  searchResult.malformedSearchResponseDiagnostics.hasStartIndexField,
+                searchMalformedHasPageSizeField:
+                  searchResult.malformedSearchResponseDiagnostics.hasPageSizeField,
               }
             : {}),
         });
