@@ -66,6 +66,17 @@ export type AdobeSignTokenExchangeResult =
       readonly status: 'unreachable';
       readonly reason?: string;
       readonly providerErrorCode?: string;
+      readonly exchangeRequestDiagnostics?: {
+        readonly endpointHost?: string;
+        readonly endpointPath?: string;
+        readonly endpointSelectionMode?: string;
+        readonly bodyFieldCount?: number;
+        readonly hasGrantTypeField?: boolean;
+        readonly hasCodeField?: boolean;
+        readonly hasClientIdField?: boolean;
+        readonly hasClientSecretField?: boolean;
+        readonly hasRedirectUriField?: boolean;
+      };
     };
 
 export interface IAdobeSignOAuthService {

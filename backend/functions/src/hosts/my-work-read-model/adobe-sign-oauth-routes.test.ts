@@ -529,7 +529,18 @@ describe('callback handler', () => {
     (seams.service.exchangeAuthorizationCode as any).mockResolvedValueOnce({
       status: 'unreachable',
       reason: 'http-4xx',
-      providerErrorCode: 'invalid_client',
+      providerErrorCode: 'invalid_request',
+      exchangeRequestDiagnostics: {
+        endpointHost: 'api.na1.adobesign.com',
+        endpointPath: '/oauth/v2/token',
+        endpointSelectionMode: 'partner-default-api-na1',
+        bodyFieldCount: 5,
+        hasGrantTypeField: true,
+        hasCodeField: true,
+        hasClientIdField: true,
+        hasClientSecretField: true,
+        hasRedirectUriField: true,
+      },
     });
     const { state } = await issueState(mod, deps, seams);
     const callback = mod.createCallbackHandler(deps);
@@ -550,13 +561,24 @@ describe('callback handler', () => {
       correlationId: 'req-oauth',
       status: 'unreachable',
       reason: 'http-4xx',
-      providerErrorCode: 'invalid_client',
+      providerErrorCode: 'invalid_request',
+      exchangeEndpointHost: 'api.na1.adobesign.com',
+      exchangeEndpointPath: '/oauth/v2/token',
+      exchangeEndpointSelectionMode: 'partner-default-api-na1',
+      exchangeBodyFieldCount: 5,
+      exchangeHasGrantTypeField: true,
+      exchangeHasCodeField: true,
+      exchangeHasClientIdField: true,
+      exchangeHasClientSecretField: true,
+      exchangeHasRedirectUriField: true,
       callbackHasApiAccessPoint: true,
       callbackHasWebAccessPoint: true,
     });
     const serializedPayload = JSON.stringify((loggerTrackEventSpy as any).mock.calls);
     expect(serializedPayload).not.toContain('sensitive-code-value');
+    expect(serializedPayload).not.toContain('client-id-value');
     expect(serializedPayload).not.toContain('super-secret-do-not-echo');
+    expect(serializedPayload).not.toContain('https://hb-intel.example.com/api/adobe/callback');
     expect(serializedPayload).not.toContain('rt-secret');
     expect(serializedPayload).not.toContain('at-secret');
   });

@@ -36,6 +36,20 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
+function expectedDiagnostics(selectionMode: 'callback-api-access-point' | 'partner-default-api-na1') {
+  return {
+    endpointHost: 'api.na1.adobesign.com',
+    endpointPath: '/oauth/v2/token',
+    endpointSelectionMode: selectionMode,
+    bodyFieldCount: 5,
+    hasGrantTypeField: true,
+    hasCodeField: true,
+    hasClientIdField: true,
+    hasClientSecretField: true,
+    hasRedirectUriField: true,
+  };
+}
+
 describe('isAllowedAdobeAccessPoint', () => {
   it('accepts hosts on the documented allow-list', () => {
     expect(isAllowedAdobeAccessPoint('https://api.na1.adobesign.com')).toBe(true);
@@ -140,6 +154,7 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'malformed-response',
+      exchangeRequestDiagnostics: expectedDiagnostics('callback-api-access-point'),
     });
   });
 
@@ -152,6 +167,7 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'malformed-response',
+      exchangeRequestDiagnostics: expectedDiagnostics('callback-api-access-point'),
     });
   });
 
@@ -208,6 +224,7 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
     ).toEqual({
       status: 'unreachable',
       reason: 'missing-access-point',
+      exchangeRequestDiagnostics: expectedDiagnostics('partner-default-api-na1'),
     });
   });
 
@@ -220,12 +237,13 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
   });
 
   it('maps HTTP 400 + unknown Adobe error to "unreachable" + "http-4xx"', async () => {
-    const fetchSpy = vi.fn(async () => jsonResponse({ error: 'invalid_client' }, 400));
+    const fetchSpy = vi.fn(async () => jsonResponse({ error: 'invalid_request' }, 400));
     const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'http-4xx',
-      providerErrorCode: 'invalid_client',
+      providerErrorCode: 'invalid_request',
+      exchangeRequestDiagnostics: expectedDiagnostics('callback-api-access-point'),
     });
   });
 
@@ -235,6 +253,7 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'http-4xx',
+      exchangeRequestDiagnostics: expectedDiagnostics('callback-api-access-point'),
     });
   });
 
@@ -254,6 +273,7 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'http-5xx',
+      exchangeRequestDiagnostics: expectedDiagnostics('callback-api-access-point'),
     });
   });
 
@@ -265,6 +285,7 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'network',
+      exchangeRequestDiagnostics: expectedDiagnostics('callback-api-access-point'),
     });
   });
 
@@ -278,6 +299,24 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'unreachable',
       reason: 'timeout',
+      exchangeRequestDiagnostics: expectedDiagnostics('callback-api-access-point'),
+    });
+  });
+
+  it('reports partner-default-api-na1 endpoint selection mode when callback access points are absent', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ error: 'invalid_request' }, 400));
+    const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
+    expect(
+      await service.exchangeAuthorizationCode({
+        ...VALID_INPUT,
+        apiAccessPoint: undefined,
+        webAccessPoint: undefined,
+      }),
+    ).toEqual({
+      status: 'unreachable',
+      reason: 'http-4xx',
+      providerErrorCode: 'invalid_request',
+      exchangeRequestDiagnostics: expectedDiagnostics('partner-default-api-na1'),
     });
   });
 });

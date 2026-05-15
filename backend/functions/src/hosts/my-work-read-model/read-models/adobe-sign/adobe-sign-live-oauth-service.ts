@@ -152,6 +152,26 @@ function normalizeSafeProviderErrorCode(raw: string | undefined): string | undef
   return /^[a-z0-9_-]+$/.test(normalized) ? normalized : undefined;
 }
 
+function buildExchangeRequestDiagnostics(
+  url: string,
+  endpointSource: AdobeSignEndpointSource,
+  body: URLSearchParams,
+) {
+  const parsed = new URL(url);
+  return {
+    endpointHost: parsed.hostname,
+    endpointPath: parsed.pathname,
+    endpointSelectionMode:
+      endpointSource === 'callback' ? 'callback-api-access-point' : 'partner-default-api-na1',
+    bodyFieldCount: Array.from(body.keys()).length,
+    hasGrantTypeField: body.has('grant_type'),
+    hasCodeField: body.has('code'),
+    hasClientIdField: body.has('client_id'),
+    hasClientSecretField: body.has('client_secret'),
+    hasRedirectUriField: body.has('redirect_uri'),
+  };
+}
+
 export function createAdobeSignLiveOAuthService(
   deps: AdobeSignLiveOAuthServiceDeps = {},
 ): IAdobeSignOAuthService {
@@ -197,6 +217,7 @@ export function createAdobeSignLiveOAuthService(
         client_secret: input.clientSecret,
         redirect_uri: input.redirectUri,
       });
+      const exchangeRequestDiagnostics = buildExchangeRequestDiagnostics(url, endpointSource, body);
 
       const controller = new AbortController();
       const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
@@ -214,15 +235,15 @@ export function createAdobeSignLiveOAuthService(
       } catch (err: unknown) {
         const name = (err as { name?: string }).name;
         if (name === 'AbortError') {
-          return { status: 'unreachable', reason: 'timeout' };
+          return { status: 'unreachable', reason: 'timeout', exchangeRequestDiagnostics };
         }
-        return { status: 'unreachable', reason: 'network' };
+        return { status: 'unreachable', reason: 'network', exchangeRequestDiagnostics };
       } finally {
         clearTimeout(timeoutHandle);
       }
 
       if (response.status >= 500) {
-        return { status: 'unreachable', reason: 'http-5xx' };
+        return { status: 'unreachable', reason: 'http-5xx', exchangeRequestDiagnostics };
       }
       if (response.status >= 400) {
         let parsed: unknown;
@@ -240,6 +261,7 @@ export function createAdobeSignLiveOAuthService(
           status: 'unreachable',
           reason: 'http-4xx',
           ...(providerErrorCode ? { providerErrorCode } : {}),
+          exchangeRequestDiagnostics,
         };
       }
 
@@ -247,10 +269,10 @@ export function createAdobeSignLiveOAuthService(
       try {
         parsed = await response.json();
       } catch {
-        return { status: 'unreachable', reason: 'malformed-response' };
+        return { status: 'unreachable', reason: 'malformed-response', exchangeRequestDiagnostics };
       }
       if (!isAdobeTokenSuccessBody(parsed)) {
-        return { status: 'unreachable', reason: 'malformed-response' };
+        return { status: 'unreachable', reason: 'malformed-response', exchangeRequestDiagnostics };
       }
 
       const grantedScopes = parseScopes((parsed as AdobeTokenSuccessBody).scope);
@@ -280,6 +302,7 @@ export function createAdobeSignLiveOAuthService(
         return {
           status: 'unreachable',
           reason: endpointSource === 'configured-fallback' ? 'missing-access-point' : 'invalid-access-point',
+          exchangeRequestDiagnostics,
         };
       }
       const resolvedApiAccessPoint = normalizeAllowedAccessPoint(resolvedApiAccessPointRaw);

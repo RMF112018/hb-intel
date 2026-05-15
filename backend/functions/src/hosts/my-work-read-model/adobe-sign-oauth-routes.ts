@@ -466,6 +466,22 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         ...(exchange.status === 'unreachable' && exchange.providerErrorCode
           ? { providerErrorCode: exchange.providerErrorCode }
           : {}),
+        ...(exchange.status === 'unreachable' && exchange.exchangeRequestDiagnostics
+          ? {
+              exchangeEndpointHost: exchange.exchangeRequestDiagnostics.endpointHost,
+              exchangeEndpointPath: exchange.exchangeRequestDiagnostics.endpointPath,
+              exchangeEndpointSelectionMode:
+                exchange.exchangeRequestDiagnostics.endpointSelectionMode,
+              exchangeBodyFieldCount: exchange.exchangeRequestDiagnostics.bodyFieldCount,
+              exchangeHasGrantTypeField: exchange.exchangeRequestDiagnostics.hasGrantTypeField,
+              exchangeHasCodeField: exchange.exchangeRequestDiagnostics.hasCodeField,
+              exchangeHasClientIdField: exchange.exchangeRequestDiagnostics.hasClientIdField,
+              exchangeHasClientSecretField:
+                exchange.exchangeRequestDiagnostics.hasClientSecretField,
+              exchangeHasRedirectUriField:
+                exchange.exchangeRequestDiagnostics.hasRedirectUriField,
+            }
+          : {}),
         callbackHasApiAccessPoint: hasApiAccessPoint,
         callbackHasWebAccessPoint: hasWebAccessPoint,
       });
