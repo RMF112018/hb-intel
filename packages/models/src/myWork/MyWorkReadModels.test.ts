@@ -84,6 +84,7 @@ describe('My Work read models — route registry', () => {
     expect(Object.keys(MY_WORK_READ_MODEL_ROUTE_PATHS)).toEqual([
       'home',
       'adobe-sign-action-queue',
+      'adobe-sign-recent-completions',
       'project-links',
     ]);
   });
@@ -92,6 +93,7 @@ describe('My Work read models — route registry', () => {
     expect(MY_WORK_READ_MODEL_ROUTE_PATHS).toEqual({
       home: 'my-work/me/home',
       'adobe-sign-action-queue': 'my-work/me/adobe-sign/action-queue',
+      'adobe-sign-recent-completions': 'my-work/me/adobe-sign/recent-completions',
       'project-links': 'my-work/me/project-links',
     });
   });
@@ -264,6 +266,27 @@ describe('My Work read models — response map', () => {
           },
         },
       },
+      'adobe-sign-recent-completions': {
+        mode: 'fixture',
+        sourceStatus: 'available',
+        readOnly: true,
+        warnings: [],
+        generatedAtUtc: '2026-05-13T10:00:00.000Z',
+        data: {
+          moduleId: 'adobe-sign-recent-completions',
+          summary: {
+            countBasis: 'returned-items',
+            completedAgreementCount: 0,
+            windowDays: 30,
+          },
+          items: [],
+          pagination: { pageSize: 25, hasMore: false },
+          freshness: {
+            state: 'fresh',
+            generatedAtUtc: '2026-05-13T10:00:00.000Z',
+          },
+        },
+      },
       'project-links': {
         mode: 'fixture',
         sourceStatus: 'available',
@@ -295,9 +318,17 @@ describe('My Work read models — response map', () => {
         },
       },
     };
-    expect(Object.keys(map)).toEqual(['home', 'adobe-sign-action-queue', 'project-links']);
+    expect(Object.keys(map)).toEqual([
+      'home',
+      'adobe-sign-action-queue',
+      'adobe-sign-recent-completions',
+      'project-links',
+    ]);
     expect(map.home.data.adobeSignActionQueue.previewItemLimit).toBe(5);
     expect(map['adobe-sign-action-queue'].data.moduleId).toBe('adobe-sign-action-queue');
+    expect(map['adobe-sign-recent-completions'].data.moduleId).toBe(
+      'adobe-sign-recent-completions',
+    );
     expect(map['project-links'].data.moduleId).toBe('my-project-links');
   });
 });

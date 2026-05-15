@@ -17,6 +17,9 @@ const ALL_ENVELOPES = [
   ...Object.entries(MY_WORK_FIXTURES['adobe-sign-action-queue']).map(
     ([key, envelope]) => [`adobe-sign-action-queue.${key}`, envelope] as const,
   ),
+  ...Object.entries(MY_WORK_FIXTURES['adobe-sign-recent-completions']).map(
+    ([key, envelope]) => [`adobe-sign-recent-completions.${key}`, envelope] as const,
+  ),
   ...Object.entries(MY_WORK_FIXTURES['project-links']).map(
     ([key, envelope]) => [`project-links.${key}`, envelope] as const,
   ),

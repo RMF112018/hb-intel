@@ -21,6 +21,7 @@ import type {
   MyWorkAdobeSignActionQueueReadModel,
   MyWorkAdobeSignActionQueueSummary,
 } from './AdobeSignActionQueue.js';
+import type { MyWorkAdobeSignRecentCompletionsReadModel } from './AdobeSignRecentCompletions.js';
 import type { MyProjectLinksReadModel } from './MyProjectLinksReadModel.js';
 
 export const MY_WORK_READ_MODEL_MODES = ['fixture', 'backend'] as const;
@@ -134,6 +135,7 @@ export interface MyWorkHomeReadModel {
 export const MY_WORK_READ_MODEL_ROUTE_PATHS = {
   home: 'my-work/me/home',
   'adobe-sign-action-queue': 'my-work/me/adobe-sign/action-queue',
+  'adobe-sign-recent-completions': 'my-work/me/adobe-sign/recent-completions',
   'project-links': 'my-work/me/project-links',
 } as const;
 
@@ -142,5 +144,6 @@ export type MyWorkReadModelRouteKey = keyof typeof MY_WORK_READ_MODEL_ROUTE_PATH
 export interface MyWorkReadModelResponseMap {
   readonly home: MyWorkReadModelEnvelope<MyWorkHomeReadModel>;
   readonly 'adobe-sign-action-queue': MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>;
+  readonly 'adobe-sign-recent-completions': MyWorkReadModelEnvelope<MyWorkAdobeSignRecentCompletionsReadModel>;
   readonly 'project-links': MyWorkReadModelEnvelope<MyProjectLinksReadModel>;
 }

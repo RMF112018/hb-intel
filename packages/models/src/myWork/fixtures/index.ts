@@ -10,6 +10,7 @@
  */
 
 export * from './adobeSignActionQueueReadModels.js';
+export * from './adobeSignRecentCompletionsReadModels.js';
 export * from './myWorkHomeReadModels.js';
 export * from './myProjectLinksReadModels.js';
 
@@ -24,6 +25,18 @@ import {
   ADOBE_SIGN_QUEUE_PRINCIPAL_UNRESOLVED,
   ADOBE_SIGN_QUEUE_SOURCE_UNAVAILABLE,
 } from './adobeSignActionQueueReadModels.js';
+
+import {
+  ADOBE_SIGN_RECENT_COMPLETIONS_AUTHORIZATION_REQUIRED,
+  ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
+  ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE_PAGED,
+  ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE,
+  ADOBE_SIGN_RECENT_COMPLETIONS_CONFIGURATION_REQUIRED,
+  ADOBE_SIGN_RECENT_COMPLETIONS_EMPTY,
+  ADOBE_SIGN_RECENT_COMPLETIONS_PARTIAL,
+  ADOBE_SIGN_RECENT_COMPLETIONS_PRINCIPAL_UNRESOLVED,
+  ADOBE_SIGN_RECENT_COMPLETIONS_SOURCE_UNAVAILABLE,
+} from './adobeSignRecentCompletionsReadModels.js';
 
 import {
   MY_WORK_HOME_AUTHORIZATION_REQUIRED,
@@ -69,6 +82,17 @@ export const MY_WORK_FIXTURES = {
     'source-unavailable': ADOBE_SIGN_QUEUE_SOURCE_UNAVAILABLE,
     'backend-unavailable': ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
   },
+  'adobe-sign-recent-completions': {
+    available: ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
+    empty: ADOBE_SIGN_RECENT_COMPLETIONS_EMPTY,
+    'available-paged': ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE_PAGED,
+    partial: ADOBE_SIGN_RECENT_COMPLETIONS_PARTIAL,
+    'configuration-required': ADOBE_SIGN_RECENT_COMPLETIONS_CONFIGURATION_REQUIRED,
+    'authorization-required': ADOBE_SIGN_RECENT_COMPLETIONS_AUTHORIZATION_REQUIRED,
+    'principal-unresolved': ADOBE_SIGN_RECENT_COMPLETIONS_PRINCIPAL_UNRESOLVED,
+    'source-unavailable': ADOBE_SIGN_RECENT_COMPLETIONS_SOURCE_UNAVAILABLE,
+    'backend-unavailable': ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE,
+  },
   'project-links': {
     available: MY_PROJECT_LINKS_AVAILABLE,
     'more-than-six-items': MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS,
@@ -86,4 +110,6 @@ export type MyWorkFixtureRouteKey = keyof typeof MY_WORK_FIXTURES;
 export type MyWorkHomeFixtureScenarioKey = keyof (typeof MY_WORK_FIXTURES)['home'];
 export type AdobeSignQueueFixtureScenarioKey =
   keyof (typeof MY_WORK_FIXTURES)['adobe-sign-action-queue'];
+export type AdobeSignRecentCompletionsFixtureScenarioKey =
+  keyof (typeof MY_WORK_FIXTURES)['adobe-sign-recent-completions'];
 export type MyProjectLinksFixtureScenarioKey = keyof (typeof MY_WORK_FIXTURES)['project-links'];
