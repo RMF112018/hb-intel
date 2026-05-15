@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { IFieldDefinition } from '../backend/functions/src/services/sharepoint-service.js';
 import {
   buildProvisioningReport,
-  createPnPListAdapter,
+  createRestListAdapter,
   main,
   parseArgs,
   resolveSiteUrl,
@@ -266,47 +266,179 @@ describe('main behavior', () => {
   });
 });
 
-describe('createPnPListAdapter error classification', () => {
-  function fakeSp(failureToThrow: unknown): unknown {
-    return {
-      web: {
-        lists: {
-          getByTitle: (_title: string) => ({
-            select: (_field: string) => async () => {
-              throw failureToThrow;
-            },
-            fields: {
-              select: () => ({ top: () => async () => [] }),
-            },
-          }),
-        },
-      },
-    };
+describe('createRestListAdapter (SharePoint REST seam)', () => {
+  const SITE_URL = 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral';
+  const TOKEN = 'fake.token';
+
+  function tokenService() {
+    return { getSharePointToken: vi.fn(async (_url: string) => TOKEN) };
   }
 
-  it('returns null on a 404-style "not found" error so listsMissing posture is preserved', async () => {
-    const adapter = createPnPListAdapter(
-      fakeSp(new Error('SharePoint returned 404 Not Found for list')),
-    );
-    const result = await adapter.getList('Projects');
+  function jsonResponse(body: unknown, status = 200): Response {
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  function textResponse(text: string, status: number): Response {
+    return new Response(text, { status, headers: { 'Content-Type': 'text/plain' } });
+  }
+
+  it('getList returns null on a 404 status (genuine missing list)', async () => {
+    const fetchImpl = vi.fn(async () => textResponse('Not Found', 404));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    const result = await adapter.getList('Missing List');
     expect(result).toBeNull();
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    const [url] = fetchImpl.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain(`${SITE_URL}/_api/web/lists/getByTitle('Missing%20List')`);
   });
 
-  it('re-throws on a 401-style unauthorized error so it never silently flows into a successful report', async () => {
-    const adapter = createPnPListAdapter(
-      fakeSp(new Error('Unauthorized: 401 — token rejected by tenant')),
+  it('getList throws on a 401 status with the HTTP code in the message (never silently null)', async () => {
+    const fetchImpl = vi.fn(async () => textResponse('Unauthorized', 401));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    await expect(adapter.getList('Projects')).rejects.toThrow(/HTTP 401/);
+  });
+
+  it('getList throws on a 403 status with the HTTP code in the message', async () => {
+    const fetchImpl = vi.fn(async () => textResponse('Forbidden', 403));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    await expect(adapter.getList('Projects')).rejects.toThrow(/HTTP 403/);
+  });
+
+  it('listFields maps SharePoint /fields rows into ILiveSharePointFieldSnapshot', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          value: [
+            {
+              InternalName: 'leadEstimatorUpns',
+              Title: 'leadEstimatorUpns',
+              TypeAsString: 'Text',
+              Required: false,
+              Indexed: false,
+              DefaultValue: '',
+              Choices: [],
+            },
+            {
+              InternalName: 'warrantyManagerUpns',
+              Title: 'warrantyManagerUpns',
+              TypeAsString: 'Note',
+              Required: false,
+            },
+          ],
+        }),
+      );
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl,
+    });
+    const list = await adapter.getList('Projects');
+    expect(list).not.toBeNull();
+    const fields = await list!.listFields();
+    expect(fields).toHaveLength(2);
+    expect(fields[0]).toMatchObject({
+      InternalName: 'leadEstimatorUpns',
+      TypeAsString: 'Text',
+    });
+    expect(fields[1]).toMatchObject({
+      InternalName: 'warrantyManagerUpns',
+      TypeAsString: 'Note',
+    });
+    const [fieldsUrl] = fetchImpl.mock.calls[1] as [string, RequestInit];
+    expect(fieldsUrl).toContain(
+      "/_api/web/lists/getByTitle('Projects')/fields?$select=InternalName,Title,TypeAsString,Required,Indexed,DefaultValue,Choices&$top=5000",
     );
-    await expect(adapter.getList('Projects')).rejects.toThrow(/Unauthorized/);
   });
 
-  it('re-throws on a 403-style forbidden error', async () => {
-    const adapter = createPnPListAdapter(fakeSp(new Error('Access denied: 403 Forbidden')));
-    await expect(adapter.getList('Projects')).rejects.toThrow(/Forbidden/);
+  it('createField POSTs the SP.FieldCreationInformation envelope with FieldTypeKind 3 + RichText:false for MultiLineText', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'guid' }, 201));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl,
+    });
+    const list = await adapter.getList('Projects');
+    await list!.createField({
+      internalName: 'warrantyManagerUpns',
+      displayName: 'warrantyManagerUpns',
+      type: 'MultiLineText',
+    });
+    const [createUrl, createInit] = fetchImpl.mock.calls[1] as [string, RequestInit];
+    expect(createUrl).toBe(`${SITE_URL}/_api/web/lists/getByTitle('Projects')/fields/add`);
+    expect((createInit.headers as Record<string, string>).Authorization).toBe(`Bearer ${TOKEN}`);
+    const body = JSON.parse(String(createInit.body));
+    expect(body).toEqual({
+      parameters: {
+        __metadata: { type: 'SP.FieldCreationInformation' },
+        FieldTypeKind: 3,
+        Title: 'warrantyManagerUpns',
+        InternalName: 'warrantyManagerUpns',
+        Required: false,
+        RichText: false,
+      },
+    });
   });
 
-  it('re-throws on an opaque runtime/network error', async () => {
-    const adapter = createPnPListAdapter(fakeSp(new Error('ECONNRESET while contacting tenant')));
-    await expect(adapter.getList('Projects')).rejects.toThrow(/ECONNRESET/);
+  it('createField POSTs FieldTypeKind 2 (no RichText) for Text', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ Title: 'Legacy Project Fallback Registry' }))
+      .mockResolvedValueOnce(jsonResponse({ Id: 'guid' }, 201));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl,
+    });
+    const list = await adapter.getList('Legacy Project Fallback Registry');
+    await list!.createField({
+      internalName: 'procoreProject',
+      displayName: 'procoreProject',
+      type: 'Text',
+    });
+    const [, createInit] = fetchImpl.mock.calls[1] as [string, RequestInit];
+    const body = JSON.parse(String(createInit.body));
+    expect(body.parameters.FieldTypeKind).toBe(2);
+    expect(body.parameters).not.toHaveProperty('RichText');
+  });
+
+  it('createField throws when the POST returns a non-OK status (never silently noop)', async () => {
+    const fetchImpl = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(jsonResponse({ Title: 'Projects' }))
+      .mockResolvedValueOnce(textResponse('column already exists', 400));
+    const adapter = createRestListAdapter({
+      siteUrl: SITE_URL,
+      tokenService: tokenService(),
+      fetchImpl,
+    });
+    const list = await adapter.getList('Projects');
+    await expect(
+      list!.createField({
+        internalName: 'leadEstimatorUpns',
+        displayName: 'leadEstimatorUpns',
+        type: 'MultiLineText',
+      }),
+    ).rejects.toThrow(/HTTP 400/);
   });
 });
 

@@ -1,12 +1,10 @@
 import { ManagedIdentityTokenService } from '../backend/functions/src/services/managed-identity-token-service.js';
-import { getPnPContext } from '../backend/functions/src/services/sharepoint-common.js';
-import { isNotFoundError } from '../backend/functions/src/services/sharepoint-identity-utils.js';
 import {
   buildListFieldPlans,
-  createSharePointField,
   type ILiveSharePointFieldSnapshot,
   type IUnresolvedMutation,
 } from '../backend/functions/src/services/sharepoint-schema-provisioning/index.js';
+import type { IFieldDefinition } from '../backend/functions/src/services/sharepoint-service.js';
 import {
   MY_PROJECTS_SOURCE_LIST_SCHEMA_DESCRIPTOR,
   type MyProjectsSourceListTarget,
@@ -297,36 +295,132 @@ export async function main(args: IProvisionArgs, deps: IMainDeps, siteUrl: strin
   return selectExitCode(finalReport);
 }
 
-export function createPnPListAdapter(sp: any): IListAdapter {
+export interface IRestListAdapterDeps {
+  readonly siteUrl: string;
+  readonly tokenService: { getSharePointToken: (siteUrl: string) => Promise<string> };
+  readonly fetchImpl?: typeof fetch;
+}
+
+function fieldTypeKindFor(type: IFieldDefinition['type']): number {
+  if (type === 'Text') return 2;
+  if (type === 'MultiLineText') return 3;
+  throw new Error(
+    `provision-my-projects-source-list-schema: REST adapter does not support FieldTypeKind for IFieldDefinition.type='${type}'. ` +
+      `Extend fieldTypeKindFor before adding such fields to the descriptor.`,
+  );
+}
+
+async function readErrorBody(response: Response): Promise<string> {
+  try {
+    const text = await response.text();
+    return text.length > 400 ? `${text.slice(0, 400)}…` : text;
+  } catch {
+    return '<no body>';
+  }
+}
+
+export function createRestListAdapter(deps: IRestListAdapterDeps): IListAdapter {
+  const fetchImpl = deps.fetchImpl ?? fetch;
+  const listEndpoint = (listTitle: string): string =>
+    `${deps.siteUrl}/_api/web/lists/getByTitle('${encodeURIComponent(listTitle)}')`;
+
   return {
     async getList(listTitle: string): Promise<IListRef | null> {
-      let list: any;
-      try {
-        list = sp.web.lists.getByTitle(listTitle);
-        await list.select('Title')();
-      } catch (err) {
-        if (isNotFoundError(err)) {
-          return null;
-        }
-        throw err;
+      const token = await deps.tokenService.getSharePointToken(deps.siteUrl);
+      const probe = await fetchImpl(`${listEndpoint(listTitle)}?$select=Title`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json;odata=nometadata',
+        },
+      });
+      if (probe.status === 404) {
+        return null;
+      }
+      if (!probe.ok) {
+        const body = await readErrorBody(probe);
+        throw new Error(
+          `provision-my-projects-source-list-schema: list lookup failed for '${listTitle}' — HTTP ${probe.status}: ${body}`,
+        );
       }
       return {
         title: listTitle,
         async listFields(): Promise<ILiveSharePointFieldSnapshot[]> {
-          return (await list.fields
-            .select(
-              'InternalName',
-              'Title',
-              'TypeAsString',
-              'Required',
-              'Indexed',
-              'DefaultValue',
-              'Choices',
-            )
-            .top(5000)()) as ILiveSharePointFieldSnapshot[];
+          const innerToken = await deps.tokenService.getSharePointToken(deps.siteUrl);
+          const url =
+            `${listEndpoint(listTitle)}/fields` +
+            `?$select=InternalName,Title,TypeAsString,Required,Indexed,DefaultValue,Choices&$top=5000`;
+          const response = await fetchImpl(url, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${innerToken}`,
+              Accept: 'application/json;odata=nometadata',
+            },
+          });
+          if (!response.ok) {
+            const body = await readErrorBody(response);
+            throw new Error(
+              `provision-my-projects-source-list-schema: field metadata query failed for list '${listTitle}' — HTTP ${response.status}: ${body}`,
+            );
+          }
+          const payload = (await response.json()) as { value?: ReadonlyArray<unknown> };
+          const rows = Array.isArray(payload.value) ? payload.value : [];
+          const snapshots: ILiveSharePointFieldSnapshot[] = [];
+          for (const raw of rows) {
+            if (typeof raw !== 'object' || raw === null) continue;
+            const row = raw as Record<string, unknown>;
+            const internalName = row.InternalName;
+            const title = row.Title;
+            const typeAsString = row.TypeAsString;
+            if (
+              typeof internalName !== 'string' ||
+              typeof title !== 'string' ||
+              typeof typeAsString !== 'string'
+            ) {
+              continue;
+            }
+            snapshots.push({
+              InternalName: internalName,
+              Title: title,
+              TypeAsString: typeAsString,
+              Required: typeof row.Required === 'boolean' ? row.Required : undefined,
+              Indexed: typeof row.Indexed === 'boolean' ? row.Indexed : undefined,
+              DefaultValue: typeof row.DefaultValue === 'string' ? row.DefaultValue : undefined,
+              Choices: Array.isArray(row.Choices)
+                ? (row.Choices as unknown[]).filter((c): c is string => typeof c === 'string')
+                : undefined,
+            });
+          }
+          return snapshots;
         },
         async createField(field): Promise<void> {
-          await createSharePointField(list, field);
+          const innerToken = await deps.tokenService.getSharePointToken(deps.siteUrl);
+          const url = `${listEndpoint(listTitle)}/fields/add`;
+          const body = JSON.stringify({
+            parameters: {
+              __metadata: { type: 'SP.FieldCreationInformation' },
+              FieldTypeKind: fieldTypeKindFor(field.type),
+              Title: field.displayName,
+              InternalName: field.internalName,
+              Required: field.required ?? false,
+              ...(field.type === 'MultiLineText' ? { RichText: false } : {}),
+            },
+          });
+          const response = await fetchImpl(url, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${innerToken}`,
+              Accept: 'application/json;odata=nometadata',
+              'Content-Type': 'application/json;odata=verbose',
+            },
+            body,
+          });
+          if (!response.ok) {
+            const errBody = await readErrorBody(response);
+            throw new Error(
+              `provision-my-projects-source-list-schema: field create failed for '${listTitle}'.'${field.internalName}' — HTTP ${response.status}: ${errBody}`,
+            );
+          }
         },
       };
     },
@@ -338,14 +432,31 @@ function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
     p,
     new Promise<T>((_resolve, reject) => {
       setTimeout(() => {
-        reject(
-          new Error(
-            `${label} timed out after ${ms}ms — likely tenant connectivity or app-only SharePoint authorization failure on the runtime identity`,
-          ),
-        );
+        reject(new Error(`${label} timed out after ${ms}ms`));
       }, ms);
     }),
   ]);
+}
+
+async function probeConnectivity(
+  siteUrl: string,
+  tokenService: { getSharePointToken: (siteUrl: string) => Promise<string> },
+  fetchImpl: typeof fetch = fetch,
+): Promise<void> {
+  const token = await tokenService.getSharePointToken(siteUrl);
+  const response = await fetchImpl(`${siteUrl}/_api/web?$select=Url`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json;odata=nometadata',
+    },
+  });
+  if (!response.ok) {
+    const body = await readErrorBody(response);
+    throw new Error(
+      `provision-my-projects-source-list-schema: SharePoint connectivity probe failed — HTTP ${response.status} at ${siteUrl}/_api/web: ${body}`,
+    );
+  }
 }
 
 async function runFromCli(): Promise<void> {
@@ -353,20 +464,18 @@ async function runFromCli(): Promise<void> {
   const siteUrl = validateHBCentralSiteUrl(resolveSiteUrl(args, process.env));
 
   const tokenService = new ManagedIdentityTokenService();
-  const sp = await withTimeout(getPnPContext(siteUrl, tokenService), 15_000, 'getPnPContext');
 
-  // Connectivity probe: forces PnPjs's lazy chain to issue a real HTTP
-  // request against the site so auth failures (401/403) surface here as a
-  // thrown error — or, if PnPjs hangs on a non-JSON 401 response, the
-  // race-timeout below converts the hang into a deterministic exit-1
-  // diagnostic instead of a silent exit-0.
-  await withTimeout(sp.web.select('Url')(), 15_000, 'SharePoint connectivity probe');
+  // REST connectivity probe: a single GET against /_api/web. Fails fast and
+  // loudly on any non-2xx (401/403/5xx) before iterating targets. Replaces
+  // the prior PnPjs lazy-queryable probe which hung silently under
+  // cert-backed app-only credentials.
+  await probeConnectivity(siteUrl, tokenService);
 
   const code = await withTimeout(
     main(
       args,
       {
-        listAdapter: createPnPListAdapter(sp),
+        listAdapter: createRestListAdapter({ siteUrl, tokenService }),
         now: () => new Date().toISOString(),
         stdout: (line) => console.log(line),
       },
