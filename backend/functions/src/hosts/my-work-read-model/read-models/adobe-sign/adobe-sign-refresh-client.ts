@@ -91,6 +91,11 @@ export type AdobeSignRefreshResult =
         readonly hasClientIdField?: boolean;
         readonly hasClientSecretField?: boolean;
       };
+      readonly malformedResponseDiagnostics?: {
+        readonly hasAccessToken?: boolean;
+        readonly hasRefreshToken?: boolean;
+        readonly hasExpiresIn?: boolean;
+      };
     };
 
 export interface IAdobeSignRefreshClient {

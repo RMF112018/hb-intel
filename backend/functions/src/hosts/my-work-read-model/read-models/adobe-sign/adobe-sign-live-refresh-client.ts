@@ -62,7 +62,7 @@ export interface AdobeSignLiveRefreshClientDeps {
 
 interface AdobeRefreshSuccessBody {
   readonly access_token: string;
-  readonly refresh_token: string;
+  readonly refresh_token?: string;
   readonly expires_in: number;
   readonly scope?: string;
 }
@@ -81,11 +81,25 @@ function isAdobeRefreshSuccessBody(value: unknown): value is AdobeRefreshSuccess
   return (
     typeof v.access_token === 'string' &&
     v.access_token.length > 0 &&
-    typeof v.refresh_token === 'string' &&
-    v.refresh_token.length > 0 &&
     isFiniteNumber(v.expires_in) &&
     (v.expires_in as number) > 0
   );
+}
+
+function buildMalformedResponseDiagnostics(parsed: unknown) {
+  if (parsed === null || typeof parsed !== 'object') {
+    return {
+      hasAccessToken: false,
+      hasRefreshToken: false,
+      hasExpiresIn: false,
+    };
+  }
+  const body = parsed as Record<string, unknown>;
+  return {
+    hasAccessToken: typeof body.access_token === 'string' && body.access_token.length > 0,
+    hasRefreshToken: typeof body.refresh_token === 'string' && body.refresh_token.length > 0,
+    hasExpiresIn: isFiniteNumber(body.expires_in) && (body.expires_in as number) > 0,
+  };
 }
 
 function readErrorCodeFromAdobeBody(body: unknown): string | undefined {
@@ -238,11 +252,19 @@ export function createAdobeSignLiveRefreshClient(
         return { status: 'unreachable', reason: 'malformed-response', refreshRequestDiagnostics };
       }
       if (!isAdobeRefreshSuccessBody(parsed)) {
-        return { status: 'unreachable', reason: 'malformed-response', refreshRequestDiagnostics };
+        return {
+          status: 'unreachable',
+          reason: 'malformed-response',
+          refreshRequestDiagnostics,
+          malformedResponseDiagnostics: buildMalformedResponseDiagnostics(parsed),
+        };
       }
 
       const successBody = parsed;
-      const newRefreshToken = successBody.refresh_token;
+      const newRefreshToken =
+        typeof successBody.refresh_token === 'string' && successBody.refresh_token.length > 0
+          ? successBody.refresh_token
+          : plaintext;
 
       // ---------------------------------------------------------------
       // 5. Re-encrypt and persist the (possibly rotated) refresh token.

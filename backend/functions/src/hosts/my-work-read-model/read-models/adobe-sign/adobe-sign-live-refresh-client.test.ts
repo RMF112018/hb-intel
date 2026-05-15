@@ -68,6 +68,19 @@ function expectedRefreshDiagnostics() {
   };
 }
 
+function expectedMalformedResponseDiagnostics(overrides?: {
+  hasAccessToken?: boolean;
+  hasRefreshToken?: boolean;
+  hasExpiresIn?: boolean;
+}) {
+  return {
+    hasAccessToken: false,
+    hasRefreshToken: false,
+    hasExpiresIn: false,
+    ...overrides,
+  };
+}
+
 interface FakeStore extends IAdobeSignRefreshTokenStore {
   readonly getCalls: AdobeSignRefreshTokenCiphertextEnvelope[];
   readonly putCalls: Array<{ actorKey: string; envelope: AdobeSignRefreshTokenCiphertextEnvelope }>;
@@ -215,6 +228,17 @@ describe('createAdobeSignLiveRefreshClient — happy path', () => {
     expect(cipher.encryptCalls).toEqual([STORED_PLAINTEXT]);
     expect(refreshTokenStore.putCalls).toHaveLength(1);
   });
+
+  it('accepts success body without refresh_token and re-encrypts existing plaintext token', async () => {
+    const { deps, refreshTokenStore, cipher, fetch } = buildDeps();
+    fetch.mockResolvedValueOnce(jsonResponse({ access_token: 'at-fresh-do-not-leak', expires_in: 3600 }));
+    const client = createAdobeSignLiveRefreshClient(deps);
+    const result = await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW });
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(cipher.encryptCalls).toEqual([STORED_PLAINTEXT]);
+    expect(refreshTokenStore.putCalls).toHaveLength(1);
+  });
 });
 
 describe('createAdobeSignLiveRefreshClient — error mappings', () => {
@@ -309,12 +333,28 @@ describe('createAdobeSignLiveRefreshClient — error mappings', () => {
 
   it('HTTP 200 missing required field → unreachable + malformed-response', async () => {
     const { deps, fetch } = buildDeps();
-    fetch.mockResolvedValueOnce(jsonResponse({ access_token: 'x', expires_in: 3600 }));
+    fetch.mockResolvedValueOnce(jsonResponse({ expires_in: 3600 }));
     const client = createAdobeSignLiveRefreshClient(deps);
     expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
       status: 'unreachable',
       reason: 'malformed-response',
       refreshRequestDiagnostics: expectedRefreshDiagnostics(),
+      malformedResponseDiagnostics: expectedMalformedResponseDiagnostics({ hasExpiresIn: true }),
+    });
+  });
+
+  it('HTTP 200 with non-positive expires_in → unreachable + malformed-response', async () => {
+    const { deps, fetch } = buildDeps();
+    fetch.mockResolvedValueOnce(jsonResponse({ access_token: 'x', expires_in: 0, refresh_token: 'rt' }));
+    const client = createAdobeSignLiveRefreshClient(deps);
+    expect(await client.refresh({ actorKey: ACTOR_KEY, grant: grantFixture(), now: NOW })).toEqual({
+      status: 'unreachable',
+      reason: 'malformed-response',
+      refreshRequestDiagnostics: expectedRefreshDiagnostics(),
+      malformedResponseDiagnostics: expectedMalformedResponseDiagnostics({
+        hasAccessToken: true,
+        hasRefreshToken: true,
+      }),
     });
   });
 

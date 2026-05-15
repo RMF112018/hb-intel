@@ -372,4 +372,56 @@ describe('token service — runtime result telemetry', () => {
     expect(serialized).not.toContain('rt-new-do-not-leak');
     expect(serialized).not.toContain('oauth');
   });
+
+  it('emits malformed-response field-presence diagnostics when refresh parser rejects 2xx JSON', async () => {
+    const { service } = buildService(activeGrant(), [
+      {
+        status: 'unreachable',
+        reason: 'malformed-response',
+        refreshRequestDiagnostics: {
+          endpointHost: 'api.na1.adobesign.com',
+          endpointPath: '/oauth/v2/refresh',
+          endpointSelectionMode: 'grant-api-access-point',
+          bodyFieldCount: 4,
+          hasGrantTypeField: true,
+          hasRefreshTokenField: true,
+          hasClientIdField: true,
+          hasClientSecretField: true,
+        },
+        malformedResponseDiagnostics: {
+          hasAccessToken: false,
+          hasRefreshToken: false,
+          hasExpiresIn: true,
+        },
+      },
+    ]);
+    const { reporter, events } = createReporterCapture();
+
+    const result = await service.getAccessToken(ACTOR_KEY, NOW, reporter);
+    expect(result.status).toBe('source-unavailable');
+    expect(events).toEqual([
+      {
+        name: 'adobeSign.read.refresh.result',
+        properties: {
+          status: 'unreachable',
+          reason: 'malformed-response',
+          refreshEndpointHost: 'api.na1.adobesign.com',
+          refreshEndpointPath: '/oauth/v2/refresh',
+          refreshEndpointSelectionMode: 'grant-api-access-point',
+          refreshBodyFieldCount: 4,
+          refreshHasGrantTypeField: true,
+          refreshHasRefreshTokenField: true,
+          refreshHasClientIdField: true,
+          refreshHasClientSecretField: true,
+          refreshMalformedHasAccessToken: false,
+          refreshMalformedHasRefreshToken: false,
+          refreshMalformedHasExpiresIn: true,
+        },
+      },
+      {
+        name: 'adobeSign.read.tokenAcquisition.result',
+        properties: { status: 'source-unavailable', reason: 'adobe-unreachable' },
+      },
+    ]);
+  });
 });

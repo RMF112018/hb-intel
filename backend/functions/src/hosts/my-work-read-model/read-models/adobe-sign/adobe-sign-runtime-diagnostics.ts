@@ -61,6 +61,9 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly refreshHasRefreshTokenField?: boolean;
   readonly refreshHasClientIdField?: boolean;
   readonly refreshHasClientSecretField?: boolean;
+  readonly refreshMalformedHasAccessToken?: boolean;
+  readonly refreshMalformedHasRefreshToken?: boolean;
+  readonly refreshMalformedHasExpiresIn?: boolean;
   readonly sourceStatus?: string;
   readonly resultStage?: AdobeSignActionQueueResultStage;
   readonly warningCodes?: readonly string[];

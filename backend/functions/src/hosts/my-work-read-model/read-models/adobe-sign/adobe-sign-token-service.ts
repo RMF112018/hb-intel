@@ -150,6 +150,16 @@ export function createAdobeSignTokenService(
                   refresh.refreshRequestDiagnostics.hasClientSecretField,
               }
             : {}),
+          ...(refresh.status === 'unreachable' && refresh.malformedResponseDiagnostics
+            ? {
+                refreshMalformedHasAccessToken:
+                  refresh.malformedResponseDiagnostics.hasAccessToken,
+                refreshMalformedHasRefreshToken:
+                  refresh.malformedResponseDiagnostics.hasRefreshToken,
+                refreshMalformedHasExpiresIn:
+                  refresh.malformedResponseDiagnostics.hasExpiresIn,
+              }
+            : {}),
         });
       };
 
