@@ -3,9 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   ADOBE_SIGN_QUEUE_AVAILABLE,
-  ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
-  ADOBE_SIGN_QUEUE_CONFIGURATION_REQUIRED,
-  ADOBE_SIGN_QUEUE_PRINCIPAL_UNRESOLVED,
   MY_WORK_HOME_AUTHORIZATION_REQUIRED,
   MY_WORK_HOME_AVAILABLE,
   MY_WORK_HOME_PARTIAL,
@@ -38,15 +35,12 @@ function makeStubClient(overrides: Partial<IMyWorkReadModelClient> = {}): IMyWor
   };
 }
 
-function renderRouter(
-  client: IMyWorkReadModelClient,
-  routerProps: Partial<React.ComponentProps<typeof MyWorkSurfaceRouter>> = {},
-) {
+function renderRouter(client: IMyWorkReadModelClient) {
   return render(
     <MyWorkReadModelClientProvider client={client}>
-      <MyWorkActiveEnvelopeProvider activeModuleId={routerProps.activeModuleId}>
+      <MyWorkActiveEnvelopeProvider>
         <MyWorkBentoGrid mode="standardLaptop">
-          <MyWorkSurfaceRouter activePrimarySurfaceId="my-work-home" {...routerProps} />
+          <MyWorkSurfaceRouter activePrimarySurfaceId="my-work-home" />
         </MyWorkBentoGrid>
       </MyWorkActiveEnvelopeProvider>
     </MyWorkReadModelClientProvider>,
@@ -67,40 +61,17 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('MyWorkSurfaceRouter — route dispatch', () => {
-  it('renders the home surface when activeModuleId is undefined', async () => {
+describe('MyWorkSurfaceRouter — single primary-page command surface', () => {
+  it('renders the home surface', async () => {
     const stub = makeStubClient();
     const { container } = renderRouter(stub);
     await waitFor(() =>
       expect(container.querySelector('[data-my-work-card-role="work-summary"]')).not.toBeNull(),
     );
-    // The focused-only queue-summary card must NOT appear on the home route.
+    // The retired focused-Adobe queue-summary card must NOT appear.
     expect(
       container.querySelector('[data-my-work-card-role="adobe-sign-queue-summary"]'),
     ).toBeNull();
-  });
-
-  it('renders the Adobe Sign focused-module surface when its id is active', async () => {
-    const stub = makeStubClient();
-    const { container } = renderRouter(stub, { activeModuleId: 'adobe-sign-action-queue' });
-    await waitFor(() =>
-      expect(
-        container.querySelector('[data-my-work-card-role="adobe-sign-queue-summary"]'),
-      ).not.toBeNull(),
-    );
-    // Home-only work-summary card must NOT appear on the focused route.
-    expect(container.querySelector('[data-my-work-card-role="work-summary"]')).toBeNull();
-  });
-
-  it('falls back to the home surface when activeModuleId is an invalid string', async () => {
-    const stub = makeStubClient();
-    const { container } = renderRouter(stub, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      activeModuleId: 'not-a-module' as any,
-    });
-    await waitFor(() =>
-      expect(container.querySelector('[data-my-work-card-role="work-summary"]')).not.toBeNull(),
-    );
   });
 
   it('does not introduce a router-owned wrapper element or data attribute', async () => {
@@ -174,83 +145,11 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
   });
 });
 
-describe('MyWorkSurfaceRouter — Adobe Sign route readiness wiring', () => {
-  it('renders the Adobe ready tree when getAdobeSignActionQueue resolves "available"', async () => {
-    const stub = makeStubClient();
-    const { container } = renderRouter(stub, { activeModuleId: 'adobe-sign-action-queue' });
-    await waitFor(() =>
-      expect(getCardRoles(container)).toEqual([
-        'adobe-sign-queue-summary',
-        'adobe-sign-agreement-action-list',
-      ]),
-    );
-    expect(container.querySelector('[data-my-work-source-status="available"]')).not.toBeNull();
-  });
-
-  it('renders the Adobe non-ready tree for "configuration-required"', async () => {
-    const stub = makeStubClient({
-      getAdobeSignActionQueue: vi.fn().mockResolvedValue(ADOBE_SIGN_QUEUE_CONFIGURATION_REQUIRED),
-    });
-    const { container } = renderRouter(stub, { activeModuleId: 'adobe-sign-action-queue' });
-    await waitFor(() =>
-      expect(
-        container.querySelector('[data-my-work-source-status="configuration-required"]'),
-      ).not.toBeNull(),
-    );
-    expect(getCardRoles(container)).toEqual([
-      'adobe-sign-queue-state',
-      'adobe-sign-connection-guidance',
-    ]);
-  });
-
-  it('renders the Adobe non-ready tree for "backend-unavailable"', async () => {
-    const stub = makeStubClient({
-      getAdobeSignActionQueue: vi.fn().mockResolvedValue(ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE),
-    });
-    const { container } = renderRouter(stub, { activeModuleId: 'adobe-sign-action-queue' });
-    await waitFor(() =>
-      expect(
-        container.querySelector('[data-my-work-source-status="backend-unavailable"]'),
-      ).not.toBeNull(),
-    );
-  });
-
-  it('renders the Adobe non-ready tree for "principal-unresolved"', async () => {
-    const stub = makeStubClient({
-      getAdobeSignActionQueue: vi.fn().mockResolvedValue(ADOBE_SIGN_QUEUE_PRINCIPAL_UNRESOLVED),
-    });
-    const { container } = renderRouter(stub, { activeModuleId: 'adobe-sign-action-queue' });
-    await waitFor(() =>
-      expect(
-        container.querySelector('[data-my-work-source-status="principal-unresolved"]'),
-      ).not.toBeNull(),
-    );
-  });
-
-  it('renders the error marker when getAdobeSignActionQueue rejects', async () => {
-    const stub = makeStubClient({
-      getAdobeSignActionQueue: vi.fn().mockRejectedValue(new Error('boom')),
-    });
-    const { container } = renderRouter(stub, { activeModuleId: 'adobe-sign-action-queue' });
-    await waitFor(() =>
-      expect(container.querySelector('[data-my-work-readiness-state="error"]')).not.toBeNull(),
-    );
-    expect(getCardRoles(container)).toEqual([]);
-  });
-});
-
 describe('MyWorkSurfaceRouter — route-scoped fetching', () => {
-  it('does NOT call the Adobe queue method when only the home route is active', async () => {
+  it('does NOT call the Adobe queue method on the single primary page', async () => {
     const stub = makeStubClient();
     renderRouter(stub);
     await waitFor(() => expect(stub.getMyWorkHome).toHaveBeenCalledTimes(1));
     expect(stub.getAdobeSignActionQueue).not.toHaveBeenCalled();
-  });
-
-  it('does NOT call the home method when only the Adobe queue route is active', async () => {
-    const stub = makeStubClient();
-    renderRouter(stub, { activeModuleId: 'adobe-sign-action-queue' });
-    await waitFor(() => expect(stub.getAdobeSignActionQueue).toHaveBeenCalledTimes(1));
-    expect(stub.getMyWorkHome).not.toHaveBeenCalled();
   });
 });

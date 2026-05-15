@@ -1,24 +1,14 @@
-import { useCallback, useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
-import {
-  normalizeMyWorkModuleId,
-  type MyWorkModuleId,
-  type MyWorkPrimarySurfaceId,
-} from '@hbc/models/myWork';
-import { createMyWorkReadModelClient } from '../api/myWorkReadModelClientFactory.js';
+import { useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
+import type { MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
 import { useMyWorkShellState } from '../state/useMyWorkShellState.js';
-import {
-  selectMyWorkFocusedAdobeHeroViewModel,
-  selectMyWorkHomeHeroViewModel,
-} from '../state/myWorkHeroViewModel.js';
+import { selectMyWorkHomeHeroViewModel } from '../state/myWorkHeroViewModel.js';
 import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
 import { AdobeSignCallbackBanner } from './AdobeSignCallbackBanner.js';
 import {
   MyWorkActiveEnvelopeProvider,
   useMyWorkActiveEnvelopeDataPath,
-  useMyWorkFocusedAdobeEnvelopeContext,
   useMyWorkHomeEnvelopeContext,
 } from './MyWorkActiveEnvelopeContext.js';
-import { MyWorkPrimaryNavigation } from './MyWorkPrimaryNavigation.js';
 import { MyWorkHeroBand } from './MyWorkHeroBand.js';
 import { MyWorkSurfaceRouter } from './MyWorkSurfaceRouter.js';
 import {
@@ -34,7 +24,7 @@ export interface MyWorkShellProps {
   readonly getApiToken?: () => Promise<string>;
   /** Test-only override for the responsive mode (no ResizeObserver in jsdom). */
   readonly forceMode?: MyWorkResponsiveMode;
-  /** Active-panel children — populated by later B03 prompts (bento grid, focused module). */
+  /** Active-panel children — populated by later B05.3 prompts. */
   readonly children?: ReactNode;
 }
 
@@ -74,34 +64,9 @@ export function MyWorkShell({
   const shellRef = useRef<HTMLDivElement | null>(null);
   const mode = useMyWorkContainerBreakpoint(shellRef, forceMode);
 
-  const { activePrimarySurfaceId, activeModuleId, selectPrimarySurface, selectModule } =
-    useMyWorkShellState();
-
-  const viewState: 'home' | 'focused-module' = activeModuleId ? 'focused-module' : 'home';
-  const tabId = `my-work-tab-${activePrimarySurfaceId satisfies MyWorkPrimarySurfaceId}`;
+  const { activePrimarySurfaceId } = useMyWorkShellState();
 
   const themeStyle = useMemo(() => MY_WORK_THEME_VARS, []);
-
-  // Adobe Sign consent-start callback. Only wired in backend mode
-  // (a real bearer-token provider is present); fixture/test renders
-  // omit `getApiToken`, so the connection card stays button-less.
-  const onConnectAdobeSign = useCallback(async (): Promise<void> => {
-    if (typeof getApiToken !== 'function') {
-      throw new Error('adobe-sign-oauth-start-not-available-in-fixture-mode');
-    }
-    const client = createMyWorkReadModelClient({
-      readModelMode: 'backend',
-      getApiToken,
-    });
-    const returnPath =
-      typeof window !== 'undefined' && window.location ? window.location.pathname : '/';
-    const result = await client.startAdobeSignOAuth({ returnPath });
-    if (typeof window !== 'undefined' && window.location) {
-      window.location.assign(result.authorizationUrl);
-    }
-  }, [getApiToken]);
-
-  const handleConnectAdobeSign = typeof getApiToken === 'function' ? onConnectAdobeSign : undefined;
 
   return (
     <div
@@ -110,30 +75,18 @@ export function MyWorkShell({
       style={themeStyle}
       data-my-work-shell="thin"
       data-my-work-shell-mode={mode}
-      data-my-work-view-state={viewState}
     >
-      <MyWorkActiveEnvelopeProvider activeModuleId={activeModuleId}>
+      <MyWorkActiveEnvelopeProvider>
         <section className={styles.commandSurface} data-my-work-command-surface="">
-          <MyWorkPrimaryNavigation
-            mode={mode}
-            activePrimarySurfaceId={activePrimarySurfaceId}
-            activeModuleId={activeModuleId}
-            onSelectPrimarySurface={selectPrimarySurface}
-            onSelectModule={selectModule}
-            panelId={MY_WORK_ACTIVE_PANEL_ID}
-          />
-          <MyWorkHeroBandAdapter mode={mode} activeModuleId={activeModuleId} />
+          <MyWorkHomeHeroBand mode={mode} />
         </section>
         <div className={styles.canvas} data-my-work-canvas="">
-          <MyWorkActiveSurfacePanel tabId={tabId} activePrimarySurfaceId={activePrimarySurfaceId}>
+          <MyWorkActiveSurfacePanel activePrimarySurfaceId={activePrimarySurfaceId}>
             <AdobeSignCallbackBanner />
             <MyWorkBentoGrid mode={mode}>
               <MyWorkSurfaceRouter
                 activePrimarySurfaceId={activePrimarySurfaceId}
-                activeModuleId={activeModuleId}
-                onSelectModule={selectModule}
                 getApiToken={getApiToken}
-                onConnectAdobeSign={handleConnectAdobeSign}
               />
               {children}
             </MyWorkBentoGrid>
@@ -145,49 +98,25 @@ export function MyWorkShell({
 }
 
 /**
- * Selects the hero view-model from whichever envelope context is mounted by
- * the active provider. Branches on `activeModuleId` so only the active
- * route's consumer hook is invoked — matching the provider mounted above.
+ * Selects the home hero view-model from the shell-mounted home envelope
+ * context. Single primary-page command surface — no route-aware branching.
  */
-function MyWorkHeroBandAdapter({
-  mode,
-  activeModuleId,
-}: {
-  readonly mode: MyWorkResponsiveMode;
-  readonly activeModuleId?: MyWorkModuleId;
-}) {
-  const normalized = normalizeMyWorkModuleId(activeModuleId);
-  if (normalized === 'adobe-sign-action-queue') {
-    return <FocusedAdobeHeroBand mode={mode} />;
-  }
-  return <HomeHeroBand mode={mode} />;
-}
-
-function HomeHeroBand({ mode }: { readonly mode: MyWorkResponsiveMode }) {
+function MyWorkHomeHeroBand({ mode }: { readonly mode: MyWorkResponsiveMode }) {
   const state = useMyWorkHomeEnvelopeContext();
   const viewModel = useMemo(() => selectMyWorkHomeHeroViewModel(state), [state]);
   return <MyWorkHeroBand mode={mode} viewModel={viewModel} />;
 }
 
-function FocusedAdobeHeroBand({ mode }: { readonly mode: MyWorkResponsiveMode }) {
-  const state = useMyWorkFocusedAdobeEnvelopeContext();
-  const viewModel = useMemo(() => selectMyWorkFocusedAdobeHeroViewModel(state), [state]);
-  return <MyWorkHeroBand mode={mode} viewModel={viewModel} />;
-}
-
 /**
- * The `<main role="tabpanel">` for the active surface. Stamps the
- * envelope's data-path classification (`backend-live`,
- * `backend-unavailable-fallback`, `fixture-ui-review`, or `unknown`)
- * alongside the existing surface-panel marker so hosted screenshots
- * unambiguously prove the data path.
+ * The `<main>` for the active surface. Stamps the envelope's data-path
+ * classification (`backend-live`, `backend-unavailable-fallback`,
+ * `fixture-ui-review`, or `unknown`) alongside the active-surface marker
+ * so hosted screenshots unambiguously prove the data path.
  */
 function MyWorkActiveSurfacePanel({
-  tabId,
   activePrimarySurfaceId,
   children,
 }: {
-  readonly tabId: string;
   readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
   readonly children: ReactNode;
 }) {
@@ -195,8 +124,7 @@ function MyWorkActiveSurfacePanel({
   return (
     <main
       id={MY_WORK_ACTIVE_PANEL_ID}
-      role="tabpanel"
-      aria-labelledby={tabId}
+      aria-label="My Work"
       className={styles.activePanel}
       data-my-work-active-surface-panel={activePrimarySurfaceId}
       data-my-work-data-path={dataPath}

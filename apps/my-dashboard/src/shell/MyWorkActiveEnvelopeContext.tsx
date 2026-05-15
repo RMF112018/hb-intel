@@ -1,11 +1,12 @@
 /**
- * Per-active-module envelope context.
+ * Active envelope context for the single primary-page command surface.
  *
- * The shell mounts exactly one provider (home or focused Adobe) chosen from
- * `activeModuleId`. The provider owns the appropriate envelope hook and
- * publishes its `EnvelopeState<T>` via context so the hero band adapter and
- * the surface router route both consume from the same fetch — no
- * duplication.
+ * The shell mounts the home envelope provider unconditionally and publishes
+ * its `EnvelopeState<T>` via context so the hero band and the surface
+ * router both consume from the same fetch — no duplication.
+ *
+ * The focused-Adobe provider/hook/context exports remain so any
+ * still-orphaned consumer (Prompt 03 deletes them) keeps compiling.
  *
  * @module shell/MyWorkActiveEnvelopeContext
  */
@@ -13,10 +14,8 @@
 import { createContext, useContext, type ReactNode } from 'react';
 
 import {
-  normalizeMyWorkModuleId,
   type MyWorkAdobeSignActionQueueReadModel,
   type MyWorkHomeReadModel,
-  type MyWorkModuleId,
   type MyWorkReadModelDataPath,
   type MyWorkReadModelEnvelope,
 } from '@hbc/models/myWork';
@@ -107,23 +106,13 @@ export function useMyWorkFocusedAdobeEnvelopeContext(): EnvelopeState<MyWorkAdob
   return state;
 }
 
-// ─── Active envelope provider router ──────────────────────────────────────
+// ─── Active envelope provider ─────────────────────────────────────────────
 
 /**
- * Mounts the envelope provider for the currently active surface so both
- * the hero band and the surface router consume the same envelope from
- * context — one fetch per active route.
+ * Mounts the home envelope provider so the hero band and the surface
+ * router consume the same envelope from context — one fetch per shell
+ * render.
  */
-export function MyWorkActiveEnvelopeProvider({
-  activeModuleId,
-  children,
-}: {
-  readonly activeModuleId?: MyWorkModuleId;
-  readonly children: ReactNode;
-}) {
-  const normalized = normalizeMyWorkModuleId(activeModuleId);
-  if (normalized === 'adobe-sign-action-queue') {
-    return <MyWorkFocusedAdobeEnvelopeProvider>{children}</MyWorkFocusedAdobeEnvelopeProvider>;
-  }
+export function MyWorkActiveEnvelopeProvider({ children }: { readonly children: ReactNode }) {
   return <MyWorkHomeEnvelopeProvider>{children}</MyWorkHomeEnvelopeProvider>;
 }

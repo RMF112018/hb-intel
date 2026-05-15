@@ -112,8 +112,8 @@ describe('MyWorkActiveEnvelopeContext — providers', () => {
   });
 });
 
-describe('MyWorkActiveEnvelopeProvider — router', () => {
-  it('mounts the home provider when activeModuleId is undefined', async () => {
+describe('MyWorkActiveEnvelopeProvider — single primary-page command surface', () => {
+  it('mounts the home provider and fetches the home envelope exactly once', async () => {
     const client = makeStubClient();
     const { container } = render(
       <MyWorkReadModelClientProvider client={client}>
@@ -129,23 +129,5 @@ describe('MyWorkActiveEnvelopeProvider — router', () => {
     );
     expect(client.getMyWorkHome).toHaveBeenCalledTimes(1);
     expect(client.getAdobeSignActionQueue).not.toHaveBeenCalled();
-  });
-
-  it('mounts the focused Adobe provider when activeModuleId is "adobe-sign-action-queue"', async () => {
-    const client = makeStubClient();
-    const { container } = render(
-      <MyWorkReadModelClientProvider client={client}>
-        <MyWorkActiveEnvelopeProvider activeModuleId="adobe-sign-action-queue">
-          <FocusedProbe />
-        </MyWorkActiveEnvelopeProvider>
-      </MyWorkReadModelClientProvider>,
-    );
-    await waitFor(() =>
-      expect(container.querySelector('[data-probe="focused"]')?.getAttribute('data-status')).toBe(
-        'success',
-      ),
-    );
-    expect(client.getAdobeSignActionQueue).toHaveBeenCalledTimes(1);
-    expect(client.getMyWorkHome).not.toHaveBeenCalled();
   });
 });

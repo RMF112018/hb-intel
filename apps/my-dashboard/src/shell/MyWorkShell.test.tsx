@@ -1,8 +1,7 @@
 import type { ReactElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
+import { cleanup, render, waitFor } from '@testing-library/react';
 import {
-  ADOBE_SIGN_QUEUE_AUTHORIZATION_REQUIRED,
   ADOBE_SIGN_QUEUE_AVAILABLE,
   MY_WORK_HOME_AUTHORIZATION_REQUIRED,
   MY_WORK_HOME_AVAILABLE,
@@ -55,17 +54,6 @@ function renderShellWithStub(stub: IMyWorkReadModelClient, node: ReactElement = 
   );
 }
 
-function openAdobeFocusedModule(container: HTMLElement): void {
-  const launcher = container.querySelector(
-    '[data-my-work-module-launcher="my-work-home"]',
-  ) as HTMLButtonElement;
-  fireEvent.click(launcher);
-  const item = container.querySelector(
-    '[data-my-work-module-menu-item="adobe-sign-action-queue"]',
-  ) as HTMLButtonElement;
-  fireEvent.click(item);
-}
-
 function getHeroHighlightValue(container: HTMLElement, id: string): string | null {
   const node = container.querySelector(`[data-my-work-hero-highlight="${id}"]`);
   // The second span is the value (label is first).
@@ -88,25 +76,28 @@ function getActivePanelDataPath(container: HTMLElement): string | null {
 }
 
 describe('MyWorkShell — composition and data-attribute contract', () => {
-  it('renders the shell root with shell + mode + view-state markers', () => {
+  it('renders the shell root with shell + mode markers (no route-aware view-state)', () => {
     const { container } = renderShell(<MyWorkShell />);
     const shell = container.querySelector('[data-my-work-shell]') as HTMLElement;
     expect(shell).not.toBeNull();
     expect(shell.getAttribute('data-my-work-shell')).toBe('thin');
     // Initial mode is the hook's default (no ResizeObserver in jsdom).
     expect(shell.getAttribute('data-my-work-shell-mode')).toBe('standardLaptop');
-    expect(shell.getAttribute('data-my-work-view-state')).toBe('home');
+    // Single primary-page command surface — the route-aware view-state attribute is retired.
+    expect(shell.hasAttribute('data-my-work-view-state')).toBe(false);
   });
 
-  it('renders exactly one active-surface-panel marker, on a <main role="tabpanel">', () => {
+  it('renders exactly one active-surface-panel marker, on a non-tabpanel <main>', () => {
     const { container } = renderShell(<MyWorkShell />);
     const panels = container.querySelectorAll('[data-my-work-active-surface-panel]');
     expect(panels).toHaveLength(1);
     const main = panels[0] as HTMLElement;
     expect(main.tagName).toBe('MAIN');
     expect(main.id).toBe(MY_WORK_ACTIVE_PANEL_ID);
-    expect(main.getAttribute('role')).toBe('tabpanel');
-    expect(main.getAttribute('aria-labelledby')).toBe('my-work-tab-my-work-home');
+    // Tab ARIA is retired with the tablist; the single primary page is labeled directly.
+    expect(main.hasAttribute('role')).toBe(false);
+    expect(main.hasAttribute('aria-labelledby')).toBe(false);
+    expect(main.getAttribute('aria-label')).toBe('My Work');
     expect(main.getAttribute('data-my-work-active-surface-panel')).toBe('my-work-home');
   });
 
@@ -116,40 +107,17 @@ describe('MyWorkShell — composition and data-attribute contract', () => {
     expect(container.querySelectorAll('[data-my-work-canvas]')).toHaveLength(1);
   });
 
-  it('mounts the primary navigation inside the command surface', () => {
+  it('does not mount a primary navigation tablist or module launcher inside the live shell', () => {
     const { container } = renderShell(<MyWorkShell />);
-    const commandSurface = container.querySelector('[data-my-work-command-surface]')!;
-    expect(commandSurface.querySelector('[data-my-work-primary-navigation]')).not.toBeNull();
+    expect(container.querySelector('[data-my-work-primary-navigation]')).toBeNull();
+    expect(container.querySelector('[data-my-work-module-launcher]')).toBeNull();
+    expect(container.querySelector('[role="tablist"]')).toBeNull();
   });
 
-  it('forwards forceMode to the breakpoint marker and density', () => {
+  it('forwards forceMode to the shell mode marker', () => {
     const { container } = renderShell(<MyWorkShell forceMode="phone" />);
     const shell = container.querySelector('[data-my-work-shell]') as HTMLElement;
     expect(shell.getAttribute('data-my-work-shell-mode')).toBe('phone');
-    const tablist = container.querySelector('[data-my-work-primary-navigation]')!;
-    expect(tablist.getAttribute('data-my-work-tabs-density')).toBe('compact');
-  });
-
-  it('flips view-state to "focused-module" once the Adobe module is selected', () => {
-    const { container } = renderShell(<MyWorkShell />);
-    const shell = container.querySelector('[data-my-work-shell]') as HTMLElement;
-    expect(shell.getAttribute('data-my-work-view-state')).toBe('home');
-
-    const launcher = container.querySelector(
-      '[data-my-work-module-launcher="my-work-home"]',
-    ) as HTMLButtonElement;
-    fireEvent.click(launcher);
-
-    const item = container.querySelector(
-      '[data-my-work-module-menu-item="adobe-sign-action-queue"]',
-    ) as HTMLButtonElement;
-    fireEvent.click(item);
-
-    expect(shell.getAttribute('data-my-work-view-state')).toBe('focused-module');
-    // active surface panel stays anchored to my-work-home (still the only surface).
-    const main = container.querySelector('[data-my-work-active-surface-panel]') as HTMLElement;
-    expect(main.getAttribute('data-my-work-active-surface-panel')).toBe('my-work-home');
-    expect(main.getAttribute('aria-labelledby')).toBe('my-work-tab-my-work-home');
   });
 
   it('renders provided active-panel children', () => {
@@ -164,19 +132,14 @@ describe('MyWorkShell — composition and data-attribute contract', () => {
 });
 
 describe('MyWorkShell — hero band composition', () => {
-  it('mounts the hero band inside the command surface, after the primary navigation', () => {
+  it('mounts the hero band inside the command surface', () => {
     const { container } = renderShell(<MyWorkShell />);
     const commandSurface = container.querySelector('[data-my-work-command-surface]')!;
-    const nav = commandSurface.querySelector('[data-my-work-primary-navigation]');
     const hero = commandSurface.querySelector('[data-my-work-hero]');
-    expect(nav).not.toBeNull();
     expect(hero).not.toBeNull();
-    // DOM order: navigation must precede hero inside the command surface.
-    const position = nav!.compareDocumentPosition(hero!);
-    expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeGreaterThan(0);
   });
 
-  it('shows the home hero copy when no module is active', () => {
+  it('shows the home hero copy on the single primary page', () => {
     const { container } = renderShell(<MyWorkShell />);
     expect(container.querySelector('[data-my-work-hero-secondary-title]')?.textContent).toBe(
       'My Work',
@@ -184,28 +147,6 @@ describe('MyWorkShell — hero band composition', () => {
     const governance = container.querySelector('[data-my-work-hero-governance-copy]');
     expect(governance?.textContent).toBe(
       'Read-only work visibility · Source actions remain in their governing systems.',
-    );
-  });
-
-  it('flips the hero identity and governance copy when the Adobe module is selected', () => {
-    const { container } = renderShell(<MyWorkShell />);
-    const launcher = container.querySelector(
-      '[data-my-work-module-launcher="my-work-home"]',
-    ) as HTMLButtonElement;
-    fireEvent.click(launcher);
-    const item = container.querySelector(
-      '[data-my-work-module-menu-item="adobe-sign-action-queue"]',
-    ) as HTMLButtonElement;
-    fireEvent.click(item);
-
-    expect(container.querySelector('[data-my-work-hero-secondary-title]')?.textContent).toBe(
-      'Adobe Sign Action Queue',
-    );
-    expect(container.querySelector('[data-my-work-hero-description]')?.textContent).toBe(
-      'Agreements in Adobe Sign that require your review, signature, approval, or other source-defined action.',
-    );
-    expect(container.querySelector('[data-my-work-hero-governance-copy]')?.textContent).toBe(
-      'Queue visibility only · Agreement actions remain in Adobe Sign.',
     );
   });
 });
@@ -233,28 +174,6 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
     });
     const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
     expect(grid.querySelector('[data-my-work-card-role="adobe-sign-queue-summary"]')).toBeNull();
-  });
-
-  it('routes to the Adobe focused-module surface after the module is selected (non-ready cards under default backend-unavailable envelope)', async () => {
-    const { container } = renderShell(<MyWorkShell />);
-    const launcher = container.querySelector(
-      '[data-my-work-module-launcher="my-work-home"]',
-    ) as HTMLButtonElement;
-    fireEvent.click(launcher);
-    const item = container.querySelector(
-      '[data-my-work-module-menu-item="adobe-sign-action-queue"]',
-    ) as HTMLButtonElement;
-    fireEvent.click(item);
-
-    await waitFor(() => {
-      const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
-      const roles = Array.from(grid.querySelectorAll('[data-my-work-card-role]')).map((el) =>
-        el.getAttribute('data-my-work-card-role'),
-      );
-      expect(roles).toEqual(['adobe-sign-queue-state', 'adobe-sign-connection-guidance']);
-    });
-    const grid = container.querySelector('[data-my-work-bento-grid]') as HTMLElement;
-    expect(grid.querySelector('[data-my-work-card-role="work-summary"]')).toBeNull();
   });
 
   it('keeps the active-panel marker exclusively on the shell <main>', () => {
@@ -289,7 +208,7 @@ describe('MyWorkShell — bento grid + surface router composition', () => {
   });
 });
 
-describe('MyWorkShell — envelope-derived hero band (Prompt 01 remediation)', () => {
+describe('MyWorkShell — envelope-derived hero band', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -302,7 +221,7 @@ describe('MyWorkShell — envelope-derived hero band (Prompt 01 remediation)', (
     });
     expect(getHeroHighlightValue(container, 'source-health')).toBe('Connected');
     expect(getHeroHighlightValue(container, 'connected-sources')).toBe('Adobe Sign');
-    // The active-route envelope is the only fetch on the home view.
+    // The single primary-page command surface fetches the home envelope only.
     expect(stub.getMyWorkHome).toHaveBeenCalledTimes(1);
     expect(stub.getAdobeSignActionQueue).not.toHaveBeenCalled();
   });
@@ -318,32 +237,6 @@ describe('MyWorkShell — envelope-derived hero band (Prompt 01 remediation)', (
     expect(getHeroHighlightValue(container, 'source-health')).toBe('Authorization required');
   });
 
-  it('focused Adobe + `available` envelope drives Connected queue-state and the live pending count', async () => {
-    const stub = makeStubClient();
-    const { container } = renderShellWithStub(stub);
-    openAdobeFocusedModule(container);
-    await waitFor(() => {
-      expect(getHeroHighlightValue(container, 'queue-state')).toBe('Connected');
-    });
-    expect(getHeroHighlightValue(container, 'pending-items')).toBe(
-      String(ADOBE_SIGN_QUEUE_AVAILABLE.data.summary.totalActionItemCount),
-    );
-    expect(getHeroHighlightValue(container, 'action-system')).toBe('Adobe Sign');
-    expect(stub.getAdobeSignActionQueue).toHaveBeenCalledTimes(1);
-  });
-
-  it('focused Adobe + `authorization-required` envelope drives Authorization required queue-state copy', async () => {
-    const stub = makeStubClient({
-      getAdobeSignActionQueue: vi.fn().mockResolvedValue(ADOBE_SIGN_QUEUE_AUTHORIZATION_REQUIRED),
-    });
-    const { container } = renderShellWithStub(stub);
-    openAdobeFocusedModule(container);
-    await waitFor(() => {
-      expect(getHeroHighlightValue(container, 'queue-state')).toBe('Authorization required');
-    });
-    expect(getHeroHighlightValue(container, 'pending-items')).toBe('Authorization required');
-  });
-
   it('never emits the legacy "Pending source connection" copy in hero highlights when the envelope has resolved', async () => {
     const stub = makeStubClient();
     const { container } = renderShellWithStub(stub);
@@ -352,32 +245,10 @@ describe('MyWorkShell — envelope-derived hero band (Prompt 01 remediation)', (
     });
     const heroText = container.querySelector('[data-my-work-hero]')?.textContent ?? '';
     expect(heroText.includes('Pending source connection')).toBe(false);
-
-    openAdobeFocusedModule(container);
-    await waitFor(() => {
-      expect(getHeroHighlightValue(container, 'queue-state')).toBe('Connected');
-    });
-    const focusedHeroText = container.querySelector('[data-my-work-hero]')?.textContent ?? '';
-    expect(focusedHeroText.includes('Pending source connection')).toBe(false);
-  });
-
-  it('the focused Adobe route shares one envelope fetch between the hero and the surface body', async () => {
-    const stub = makeStubClient();
-    // Re-render so the shell mounts directly in the focused Adobe state would
-    // require shell-level state injection; instead, mount focused via the
-    // provider/router directly to assert single-fetch under the focused route.
-    const { container } = renderShellWithStub(stub);
-    openAdobeFocusedModule(container);
-    await waitFor(() => {
-      expect(getHeroHighlightValue(container, 'queue-state')).toBe('Connected');
-    });
-    // Hero band and surface body share the focused Adobe envelope via the
-    // provider context — exactly one fetch for the active focused route.
-    expect(stub.getAdobeSignActionQueue).toHaveBeenCalledTimes(1);
   });
 });
 
-describe('MyWorkShell — data-path DOM marker (Prompt 02 remediation)', () => {
+describe('MyWorkShell — data-path DOM marker', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -426,27 +297,6 @@ describe('MyWorkShell — data-path DOM marker (Prompt 02 remediation)', () => {
     const { container } = renderShellWithStub(stub);
     await waitFor(() => {
       expect(getActivePanelDataPath(container)).toBe('fixture-ui-review');
-    });
-  });
-
-  it('flips the data-path marker when the focused Adobe route mounts and its envelope resolves', async () => {
-    const stub = makeStubClient({
-      getMyWorkHome: vi
-        .fn()
-        .mockResolvedValue(withDataPath(MY_WORK_HOME_AVAILABLE, 'backend-live')),
-      getAdobeSignActionQueue: vi
-        .fn()
-        .mockResolvedValue(
-          withDataPath(ADOBE_SIGN_QUEUE_AUTHORIZATION_REQUIRED, 'backend-unavailable-fallback'),
-        ),
-    });
-    const { container } = renderShellWithStub(stub);
-    await waitFor(() => {
-      expect(getActivePanelDataPath(container)).toBe('backend-live');
-    });
-    openAdobeFocusedModule(container);
-    await waitFor(() => {
-      expect(getActivePanelDataPath(container)).toBe('backend-unavailable-fallback');
     });
   });
 });
