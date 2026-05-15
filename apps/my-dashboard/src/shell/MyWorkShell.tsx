@@ -18,10 +18,20 @@ import styles from './MyWorkShell.module.css';
 export const MY_WORK_ACTIVE_PANEL_ID = 'my-work-active-surface-panel';
 
 export interface MyWorkShellProps {
-  readonly spfxContext?: { pageContext: { user: { loginName: string } } };
+  readonly spfxContext?: {
+    pageContext: {
+      user: {
+        loginName: string;
+        displayName?: string;
+        email?: string;
+      };
+    };
+  };
   readonly getApiToken?: () => Promise<string>;
   /** Test-only override for the responsive mode (no ResizeObserver in jsdom). */
   readonly forceMode?: MyWorkResponsiveMode;
+  /** Test-only override for the page-header greeting clock. Defaults to `new Date()`. */
+  readonly now?: Date;
   /** Active-panel children — populated by later B05.3 prompts. */
   readonly children?: ReactNode;
 }
@@ -54,9 +64,10 @@ const MY_WORK_THEME_VARS: CSSProperties = Object.freeze({
 } as CSSProperties);
 
 export function MyWorkShell({
-  spfxContext: _spfxContext,
+  spfxContext,
   getApiToken,
   forceMode,
+  now,
   children,
 }: MyWorkShellProps) {
   const shellRef = useRef<HTMLDivElement | null>(null);
@@ -65,6 +76,14 @@ export function MyWorkShell({
   const { activePrimarySurfaceId } = useMyWorkShellState();
 
   const themeStyle = useMemo(() => MY_WORK_THEME_VARS, []);
+
+  const pageHeaderIdentity = useMemo(
+    () => ({
+      displayName: spfxContext?.pageContext.user.displayName,
+      email: spfxContext?.pageContext.user.email,
+    }),
+    [spfxContext],
+  );
 
   return (
     <div
@@ -76,7 +95,7 @@ export function MyWorkShell({
     >
       <MyWorkActiveEnvelopeProvider>
         <section className={styles.commandSurface} data-my-work-command-surface="">
-          <MyWorkHeroBand mode={mode} />
+          <MyWorkHeroBand mode={mode} identity={pageHeaderIdentity} now={now} />
         </section>
         <div className={styles.canvas} data-my-work-canvas="">
           <MyWorkActiveSurfacePanel activePrimarySurfaceId={activePrimarySurfaceId}>

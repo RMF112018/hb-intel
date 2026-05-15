@@ -125,49 +125,81 @@ describe('MyWorkShell — composition and data-attribute contract', () => {
   });
 });
 
+const SHELL_FIXTURE_SPFX_CONTEXT = {
+  pageContext: {
+    user: {
+      loginName: 'bfetting@example.com',
+      displayName: 'Bobby Fetting',
+      email: 'bfetting@example.com',
+    },
+  },
+};
+
+function shellDateAt(hour: number, minute = 0): Date {
+  return new Date(2026, 4, 15, hour, minute, 0, 0);
+}
+
 describe('MyWorkShell — page header composition', () => {
   it('mounts the page header inside the command surface', () => {
-    const { container } = renderShell(<MyWorkShell />);
+    const { container } = renderShell(<MyWorkShell now={shellDateAt(9)} />);
     const commandSurface = container.querySelector('[data-my-work-command-surface]')!;
     const header = commandSurface.querySelector('[data-my-work-page-header]');
     expect(header).not.toBeNull();
   });
 
-  it('renders the locked compact header copy verbatim', () => {
-    const { container } = renderShell(<MyWorkShell />);
-    expect(container.querySelector('[data-my-work-page-header-eyebrow]')?.textContent).toBe(
-      'My Dashboard',
+  it('renders the personalized greeting for the authenticated SPFx user at a morning timestamp', () => {
+    const { container } = renderShell(
+      <MyWorkShell spfxContext={SHELL_FIXTURE_SPFX_CONTEXT} now={shellDateAt(9)} />,
     );
-    expect(container.querySelector('[data-my-work-page-header-title]')?.textContent).toBe(
-      'My Work',
+    expect(container.querySelector('[data-my-work-page-header-greeting]')?.textContent).toBe(
+      'Good morning, Bobby.',
     );
     expect(container.querySelector('[data-my-work-page-header-support]')?.textContent).toBe(
       'Your personal launch pad for project access and work requiring attention.',
     );
   });
 
-  it('emits no retired hero markers under the live shell', () => {
-    const { container } = renderShell(<MyWorkShell />);
+  it('falls back to "there" when no SPFx context is supplied', () => {
+    const { container } = renderShell(<MyWorkShell now={shellDateAt(9)} />);
+    expect(container.querySelector('[data-my-work-page-header-greeting]')?.textContent).toBe(
+      'Good morning, there.',
+    );
+  });
+
+  it('the live shell does not leak retired identity copy "My Dashboard" / "My Work" into the header text', () => {
+    const { container } = renderShell(
+      <MyWorkShell spfxContext={SHELL_FIXTURE_SPFX_CONTEXT} now={shellDateAt(9)} />,
+    );
+    const headerText = container.querySelector('[data-my-work-page-header]')?.textContent ?? '';
+    expect(headerText).not.toContain('My Dashboard');
+    expect(headerText).not.toContain('My Work');
+  });
+
+  it('emits no retired hero markers and no retired Prompt-02 static-identity markers under the live shell', () => {
+    const { container } = renderShell(
+      <MyWorkShell spfxContext={SHELL_FIXTURE_SPFX_CONTEXT} now={shellDateAt(9)} />,
+    );
     expect(container.querySelector('[data-my-work-hero]')).toBeNull();
     expect(container.querySelector('[data-my-work-hero-highlight]')).toBeNull();
     expect(container.querySelector('[data-my-work-hero-governance-copy]')).toBeNull();
     expect(container.querySelector('[data-my-work-hero-secondary-title]')).toBeNull();
+    expect(container.querySelector('[data-my-work-page-header-eyebrow]')).toBeNull();
+    expect(container.querySelector('[data-my-work-page-header-title]')).toBeNull();
   });
 
-  it('does not load the home envelope to render the static header (header is envelope-agnostic)', async () => {
-    // Stalled envelope client: if the page header tried to consume the envelope
+  it('renders the greeting synchronously even when the home envelope is stalled (header is envelope-agnostic)', () => {
+    // Stalled envelope client: if the page header consumed the envelope
     // context, the header would block on `loading` rather than rendering its
-    // static copy synchronously.
+    // greeting synchronously.
     const stub = makeStubClient({
       getMyWorkHome: vi.fn<IMyWorkReadModelClient['getMyWorkHome']>(() => new Promise(() => {})),
     });
-    const { container } = renderShellWithStub(stub);
-    // Header copy must be present immediately, before the envelope resolves.
-    expect(container.querySelector('[data-my-work-page-header-eyebrow]')?.textContent).toBe(
-      'My Dashboard',
+    const { container } = renderShellWithStub(
+      stub,
+      <MyWorkShell spfxContext={SHELL_FIXTURE_SPFX_CONTEXT} now={shellDateAt(9)} />,
     );
-    expect(container.querySelector('[data-my-work-page-header-title]')?.textContent).toBe(
-      'My Work',
+    expect(container.querySelector('[data-my-work-page-header-greeting]')?.textContent).toBe(
+      'Good morning, Bobby.',
     );
     expect(container.querySelector('[data-my-work-page-header-support]')?.textContent).toBe(
       'Your personal launch pad for project access and work requiring attention.',

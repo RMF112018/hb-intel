@@ -4,7 +4,15 @@ import { MyWorkReadModelClientProvider } from './runtime/MyWorkReadModelClientPr
 import { MyWorkShell } from './shell/MyWorkShell.js';
 
 export interface MyDashboardAppProps {
-  spfxContext?: { pageContext: { user: { loginName: string } } };
+  spfxContext?: {
+    pageContext: {
+      user: {
+        loginName: string;
+        displayName?: string;
+        email?: string;
+      };
+    };
+  };
   /** B02 token-provider seam — wired here so later prompts can hand it to a backend context without re-shaping the mount call. */
   getApiToken?: () => Promise<string>;
 }
