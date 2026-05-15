@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { IFieldDefinition } from '../backend/functions/src/services/sharepoint-service.js';
 import {
   buildProvisioningReport,
+  createPnPListAdapter,
   main,
   parseArgs,
   resolveSiteUrl,
@@ -12,7 +13,10 @@ import {
   type IProvisionTargetReport,
 } from './provision-my-projects-source-list-schema';
 
-function field(internalName: string, type: 'Text' | 'Note'): {
+function field(
+  internalName: string,
+  type: 'Text' | 'Note',
+): {
   InternalName: string;
   Title: string;
   TypeAsString: string;
@@ -77,7 +81,14 @@ describe('parseArgs', () => {
   });
 
   it('parses apply/json/site-url', () => {
-    expect(parseArgs(['--apply', '--json', '--site-url', 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral'])).toEqual({
+    expect(
+      parseArgs([
+        '--apply',
+        '--json',
+        '--site-url',
+        'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+      ]),
+    ).toEqual({
       apply: true,
       json: true,
       siteUrl: 'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
@@ -91,14 +102,20 @@ describe('parseArgs', () => {
 
 describe('site url resolution', () => {
   it('uses cli site-url over env', () => {
-    expect(resolveSiteUrl({ apply: false, json: false, siteUrl: 'https://x' }, { SHAREPOINT_PROJECTS_SITE_URL: 'https://y' } as NodeJS.ProcessEnv)).toBe('https://x');
+    expect(
+      resolveSiteUrl({ apply: false, json: false, siteUrl: 'https://x' }, {
+        SHAREPOINT_PROJECTS_SITE_URL: 'https://y',
+      } as NodeJS.ProcessEnv),
+    ).toBe('https://x');
   });
 
   it('validates HBCentral lock', () => {
-    expect(validateHBCentralSiteUrl('https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/')).toBe(
-      'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+    expect(
+      validateHBCentralSiteUrl('https://hedrickbrotherscom.sharepoint.com/sites/HBCentral/'),
+    ).toBe('https://hedrickbrotherscom.sharepoint.com/sites/HBCentral');
+    expect(() => validateHBCentralSiteUrl('https://example.com/sites/HBCentral')).toThrow(
+      /must be HBCentral/,
     );
-    expect(() => validateHBCentralSiteUrl('https://example.com/sites/HBCentral')).toThrow(/must be HBCentral/);
   });
 });
 
@@ -246,6 +263,69 @@ describe('main behavior', () => {
     const report = JSON.parse(outputs[0] ?? '{}');
     expect(report.listsMissing).toBe(true);
     expect(report.success).toBe(false);
+  });
+});
+
+describe('createPnPListAdapter error classification', () => {
+  function fakeSp(failureToThrow: unknown): unknown {
+    return {
+      web: {
+        lists: {
+          getByTitle: (_title: string) => ({
+            select: (_field: string) => async () => {
+              throw failureToThrow;
+            },
+            fields: {
+              select: () => ({ top: () => async () => [] }),
+            },
+          }),
+        },
+      },
+    };
+  }
+
+  it('returns null on a 404-style "not found" error so listsMissing posture is preserved', async () => {
+    const adapter = createPnPListAdapter(
+      fakeSp(new Error('SharePoint returned 404 Not Found for list')),
+    );
+    const result = await adapter.getList('Projects');
+    expect(result).toBeNull();
+  });
+
+  it('re-throws on a 401-style unauthorized error so it never silently flows into a successful report', async () => {
+    const adapter = createPnPListAdapter(
+      fakeSp(new Error('Unauthorized: 401 — token rejected by tenant')),
+    );
+    await expect(adapter.getList('Projects')).rejects.toThrow(/Unauthorized/);
+  });
+
+  it('re-throws on a 403-style forbidden error', async () => {
+    const adapter = createPnPListAdapter(fakeSp(new Error('Access denied: 403 Forbidden')));
+    await expect(adapter.getList('Projects')).rejects.toThrow(/Forbidden/);
+  });
+
+  it('re-throws on an opaque runtime/network error', async () => {
+    const adapter = createPnPListAdapter(fakeSp(new Error('ECONNRESET while contacting tenant')));
+    await expect(adapter.getList('Projects')).rejects.toThrow(/ECONNRESET/);
+  });
+});
+
+describe('main propagates adapter failures (no silent success path)', () => {
+  it('rejects when getList throws an auth error, leaving stdout empty', async () => {
+    const out: string[] = [];
+    const throwingAdapter: IListAdapter = {
+      async getList(_title: string) {
+        throw new Error('Unauthorized: 401');
+      },
+    };
+    await expect(
+      main(
+        { apply: false, json: true },
+        deps(throwingAdapter, out),
+        'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+      ),
+    ).rejects.toThrow(/Unauthorized/);
+    expect(out).toEqual([]);
   });
 });
 

@@ -1,5 +1,6 @@
 import { ManagedIdentityTokenService } from '../backend/functions/src/services/managed-identity-token-service.js';
 import { getPnPContext } from '../backend/functions/src/services/sharepoint-common.js';
+import { isNotFoundError } from '../backend/functions/src/services/sharepoint-identity-utils.js';
 import {
   buildListFieldPlans,
   createSharePointField,
@@ -93,7 +94,9 @@ export function parseArgs(argv: readonly string[]): IProvisionArgs {
 export function resolveSiteUrl(args: IProvisionArgs, env: NodeJS.ProcessEnv): string {
   const resolved = args.siteUrl ?? env.SHAREPOINT_PROJECTS_SITE_URL ?? env.SHAREPOINT_TENANT_URL;
   if (!resolved) {
-    throw new Error('Missing site URL. Provide --site-url or set SHAREPOINT_PROJECTS_SITE_URL / SHAREPOINT_TENANT_URL.');
+    throw new Error(
+      'Missing site URL. Provide --site-url or set SHAREPOINT_PROJECTS_SITE_URL / SHAREPOINT_TENANT_URL.',
+    );
   }
   return resolved;
 }
@@ -108,12 +111,16 @@ export function validateHBCentralSiteUrl(siteUrl: string): string {
   const hostOk = parsed.hostname.toLowerCase() === 'hedrickbrotherscom.sharepoint.com';
   const pathOk = parsed.pathname.toLowerCase().replace(/\/+$/, '') === '/sites/hbcentral';
   if (!hostOk || !pathOk) {
-    throw new Error(`Site URL must be HBCentral: https://hedrickbrotherscom.sharepoint.com/sites/HBCentral (received: ${siteUrl})`);
+    throw new Error(
+      `Site URL must be HBCentral: https://hedrickbrotherscom.sharepoint.com/sites/HBCentral (received: ${siteUrl})`,
+    );
   }
   return `https://${parsed.hostname}/sites/HBCentral`;
 }
 
-function nextCommandsFor(report: Pick<IProvisionReport, 'siteUrl' | 'apply' | 'success' | 'hasBlockingDrift'>): string[] {
+function nextCommandsFor(
+  report: Pick<IProvisionReport, 'siteUrl' | 'apply' | 'success' | 'hasBlockingDrift'>,
+): string[] {
   const siteArg = `--site-url ${report.siteUrl}`;
   if (report.success && !report.apply) {
     return [
@@ -151,8 +158,10 @@ export function buildProvisioningReport(input: {
     startedAtUtc: input.startedAtUtc,
     completedAtUtc: input.completedAtUtc,
     identityLaneWarning: {
-      runtimeLane: 'Function App UAMI app-only token lane (ManagedIdentityTokenService/getPnPContext).',
-      operatorLane: 'HB SharePoint Creator app registration is a separate operator/deployment identity context.',
+      runtimeLane:
+        'Function App UAMI app-only token lane (ManagedIdentityTokenService/getPnPContext).',
+      operatorLane:
+        'HB SharePoint Creator app registration is a separate operator/deployment identity context.',
       note: 'Ensure app-only SharePoint permissions are granted to the runtime identity before using --apply.',
     },
     targets: input.targets,
@@ -288,28 +297,55 @@ export async function main(args: IProvisionArgs, deps: IMainDeps, siteUrl: strin
   return selectExitCode(finalReport);
 }
 
-function createPnPListAdapter(sp: any): IListAdapter {
+export function createPnPListAdapter(sp: any): IListAdapter {
   return {
     async getList(listTitle: string): Promise<IListRef | null> {
+      let list: any;
       try {
-        const list = sp.web.lists.getByTitle(listTitle);
+        list = sp.web.lists.getByTitle(listTitle);
         await list.select('Title')();
-        return {
-          title: listTitle,
-          async listFields(): Promise<ILiveSharePointFieldSnapshot[]> {
-            return (await list.fields
-              .select('InternalName', 'Title', 'TypeAsString', 'Required', 'Indexed', 'DefaultValue', 'Choices')
-              .top(5000)()) as ILiveSharePointFieldSnapshot[];
-          },
-          async createField(field): Promise<void> {
-            await createSharePointField(list, field);
-          },
-        };
-      } catch {
-        return null;
+      } catch (err) {
+        if (isNotFoundError(err)) {
+          return null;
+        }
+        throw err;
       }
+      return {
+        title: listTitle,
+        async listFields(): Promise<ILiveSharePointFieldSnapshot[]> {
+          return (await list.fields
+            .select(
+              'InternalName',
+              'Title',
+              'TypeAsString',
+              'Required',
+              'Indexed',
+              'DefaultValue',
+              'Choices',
+            )
+            .top(5000)()) as ILiveSharePointFieldSnapshot[];
+        },
+        async createField(field): Promise<void> {
+          await createSharePointField(list, field);
+        },
+      };
     },
   };
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race<T>([
+    p,
+    new Promise<T>((_resolve, reject) => {
+      setTimeout(() => {
+        reject(
+          new Error(
+            `${label} timed out after ${ms}ms — likely tenant connectivity or app-only SharePoint authorization failure on the runtime identity`,
+          ),
+        );
+      }, ms);
+    }),
+  ]);
 }
 
 async function runFromCli(): Promise<void> {
@@ -317,13 +353,28 @@ async function runFromCli(): Promise<void> {
   const siteUrl = validateHBCentralSiteUrl(resolveSiteUrl(args, process.env));
 
   const tokenService = new ManagedIdentityTokenService();
-  const sp = await getPnPContext(siteUrl, tokenService);
+  const sp = await withTimeout(getPnPContext(siteUrl, tokenService), 15_000, 'getPnPContext');
 
-  const code = await main(args, {
-    listAdapter: createPnPListAdapter(sp),
-    now: () => new Date().toISOString(),
-    stdout: (line) => console.log(line),
-  }, siteUrl);
+  // Connectivity probe: forces PnPjs's lazy chain to issue a real HTTP
+  // request against the site so auth failures (401/403) surface here as a
+  // thrown error — or, if PnPjs hangs on a non-JSON 401 response, the
+  // race-timeout below converts the hang into a deterministic exit-1
+  // diagnostic instead of a silent exit-0.
+  await withTimeout(sp.web.select('Url')(), 15_000, 'SharePoint connectivity probe');
+
+  const code = await withTimeout(
+    main(
+      args,
+      {
+        listAdapter: createPnPListAdapter(sp),
+        now: () => new Date().toISOString(),
+        stdout: (line) => console.log(line),
+      },
+      siteUrl,
+    ),
+    60_000,
+    'main provisioning pass',
+  );
   process.exit(code);
 }
 
@@ -334,6 +385,18 @@ const invokedDirectly =
   process.argv[1].endsWith('provision-my-projects-source-list-schema.ts');
 
 if (invokedDirectly) {
+  process.on('unhandledRejection', (err) => {
+    console.error(
+      `provision-my-projects-source-list-schema: unhandled rejection — ${err instanceof Error ? err.message : String(err)}`,
+    );
+    process.exit(1);
+  });
+  process.on('uncaughtException', (err) => {
+    console.error(
+      `provision-my-projects-source-list-schema: uncaught exception — ${err instanceof Error ? err.message : String(err)}`,
+    );
+    process.exit(1);
+  });
   runFromCli().catch((err) => {
     console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);

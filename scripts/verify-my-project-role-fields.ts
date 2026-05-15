@@ -177,6 +177,18 @@ const invokedDirectly =
   process.argv[1].endsWith('verify-my-project-role-fields.ts');
 
 if (invokedDirectly) {
+  process.on('unhandledRejection', (err) => {
+    console.error(
+      `verify-my-project-role-fields: unhandled rejection — ${err instanceof Error ? err.message : String(err)}`,
+    );
+    process.exit(1);
+  });
+  process.on('uncaughtException', (err) => {
+    console.error(
+      `verify-my-project-role-fields: uncaught exception — ${err instanceof Error ? err.message : String(err)}`,
+    );
+    process.exit(1);
+  });
   runFromCli().catch((err) => {
     console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);
