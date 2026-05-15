@@ -130,6 +130,56 @@ describe('createAdobeSignLiveSearchClient — request shape', () => {
 });
 
 describe('createAdobeSignLiveSearchClient — happy path', () => {
+  it('accepts the confirmed live envelope agreementAssetsResults.agreementAssetsResultList', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreementAssetsResults: {
+          agreementAssetsResultList: [
+            {
+              id: 'agreement-1',
+              name: 'Envelope Name',
+              recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+            },
+          ],
+          searchPageInfo: {},
+          status: {},
+          totalHits: 1,
+        },
+        totalHits: 1,
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.items).toEqual([
+      {
+        agreementId: 'agreement-1',
+        agreementName: 'Envelope Name',
+        recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+      },
+    ]);
+  });
+
+  it('accepts the confirmed live envelope with an empty agreementAssetsResultList', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreementAssetsResults: {
+          agreementAssetsResultList: [],
+          searchPageInfo: {},
+          status: {},
+          totalHits: 0,
+        },
+        totalHits: 0,
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.items).toEqual([]);
+  });
+
   it('maps a multi-row agreements response into AdobeSignSearchClientItem rows', async () => {
     const fetchSpy = vi.fn(async () =>
       jsonResponse({
@@ -206,6 +256,24 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
 });
 
 describe('createAdobeSignLiveSearchClient — error mappings', () => {
+  it('2xx with agreementAssetsResults object but missing agreementAssetsResultList array remains malformed-response', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreementAssetsResults: {
+          searchPageInfo: {},
+          status: {},
+          totalHits: 1,
+        },
+        totalHits: 1,
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('unreachable');
+    if (result.status !== 'unreachable') return;
+    expect(result.reason).toBe('malformed-response');
+  });
+
   it('HTTP 401 → unauthorized', async () => {
     const fetchSpy = vi.fn(async () => jsonResponse({ error: 'unauthorized' }, 401));
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });

@@ -406,6 +406,17 @@ function mapRow(row: unknown): AdobeSignSearchClientItem | undefined {
   };
 }
 
+function readAgreementsRows(parsed: Record<string, unknown>): readonly unknown[] | undefined {
+  const nestedResults = parsed.agreementAssetsResults;
+  if (nestedResults !== null && typeof nestedResults === 'object') {
+    const nestedRows = (nestedResults as Record<string, unknown>).agreementAssetsResultList;
+    if (Array.isArray(nestedRows)) return nestedRows;
+  }
+  const legacyRows = parsed.agreements;
+  if (Array.isArray(legacyRows)) return legacyRows;
+  return undefined;
+}
+
 export function createAdobeSignLiveSearchClient(
   deps: AdobeSignLiveSearchClientDeps = {},
 ): IAdobeSignSearchClient {
@@ -525,7 +536,7 @@ export function createAdobeSignLiveSearchClient(
           malformedSearchResponseDiagnostics: buildMalformedSearchResponseDiagnostics(parsed),
         };
       }
-      const rawAgreements = (parsed as Record<string, unknown>).agreements;
+      const rawAgreements = readAgreementsRows(parsed as Record<string, unknown>);
       if (!Array.isArray(rawAgreements)) {
         return {
           status: 'unreachable',
