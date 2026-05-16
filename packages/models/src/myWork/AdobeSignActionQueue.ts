@@ -95,6 +95,46 @@ export interface MyWorkAdobeSignActionQueueQuery {
   readonly cursor?: string;
 }
 
+export interface ResolveAdobeSignActionLinkRequest {
+  readonly itemId: string;
+  readonly agreementId: string;
+  readonly requiredAction: MyWorkAdobeSignRequiredAction;
+}
+
+export const ADOBE_SIGN_ACTION_LINK_RESOLVE_OUTCOMES = [
+  'redirect-ready',
+  'invalid-input',
+  'authorization-required',
+  'principal-unresolved',
+  'scope-insufficient',
+  'source-unavailable',
+  'not-ready',
+  'no-action-url',
+  'rate-limited',
+  'policy-rejected',
+] as const;
+
+export type AdobeSignActionLinkResolveOutcome =
+  (typeof ADOBE_SIGN_ACTION_LINK_RESOLVE_OUTCOMES)[number];
+
+export type AdobeSignActionLinkResolveResult =
+  | {
+      readonly status: 'redirect-ready';
+      readonly redirectUrl: string;
+    }
+  | {
+      readonly status:
+        | 'invalid-input'
+        | 'authorization-required'
+        | 'principal-unresolved'
+        | 'scope-insufficient'
+        | 'source-unavailable'
+        | 'not-ready'
+        | 'no-action-url'
+        | 'rate-limited'
+        | 'policy-rejected';
+    };
+
 export interface MyWorkAdobeSignActionQueuePagination {
   readonly pageSize: number;
   readonly hasMore: boolean;

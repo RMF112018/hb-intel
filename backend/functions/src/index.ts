@@ -50,3 +50,6 @@ import './hosts/my-work-read-model/my-work-read-model-routes.js';
 
 // My Dashboard / Adobe Sign delegated OAuth routes
 import './hosts/my-work-read-model/adobe-sign-oauth-routes.js';
+
+// My Dashboard / Adobe Sign action-link resolver route
+import './hosts/my-work-read-model/adobe-sign-action-link-routes.js';

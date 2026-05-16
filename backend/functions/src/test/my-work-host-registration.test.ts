@@ -37,4 +37,13 @@ describe('My Dashboard / My Work host route registration', () => {
       /import\s+['"]\.\/hosts\/my-work-read-model\/adobe-sign-oauth-routes\.js['"];?/,
     );
   });
+
+  it('imports the Adobe Sign action-link resolver route module', () => {
+    expect(
+      monoIndex,
+      "index.ts must import './hosts/my-work-read-model/adobe-sign-action-link-routes.js'",
+    ).toMatch(
+      /import\s+['"]\.\/hosts\/my-work-read-model\/adobe-sign-action-link-routes\.js['"];?/,
+    );
+  });
 });
