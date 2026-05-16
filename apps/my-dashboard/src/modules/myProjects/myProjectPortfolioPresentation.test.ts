@@ -29,6 +29,14 @@ function makeItem(overrides: Partial<MyProjectLinkItem>): MyProjectLinkItem {
       state: 'unavailable',
       label: 'Procore unavailable',
     },
+    buildingConnectedAction: {
+      state: 'unavailable',
+      label: 'BuildingConnected unavailable',
+    },
+    documentCrunchAction: {
+      state: 'unavailable',
+      label: 'Document Crunch unavailable',
+    },
     provenance: {},
     warnings: [],
   };

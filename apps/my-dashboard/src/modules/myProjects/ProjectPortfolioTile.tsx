@@ -4,7 +4,7 @@ import {
   type MyProjectAssignmentRoleId,
   type MyProjectLinkItem,
 } from '@hbc/models/myWork';
-import { ProjectLaunchMenu } from './ProjectLaunchMenu.js';
+import { ProjectLaunchActions } from './ProjectLaunchActions.js';
 import styles from './ProjectPortfolioTile.module.css';
 
 export interface ProjectPortfolioTileProps {
@@ -13,9 +13,7 @@ export interface ProjectPortfolioTileProps {
   readonly onOpenChange: (open: boolean) => void;
 }
 
-function sortedRoleLabels(
-  roles: readonly MyProjectAssignmentRoleId[],
-): readonly string[] {
+function sortedRoleLabels(roles: readonly MyProjectAssignmentRoleId[]): readonly string[] {
   return roles
     .map((roleId) => MY_PROJECT_ASSIGNMENT_ROLE_BY_ID[roleId])
     .slice()
@@ -52,7 +50,7 @@ export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortf
             {row.projectStage}
           </p>
         ) : null}
-        <ProjectLaunchMenu row={row} isOpen={isOpen} onOpenChange={onOpenChange} />
+        <ProjectLaunchActions row={row} isDrawerOpen={isOpen} onDrawerOpenChange={onOpenChange} />
       </div>
 
       {primaryRoleLabel ? (

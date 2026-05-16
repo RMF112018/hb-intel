@@ -79,12 +79,21 @@ function selectBannerText(params: {
   return null;
 }
 
-function hasAnyUnavailableSharePoint(items: readonly MyProjectLinkItem[]): boolean {
-  return items.some((item) => item.sharePointAction.state === 'unavailable');
-}
-
-function hasAnyUnavailableProcore(items: readonly MyProjectLinkItem[]): boolean {
-  return items.some((item) => item.procoreAction.state === 'unavailable');
+function buildMissingDestinationLabels(items: readonly MyProjectLinkItem[]): readonly string[] {
+  const labels: string[] = [];
+  if (items.some((item) => item.sharePointAction.state === 'unavailable')) {
+    labels.push('SharePoint');
+  }
+  if (items.some((item) => item.procoreAction.state === 'unavailable')) {
+    labels.push('Procore');
+  }
+  if (items.some((item) => item.buildingConnectedAction.state === 'unavailable')) {
+    labels.push('BuildingConnected');
+  }
+  if (items.some((item) => item.documentCrunchAction.state === 'unavailable')) {
+    labels.push('Document Crunch');
+  }
+  return labels;
 }
 
 export function MyProjectsHomeCard({ footprint = 'full', spanOverrides }: MyProjectsHomeCardProps) {
@@ -175,7 +184,9 @@ export function MyProjectsHomeCard({ footprint = 'full', spanOverrides }: MyProj
             <span className={styles.mastheadCadence}>{sortedItems.length} active</span>
           ) : null}
         </div>
-        <p className={styles.lead}>Open assigned projects in SharePoint or Procore.</p>
+        <p className={styles.lead}>
+          Open assigned projects across SharePoint, Procore, BuildingConnected, and Document Crunch.
+        </p>
       </div>
 
       {bannerText ? (
@@ -235,16 +246,16 @@ export function MyProjectsHomeCard({ footprint = 'full', spanOverrides }: MyProj
               View all projects
             </button>
           ) : null}
-          {hasAnyUnavailableSharePoint(sortedItems) ? (
-            <p className={styles.assistiveHint}>
-              One or more projects do not currently have a SharePoint launch destination.
-            </p>
-          ) : null}
-          {hasAnyUnavailableProcore(sortedItems) ? (
-            <p className={styles.assistiveHint}>
-              One or more projects do not currently have a Procore launch destination.
-            </p>
-          ) : null}
+          {(() => {
+            const missing = buildMissingDestinationLabels(sortedItems);
+            if (missing.length === 0) return null;
+            return (
+              <p className={styles.assistiveHint} data-my-projects-missing-hint="">
+                Some assigned projects do not currently have launch destinations for:{' '}
+                {missing.join(', ')}.
+              </p>
+            );
+          })()}
         </div>
       ) : null}
 

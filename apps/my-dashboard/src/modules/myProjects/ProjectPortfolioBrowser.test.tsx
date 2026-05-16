@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS } from '@hbc/models/myWork/fixtures';
+import { MyWorkBentoGrid } from '../../layout/MyWorkBentoGrid.js';
 import type { MyWorkResponsiveMode } from '../../layout/useMyWorkContainerBreakpoint.js';
 import { ProjectPortfolioBrowser } from './ProjectPortfolioBrowser.js';
 
@@ -21,7 +22,7 @@ function BrowserHarness({
   const [isOpen, setIsOpen] = useState(initialOpen);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   return (
-    <>
+    <MyWorkBentoGrid mode={mode}>
       <button
         ref={triggerRef}
         type="button"
@@ -39,7 +40,7 @@ function BrowserHarness({
           onOpen?.(next);
         }}
       />
-    </>
+    </MyWorkBentoGrid>
   );
 }
 
@@ -232,9 +233,13 @@ describe('ProjectPortfolioBrowser — posture by mode', () => {
   });
 });
 
-describe('ProjectPortfolioBrowser — in-browser launch menu concurrency', () => {
-  it('opens only one tile launch menu at a time within the browser context', () => {
-    render(<BrowserHarness initialOpen />);
+describe('ProjectPortfolioBrowser — in-browser launch drawer concurrency (phone)', () => {
+  it('opens only one tile launch drawer at a time within the browser context', () => {
+    // Inline mode (tablet+desktop) renders all four destinations directly on
+    // each tile — no trigger, no concurrency surface. The launch drawer
+    // appears only in phone mode, so the concurrency contract is enforced
+    // there.
+    render(<BrowserHarness mode="phone" initialOpen />);
     const triggers = Array.from(
       document.body.querySelectorAll<HTMLButtonElement>(
         '[data-my-projects-portfolio-browser] [data-my-projects-launch-trigger]',
@@ -243,9 +248,9 @@ describe('ProjectPortfolioBrowser — in-browser launch menu concurrency', () =>
     expect(triggers.length).toBeGreaterThanOrEqual(2);
 
     fireEvent.click(triggers[0]!);
-    expect(document.body.querySelectorAll('[data-my-projects-launch-menu]').length).toBe(1);
+    expect(document.body.querySelectorAll('[data-my-projects-launch-drawer]').length).toBe(1);
 
     fireEvent.click(triggers[1]!);
-    expect(document.body.querySelectorAll('[data-my-projects-launch-menu]').length).toBe(1);
+    expect(document.body.querySelectorAll('[data-my-projects-launch-drawer]').length).toBe(1);
   });
 });
