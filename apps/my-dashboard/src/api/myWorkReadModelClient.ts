@@ -11,6 +11,7 @@
 
 import {
   MY_WORK_READ_MODEL_ROUTE_PATHS,
+  type AdobeSignActionLinkResolveResult,
   type MyProjectLinksReadModel,
   type MyWorkAdobeSignActionQueueQuery,
   type MyWorkAdobeSignActionQueueReadModel,
@@ -19,6 +20,7 @@ import {
   type MyWorkHomeReadModel,
   type MyWorkReadModelEnvelope,
   type MyWorkReadModelRouteKey,
+  type ResolveAdobeSignActionLinkRequest,
 } from '@hbc/models/myWork';
 
 export { MY_WORK_READ_MODEL_ROUTE_PATHS };
@@ -56,6 +58,9 @@ export interface IMyWorkReadModelClient {
     query?: MyWorkAdobeSignRecentCompletionsQuery,
   ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignRecentCompletionsReadModel>>;
   getMyProjectLinks(): Promise<MyWorkReadModelEnvelope<MyProjectLinksReadModel>>;
+  resolveAdobeSignActionLink(
+    input: ResolveAdobeSignActionLinkRequest,
+  ): Promise<AdobeSignActionLinkResolveResult>;
   /**
    * Issue a fresh Adobe Sign OAuth `state` and return the
    * Adobe-hosted authorization URL the browser should navigate to.

@@ -14,6 +14,7 @@
  */
 
 import type {
+  AdobeSignActionLinkResolveResult,
   MyProjectLinksReadModel,
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
@@ -21,6 +22,7 @@ import type {
   MyWorkAdobeSignRecentCompletionsReadModel,
   MyWorkHomeReadModel,
   MyWorkReadModelEnvelope,
+  ResolveAdobeSignActionLinkRequest,
 } from '@hbc/models/myWork';
 
 import { MY_WORK_MARK, markMyWork, measureMyWork } from '../runtime/myWorkPerformanceMarks.js';
@@ -44,6 +46,7 @@ export type MyWorkReadModelFetch = (
 ) => Promise<Response>;
 
 const ADOBE_SIGN_OAUTH_START_ROUTE_PATH = 'my-work/me/adobe-sign/oauth/start' as const;
+const ADOBE_SIGN_ACTION_LINK_RESOLVE_ROUTE_PATH = 'my-work/me/adobe-sign/action-link/resolve' as const;
 
 export interface MyWorkBackendReadModelClientOptions {
   readonly backendBaseUrl: string;
@@ -265,6 +268,77 @@ class MyWorkBackendReadModelClient implements IMyWorkReadModelClient {
       authorizationUrl: (data as Record<string, string>).authorizationUrl,
       stateExpiresAtUtc: (data as Record<string, string>).stateExpiresAtUtc,
     };
+  }
+
+  async resolveAdobeSignActionLink(
+    input: ResolveAdobeSignActionLinkRequest,
+  ): Promise<AdobeSignActionLinkResolveResult> {
+    let token: string;
+    try {
+      token = await this.getApiToken();
+    } catch {
+      return { status: 'authorization-required' };
+    }
+    if (!token || token.trim().length === 0) {
+      return { status: 'authorization-required' };
+    }
+
+    const url = `${this.apiBaseUrl}/${ADOBE_SIGN_ACTION_LINK_RESOLVE_ROUTE_PATH}`;
+    let response: Response;
+    try {
+      response = await this.fetchImpl(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(input),
+      });
+    } catch {
+      return { status: 'source-unavailable' };
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      return { status: 'authorization-required' };
+    }
+    if (!response.ok) {
+      return { status: 'source-unavailable' };
+    }
+
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      return { status: 'source-unavailable' };
+    }
+    if (typeof body !== 'object' || body === null || !('data' in body)) {
+      return { status: 'source-unavailable' };
+    }
+
+    const data = (body as { data?: unknown }).data;
+    if (typeof data !== 'object' || data === null || typeof (data as { status?: unknown }).status !== 'string') {
+      return { status: 'source-unavailable' };
+    }
+
+    const result = data as AdobeSignActionLinkResolveResult;
+    if (result.status === 'redirect-ready' && typeof result.redirectUrl === 'string') {
+      return result;
+    }
+    if (
+      result.status === 'invalid-input' ||
+      result.status === 'authorization-required' ||
+      result.status === 'principal-unresolved' ||
+      result.status === 'scope-insufficient' ||
+      result.status === 'source-unavailable' ||
+      result.status === 'not-ready' ||
+      result.status === 'no-action-url' ||
+      result.status === 'rate-limited' ||
+      result.status === 'policy-rejected'
+    ) {
+      return result;
+    }
+    return { status: 'source-unavailable' };
   }
 }
 

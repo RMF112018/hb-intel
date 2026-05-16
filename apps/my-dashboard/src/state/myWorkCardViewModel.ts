@@ -199,6 +199,7 @@ export function selectAdobeQueueSummaryVmFromSummary(
 
 export interface AdobeAgreementListItem {
   readonly itemId: string;
+  readonly agreementId: string;
   readonly agreementName: string;
   readonly requiredAction: MyWorkAdobeSignRequiredAction;
   readonly requiredActionLabel: string;
@@ -351,6 +352,7 @@ export function selectAdobeAgreementListVmFromItems(
   }
   const mapped = items.map<AdobeAgreementListItem>((it) => ({
     itemId: it.itemId,
+    agreementId: it.agreementId,
     agreementName: it.agreementName,
     requiredAction: it.requiredAction,
     requiredActionLabel: requiredActionLabel(it.requiredAction),

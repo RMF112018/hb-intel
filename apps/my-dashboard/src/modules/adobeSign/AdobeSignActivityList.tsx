@@ -4,7 +4,12 @@ export interface AdobeSignActivityListItem {
   readonly key: string;
   readonly title: string;
   readonly metadataParts: readonly string[];
+  readonly primaryActionLabel?: string;
+  readonly onPrimaryActionClick?: () => void;
+  readonly primaryActionDisabled?: boolean;
+  readonly fallbackViewLabel?: string;
   readonly sourceOpenUrl?: string;
+  readonly rowErrorMessage?: string;
 }
 
 export interface AdobeSignActivityListProps {
@@ -41,7 +46,12 @@ export function AdobeSignActivityList({
             variant={variant}
             title={item.title}
             metadataParts={item.metadataParts}
+            primaryActionLabel={item.primaryActionLabel}
+            onPrimaryActionClick={item.onPrimaryActionClick}
+            primaryActionDisabled={item.primaryActionDisabled}
+            fallbackViewLabel={item.fallbackViewLabel}
             sourceOpenUrl={item.sourceOpenUrl}
+            rowErrorMessage={item.rowErrorMessage}
             className={rowClassName}
             titleClassName={titleClassName}
             metaRowClassName={metaRowClassName}

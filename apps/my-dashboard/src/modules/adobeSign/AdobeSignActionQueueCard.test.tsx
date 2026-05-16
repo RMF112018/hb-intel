@@ -19,6 +19,7 @@ import {
   MY_WORK_HOME_SOURCE_UNAVAILABLE,
 } from '@hbc/models/myWork/fixtures';
 import type {
+  AdobeSignActionLinkResolveResult,
   MyWorkAdobeSignActionQueueItem,
   MyWorkHomeReadModel,
   MyWorkReadModelEnvelope,
@@ -47,6 +48,7 @@ function renderCard(
     onConnect?: () => Promise<void>;
     recentCompletionsEnvelope?: unknown;
     getAdobeSignRecentCompletions?: () => Promise<unknown>;
+    resolveAdobeSignActionLink?: () => Promise<AdobeSignActionLinkResolveResult>;
     mode?: Parameters<typeof MyWorkBentoGrid>[0]['mode'];
   } = {},
 ) {
@@ -57,6 +59,7 @@ function renderCard(
     onConnect,
     recentCompletionsEnvelope,
     getAdobeSignRecentCompletions,
+    resolveAdobeSignActionLink,
     mode = 'standardLaptop',
   } = options;
   const getRecentCompletions =
@@ -69,6 +72,9 @@ function renderCard(
     getMyProjectLinks: vi.fn(async () => {
       throw new Error('unused');
     }),
+    resolveAdobeSignActionLink:
+      resolveAdobeSignActionLink ??
+      vi.fn(async () => ({ status: 'source-unavailable' as const })),
     startAdobeSignOAuth: vi.fn(async () => {
       throw new Error('unused');
     }),
@@ -841,8 +847,8 @@ describe('AdobeSignActionQueueCard — completed panel', () => {
   });
 });
 
-describe('AdobeSignActionQueueCard — item handoff anchor', () => {
-  it('renders an Open in Adobe Sign anchor when item.sourceOpenUrl is present', () => {
+describe('AdobeSignActionQueueCard — item handoff actions', () => {
+  it('renders a View anchor when item.sourceOpenUrl is present', () => {
     const { container } = renderCard({
       readinessVariant: 'ready',
       homeEnvelope: MY_WORK_HOME_AVAILABLE,
@@ -858,7 +864,7 @@ describe('AdobeSignActionQueueCard — item handoff anchor', () => {
       expect(anchor.getAttribute('target')).toBe('_blank');
       expect(anchor.getAttribute('rel')).toBe('noopener noreferrer');
       expect(anchor.getAttribute('href')).toBeTruthy();
-      expect(anchor.textContent).toContain('Open');
+      expect(anchor.textContent).toContain('View');
     });
   });
 
@@ -901,6 +907,96 @@ describe('AdobeSignActionQueueCard — item handoff anchor', () => {
     expect(container.querySelectorAll('[data-adobe-sign-activity-row]').length).toBeGreaterThan(0);
     // But no handoff anchor renders because no item carries a truthful URL.
     expect(container.querySelector('[data-adobe-sign-row-open-action="start"]')).toBeNull();
+  });
+
+  it('renders Act now only for resolver-capable queue rows', () => {
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+    });
+    const primaryActions = container.querySelectorAll('[data-adobe-sign-row-primary-action="start"]');
+    expect(primaryActions.length).toBeGreaterThan(0);
+    const labels = Array.from(primaryActions).map((el) => el.textContent?.trim());
+    expect(labels.every((label) => label === 'Act now')).toBe(true);
+  });
+
+  it('shows Opening… while resolving and surfaces row-local failure copy on non-success', async () => {
+    let resolveRequest: (() => void) | undefined;
+    const resolveAdobeSignActionLink = vi.fn(
+      () =>
+        new Promise<AdobeSignActionLinkResolveResult>((resolve) => {
+          resolveRequest = () => resolve({ status: 'source-unavailable' });
+        }),
+    );
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      resolveAdobeSignActionLink,
+    });
+
+    const actNowButton = container.querySelector(
+      '[data-adobe-sign-row-primary-action="start"]',
+    ) as HTMLButtonElement | null;
+    expect(actNowButton).not.toBeNull();
+    fireEvent.click(actNowButton!);
+
+    await waitFor(() => {
+      expect(actNowButton?.textContent).toBe('Opening…');
+      expect(actNowButton?.disabled).toBe(true);
+    });
+
+    resolveRequest?.();
+    await waitFor(() => {
+      expect(container.querySelector('[data-adobe-sign-row-error]')?.textContent).toContain(
+        'Unable to open right now.',
+      );
+    });
+  });
+
+  it('opens redirect url on resolver success and clears failure state', async () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const resolveAdobeSignActionLink = vi.fn(async () => ({
+      status: 'redirect-ready' as const,
+      redirectUrl: 'https://secure.adobesign.com/public/apiesign?x=1',
+    }));
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      resolveAdobeSignActionLink,
+    });
+
+    const actNowButton = container.querySelector(
+      '[data-adobe-sign-row-primary-action="start"]',
+    ) as HTMLButtonElement | null;
+    expect(actNowButton).not.toBeNull();
+    fireEvent.click(actNowButton!);
+
+    await waitFor(() => {
+      expect(openSpy).toHaveBeenCalledWith(
+        'https://secure.adobesign.com/public/apiesign?x=1',
+        '_blank',
+        'noopener,noreferrer',
+      );
+    });
+    expect(container.querySelector('[data-adobe-sign-row-error]')).toBeNull();
+  });
+
+  it('keeps completed rows view-oriented', async () => {
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      recentCompletionsEnvelope: ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
+    });
+    fireEvent.click(container.querySelector('[data-adobe-sign-card-view="completed"]')!);
+    await waitFor(() => {
+      const completedPanel = container.querySelector('#adobe-sign-panel-completed');
+      expect(completedPanel?.hasAttribute('hidden')).toBe(false);
+    });
+    expect(container.querySelector('[data-adobe-sign-row-primary-action="start"]')).toBeNull();
+    const completedOpen = container.querySelector('[data-adobe-sign-row-open-action="start"]');
+    if (completedOpen) {
+      expect(completedOpen.textContent).toContain('View');
+    }
   });
 });
 
@@ -970,6 +1066,7 @@ describe('AdobeSignActionQueueCard — accessibility', () => {
       getMyProjectLinks: vi.fn(async () => {
         throw new Error('unused');
       }),
+      resolveAdobeSignActionLink: vi.fn(async () => ({ status: 'source-unavailable' as const })),
       startAdobeSignOAuth: vi.fn(async () => {
         throw new Error('unused');
       }),

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
+  AdobeSignActionLinkResolveResult,
+  ResolveAdobeSignActionLinkRequest,
   MyWorkHomeReadModel,
   MyWorkReadModelEnvelope,
   MyWorkReadModelSourceStatus,
@@ -77,6 +79,13 @@ type CompletedPanelState =
   | 'configuration-required'
   | 'principal-unresolved';
 
+type QueueResolveUiState = 'idle' | 'resolving' | 'failed';
+
+interface QueueResolveRowState {
+  readonly state: QueueResolveUiState;
+  readonly lastFailure?: Exclude<AdobeSignActionLinkResolveResult['status'], 'redirect-ready'>;
+}
+
 function resolveStateMarker(
   readinessVariant: MyWorkSurfaceReadinessVariant,
   effectiveSourceStatus: MyWorkReadModelSourceStatus | undefined,
@@ -115,6 +124,9 @@ export function AdobeSignActionQueueCard({
   const readModelClient = useMyWorkReadModelClient();
   const { mode } = useMyWorkBentoContext();
   const [activeView, setActiveView] = useState<ActiveView>('action-queue');
+  const [queueResolveStateByItemId, setQueueResolveStateByItemId] = useState<
+    Readonly<Record<string, QueueResolveRowState>>
+  >({});
 
   // Effective Adobe-specific source status: envelope-derived first, explicit prop fallback.
   const effectiveSourceStatus = useMemo<MyWorkReadModelSourceStatus | undefined>(
@@ -155,6 +167,53 @@ export function AdobeSignActionQueueCard({
     previewItems.slice(0, PREVIEW_ITEM_LIMIT),
     false,
   );
+
+  const resolveFailureCopy = (
+    status: Exclude<AdobeSignActionLinkResolveResult['status'], 'redirect-ready'>,
+  ): string => {
+    switch (status) {
+      case 'authorization-required':
+        return 'Unable to open right now. Reconnect Adobe Sign and try again.';
+      case 'principal-unresolved':
+      case 'scope-insufficient':
+      case 'source-unavailable':
+      case 'not-ready':
+      case 'no-action-url':
+      case 'rate-limited':
+      case 'policy-rejected':
+      case 'invalid-input':
+      default:
+        return 'Unable to open right now. Please try again.';
+    }
+  };
+
+  const handleActNow = async (input: ResolveAdobeSignActionLinkRequest): Promise<void> => {
+    setQueueResolveStateByItemId((prev) => ({
+      ...prev,
+      [input.itemId]: { state: 'resolving' },
+    }));
+
+    let result: AdobeSignActionLinkResolveResult;
+    try {
+      result = await readModelClient.resolveAdobeSignActionLink(input);
+    } catch {
+      result = { status: 'source-unavailable' };
+    }
+
+    if (result.status === 'redirect-ready') {
+      window.open(result.redirectUrl, '_blank', 'noopener,noreferrer');
+      setQueueResolveStateByItemId((prev) => ({
+        ...prev,
+        [input.itemId]: { state: 'idle' },
+      }));
+      return;
+    }
+
+    setQueueResolveStateByItemId((prev) => ({
+      ...prev,
+      [input.itemId]: { state: 'failed', lastFailure: result.status },
+    }));
+  };
 
   // CTA state machine — direct lift from the retired AdobeSignConnectionGuidanceCard.
   const [connectState, setConnectState] = useState<ConnectState>('idle');
@@ -435,6 +494,22 @@ export function AdobeSignActionQueueCard({
           <AdobeSignActivityList
             variant="queue"
             items={agreementListVm.items.map((item) => ({
+              ...(item.actionHandoff.posture === 'resolve-on-click'
+                ? {
+                    primaryActionLabel:
+                      queueResolveStateByItemId[item.itemId]?.state === 'resolving'
+                        ? 'Opening…'
+                        : 'Act now',
+                    primaryActionDisabled:
+                      queueResolveStateByItemId[item.itemId]?.state === 'resolving',
+                    onPrimaryActionClick: () =>
+                      void handleActNow({
+                        itemId: item.itemId,
+                        agreementId: item.agreementId,
+                        requiredAction: item.requiredAction,
+                      }),
+                  }
+                : {}),
               key: item.itemId,
               title: item.agreementName,
               metadataParts: [
@@ -442,7 +517,13 @@ export function AdobeSignActionQueueCard({
                 item.senderLabel ? `From ${item.senderLabel}` : '',
                 item.expiresLabel ? `Expires ${item.expiresLabel}` : '',
               ],
+              fallbackViewLabel: item.sourceOpenUrl ? 'View' : undefined,
               sourceOpenUrl: item.sourceOpenUrl,
+              rowErrorMessage:
+                queueResolveStateByItemId[item.itemId]?.state === 'failed' &&
+                queueResolveStateByItemId[item.itemId]?.lastFailure
+                  ? resolveFailureCopy(queueResolveStateByItemId[item.itemId]!.lastFailure!)
+                  : undefined,
             }))}
             previewContext={queuePreviewContext ?? undefined}
             listClassName={localStyles.activityList}
@@ -506,6 +587,7 @@ export function AdobeSignActionQueueCard({
                 item.dateLabel || item.senderLabel
                   ? [item.dateLabel ?? '', item.senderLabel ? `From ${item.senderLabel}` : '']
                   : ['Completion metadata not reported.'],
+              fallbackViewLabel: item.sourceOpenUrl ? 'View' : undefined,
               sourceOpenUrl: item.sourceOpenUrl,
             }))}
             previewContext={completedPreviewContext ?? undefined}

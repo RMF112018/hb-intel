@@ -14,6 +14,7 @@
  */
 
 import type {
+  AdobeSignActionLinkResolveResult,
   MyProjectLinksReadModel,
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
@@ -22,6 +23,7 @@ import type {
   MyWorkHomeReadModel,
   MyWorkReadModelDataPath,
   MyWorkReadModelEnvelope,
+  ResolveAdobeSignActionLinkRequest,
 } from '@hbc/models/myWork';
 import { MY_WORK_FIXTURE_GENERATED_AT_UTC, MY_WORK_FIXTURES } from '@hbc/models/myWork/fixtures';
 
@@ -106,6 +108,12 @@ class MyWorkFixtureReadModelClient implements IMyWorkReadModelClient {
     // Fixture mode is deliberate-no-network; the consent flow can only run
     // in backend mode. Parents must only call this in backend-mode contexts.
     throw new Error('adobe-sign-oauth-start-not-available-in-fixture-mode');
+  }
+
+  async resolveAdobeSignActionLink(
+    _input: ResolveAdobeSignActionLinkRequest,
+  ): Promise<AdobeSignActionLinkResolveResult> {
+    return { status: 'source-unavailable' };
   }
 }
 

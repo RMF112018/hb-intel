@@ -24,6 +24,7 @@ function makeStubClient(): IMyWorkReadModelClient {
     getMyWorkHome: vi.fn().mockRejectedValue(new Error('unused')),
     getAdobeSignActionQueue: vi.fn().mockRejectedValue(new Error('unused')),
     getMyProjectLinks: getMyProjectLinksMock,
+    resolveAdobeSignActionLink: vi.fn().mockRejectedValue(new Error('unused')),
     startAdobeSignOAuth: vi.fn().mockRejectedValue(new Error('unused')),
   };
 }

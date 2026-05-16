@@ -22,6 +22,7 @@ function makeClient(
     getMyProjectLinks: vi.fn(async () => {
       throw new Error('not used');
     }),
+    resolveAdobeSignActionLink: vi.fn(async () => ({ status: 'source-unavailable' as const })),
     startAdobeSignOAuth: vi.fn(async () => {
       throw new Error('not used');
     }),

@@ -591,3 +591,102 @@ describe('My Work backend read-model client — startAdobeSignOAuth', () => {
     );
   });
 });
+
+describe('My Work backend read-model client — resolveAdobeSignActionLink', () => {
+  it('posts to the canonical resolver route with bearer auth and body', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ data: { status: 'redirect-ready', redirectUrl: 'https://secure.adobesign.com/public/apiesign?x=1' } }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok-resolve',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+
+    const result = await client.resolveAdobeSignActionLink({
+      itemId: 'adobe-sign:agreement-1',
+      agreementId: 'agreement-1',
+      requiredAction: 'signature',
+    });
+
+    expect(result).toEqual({
+      status: 'redirect-ready',
+      redirectUrl: 'https://secure.adobesign.com/public/apiesign?x=1',
+    });
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(url).toBe('https://example.invalid/api/my-work/me/adobe-sign/action-link/resolve');
+    expect(init.method).toBe('POST');
+    expect(init.headers.Authorization).toBe('Bearer tok-resolve');
+    expect(init.headers['Content-Type']).toBe('application/json');
+    expect(init.body).toBe(
+      JSON.stringify({
+        itemId: 'adobe-sign:agreement-1',
+        agreementId: 'agreement-1',
+        requiredAction: 'signature',
+      }),
+    );
+  });
+
+  it('maps token rejection and 401/403 to authorization-required', async () => {
+    const tokenRejectClient = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => {
+        throw new Error('token down');
+      },
+      fetch: vi.fn<MyWorkReadModelFetch>(),
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(
+      tokenRejectClient.resolveAdobeSignActionLink({
+        itemId: 'x',
+        agreementId: 'x',
+        requiredAction: 'signature',
+      }),
+    ).resolves.toEqual({ status: 'authorization-required' });
+
+    const unauthorizedClient = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: vi.fn<MyWorkReadModelFetch>().mockResolvedValue(new Response('', { status: 401 })),
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(
+      unauthorizedClient.resolveAdobeSignActionLink({
+        itemId: 'x',
+        agreementId: 'x',
+        requiredAction: 'signature',
+      }),
+    ).resolves.toEqual({ status: 'authorization-required' });
+  });
+
+  it('maps transport/malformed failures to source-unavailable', async () => {
+    const fetchRejectClient = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: vi.fn<MyWorkReadModelFetch>().mockRejectedValue(new Error('network')),
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(
+      fetchRejectClient.resolveAdobeSignActionLink({
+        itemId: 'x',
+        agreementId: 'x',
+        requiredAction: 'signature',
+      }),
+    ).resolves.toEqual({ status: 'source-unavailable' });
+
+    const malformedClient = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: vi.fn<MyWorkReadModelFetch>().mockResolvedValue(makeJsonResponse({ nope: true })),
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(
+      malformedClient.resolveAdobeSignActionLink({
+        itemId: 'x',
+        agreementId: 'x',
+        requiredAction: 'signature',
+      }),
+    ).resolves.toEqual({ status: 'source-unavailable' });
+  });
+});

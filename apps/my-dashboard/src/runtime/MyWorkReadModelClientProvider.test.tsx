@@ -26,6 +26,7 @@ function makeStubClient(overrides: Partial<IMyWorkReadModelClient> = {}): IMyWor
     getMyWorkHome: vi.fn().mockResolvedValue(MY_WORK_HOME_AVAILABLE),
     getAdobeSignActionQueue: vi.fn(),
     getMyProjectLinks: vi.fn(),
+    resolveAdobeSignActionLink: vi.fn().mockResolvedValue({ status: 'source-unavailable' }),
     startAdobeSignOAuth: vi.fn(),
     ...overrides,
   };

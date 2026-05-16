@@ -23,6 +23,7 @@ function makeAuthorizationRequiredStub(): IMyWorkReadModelClient {
     getMyWorkHome: vi.fn().mockResolvedValue(MY_WORK_HOME_AUTHORIZATION_REQUIRED),
     getAdobeSignActionQueue: vi.fn(),
     getMyProjectLinks: vi.fn().mockResolvedValue(PROJECT_LINKS_AVAILABLE),
+    resolveAdobeSignActionLink: vi.fn().mockResolvedValue({ status: 'source-unavailable' }),
     startAdobeSignOAuth: vi.fn(),
   };
 }

@@ -53,6 +53,7 @@ describe('My Work read-model client — interface conformance', () => {
       getAdobeSignActionQueue: async () => ADOBE_SIGN_QUEUE_AVAILABLE,
       getAdobeSignRecentCompletions: async () => ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
       getMyProjectLinks: async () => MY_PROJECT_LINKS_AVAILABLE,
+      resolveAdobeSignActionLink: async () => ({ status: 'source-unavailable' }),
       startAdobeSignOAuth: async () => ({
         authorizationUrl: 'https://secure.adobesign.com/public/oauth/v2?state=stub',
         stateExpiresAtUtc: '2026-05-13T12:10:00.000Z',
@@ -63,6 +64,7 @@ describe('My Work read-model client — interface conformance', () => {
       'getAdobeSignRecentCompletions',
       'getMyProjectLinks',
       'getMyWorkHome',
+      'resolveAdobeSignActionLink',
       'startAdobeSignOAuth',
     ]);
   });

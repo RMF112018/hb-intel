@@ -243,3 +243,16 @@ describe('My Work fixture read-model client — contract purity', () => {
     }
   });
 });
+
+describe('My Work fixture read-model client — resolver fallback', () => {
+  it('returns a safe non-success resolver outcome', async () => {
+    const client = createMyWorkFixtureReadModelClient();
+    await expect(
+      client.resolveAdobeSignActionLink({
+        itemId: 'adobe-sign:agreement-1',
+        agreementId: 'agreement-1',
+        requiredAction: 'signature',
+      }),
+    ).resolves.toEqual({ status: 'source-unavailable' });
+  });
+});
