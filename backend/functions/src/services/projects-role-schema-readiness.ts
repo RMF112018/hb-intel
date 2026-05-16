@@ -1,14 +1,17 @@
 /**
- * My Projects role schema readiness — pure verification helper.
+ * My Projects source-list schema readiness — pure verification helper.
  *
  * The my-project-links backend provider iterates the 14 canonical role-array
  * fields (`MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS` from `@hbc/models/myWork`)
- * on every row of both Projects and the Legacy Project Fallback Registry.
- * When any of those fields is absent or has the wrong SharePoint type, the
- * provider silently emits zero matches for users whose only assignments live
- * in that field — operators cannot triage this from the response payload
- * alone (`data.diagnostics.classification === 'zero-match-available-sources'`
- * is the same value whether the columns exist or not).
+ * on every row of both Projects and the Legacy Project Fallback Registry,
+ * and the multi-platform launch surface (B05.10) additionally requires the
+ * two external-launch link columns on both lists plus a Registry-side
+ * `projectStage` Text column for legacy-only stage continuity. When any of
+ * those fields is absent or has the wrong SharePoint type, the provider
+ * silently emits zero matches or skips launch destinations for affected
+ * users — operators cannot triage this from the response payload alone
+ * (`data.diagnostics.classification === 'zero-match-available-sources'` is
+ * the same value whether the columns exist or not).
  *
  * This module produces a deterministic, per-list per-field readiness
  * classification from a snapshot of each list's columns (as `TypeAsString`
@@ -19,10 +22,7 @@
  * @module services/projects-role-schema-readiness
  */
 
-import {
-  MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS,
-  type MyProjectAssignmentInternalField,
-} from '@hbc/models/myWork';
+import { MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS } from '@hbc/models/myWork';
 
 import { PROJECTS_LIST_NAME } from './projects-list-contract.js';
 import { LEGACY_FALLBACK_REGISTRY_LIST_TITLE } from './legacy-fallback/list-descriptors.js';
@@ -46,35 +46,63 @@ export type MyProjectRoleFieldReadinessState =
   (typeof MY_PROJECT_ROLE_FIELD_READINESS_STATES)[number];
 
 /**
- * The 14 canonical role-array fields the my-project-links provider iterates
- * on every row of the Projects list. Source of truth lives in
- * `@hbc/models/myWork`; this constant is a typed re-export so consumers
- * (the readiness helper and CLI script) do not duplicate the list.
+ * External-launch link columns added to both Projects and the Legacy
+ * Project Fallback Registry for the B05.10 multi-platform launch surface.
+ * Both stored as SharePoint Text and consumed by the my-project-links
+ * provider when constructing the BuildingConnected and Document Crunch
+ * launch actions.
  */
-export const MY_PROJECT_LINKS_REQUIRED_FIELDS_PROJECTS: readonly MyProjectAssignmentInternalField[] =
-  MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS;
+export const MY_PROJECT_LINKS_EXTERNAL_LAUNCH_FIELDS: readonly string[] = [
+  'buildingConnectedUrl',
+  'documentCrunchUrl',
+];
+
+/**
+ * The 14 canonical role-array fields the my-project-links provider iterates
+ * on every row of the Projects list, plus the two external-launch link
+ * columns added for the multi-platform launch surface. Source of truth for
+ * the role-array set lives in `@hbc/models/myWork`; the external-launch
+ * additions live in `MY_PROJECT_LINKS_EXTERNAL_LAUNCH_FIELDS` above.
+ */
+export const MY_PROJECT_LINKS_REQUIRED_FIELDS_PROJECTS: readonly string[] = [
+  ...MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS,
+  ...MY_PROJECT_LINKS_EXTERNAL_LAUNCH_FIELDS,
+];
 
 /**
  * The Legacy Project Fallback Registry needs the same 14 canonical
- * role-array fields plus a `procoreProject` Text column. The Registry has
- * no provider-side fallback, so a missing field here directly produces
- * silent zero-match for users whose assignments live in legacy rows.
+ * role-array fields plus a `procoreProject` Text column, the two
+ * external-launch link columns, and a Registry-side `projectStage` Text
+ * column for legacy-only stage continuity (Projects reuses `field_6` for
+ * stage; the Registry has no equivalent). The Registry has no
+ * provider-side fallback, so a missing field here directly produces
+ * silent zero-match (role arrays / `procoreProject`) or a missing launch
+ * destination (external-launch / stage) for users whose assignments live
+ * in legacy rows.
  */
 export const MY_PROJECT_LINKS_REQUIRED_FIELDS_LEGACY_REGISTRY: readonly string[] = [
   ...MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS,
   'procoreProject',
+  ...MY_PROJECT_LINKS_EXTERNAL_LAUNCH_FIELDS,
+  'projectStage',
 ];
 
 /**
  * SharePoint `TypeAsString` value expected for each required field. The
  * 14 canonical role-array fields are stored as MultiLineText (Note);
- * `procoreProject` is plain Text.
+ * `procoreProject`, the two external-launch link columns, and the
+ * Registry-side `projectStage` column are all plain Text.
  */
 const EXPECTED_TYPE_NOTE = 'Note';
 const EXPECTED_TYPE_TEXT = 'Text';
+const TEXT_TYPED_FIELDS: ReadonlySet<string> = new Set<string>([
+  'procoreProject',
+  ...MY_PROJECT_LINKS_EXTERNAL_LAUNCH_FIELDS,
+  'projectStage',
+]);
 
 function expectedTypeFor(field: string): string {
-  if (field === 'procoreProject') return EXPECTED_TYPE_TEXT;
+  if (TEXT_TYPED_FIELDS.has(field)) return EXPECTED_TYPE_TEXT;
   return EXPECTED_TYPE_NOTE;
 }
 

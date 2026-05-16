@@ -5,15 +5,34 @@
 This is the read-only schema readiness gate for My Projects source lists. It verifies required columns only; it does not provision or backfill.
 
 Required lists:
+
 - `Projects`
 - `Legacy Project Fallback Registry`
 
 ## Canonical fields
 
-Source of truth: `MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS` in `packages/models/src/myWork/MyProjectAssignmentRoles.ts`.
+Source of truth: `MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS` in `packages/models/src/myWork/MyProjectAssignmentRoles.ts` (role arrays), plus the descriptor and readiness helper at:
 
-- 14 canonical role-array fields: expected SharePoint `Note` (`MultiLineText`)
-- Registry-only `procoreProject`: expected SharePoint `Text`
+- `backend/functions/src/services/my-projects/my-projects-source-list-schema.ts`
+- `backend/functions/src/services/projects-role-schema-readiness.ts`
+
+| Field                  | Lists                 | Expected Type          | Notes                                                                                      |
+| ---------------------- | --------------------- | ---------------------- | ------------------------------------------------------------------------------------------ |
+| 14 role-array fields   | Projects + Registry   | `Note` (MultiLineText) | Source of truth: `MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS`. Required on both lists.          |
+| `procoreProject`       | Registry only         | `Text`                 | Registry-only Procore identifier/token column.                                             |
+| `buildingConnectedUrl` | Projects + Registry   | `Text`                 | B05.10 multi-platform launch — Autodesk BuildingConnected destination URL on each row.     |
+| `documentCrunchUrl`    | Projects + Registry   | `Text`                 | B05.10 multi-platform launch — Document Crunch destination URL on each row.                |
+| `projectStage`         | Registry only (added) | `Text`                 | Registry-side stage column. Projects-side stage is the existing `field_6` (no new column). |
+
+Required-field counts:
+
+- Projects: **16** (14 role arrays + `buildingConnectedUrl` + `documentCrunchUrl`)
+- Legacy Project Fallback Registry: **18** (14 role arrays + `procoreProject` + `buildingConnectedUrl` + `documentCrunchUrl` + `projectStage`)
+
+Project stage — Projects vs Registry distinction:
+
+- **Projects-side stage**: reuse the existing `field_6` column (`Text`, `MaxLength=255`) via `resolveSpField('projectStage')` in `backend/functions/src/services/projects-list-contract.ts`. No new column is added to the Projects list.
+- **Registry-side stage**: a new `projectStage` `Text` column is added to the Legacy Project Fallback Registry because the Registry does not carry `field_6`. The provider applies a Projects-preferred precedence rule on merged rows.
 
 ## Identity lane distinction (critical)
 
@@ -31,6 +50,7 @@ pnpm tsx scripts/verify-my-project-role-fields.ts --json
 ```
 
 Exit code:
+
 - `0`: ready
 - `1`: missing/wrong-type drift exists
 
@@ -43,6 +63,7 @@ Use the documented end-to-end runbook for deterministic ordering:
 - `docs/how-to/administrator/provision-my-projects-source-list-schema.md`
 
 That runbook defines the full sequence:
+
 1. identity lane selection
 2. read-only verification
 3. provisioner dry-run

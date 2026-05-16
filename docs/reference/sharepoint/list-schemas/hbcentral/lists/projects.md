@@ -97,35 +97,39 @@
 | Modified                 | Modified                   | DateTime      | No       | No     | Yes       | No      | System/OOB-like                                                                                   |
 | Unique Id                | UniqueId                   | Lookup        | No       | Yes    | Yes       | No      | System/OOB-like                                                                                   |
 
-## 4. My Projects Role-Array Fields — Operator-Gated Target Additions (Verification-Required)
+## 4. My Projects Source-List Fields — Operator-Gated Target Additions (Verification-Required)
 
-The following My Projects fields are repo-side target contract additions. They are **live-verified iff `scripts/verify-my-project-role-fields.ts` reports `ready: true`** for the `Projects` list — until then they are target-only and tenant mutation is operator-gated in later prompts/scripts. The my-project-links provider iterates all 14 on every row; the Projects list also exposes a 4-field legacy fallback (`leadEstimatorUpn`, `supportingEstimatorUpns`, `projectManagerUpn`, `projectExecutiveUpn`) for the subset of roles it covers.
+The following My Projects fields are repo-side target contract additions. They are **live-verified iff `scripts/verify-my-project-role-fields.ts` reports `ready: true`** for the `Projects` list — until then they are target-only and tenant mutation is operator-gated in later prompts/scripts. The my-project-links provider iterates all 14 role-array fields on every row; the Projects list also exposes a 4-field legacy fallback (`leadEstimatorUpn`, `supportingEstimatorUpns`, `projectManagerUpn`, `projectExecutiveUpn`) for the subset of roles it covers. The two external-launch link columns are required by the B05.10 multi-platform launch surface (Autodesk BuildingConnected and Document Crunch launch destinations on each project tile). Project stage is **not** added as a new column on the Projects list — the existing `field_6` is reused via `resolveSpField('projectStage')` for the Projects-side stage value.
 
-> **Schema Readiness Verification** — run `pnpm tsx scripts/verify-my-project-role-fields.ts` (read-only, no `--apply`) to prove whether these 14 columns exist with the expected `Note` type. See `docs/reference/spfx-surfaces/my-dashboard/my-projects-schema-readiness.md` for the interpretation and remediation flow.
+> **Schema Readiness Verification** — run `pnpm tsx scripts/verify-my-project-role-fields.ts` (read-only, no `--apply`) to prove whether these 16 columns exist with the expected types (14 role-array `Note`, 2 external-launch `Text`). See `docs/reference/spfx-surfaces/my-dashboard/my-projects-schema-readiness.md` for the interpretation and remediation flow.
 
-| Internal Name            | Target Type          | Required | Indexed | Storage/Semantics          |
-| ------------------------ | -------------------- | -------- | ------- | -------------------------- |
-| leadEstimatorUpns        | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| estimatorUpns            | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| idsManagerUpns           | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| projectAccountantUpns    | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| projectAdministratorUpns | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| projectCoordinatorUpns   | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| superintendentUpns       | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| leadSuperintendentUpns   | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| projectManagerUpns       | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| leadProjectManagerUpns   | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| projectExecutiveUpns     | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| safetyCoordinatorUpns    | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| qcManagerUpns            | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
-| warrantyManagerUpns      | Note (MultiLineText) | No       | No      | JSON-serialized `string[]` |
+| Internal Name            | Display Name                    | Target Type          | Required | Indexed | Storage/Semantics                                    |
+| ------------------------ | ------------------------------- | -------------------- | -------- | ------- | ---------------------------------------------------- |
+| leadEstimatorUpns        | Lead Estimator Upns             | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| estimatorUpns            | Estimator Upns                  | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| idsManagerUpns           | Ids Manager Upns                | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| projectAccountantUpns    | Project Accountant Upns         | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| projectAdministratorUpns | Project Administrator Upns      | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| projectCoordinatorUpns   | Project Coordinator Upns        | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| superintendentUpns       | Superintendent Upns             | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| leadSuperintendentUpns   | Lead Superintendent Upns        | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| projectManagerUpns       | Project Manager Upns            | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| leadProjectManagerUpns   | Lead Project Manager Upns       | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| projectExecutiveUpns     | Project Executive Upns          | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| safetyCoordinatorUpns    | Safety Coordinator Upns         | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| qcManagerUpns            | QC Manager Upns                 | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| warrantyManagerUpns      | Warranty Manager Upns           | Note (MultiLineText) | No       | No      | JSON-serialized `string[]`                           |
+| buildingConnectedUrl     | Autodesk BuildingConnected Link | Text                 | No       | No      | Project-scoped external URL (https://); empty if N/A |
+| documentCrunchUrl        | Document Crunch Link            | Text                 | No       | No      | Project-scoped external URL (https://); empty if N/A |
 
 ## 5. Schema Gap Table (Prompt 02)
 
-| Concern                               | Live Snapshot                                                                                       | Target Contract              | Readiness Verification                                                                | Tenant Mutation Owner                                      |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| Canonical role arrays for My Projects | Not present in live snapshot table                                                                  | Add 14 `...Upns` Note fields | `scripts/verify-my-project-role-fields.ts` (read-only; `ready: true` ⇒ live-verified) | Later operator-gated provisioning step (Prompt 05/06 path) |
-| Legacy compatibility role fields      | Present (`projectExecutiveUpn`, `projectManagerUpn`, `leadEstimatorUpn`, `supportingEstimatorUpns`) | Retain unchanged             | N/A — already live                                                                    | N/A in Prompt 02                                           |
+| Concern                                                                    | Live Snapshot                                                                                       | Target Contract                                                  | Readiness Verification                                                                                      | Tenant Mutation Owner                                      |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Canonical role arrays for My Projects                                      | Not present in live snapshot table                                                                  | Add 14 `...Upns` Note fields                                     | `scripts/verify-my-project-role-fields.ts` (read-only; `ready: true` ⇒ live-verified)                       | Later operator-gated provisioning step (Prompt 05/06 path) |
+| External-launch link columns (`buildingConnectedUrl`, `documentCrunchUrl`) | Not present in live snapshot table                                                                  | Add 2 Text columns (B05.10 multi-platform launch surface)        | `scripts/verify-my-project-role-fields.ts` (read-only; `ready: true` ⇒ live-verified, expected `Text`)      | Later operator-gated provisioning step (B05.10 Prompt 06)  |
+| Projects-side project stage                                                | `field_6` (Text) already present in live snapshot                                                   | Reuse `field_6` via `resolveSpField('projectStage')`; do not add | N/A — covered by existing `field_6`. Registry adds its own `projectStage` column (see legacy-registry doc). | N/A — no Projects-side mutation                            |
+| Legacy compatibility role fields                                           | Present (`projectExecutiveUpn`, `projectManagerUpn`, `leadEstimatorUpn`, `supportingEstimatorUpns`) | Retain unchanged                                                 | N/A — already live                                                                                          | N/A in Prompt 02                                           |
 
 ## 6. Content Types / Forms / Behavioral Context
 

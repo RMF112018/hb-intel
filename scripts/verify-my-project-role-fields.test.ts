@@ -15,10 +15,14 @@ import type { ListFieldSnapshot } from '../backend/functions/src/services/projec
 const NOW = '2026-05-13T00:00:00.000Z';
 
 function liveProjectsSnapshot(): ListFieldSnapshot[] {
-  return MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS.map((internalName) => ({
-    internalName,
-    typeAsString: 'Note',
-  }));
+  return [
+    ...MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS.map((internalName) => ({
+      internalName,
+      typeAsString: 'Note',
+    })),
+    { internalName: 'buildingConnectedUrl', typeAsString: 'Text' },
+    { internalName: 'documentCrunchUrl', typeAsString: 'Text' },
+  ];
 }
 
 function liveRegistrySnapshot(): ListFieldSnapshot[] {
@@ -28,6 +32,9 @@ function liveRegistrySnapshot(): ListFieldSnapshot[] {
       typeAsString: 'Note',
     })),
     { internalName: 'procoreProject', typeAsString: 'Text' },
+    { internalName: 'buildingConnectedUrl', typeAsString: 'Text' },
+    { internalName: 'documentCrunchUrl', typeAsString: 'Text' },
+    { internalName: 'projectStage', typeAsString: 'Text' },
   ];
 }
 
@@ -156,6 +163,54 @@ describe('main', () => {
       (e: { internalName: string }) => e.internalName === 'projectManagerUpns',
     );
     expect(entry.state).toBe('missing');
+  });
+
+  it('returns 1 and reports buildingConnectedUrl missing on Projects', async () => {
+    const stdoutLines: string[] = [];
+    const code = await main(
+      { json: true },
+      {
+        listFieldQuery: stubQuery({
+          Projects: liveProjectsSnapshot().filter((f) => f.internalName !== 'buildingConnectedUrl'),
+          'Legacy Project Fallback Registry': liveRegistrySnapshot(),
+        }),
+        now: () => NOW,
+        stdout: (line) => stdoutLines.push(line),
+      },
+    );
+    expect(code).toBe(1);
+    const parsed = JSON.parse(stdoutLines[0]!);
+    expect(parsed.ready).toBe(false);
+    const entry = parsed.projects.entries.find(
+      (e: { internalName: string }) => e.internalName === 'buildingConnectedUrl',
+    );
+    expect(entry.state).toBe('missing');
+    expect(entry.expectedTypeAsString).toBe('Text');
+  });
+
+  it('returns 1 and reports projectStage missing on the Legacy Registry', async () => {
+    const stdoutLines: string[] = [];
+    const code = await main(
+      { json: true },
+      {
+        listFieldQuery: stubQuery({
+          Projects: liveProjectsSnapshot(),
+          'Legacy Project Fallback Registry': liveRegistrySnapshot().filter(
+            (f) => f.internalName !== 'projectStage',
+          ),
+        }),
+        now: () => NOW,
+        stdout: (line) => stdoutLines.push(line),
+      },
+    );
+    expect(code).toBe(1);
+    const parsed = JSON.parse(stdoutLines[0]!);
+    expect(parsed.ready).toBe(false);
+    const entry = parsed.legacyRegistry.entries.find(
+      (e: { internalName: string }) => e.internalName === 'projectStage',
+    );
+    expect(entry.state).toBe('missing');
+    expect(entry.expectedTypeAsString).toBe('Text');
   });
 
   it('createGraphListFieldQuery calls getSharePointToken with the site URL and passes the bearer to fetch', async () => {

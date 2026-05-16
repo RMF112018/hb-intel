@@ -23,7 +23,9 @@ export interface MyProjectsSourceListSchemaDescriptor {
   readonly targets: readonly MyProjectsSourceListTarget[];
 }
 
-function roleFieldDisplayName(internalName: (typeof MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS)[number]): string {
+function roleFieldDisplayName(
+  internalName: (typeof MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS)[number],
+): string {
   return `${MY_PROJECT_ASSIGNMENT_ROLE_BY_INTERNAL_FIELD[internalName].displayLabel} Upns`;
 }
 
@@ -46,16 +48,46 @@ export const MY_PROJECTS_SOURCE_LIST_REGISTRY_EXTRA_FIELDS: readonly IFieldDefin
   },
 ];
 
+export const MY_PROJECTS_EXTERNAL_LAUNCH_FIELDS: readonly IFieldDefinition[] = [
+  {
+    internalName: 'buildingConnectedUrl',
+    displayName: 'Autodesk BuildingConnected Link',
+    type: 'Text',
+    required: false,
+    indexed: false,
+  },
+  {
+    internalName: 'documentCrunchUrl',
+    displayName: 'Document Crunch Link',
+    type: 'Text',
+    required: false,
+    indexed: false,
+  },
+];
+
+export const MY_PROJECTS_REGISTRY_STAGE_FIELD: IFieldDefinition = {
+  internalName: 'projectStage',
+  displayName: 'Project Stage',
+  type: 'Text',
+  required: false,
+  indexed: false,
+};
+
 export const MY_PROJECTS_SOURCE_LIST_PROJECTS_TARGET: MyProjectsSourceListTarget = {
   listTitle: MY_PROJECTS_SOURCE_LIST_TITLE_PROJECTS,
   allowCreateList: false,
-  fields: MY_PROJECTS_SOURCE_LIST_ROLE_FIELDS,
+  fields: [...MY_PROJECTS_SOURCE_LIST_ROLE_FIELDS, ...MY_PROJECTS_EXTERNAL_LAUNCH_FIELDS],
 };
 
 export const MY_PROJECTS_SOURCE_LIST_LEGACY_REGISTRY_TARGET: MyProjectsSourceListTarget = {
   listTitle: MY_PROJECTS_SOURCE_LIST_TITLE_LEGACY_REGISTRY,
   allowCreateList: false,
-  fields: [...MY_PROJECTS_SOURCE_LIST_ROLE_FIELDS, ...MY_PROJECTS_SOURCE_LIST_REGISTRY_EXTRA_FIELDS],
+  fields: [
+    ...MY_PROJECTS_SOURCE_LIST_ROLE_FIELDS,
+    ...MY_PROJECTS_SOURCE_LIST_REGISTRY_EXTRA_FIELDS,
+    ...MY_PROJECTS_EXTERNAL_LAUNCH_FIELDS,
+    MY_PROJECTS_REGISTRY_STAGE_FIELD,
+  ],
 };
 
 export const MY_PROJECTS_SOURCE_LIST_SCHEMA_DESCRIPTOR: MyProjectsSourceListSchemaDescriptor = {

@@ -164,6 +164,17 @@ describe('main behavior', () => {
     expect(code).toBe(0);
     expect(projectsCreate).toHaveBeenCalled();
     expect(registryCreate).toHaveBeenCalled();
+    const projectsCreated = projectsCreate.mock.calls.map(
+      ([f]) => (f as IFieldDefinition).internalName,
+    );
+    const registryCreated = registryCreate.mock.calls.map(
+      ([f]) => (f as IFieldDefinition).internalName,
+    );
+    expect(projectsCreated).toContain('buildingConnectedUrl');
+    expect(projectsCreated).toContain('documentCrunchUrl');
+    expect(registryCreated).toContain('buildingConnectedUrl');
+    expect(registryCreated).toContain('documentCrunchUrl');
+    expect(registryCreated).toContain('projectStage');
   });
 
   it('is idempotent when all required fields already exist', async () => {
@@ -190,6 +201,8 @@ describe('main behavior', () => {
               field('safetyCoordinatorUpns', 'Note'),
               field('qcManagerUpns', 'Note'),
               field('warrantyManagerUpns', 'Note'),
+              field('buildingConnectedUrl', 'Text'),
+              field('documentCrunchUrl', 'Text'),
             ],
             createSpy: projectsCreate,
           },
@@ -210,6 +223,9 @@ describe('main behavior', () => {
               field('qcManagerUpns', 'Note'),
               field('warrantyManagerUpns', 'Note'),
               field('procoreProject', 'Text'),
+              field('buildingConnectedUrl', 'Text'),
+              field('documentCrunchUrl', 'Text'),
+              field('projectStage', 'Text'),
             ],
             createSpy: registryCreate,
           },
@@ -244,6 +260,40 @@ describe('main behavior', () => {
     const report = JSON.parse(outputs[0] ?? '{}');
     expect(report.hasBlockingDrift).toBe(true);
     expect(report.targets[0].blockers.length).toBeGreaterThan(0);
+  });
+
+  it('wrong-type external-launch field on Projects (Note instead of Text) blocks apply', async () => {
+    const projectsCreate = vi.fn(async (_f: IFieldDefinition) => {});
+    const outputs: string[] = [];
+
+    const code = await main(
+      { apply: true, json: true },
+      deps(
+        fakeAdapter({
+          projects: {
+            fields: [field('buildingConnectedUrl', 'Note')],
+            createSpy: projectsCreate,
+          },
+          registry: { fields: [field('procoreProject', 'Text')] },
+        }),
+        outputs,
+      ),
+      'https://hedrickbrotherscom.sharepoint.com/sites/HBCentral',
+    );
+
+    expect(code).toBe(1);
+    expect(projectsCreate).not.toHaveBeenCalled();
+    const report = JSON.parse(outputs[0] ?? '{}');
+    expect(report.hasBlockingDrift).toBe(true);
+    const projectsTarget = (report.targets as IProvisionTargetReport[]).find(
+      (t) => t.listTitle === 'Projects',
+    );
+    expect(projectsTarget).toBeDefined();
+    expect(
+      projectsTarget!.blockers.some(
+        (b) => b.fieldInternalName === 'buildingConnectedUrl' && b.liveType === 'Note',
+      ),
+    ).toBe(true);
   });
 
   it('missing list fails with no mutation and list-missing flag', async () => {

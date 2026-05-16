@@ -5,10 +5,20 @@
 Operator-safe runbook to move from read-only schema verification to controlled provisioning and post-provision backfill for My Projects source lists on HBCentral.
 
 This runbook is scoped to:
+
 - `Projects`
 - `Legacy Project Fallback Registry`
 
 It does not create lists, does not mutate item data unless backfill `--apply` is explicitly used, and does not remediate unrelated drift such as `FolderWebUrl`.
+
+### Schema in scope (B05.10 expansion)
+
+The deterministic command sequence below provisions all canonical columns required by the my-project-links provider plus the B05.10 multi-platform launch surface:
+
+- **Projects (16 columns)**: 14 role-array `Note` fields + `buildingConnectedUrl` (`Text`) + `documentCrunchUrl` (`Text`). The Projects-side project-stage value is sourced from the existing `field_6` (`Text`) and is **not** re-provisioned.
+- **Legacy Project Fallback Registry (18 columns)**: 14 role-array `Note` fields + `procoreProject` (`Text`) + `buildingConnectedUrl` (`Text`) + `documentCrunchUrl` (`Text`) + `projectStage` (`Text`). The Registry-side `projectStage` column is independent of the Projects-side `field_6` reuse.
+
+See `docs/reference/spfx-surfaces/my-dashboard/my-projects-schema-readiness.md` for the canonical field table.
 
 ## Identity Lane Prerequisite
 

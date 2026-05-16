@@ -1,5 +1,9 @@
 /**
- * Read-only schema-readiness verification for My Projects role-array fields.
+ * Read-only schema-readiness verification for the My Projects source-list
+ * schema — the 14 canonical role-array fields, `procoreProject` (Registry
+ * only), the two external-launch link columns (`buildingConnectedUrl`,
+ * `documentCrunchUrl` on both lists), and the Registry-side `projectStage`
+ * column added for the B05.10 multi-platform launch surface.
  *
  * Pure verification — no `--apply`, no mutation, no provisioning. Queries
  * the column metadata of both the `Projects` list and the
@@ -59,7 +63,7 @@ export function formatReport(report: ProjectsRoleSchemaReadinessReport, asJson: 
     return JSON.stringify(report, null, 2);
   }
   const lines: string[] = [];
-  lines.push('[verify-my-project-role-fields] schema readiness');
+  lines.push('[verify-my-project-role-fields] my-projects source-list schema readiness');
   lines.push(`  generatedAtUtc: ${report.generatedAtUtc}`);
   lines.push(`  ready: ${report.ready}`);
   for (const block of [report.projects, report.legacyRegistry]) {
