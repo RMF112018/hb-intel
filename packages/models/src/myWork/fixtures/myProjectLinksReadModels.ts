@@ -32,6 +32,16 @@ const ITEM_PROJECTS_ONLY_READY: MyProjectLinkItem = {
     procoreProject: '1234567',
     href: 'https://app.procore.com/1234567/project/home',
   },
+  buildingConnectedAction: {
+    state: 'available',
+    label: 'Open BuildingConnected',
+    href: 'https://buildingconnected.example.invalid/projects/24-100-01',
+  },
+  documentCrunchAction: {
+    state: 'available',
+    label: 'Open Document Crunch',
+    href: 'https://documentcrunch.example.invalid/projects/24-100-01',
+  },
   provenance: {
     projectsListItemId: 101,
   },
@@ -55,6 +65,15 @@ const ITEM_MERGED_SP_ONLY: MyProjectLinkItem = {
     state: 'unavailable',
     label: 'Procore unavailable',
   },
+  buildingConnectedAction: {
+    state: 'unavailable',
+    label: 'BuildingConnected unavailable',
+  },
+  documentCrunchAction: {
+    state: 'available',
+    label: 'Open Document Crunch',
+    href: 'https://documentcrunch.example.invalid/projects/24-100-02',
+  },
   provenance: {
     projectsListItemId: 102,
     legacyRegistryItemId: 88,
@@ -64,6 +83,7 @@ const ITEM_MERGED_SP_ONLY: MyProjectLinkItem = {
   },
   warnings: [
     { code: 'procore-launch-unavailable' },
+    { code: 'building-connected-launch-unavailable' },
     { code: 'legacy-role-data-preserved' },
   ],
 };
@@ -73,6 +93,7 @@ const ITEM_LEGACY_ONLY_PROCORE: MyProjectLinkItem = {
   source: 'legacy-only',
   projectName: 'Legacy Warehouse Program',
   projectNumber: '23-777-14',
+  projectStage: 'Construction',
   assignmentRoles: ['superintendent'],
   sharePointAction: {
     state: 'unavailable',
@@ -85,6 +106,15 @@ const ITEM_LEGACY_ONLY_PROCORE: MyProjectLinkItem = {
     procoreProject: '7654321',
     href: 'https://app.procore.com/7654321/project/home',
   },
+  buildingConnectedAction: {
+    state: 'available',
+    label: 'Open BuildingConnected',
+    href: 'https://buildingconnected.example.invalid/projects/23-777-14',
+  },
+  documentCrunchAction: {
+    state: 'unavailable',
+    label: 'Document Crunch unavailable',
+  },
   provenance: {
     legacyRegistryItemId: 77,
     fallbackMatchMethod: 'no-match',
@@ -92,6 +122,7 @@ const ITEM_LEGACY_ONLY_PROCORE: MyProjectLinkItem = {
   },
   warnings: [
     { code: 'sharepoint-launch-unavailable' },
+    { code: 'document-crunch-launch-unavailable' },
     { code: 'assignment-source-bounded' },
     { code: 'schema-transition-legacy-role-fallback-used' },
   ],
@@ -128,10 +159,26 @@ const ITEM_MORE_4: MyProjectLinkItem = {
 
 function buildSummary(items: readonly MyProjectLinkItem[]) {
   const dualLaunchReadyCount = items.filter(
-    (item) => item.sharePointAction.state === 'available' && item.procoreAction.state === 'available',
+    (item) =>
+      item.sharePointAction.state === 'available' && item.procoreAction.state === 'available',
   ).length;
-  const sharePointReadyCount = items.filter((item) => item.sharePointAction.state === 'available').length;
+  const sharePointReadyCount = items.filter(
+    (item) => item.sharePointAction.state === 'available',
+  ).length;
   const procoreReadyCount = items.filter((item) => item.procoreAction.state === 'available').length;
+  const buildingConnectedReadyCount = items.filter(
+    (item) => item.buildingConnectedAction.state === 'available',
+  ).length;
+  const documentCrunchReadyCount = items.filter(
+    (item) => item.documentCrunchAction.state === 'available',
+  ).length;
+  const multiPlatformReadyCount = items.filter(
+    (item) =>
+      item.sharePointAction.state === 'available' &&
+      item.procoreAction.state === 'available' &&
+      item.buildingConnectedAction.state === 'available' &&
+      item.documentCrunchAction.state === 'available',
+  ).length;
   const projectsOnlyCount = items.filter((item) => item.source === 'projects-only').length;
   const mergedCount = items.filter((item) => item.source === 'merged').length;
   const legacyOnlyCount = items.filter((item) => item.source === 'legacy-only').length;
@@ -143,6 +190,11 @@ function buildSummary(items: readonly MyProjectLinkItem[]) {
     procoreReadyCount,
     noSharePointLaunchCount: items.length - sharePointReadyCount,
     noProcoreLaunchCount: items.length - procoreReadyCount,
+    buildingConnectedReadyCount,
+    documentCrunchReadyCount,
+    noBuildingConnectedLaunchCount: items.length - buildingConnectedReadyCount,
+    noDocumentCrunchLaunchCount: items.length - documentCrunchReadyCount,
+    multiPlatformReadyCount,
     projectsOnlyCount,
     mergedCount,
     legacyOnlyCount,

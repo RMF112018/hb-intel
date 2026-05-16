@@ -5,6 +5,10 @@ export const MY_PROJECT_LINK_WARNING_CODES = [
   'sharepoint-launch-unavailable',
   'procore-launch-unavailable',
   'procore-project-invalid',
+  'building-connected-launch-unavailable',
+  'building-connected-url-invalid',
+  'document-crunch-launch-unavailable',
+  'document-crunch-url-invalid',
   'assignment-source-bounded',
   'projects-source-partial',
   'legacy-registry-source-partial',
@@ -37,6 +41,16 @@ export interface MyProjectLinkItem {
     readonly state: 'available' | 'unavailable';
     readonly label: 'Open Procore' | 'Procore unavailable';
     readonly procoreProject?: string;
+    readonly href?: string;
+  };
+  readonly buildingConnectedAction: {
+    readonly state: 'available' | 'unavailable';
+    readonly label: 'Open BuildingConnected' | 'BuildingConnected unavailable';
+    readonly href?: string;
+  };
+  readonly documentCrunchAction: {
+    readonly state: 'available' | 'unavailable';
+    readonly label: 'Open Document Crunch' | 'Document Crunch unavailable';
     readonly href?: string;
   };
   readonly provenance: {
@@ -104,6 +118,11 @@ export interface MyProjectLinksReadModel {
     readonly procoreReadyCount: number;
     readonly noSharePointLaunchCount: number;
     readonly noProcoreLaunchCount: number;
+    readonly buildingConnectedReadyCount: number;
+    readonly documentCrunchReadyCount: number;
+    readonly noBuildingConnectedLaunchCount: number;
+    readonly noDocumentCrunchLaunchCount: number;
+    readonly multiPlatformReadyCount: number;
     readonly projectsOnlyCount: number;
     readonly mergedCount: number;
     readonly legacyOnlyCount: number;

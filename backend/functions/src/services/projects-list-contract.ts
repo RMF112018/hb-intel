@@ -110,6 +110,10 @@ export interface IProjectsListItem {
   officeDivision: string;
   /** Raw Procore project identifier/token (optional; empty string when unset). */
   procoreProject: string;
+  /** B05.10 — Autodesk BuildingConnected launch URL (optional Text column). */
+  buildingConnectedUrl?: string;
+  /** B05.10 — Document Crunch launch URL (optional Text column). */
+  documentCrunchUrl?: string;
   /** Project executive UPN. */
   projectExecutiveUpn: string;
   /** Project manager UPN. */
@@ -196,95 +200,211 @@ export interface IFieldMapEntry {
  */
 export const PROJECTS_LIST_FIELD_MAP = {
   // ── Identity ───────────────────────────────────────────────────────────
-  _title:          { spInternalName: 'Title',    spType: 'Text',          serialization: 'computed' },
-  requestId:       { spInternalName: 'field_1',  spType: 'Text',          serialization: 'direct' },
-  projectNumber:   { spInternalName: 'field_2',  spType: 'Text',          serialization: 'direct' },
-  projectName:     { spInternalName: 'field_3',  spType: 'Text',          serialization: 'direct' },
+  _title: { spInternalName: 'Title', spType: 'Text', serialization: 'computed' },
+  requestId: { spInternalName: 'field_1', spType: 'Text', serialization: 'direct' },
+  projectNumber: { spInternalName: 'field_2', spType: 'Text', serialization: 'direct' },
+  projectName: { spInternalName: 'field_3', spType: 'Text', serialization: 'direct' },
 
   // ── Location ───────────────────────────────────────────────────────────
-  projectLocation: { spInternalName: 'field_4',  spType: 'Text',          serialization: 'direct' },
+  projectLocation: { spInternalName: 'field_4', spType: 'Text', serialization: 'direct' },
 
   // ── Classification ─────────────────────────────────────────────────────
-  projectType:     { spInternalName: 'field_5',  spType: 'Choice',        serialization: 'direct' },
-  projectStage:    { spInternalName: 'field_6',  spType: 'Choice',        serialization: 'direct' },
+  projectType: { spInternalName: 'field_5', spType: 'Choice', serialization: 'direct' },
+  projectStage: { spInternalName: 'field_6', spType: 'Choice', serialization: 'direct' },
 
   // ── Submission ─────────────────────────────────────────────────────────
-  submittedBy:     { spInternalName: 'field_7',  spType: 'Text',          serialization: 'direct' },
-  submittedAt:     { spInternalName: 'field_8',  spType: 'Number',        serialization: 'direct' },
-  state:           { spInternalName: 'field_9',  spType: 'Choice',        serialization: 'direct' },
+  submittedBy: { spInternalName: 'field_7', spType: 'Text', serialization: 'direct' },
+  submittedAt: { spInternalName: 'field_8', spType: 'Number', serialization: 'direct' },
+  state: { spInternalName: 'field_9', spType: 'Choice', serialization: 'direct' },
 
   // ── Team (JSON arrays) ────────────────────────────────────────────────
-  groupMembers:    { spInternalName: 'field_10', spType: 'MultiLineText', serialization: 'json-array' },
-  groupLeaders:    { spInternalName: 'field_11', spType: 'MultiLineText', serialization: 'json-array' },
+  groupMembers: {
+    spInternalName: 'field_10',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  groupLeaders: {
+    spInternalName: 'field_11',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
 
   // ── Business details ──────────────────────────────────────────────────
-  department:      { spInternalName: 'field_12', spType: 'Choice',        serialization: 'direct' },
-  estimatedValue:  { spInternalName: 'field_13', spType: 'Number',        serialization: 'number' },
-  clientName:      { spInternalName: 'field_14', spType: 'Text',          serialization: 'direct' },
-  startDate:       { spInternalName: 'field_15', spType: 'Number',        serialization: 'direct' },
-  contractType:    { spInternalName: 'field_16', spType: 'Choice',        serialization: 'direct' },
-  viewerUPNs:      { spInternalName: 'viewerUPNs', spType: 'MultiLineText', serialization: 'json-array' },
-  addOns:          { spInternalName: 'addOns',     spType: 'MultiLineText', serialization: 'json-array' },
+  department: { spInternalName: 'field_12', spType: 'Choice', serialization: 'direct' },
+  estimatedValue: { spInternalName: 'field_13', spType: 'Number', serialization: 'number' },
+  clientName: { spInternalName: 'field_14', spType: 'Text', serialization: 'direct' },
+  startDate: { spInternalName: 'field_15', spType: 'Number', serialization: 'direct' },
+  contractType: { spInternalName: 'field_16', spType: 'Choice', serialization: 'direct' },
+  viewerUPNs: {
+    spInternalName: 'viewerUPNs',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  addOns: { spInternalName: 'addOns', spType: 'MultiLineText', serialization: 'json-array' },
 
   // ── Clarification ─────────────────────────────────────────────────────
-  clarificationNote: { spInternalName: 'field_20', spType: 'Number',      serialization: 'direct' },
+  clarificationNote: { spInternalName: 'field_20', spType: 'Number', serialization: 'direct' },
 
   // ── Completion ────────────────────────────────────────────────────────
-  completedBy:     { spInternalName: 'field_21', spType: 'Number',        serialization: 'direct' },
-  completedAt:     { spInternalName: 'field_22', spType: 'Number',        serialization: 'direct' },
-  siteUrl:         { spInternalName: 'field_23', spType: 'URL',           serialization: 'direct' },
+  completedBy: { spInternalName: 'field_21', spType: 'Number', serialization: 'direct' },
+  completedAt: { spInternalName: 'field_22', spType: 'Number', serialization: 'direct' },
+  siteUrl: { spInternalName: 'field_23', spType: 'URL', serialization: 'direct' },
 
   // ── Retry & Year ──────────────────────────────────────────────────────
-  retryCount:      { spInternalName: 'field_24', spType: 'Number',        serialization: 'number' },
-  year:            { spInternalName: 'Year',     spType: 'Number',        serialization: 'number' },
+  retryCount: { spInternalName: 'field_24', spType: 'Number', serialization: 'number' },
+  year: { spInternalName: 'Year', spType: 'Number', serialization: 'number' },
 
   // ── Phase 2 gap fields (P2-07) ────────────────────────────────────────
   // Added to production schema 2026-03-31. These columns use domain
   // property names as SP internal names.
 
   // Location (structured)
-  projectStreetAddress: { spInternalName: 'projectStreetAddress', spType: 'Text',     serialization: 'direct' },
-  projectCity:          { spInternalName: 'projectCity',          spType: 'Text',     serialization: 'direct' },
-  projectCounty:        { spInternalName: 'projectCounty',       spType: 'Text',     serialization: 'direct' },
-  projectState:         { spInternalName: 'projectState',        spType: 'Text',     serialization: 'direct' },
-  projectZip:           { spInternalName: 'projectZip',          spType: 'Number',   serialization: 'number' },
+  projectStreetAddress: {
+    spInternalName: 'projectStreetAddress',
+    spType: 'Text',
+    serialization: 'direct',
+  },
+  projectCity: { spInternalName: 'projectCity', spType: 'Text', serialization: 'direct' },
+  projectCounty: { spInternalName: 'projectCounty', spType: 'Text', serialization: 'direct' },
+  projectState: { spInternalName: 'projectState', spType: 'Text', serialization: 'direct' },
+  projectZip: { spInternalName: 'projectZip', spType: 'Number', serialization: 'number' },
 
   // Classification
-  officeDivision:       { spInternalName: 'officeDivision',      spType: 'Text',     serialization: 'direct' },
-  procoreProject:       { spInternalName: 'procoreProject',      spType: 'Text',     serialization: 'direct' },
+  officeDivision: { spInternalName: 'officeDivision', spType: 'Text', serialization: 'direct' },
+  procoreProject: { spInternalName: 'procoreProject', spType: 'Text', serialization: 'direct' },
+
+  // External-launch link columns (B05.10 multi-platform launch expansion)
+  buildingConnectedUrl: {
+    spInternalName: 'buildingConnectedUrl',
+    spType: 'Text',
+    serialization: 'direct',
+  },
+  documentCrunchUrl: {
+    spInternalName: 'documentCrunchUrl',
+    spType: 'Text',
+    serialization: 'direct',
+  },
 
   // Team roles
-  projectExecutiveUpn:      { spInternalName: 'projectExecutiveUpn',      spType: 'Text',     serialization: 'direct' },
-  projectManagerUpn:        { spInternalName: 'projectManagerUpn',        spType: 'Text',     serialization: 'direct' },
-  leadEstimatorUpn:         { spInternalName: 'leadEstimatorUpn',         spType: 'Text',     serialization: 'direct' },
-  supportingEstimatorUpns:  { spInternalName: 'supportingEstimatorUpns',  spType: 'MultiLineText', serialization: 'json-array' },
-  leadEstimatorUpns:        { spInternalName: 'leadEstimatorUpns',        spType: 'MultiLineText', serialization: 'json-array' },
-  estimatorUpns:            { spInternalName: 'estimatorUpns',            spType: 'MultiLineText', serialization: 'json-array' },
-  idsManagerUpns:           { spInternalName: 'idsManagerUpns',           spType: 'MultiLineText', serialization: 'json-array' },
-  projectAccountantUpns:    { spInternalName: 'projectAccountantUpns',    spType: 'MultiLineText', serialization: 'json-array' },
-  projectAdministratorUpns: { spInternalName: 'projectAdministratorUpns', spType: 'MultiLineText', serialization: 'json-array' },
-  projectCoordinatorUpns:   { spInternalName: 'projectCoordinatorUpns',   spType: 'MultiLineText', serialization: 'json-array' },
-  superintendentUpns:       { spInternalName: 'superintendentUpns',       spType: 'MultiLineText', serialization: 'json-array' },
-  leadSuperintendentUpns:   { spInternalName: 'leadSuperintendentUpns',   spType: 'MultiLineText', serialization: 'json-array' },
-  projectManagerUpns:       { spInternalName: 'projectManagerUpns',       spType: 'MultiLineText', serialization: 'json-array' },
-  leadProjectManagerUpns:   { spInternalName: 'leadProjectManagerUpns',   spType: 'MultiLineText', serialization: 'json-array' },
-  projectExecutiveUpns:     { spInternalName: 'projectExecutiveUpns',     spType: 'MultiLineText', serialization: 'json-array' },
-  safetyCoordinatorUpns:    { spInternalName: 'safetyCoordinatorUpns',    spType: 'MultiLineText', serialization: 'json-array' },
-  qcManagerUpns:            { spInternalName: 'qcManagerUpns',            spType: 'MultiLineText', serialization: 'json-array' },
-  warrantyManagerUpns:      { spInternalName: 'warrantyManagerUpns',      spType: 'MultiLineText', serialization: 'json-array' },
-  timberscanApproverUpn:    { spInternalName: 'timberscanApproverUpn',    spType: 'Text',     serialization: 'direct' },
-  sageAccessUpns:           { spInternalName: 'sageAccessUpns',           spType: 'MultiLineText', serialization: 'json-array' },
+  projectExecutiveUpn: {
+    spInternalName: 'projectExecutiveUpn',
+    spType: 'Text',
+    serialization: 'direct',
+  },
+  projectManagerUpn: {
+    spInternalName: 'projectManagerUpn',
+    spType: 'Text',
+    serialization: 'direct',
+  },
+  leadEstimatorUpn: { spInternalName: 'leadEstimatorUpn', spType: 'Text', serialization: 'direct' },
+  supportingEstimatorUpns: {
+    spInternalName: 'supportingEstimatorUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  leadEstimatorUpns: {
+    spInternalName: 'leadEstimatorUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  estimatorUpns: {
+    spInternalName: 'estimatorUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  idsManagerUpns: {
+    spInternalName: 'idsManagerUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  projectAccountantUpns: {
+    spInternalName: 'projectAccountantUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  projectAdministratorUpns: {
+    spInternalName: 'projectAdministratorUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  projectCoordinatorUpns: {
+    spInternalName: 'projectCoordinatorUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  superintendentUpns: {
+    spInternalName: 'superintendentUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  leadSuperintendentUpns: {
+    spInternalName: 'leadSuperintendentUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  projectManagerUpns: {
+    spInternalName: 'projectManagerUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  leadProjectManagerUpns: {
+    spInternalName: 'leadProjectManagerUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  projectExecutiveUpns: {
+    spInternalName: 'projectExecutiveUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  safetyCoordinatorUpns: {
+    spInternalName: 'safetyCoordinatorUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  qcManagerUpns: {
+    spInternalName: 'qcManagerUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  warrantyManagerUpns: {
+    spInternalName: 'warrantyManagerUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
+  timberscanApproverUpn: {
+    spInternalName: 'timberscanApproverUpn',
+    spType: 'Text',
+    serialization: 'direct',
+  },
+  sageAccessUpns: {
+    spInternalName: 'sageAccessUpns',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
 
   // Clarification lifecycle
-  clarificationRequestedAt:  { spInternalName: 'clarificationRequestedAt',  spType: 'DateTime', serialization: 'direct' },
-  requesterRetryUsed:        { spInternalName: 'requesterRetryUsed',        spType: 'Text',     serialization: 'direct' },
-  clarificationItems:        { spInternalName: 'clarificationItems',        spType: 'MultiLineText', serialization: 'json-array' },
+  clarificationRequestedAt: {
+    spInternalName: 'clarificationRequestedAt',
+    spType: 'DateTime',
+    serialization: 'direct',
+  },
+  requesterRetryUsed: {
+    spInternalName: 'requesterRetryUsed',
+    spType: 'Text',
+    serialization: 'direct',
+  },
+  clarificationItems: {
+    spInternalName: 'clarificationItems',
+    spType: 'MultiLineText',
+    serialization: 'json-array',
+  },
 
   // ── P9-G5-05: Stable identity fields ──────────────────────────────────
   // Entra Object ID columns for oid-based ownership and actor attribution.
   // Absent on pre-migration rows; columns require manual SP admin creation.
-  submittedByOid:            { spInternalName: 'submittedByOid',            spType: 'Text',          serialization: 'direct' },
-  completedByOid:            { spInternalName: 'completedByOid',            spType: 'Text',          serialization: 'direct' },
+  submittedByOid: { spInternalName: 'submittedByOid', spType: 'Text', serialization: 'direct' },
+  completedByOid: { spInternalName: 'completedByOid', spType: 'Text', serialization: 'direct' },
 } as const satisfies Record<string, IFieldMapEntry>;
 
 /** Domain property names that have a corresponding SharePoint column. */
@@ -307,14 +427,14 @@ export const PROJECTS_LIST_SELECT_FIELDS: readonly (keyof IProjectsListItem)[] =
  * A missing required field means OData queries, upserts, or state routing will fail.
  */
 export const REQUIRED_PRODUCTION_FIELDS: readonly (keyof IProjectsListItem)[] = [
-  'field_1',   // requestId / projectId — system key
-  'field_2',   // projectNumber — business key, uniqueness enforcement
-  'field_3',   // projectName — display, Title computation
-  'field_5',   // projectType — required submission field
-  'field_7',   // submittedBy — audit identity
-  'field_8',   // submittedAt — submission timestamp
-  'field_9',   // state — lifecycle routing
-  'field_10',  // groupMembers — provisioning requirement
+  'field_1', // requestId / projectId — system key
+  'field_2', // projectNumber — business key, uniqueness enforcement
+  'field_3', // projectName — display, Title computation
+  'field_5', // projectType — required submission field
+  'field_7', // submittedBy — audit identity
+  'field_8', // submittedAt — submission timestamp
+  'field_9', // state — lifecycle routing
+  'field_10', // groupMembers — provisioning requirement
 ];
 
 /**
@@ -322,17 +442,38 @@ export const REQUIRED_PRODUCTION_FIELDS: readonly (keyof IProjectsListItem)[] = 
  * Their absence on legacy rows is expected and does not indicate schema drift.
  */
 export const OPTIONAL_EXTENSION_FIELDS: readonly (keyof IProjectsListItem)[] = [
-  'projectStreetAddress', 'projectCity', 'projectCounty', 'projectState', 'projectZip',
-  'officeDivision', 'procoreProject',
-  'projectExecutiveUpn', 'projectManagerUpn', 'leadEstimatorUpn',
+  'projectStreetAddress',
+  'projectCity',
+  'projectCounty',
+  'projectState',
+  'projectZip',
+  'officeDivision',
+  'procoreProject',
+  'projectExecutiveUpn',
+  'projectManagerUpn',
+  'leadEstimatorUpn',
   'supportingEstimatorUpns',
-  'leadEstimatorUpns', 'estimatorUpns', 'idsManagerUpns', 'projectAccountantUpns',
-  'projectAdministratorUpns', 'projectCoordinatorUpns', 'superintendentUpns',
-  'leadSuperintendentUpns', 'projectManagerUpns', 'leadProjectManagerUpns',
-  'projectExecutiveUpns', 'safetyCoordinatorUpns', 'qcManagerUpns', 'warrantyManagerUpns',
-  'timberscanApproverUpn', 'sageAccessUpns',
-  'clarificationRequestedAt', 'requesterRetryUsed', 'clarificationItems',
-  'submittedByOid', 'completedByOid',
+  'leadEstimatorUpns',
+  'estimatorUpns',
+  'idsManagerUpns',
+  'projectAccountantUpns',
+  'projectAdministratorUpns',
+  'projectCoordinatorUpns',
+  'superintendentUpns',
+  'leadSuperintendentUpns',
+  'projectManagerUpns',
+  'leadProjectManagerUpns',
+  'projectExecutiveUpns',
+  'safetyCoordinatorUpns',
+  'qcManagerUpns',
+  'warrantyManagerUpns',
+  'timberscanApproverUpn',
+  'sageAccessUpns',
+  'clarificationRequestedAt',
+  'requesterRetryUsed',
+  'clarificationItems',
+  'submittedByOid',
+  'completedByOid',
 ];
 
 /** P6-04: Schema readiness result. */
@@ -353,9 +494,7 @@ export interface ISchemaReadinessResult {
  * Non-blocking — never throws. Returns a structured result for diagnostic use.
  * Call on first successful list query or during environment validation.
  */
-export function validateSchemaReadiness(
-  item: Record<string, unknown>,
-): ISchemaReadinessResult {
+export function validateSchemaReadiness(item: Record<string, unknown>): ISchemaReadinessResult {
   const present: string[] = [];
   const missing: string[] = [];
   const warnings: string[] = [];

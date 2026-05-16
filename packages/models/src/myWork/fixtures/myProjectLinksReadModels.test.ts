@@ -61,6 +61,46 @@ describe('project-links fixtures', () => {
     expect(MY_PROJECT_LINKS_AVAILABLE.data.summary.dualLaunchReadyCount).toBeGreaterThan(0);
   });
 
+  it.each(ALL)('%s envelope items carry the two new launch actions', (_name, envelope) => {
+    for (const item of envelope.data.items) {
+      expect(['available', 'unavailable']).toContain(item.buildingConnectedAction.state);
+      expect(['available', 'unavailable']).toContain(item.documentCrunchAction.state);
+      if (item.buildingConnectedAction.state === 'available') {
+        expect(item.buildingConnectedAction.label).toBe('Open BuildingConnected');
+        expect(item.buildingConnectedAction.href).toMatch(/^https?:\/\//);
+      } else {
+        expect(item.buildingConnectedAction.label).toBe('BuildingConnected unavailable');
+      }
+      if (item.documentCrunchAction.state === 'available') {
+        expect(item.documentCrunchAction.label).toBe('Open Document Crunch');
+        expect(item.documentCrunchAction.href).toMatch(/^https?:\/\//);
+      } else {
+        expect(item.documentCrunchAction.label).toBe('Document Crunch unavailable');
+      }
+    }
+  });
+
+  it.each(ALL)(
+    '%s envelope summary exposes the four new B05.10 counts and multiPlatformReadyCount',
+    (_name, envelope) => {
+      const summary = envelope.data.summary;
+      const total = envelope.data.items.length;
+      expect(summary.buildingConnectedReadyCount).toBeGreaterThanOrEqual(0);
+      expect(summary.documentCrunchReadyCount).toBeGreaterThanOrEqual(0);
+      expect(summary.buildingConnectedReadyCount).toBeLessThanOrEqual(total);
+      expect(summary.documentCrunchReadyCount).toBeLessThanOrEqual(total);
+      expect(summary.noBuildingConnectedLaunchCount).toBe(
+        total - summary.buildingConnectedReadyCount,
+      );
+      expect(summary.noDocumentCrunchLaunchCount).toBe(total - summary.documentCrunchReadyCount);
+      expect(summary.multiPlatformReadyCount).toBeLessThanOrEqual(summary.dualLaunchReadyCount);
+      expect(summary.multiPlatformReadyCount).toBeLessThanOrEqual(
+        summary.buildingConnectedReadyCount,
+      );
+      expect(summary.multiPlatformReadyCount).toBeLessThanOrEqual(summary.documentCrunchReadyCount);
+    },
+  );
+
   it('more-than-six-items fixture provides 7 ordered items', () => {
     expect(MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS.data.items).toHaveLength(7);
     expect(MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS.data.items[0]?.projectNumber).toBe('24-100-01');
@@ -69,8 +109,18 @@ describe('project-links fixtures', () => {
 
   it('mixed-action-availability fixture carries opposite launch-availability cases', () => {
     const items = MY_PROJECT_LINKS_MIXED_ACTION_AVAILABILITY.data.items;
-    expect(items.some((item) => item.sharePointAction.state === 'available' && item.procoreAction.state === 'unavailable')).toBe(true);
-    expect(items.some((item) => item.sharePointAction.state === 'unavailable' && item.procoreAction.state === 'available')).toBe(true);
+    expect(
+      items.some(
+        (item) =>
+          item.sharePointAction.state === 'available' && item.procoreAction.state === 'unavailable',
+      ),
+    ).toBe(true);
+    expect(
+      items.some(
+        (item) =>
+          item.sharePointAction.state === 'unavailable' && item.procoreAction.state === 'available',
+      ),
+    ).toBe(true);
   });
 
   it('bounded-source partial fixture includes bounded warning vocabulary', () => {
