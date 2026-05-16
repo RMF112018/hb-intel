@@ -39,3 +39,21 @@ export function selectVisibleProjects(
   if (expanded) return items;
   return items.slice(0, resolveMyProjectsVisibleCount(mode));
 }
+
+export function normalizeProjectSearchQuery(input: string): string {
+  return input.trim().toLowerCase();
+}
+
+export function filterMyProjectsByQuery(
+  items: readonly MyProjectLinkItem[],
+  query: string,
+): readonly MyProjectLinkItem[] {
+  const normalized = normalizeProjectSearchQuery(query);
+  if (normalized.length === 0) return items;
+  return items.filter((item) => {
+    return (
+      item.projectName.toLowerCase().includes(normalized) ||
+      item.projectNumber.toLowerCase().includes(normalized)
+    );
+  });
+}

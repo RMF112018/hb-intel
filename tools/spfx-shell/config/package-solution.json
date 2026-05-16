@@ -3,7 +3,7 @@
   "solution": {
     "name": "hb-intel-my-dashboard",
     "id": "2f47bece-2668-4a02-a2ac-4e86eb3970a2",
-    "version": "1.0.0.013",
+    "version": "1.0.0.014",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "My Dashboard",
         "description": "Deploys the My Dashboard webpart assets to HBCentral.",
         "id": "7a8b5491-bd3b-4fdd-8acd-81008bb4a64a",
-        "version": "1.0.0.013",
+        "version": "1.0.0.014",
         "componentIds": [
           "412eb9fd-2eb2-4f7d-a4f1-7865e339a369"
         ]

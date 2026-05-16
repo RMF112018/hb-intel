@@ -6,6 +6,8 @@ import {
 } from '../../layout/useMyWorkContainerBreakpoint.js';
 import {
   MY_PROJECTS_VISIBLE_COUNT_BY_MODE,
+  filterMyProjectsByQuery,
+  normalizeProjectSearchQuery,
   resolveMyProjectsVisibleCount,
   selectVisibleProjects,
   sortMyProjectsForDisplay,
@@ -137,5 +139,75 @@ describe('selectVisibleProjects', () => {
     const inputSnapshot = ten.map((item) => item.recordKey);
     selectVisibleProjects(ten, 'desktop', false);
     expect(ten.map((item) => item.recordKey)).toEqual(inputSnapshot);
+  });
+});
+
+describe('normalizeProjectSearchQuery', () => {
+  it('trims whitespace and lowercases mixed-case input', () => {
+    expect(normalizeProjectSearchQuery('   ALPHA ')).toBe('alpha');
+  });
+
+  it('is idempotent on already-normalized input', () => {
+    expect(normalizeProjectSearchQuery('harbor')).toBe('harbor');
+  });
+
+  it('returns an empty string for empty / whitespace-only input', () => {
+    expect(normalizeProjectSearchQuery('')).toBe('');
+    expect(normalizeProjectSearchQuery('   ')).toBe('');
+  });
+});
+
+describe('filterMyProjectsByQuery', () => {
+  const corpus: readonly MyProjectLinkItem[] = [
+    makeItem({
+      recordKey: 'projects:1',
+      projectName: 'Harbor Office Renovation',
+      projectNumber: '24-100-01',
+    }),
+    makeItem({
+      recordKey: 'projects:2',
+      projectName: 'Civic Center Expansion',
+      projectNumber: '24-100-02',
+    }),
+    makeItem({
+      recordKey: 'projects:3',
+      projectName: 'North Campus Demo',
+      projectNumber: '24-200-99',
+    }),
+  ];
+
+  it('returns the input list unchanged for empty queries', () => {
+    expect(filterMyProjectsByQuery(corpus, '')).toBe(corpus);
+    expect(filterMyProjectsByQuery(corpus, '   ')).toBe(corpus);
+  });
+
+  it('filters by case-insensitive name substring', () => {
+    const results = filterMyProjectsByQuery(corpus, 'HARBOR');
+    expect(results.map((item) => item.recordKey)).toEqual(['projects:1']);
+  });
+
+  it('filters by full project-number match', () => {
+    const results = filterMyProjectsByQuery(corpus, '24-200-99');
+    expect(results.map((item) => item.recordKey)).toEqual(['projects:3']);
+  });
+
+  it('filters by partial project-number substring', () => {
+    const results = filterMyProjectsByQuery(corpus, '24-100');
+    expect(results.map((item) => item.recordKey)).toEqual(['projects:1', 'projects:2']);
+  });
+
+  it('matches either name OR number', () => {
+    const results = filterMyProjectsByQuery(corpus, 'civic');
+    expect(results.map((item) => item.recordKey)).toEqual(['projects:2']);
+  });
+
+  it('returns an empty array when nothing matches', () => {
+    expect(filterMyProjectsByQuery(corpus, 'nonexistent')).toEqual([]);
+  });
+
+  it('does not mutate input', () => {
+    const inputSnapshot = corpus.map((item) => item.recordKey);
+    filterMyProjectsByQuery(corpus, 'harbor');
+    expect(corpus.map((item) => item.recordKey)).toEqual(inputSnapshot);
   });
 });

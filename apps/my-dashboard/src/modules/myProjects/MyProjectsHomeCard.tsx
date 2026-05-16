@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type {
   MyProjectLinkItem,
   MyProjectLinksReadModel,
@@ -12,6 +12,7 @@ import type {
   MyWorkCardFootprint,
   MyWorkCardSpanOverrides,
 } from '../../layout/myWorkFootprints.js';
+import { ProjectPortfolioBrowser } from './ProjectPortfolioBrowser.js';
 import { ProjectPortfolioTile } from './ProjectPortfolioTile.js';
 import {
   resolveMyProjectsVisibleCount,
@@ -95,13 +96,11 @@ export function MyProjectsHomeCard({
   const { mode } = useMyWorkBentoContext();
   const client = useMemo(() => createMyWorkReadModelClient({ getApiToken }), [getApiToken]);
   const [isLoading, setIsLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
   const [envelope, setEnvelope] = useState<MyWorkReadModelEnvelope<MyProjectLinksReadModel> | null>(
     null,
   );
   const [openTileKey, setOpenTileKey] = useState<string | null>(null);
-  const disclosureButtonRef = useRef<HTMLButtonElement | null>(null);
-  const restoreDisclosureFocusRef = useRef(false);
+  const [browserOpen, setBrowserOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -135,8 +134,8 @@ export function MyProjectsHomeCard({
   const sortedItems = useMemo(() => sortMyProjectsForDisplay(items), [items]);
   const visibleCount = resolveMyProjectsVisibleCount(mode);
   const displayedItems = useMemo(
-    () => selectVisibleProjects(sortedItems, mode, expanded),
-    [sortedItems, mode, expanded],
+    () => selectVisibleProjects(sortedItems, mode, false),
+    [sortedItems, mode],
   );
   const showRowDisclosure = sortedItems.length > visibleCount;
 
@@ -149,23 +148,6 @@ export function MyProjectsHomeCard({
       : bannerText
         ? 'banner-only'
         : 'empty';
-
-  const handleToggleDisclosure = () => {
-    setExpanded((current) => {
-      const next = !current;
-      if (current === true && next === false) {
-        restoreDisclosureFocusRef.current = true;
-      }
-      return next;
-    });
-  };
-
-  useEffect(() => {
-    if (!expanded && restoreDisclosureFocusRef.current) {
-      disclosureButtonRef.current?.focus();
-      restoreDisclosureFocusRef.current = false;
-    }
-  }, [expanded]);
 
   useEffect(() => {
     if (openTileKey && !displayedItems.some((row) => row.recordKey === openTileKey)) {
@@ -217,7 +199,7 @@ export function MyProjectsHomeCard({
       {isPopulated ? (
         <div className={styles.portfolioRegion} data-my-projects-portfolio-region="">
           <div
-            data-my-projects-expanded={expanded ? 'true' : 'false'}
+            hidden
             data-my-projects-has-disclosure={showRowDisclosure ? 'true' : 'false'}
           />
           <div
@@ -237,15 +219,12 @@ export function MyProjectsHomeCard({
           </div>
           {showRowDisclosure ? (
             <button
-              ref={disclosureButtonRef}
               type="button"
               className={styles.disclosure}
-              aria-expanded={expanded ? 'true' : 'false'}
-              aria-controls="my-projects-tile-grid"
-              onClick={handleToggleDisclosure}
-              data-my-projects-disclosure=""
+              onClick={() => setBrowserOpen(true)}
+              data-my-projects-view-all=""
             >
-              {expanded ? 'Show fewer' : 'View all My Projects'}
+              View all projects
             </button>
           ) : null}
           {hasAnyUnavailableSharePoint(sortedItems) ? (
@@ -260,6 +239,13 @@ export function MyProjectsHomeCard({
           ) : null}
         </div>
       ) : null}
+
+      <ProjectPortfolioBrowser
+        items={sortedItems}
+        mode={mode}
+        isOpen={browserOpen}
+        onOpenChange={setBrowserOpen}
+      />
     </MyWorkCard>
   );
 }

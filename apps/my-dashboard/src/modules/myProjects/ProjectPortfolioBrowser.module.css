@@ -1,0 +1,120 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, #0f172a 55%, transparent 45%);
+  z-index: 1100;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-left: 1px solid var(--my-work-color-border);
+  width: min(440px, 100vw);
+  height: 100vh;
+  box-shadow: -16px 0 32px rgba(15, 23, 42, 0.18);
+  z-index: 1;
+}
+
+.panel[data-my-projects-browser-posture='sheet'] {
+  width: 100%;
+  height: 100%;
+  border-left: 0;
+  box-shadow: none;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 10px;
+  row-gap: 10px;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--my-work-color-border);
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--my-work-color-text-primary);
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.close {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  min-height: 32px;
+  border-radius: var(--my-work-radius-md);
+  border: 1px solid var(--my-work-color-border);
+  background: #fff;
+  color: var(--my-work-color-text-primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--my-work-color-rail);
+}
+
+.close:focus-visible {
+  outline: 2px solid var(--my-work-color-rail-accent);
+  outline-offset: 2px;
+}
+
+.search {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--my-work-color-border);
+  border-radius: var(--my-work-radius-md);
+  font: inherit;
+  font-size: 13px;
+  color: var(--my-work-color-text-primary);
+  background: #fff;
+}
+
+.search::placeholder {
+  color: var(--my-work-color-text-muted);
+}
+
+.search:focus-visible {
+  outline: 2px solid var(--my-work-color-rail-accent);
+  outline-offset: 2px;
+}
+
+.body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.empty {
+  margin: 24px 0 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--my-work-color-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .close,
+  .search {
+    transition: none;
+  }
+}

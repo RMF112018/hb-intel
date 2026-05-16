@@ -255,7 +255,7 @@ describe('MyProjectsHomeCard', () => {
     expect(overflowButton.getAttribute('aria-expanded')).toBe('true');
   });
 
-  it('shows mode-aware visible count (6 on desktop) and supports expand/collapse disclosure', async () => {
+  it('shows mode-aware visible count on desktop and opens the portfolio browser overflow', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS);
     const { container, getByText } = renderCard('desktop');
 
@@ -263,23 +263,21 @@ describe('MyProjectsHomeCard', () => {
       expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(6),
     );
 
-    const expand = getByText('View all My Projects') as HTMLButtonElement;
-    expect(expand.getAttribute('aria-controls')).toBe('my-projects-tile-grid');
-    expect(expand.getAttribute('aria-expanded')).toBe('false');
-    fireEvent.click(expand);
+    const viewAll = getByText('View all projects') as HTMLButtonElement;
+    expect(viewAll.getAttribute('data-my-projects-view-all')).toBe('');
+    viewAll.focus();
+    fireEvent.click(viewAll);
 
-    await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(
-        MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS.data.items.length,
-      ),
-    );
+    const browser = document.body.querySelector(
+      '[data-my-projects-portfolio-browser]',
+    ) as HTMLElement;
+    expect(browser).not.toBeNull();
+    expect(browser.getAttribute('role')).toBe('dialog');
 
-    const collapse = getByText('Show fewer') as HTMLButtonElement;
-    fireEvent.click(collapse);
-    await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(6),
-    );
-    expect(document.activeElement).toBe(collapse);
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+    expect(document.body.querySelector('[data-my-projects-portfolio-browser]')).toBeNull();
+    expect(document.activeElement).toBe(viewAll);
+    expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(6);
   });
 
   it('applies the locked phone visible count of 3', async () => {
