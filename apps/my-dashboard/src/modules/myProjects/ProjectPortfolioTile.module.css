@@ -2,18 +2,22 @@
   display: grid;
   grid-template-rows: auto auto auto;
   gap: 10px;
-  border: 1px solid var(--my-work-color-border);
+  border: 1px solid color-mix(in srgb, var(--my-work-color-border) 60%, transparent);
   border-radius: calc(var(--my-work-radius-md) + 2px);
+  /* Near-pure-white surface so tiles read as floating panels on the HB-blue
+     gradient backdrop. */
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, #ffffff 98%, var(--my-work-color-rail) 2%),
-    color-mix(in srgb, #ffffff 93%, var(--my-work-color-rail) 7%)
+    #ffffff 0%,
+    color-mix(in srgb, #ffffff 96%, var(--my-work-color-rail) 4%) 100%
   );
-  /* Resting micro-elevation — two-layer subtle shadow stack for premium
-     depth at idle (matches Foleon .executiveSurface vocabulary). */
+  /* Resting two-layer elevation — bumped from the prior 4%/4% so tiles
+     present as hovering over the HB-blue gradient (instead of sitting on
+     a near-white inner panel). Hover/focus-within keeps the three-layer
+     additive lift below. */
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 6px 18px rgba(15, 23, 42, 0.04);
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 8px 22px rgba(15, 23, 42, 0.08);
   padding: 12px 14px;
   min-width: 0;
   transition:

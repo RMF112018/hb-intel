@@ -94,12 +94,13 @@
 }
 
 .portfolioRegion {
-  /* Semi-transparent white panel so the HB-blue card tint reads through subtly
-     while the tile content remains on a near-white surface. */
-  background: color-mix(in srgb, #ffffff 86%, transparent);
-  border: 1px solid color-mix(in srgb, var(--my-work-brand-hb-blue) 12%, transparent);
-  border-radius: var(--my-work-radius-md);
-  padding: 14px;
+  /* Transparent wrapper — the HB-blue gradient on the outer MyWorkCard surface
+     reads continuously through this region. Tiles float directly on the
+     gradient. Padding is reserved only as breathing room. */
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 4px 0 0;
   min-width: 0;
   container-type: inline-size;
   container-name: my-projects-region;
@@ -191,12 +192,13 @@
 }
 
 .compactBlock {
-  /* Same semi-transparent white panel treatment as .portfolioRegion so the
-     HB-blue card tint reads through cohesively across all branches. */
-  background: color-mix(in srgb, #ffffff 86%, transparent);
-  border: 1px dashed color-mix(in srgb, var(--my-work-brand-hb-blue) 18%, transparent);
-  border-radius: var(--my-work-radius-md);
-  padding: 12px 14px;
+  /* Transparent wrapper for loading / empty branches — the HB-blue gradient
+     reads continuously underneath, matching the populated .portfolioRegion
+     treatment so all branches feel cohesive on the same surface. */
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 6px 2px 2px;
   min-width: 0;
 }
 
