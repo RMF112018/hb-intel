@@ -13,6 +13,9 @@ There is no focused Adobe module route. The auth-required UI renders
 **inside** the consolidated `AdobeSignActionQueueCard` directly on the
 home page.
 
+In this posture, the Adobe header view toggle is intentionally hidden.
+The card remains connect-focused until Adobe access is available.
+
 ## The chain
 
 ```
@@ -37,39 +40,45 @@ Backend principal-resolver
 
 ## File-by-file references
 
-| Concern | File | Notes |
-| --- | --- | --- |
-| No-grant → `authorization-required` | `backend/functions/src/hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-principal-resolver.ts` | All no-grant branches (no-grant-found, grant-revoked, grant-requires-reauth, pending) emit `authorization-required`. |
-| `authorization-required` envelope assembly | `backend/functions/src/hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-action-queue-adapter.ts` | Principal, token, and search-client unauthorized paths produce the same `sourceStatus`. |
-| SPFx backend client stamps `dataPath: 'backend-live'` | `apps/my-dashboard/src/api/myWorkBackendReadModelClient.ts` | Envelope passes through unchanged otherwise. |
-| Home-route envelope context | `apps/my-dashboard/src/shell/MyWorkActiveEnvelopeContext.tsx` | `MyWorkHomeEnvelopeProvider`, `useMyWorkHomeEnvelopeContext`. Focused-module envelope providers have been retired. |
-| Surface composition | `apps/my-dashboard/src/surfaces/home/MyWorkHomeSurface.tsx` | Renders exactly two cards in static order: My Projects, then Adobe Sign Action Queue. Threads `sourceStatus`, `homeEnvelope`, and `onConnectAdobeSign` into the consolidated card. |
-| Consolidated card (owns the auth-required UI) | `apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.tsx` | Card emits `data-adobe-sign-action-queue-state` and renders the Connect CTA only when `sourceStatus === 'authorization-required'` AND `onConnect` is supplied. |
-| State copy contract | `apps/my-dashboard/src/state/myWorkCardViewModel.ts` | `selectAdobeSignActionQueueStateCopy('authorization-required', hasOnConnect)` returns badge `Connect required`, body copy locked to the target copy library, `ctaVisible: hasOnConnect`. |
-| OAuth start POST | `apps/my-dashboard/src/api/myWorkBackendReadModelClient.ts` | `startAdobeSignOAuth(...)`. |
-| Shell-level click handler | `apps/my-dashboard/src/shell/MyWorkShell.tsx` | `onConnectAdobeSign` constructs a backend-mode client, calls `startAdobeSignOAuth`, then `window.location.assign(authorizationUrl)`. |
-| Callback banner | `apps/my-dashboard/src/shell/AdobeSignCallbackBanner.tsx` + `apps/my-dashboard/src/runtime/useAdobeSignCallbackResult.ts` | Reads `adobeSignAuthorization` from `location.search`, cleans URL, renders status. |
+| Concern                                               | File                                                                                                                      | Notes                                                                                                                                                                                    |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No-grant → `authorization-required`                   | `backend/functions/src/hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-principal-resolver.ts`                  | All no-grant branches (no-grant-found, grant-revoked, grant-requires-reauth, pending) emit `authorization-required`.                                                                     |
+| `authorization-required` envelope assembly            | `backend/functions/src/hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-action-queue-adapter.ts`                | Principal, token, and search-client unauthorized paths produce the same `sourceStatus`.                                                                                                  |
+| SPFx backend client stamps `dataPath: 'backend-live'` | `apps/my-dashboard/src/api/myWorkBackendReadModelClient.ts`                                                               | Envelope passes through unchanged otherwise.                                                                                                                                             |
+| Home-route envelope context                           | `apps/my-dashboard/src/shell/MyWorkActiveEnvelopeContext.tsx`                                                             | `MyWorkHomeEnvelopeProvider`, `useMyWorkHomeEnvelopeContext`. Focused-module envelope providers have been retired.                                                                       |
+| Surface composition                                   | `apps/my-dashboard/src/surfaces/home/MyWorkHomeSurface.tsx`                                                               | Renders exactly two cards in static order: My Projects, then Adobe Sign Action Queue. Threads `sourceStatus`, `homeEnvelope`, and `onConnectAdobeSign` into the consolidated card.       |
+| Consolidated card (owns the auth-required UI)         | `apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.tsx`                                                    | Card emits `data-adobe-sign-action-queue-state` and renders the Connect CTA only when `sourceStatus === 'authorization-required'` AND `onConnect` is supplied.                           |
+| State copy contract                                   | `apps/my-dashboard/src/state/myWorkCardViewModel.ts`                                                                      | `selectAdobeSignActionQueueStateCopy('authorization-required', hasOnConnect)` returns badge `Connect required`, body copy locked to the target copy library, `ctaVisible: hasOnConnect`. |
+| OAuth start POST                                      | `apps/my-dashboard/src/api/myWorkBackendReadModelClient.ts`                                                               | `startAdobeSignOAuth(...)`.                                                                                                                                                              |
+| Shell-level click handler                             | `apps/my-dashboard/src/shell/MyWorkShell.tsx`                                                                             | `onConnectAdobeSign` constructs a backend-mode client, calls `startAdobeSignOAuth`, then `window.location.assign(authorizationUrl)`.                                                     |
+| Callback banner                                       | `apps/my-dashboard/src/shell/AdobeSignCallbackBanner.tsx` + `apps/my-dashboard/src/runtime/useAdobeSignCallbackResult.ts` | Reads `adobeSignAuthorization` from `location.search`, cleans URL, renders status.                                                                                                       |
 
 ## DOM markers — what a hosted screenshot must show
 
 On the My Dashboard home page, with no Adobe Sign grant, the DOM beneath
 `<main data-my-work-active-surface-panel="my-work-home">` must contain:
 
-| Marker | Expected value | Where it lives |
-| --- | --- | --- |
-| `data-my-work-source-status` | `authorization-required` | hidden `<span>` emitted by `MyWorkHomeSurface` |
-| `data-my-work-data-path` | `backend-live` | on `<main role="main">` (set by the runtime stamping in `MyWorkShell`) |
-| `data-my-work-card-role` | `adobe-sign-action-queue` | consolidated card root (via `MyWorkCard`) |
-| `data-adobe-sign-action-queue-state` | `authorization-required` | consolidated card root |
-| `data-adobe-sign-action-queue-badge` | `Connect required` | consolidated card root |
-| `data-adobe-sign-connect-action` | `start` | the Connect button |
-| `data-adobe-sign-connect-state` | `idle` (→ `connecting` on click → `idle` / `error` after POST) | the Connect button |
+| Marker                               | Expected value                                                 | Where it lives                                                         |
+| ------------------------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `data-my-work-source-status`         | `authorization-required`                                       | hidden `<span>` emitted by `MyWorkHomeSurface`                         |
+| `data-my-work-data-path`             | `backend-live`                                                 | on `<main role="main">` (set by the runtime stamping in `MyWorkShell`) |
+| `data-my-work-card-role`             | `adobe-sign-action-queue`                                      | consolidated card root (via `MyWorkCard`)                              |
+| `data-adobe-sign-action-queue-state` | `authorization-required`                                       | consolidated card root                                                 |
+| `data-adobe-sign-action-queue-badge` | `Connect required`                                             | consolidated card root                                                 |
+| `data-adobe-sign-connect-action`     | `start`                                                        | the Connect button                                                     |
+| `data-adobe-sign-connect-state`      | `idle` (→ `connecting` on click → `idle` / `error` after POST) | the Connect button                                                     |
+
+In the same auth-required DOM posture:
+
+- `data-adobe-sign-card-view-toggle` is absent.
+- `data-adobe-sign-active-view="action-queue"` remains on the card root.
+- The completed panel marker is absent because completed view is not exposed.
 
 After the consent return:
 
-| Marker | Possible values |
-| --- | --- |
-| `data-my-work-adobe-sign-callback` | `success`, `retryable-failure`, `operator-action-required`, `transient-failure`, `unknown` |
+| Marker                                    | Possible values                                                                                                                        |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-my-work-adobe-sign-callback`        | `success`, `retryable-failure`, `operator-action-required`, `transient-failure`, `unknown`                                             |
 | `data-my-work-adobe-sign-callback-status` | `success`, `invalid-state`, `expired-state`, `consumed-state`, `configuration-required`, `source-unavailable`, …other backend statuses |
 
 ### Retired markers (must NOT appear on the home page)
@@ -88,33 +97,51 @@ and must not appear under the current consolidated card:
 `MyWorkHomeSurface.test.tsx` carry regression assertions for the absence
 of these markers.
 
+## Header toggle visibility doctrine
+
+The in-header `Action Queue` / `Completed` selector is shown only when
+Adobe queue state is data-capable (`available-items`, `available-empty`,
+or `partial`).
+
+It is hidden in:
+
+- `loading`
+- `authorization-required`
+- `configuration-required`
+- `principal-unresolved`
+- `source-unavailable`
+- `backend-unavailable`
+
+After authorization succeeds and a data-capable Adobe status is returned,
+the same single card exposes both header views.
+
 ## Negative — when the CTA must NOT appear
 
 The `Connect Adobe Sign` button is suppressed by the consolidated card
 in all of these cases. Use these as the inverse acceptance criteria:
 
-| `sourceStatus` | `readinessVariant` | CTA visible? | Why |
-| --- | --- | --- | --- |
-| `available` / `partial` | `ready` | No | The card renders its agreement list + summary; auth-required state is not active. |
-| `configuration-required` | `non-ready` | No | Admin-side fix; `selectAdobeSignActionQueueStateCopy` returns `ctaVisible: false`. |
-| `principal-unresolved` | `non-ready` | No | Administrator-side resolution required; `ctaVisible: false`. |
-| `source-unavailable` | `non-ready` | No | Wait for source recovery; `ctaVisible: false`. |
-| `backend-unavailable` | `non-ready` | No | Backend transport issue, not consent; `ctaVisible: false`. |
-| any | `loading` | No | The Adobe card renders its loading state (no CTA). |
-| any | `error` | No | The Adobe card renders its backend-unavailable state (no CTA). |
-| `authorization-required` | `non-ready`, but `onConnectAdobeSign` absent | No | The card guards the CTA against a silent no-op; the surface tests both branches explicitly. |
+| `sourceStatus`           | `readinessVariant`                           | CTA visible? | Why                                                                                         |
+| ------------------------ | -------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------- |
+| `available` / `partial`  | `ready`                                      | No           | The card renders its agreement list + summary; auth-required state is not active.           |
+| `configuration-required` | `non-ready`                                  | No           | Admin-side fix; `selectAdobeSignActionQueueStateCopy` returns `ctaVisible: false`.          |
+| `principal-unresolved`   | `non-ready`                                  | No           | Administrator-side resolution required; `ctaVisible: false`.                                |
+| `source-unavailable`     | `non-ready`                                  | No           | Wait for source recovery; `ctaVisible: false`.                                              |
+| `backend-unavailable`    | `non-ready`                                  | No           | Backend transport issue, not consent; `ctaVisible: false`.                                  |
+| any                      | `loading`                                    | No           | The Adobe card renders its loading state (no CTA).                                          |
+| any                      | `error`                                      | No           | The Adobe card renders its backend-unavailable state (no CTA).                              |
+| `authorization-required` | `non-ready`, but `onConnectAdobeSign` absent | No           | The card guards the CTA against a silent no-op; the surface tests both branches explicitly. |
 
 ## Test-coverage map
 
-| File | Layer | What it proves |
-| --- | --- | --- |
-| `backend/functions/src/hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-principal-resolver.test.ts` | Backend | Every no-grant branch emits `authorization-required`. |
-| `backend/functions/src/hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-action-queue-adapter.test.ts` | Backend | `authorization-required` envelopes carry `sourceStatus: 'authorization-required'`, `mode: 'backend'`, empty data, expected warning code (principal / token / search-client unauthorized paths). |
-| `apps/my-dashboard/src/api/myWorkBackendReadModelClient.test.ts` | SPFx client | Successful backend responses stamp `dataPath: 'backend-live'`; failure modes delegate to the fallback. |
-| `apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.test.tsx` | Card unit | The full state matrix including `authorization-required` with/without `onConnect`: badge copy, body copy, CTA visibility, idle button marker. |
-| `apps/my-dashboard/src/surfaces/home/MyWorkHomeSurface.test.tsx` | Surface integration | Connect CTA presence on `authorization-required` + `onConnectAdobeSign` supplied; CTA suppression when `onConnectAdobeSign` absent; two-card composition; locked bento spans. |
-| `apps/my-dashboard/src/shell/MyWorkShell.adobeOAuth.test.tsx` | Shell E2E | Authorization-required envelope → consolidated card → idle Connect button → click → POST to `/api/my-work/me/adobe-sign/oauth/start` with bearer + returnPath → navigate to `authorizationUrl`. Negative: no `getApiToken` → no Connect button. |
-| `apps/my-dashboard/src/shell/AdobeSignCallbackBanner.test.tsx` | Shell post-return | All callback-result kinds and statuses surface with the documented markers; URL cleaning + secret denylist. |
+| File                                                                                                            | Layer               | What it proves                                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `backend/functions/src/hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-principal-resolver.test.ts`   | Backend             | Every no-grant branch emits `authorization-required`.                                                                                                                                                                                           |
+| `backend/functions/src/hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-action-queue-adapter.test.ts` | Backend             | `authorization-required` envelopes carry `sourceStatus: 'authorization-required'`, `mode: 'backend'`, empty data, expected warning code (principal / token / search-client unauthorized paths).                                                 |
+| `apps/my-dashboard/src/api/myWorkBackendReadModelClient.test.ts`                                                | SPFx client         | Successful backend responses stamp `dataPath: 'backend-live'`; failure modes delegate to the fallback.                                                                                                                                          |
+| `apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.test.tsx`                                     | Card unit           | The full state matrix including `authorization-required` with/without `onConnect`: badge copy, body copy, CTA visibility, idle button marker.                                                                                                   |
+| `apps/my-dashboard/src/surfaces/home/MyWorkHomeSurface.test.tsx`                                                | Surface integration | Connect CTA presence on `authorization-required` + `onConnectAdobeSign` supplied; CTA suppression when `onConnectAdobeSign` absent; two-card composition; locked bento spans.                                                                   |
+| `apps/my-dashboard/src/shell/MyWorkShell.adobeOAuth.test.tsx`                                                   | Shell E2E           | Authorization-required envelope → consolidated card → idle Connect button → click → POST to `/api/my-work/me/adobe-sign/oauth/start` with bearer + returnPath → navigate to `authorizationUrl`. Negative: no `getApiToken` → no Connect button. |
+| `apps/my-dashboard/src/shell/AdobeSignCallbackBanner.test.tsx`                                                  | Shell post-return   | All callback-result kinds and statuses surface with the documented markers; URL cleaning + secret denylist.                                                                                                                                     |
 
 ## Hosted acceptance — operator checklist
 
@@ -130,8 +157,8 @@ in all of these cases. Use these as the inverse acceptance criteria:
      `<span hidden data-my-work-source-status="authorization-required"></span>`
    - the Adobe card root:
      `<… data-my-work-card-role="adobe-sign-action-queue"
-        data-adobe-sign-action-queue-state="authorization-required"
-        data-adobe-sign-action-queue-badge="Connect required" …>`
+data-adobe-sign-action-queue-state="authorization-required"
+data-adobe-sign-action-queue-badge="Connect required" …>`
    - inside the card:
      `<button data-adobe-sign-connect-action="start" data-adobe-sign-connect-state="idle">Connect Adobe Sign</button>`
 4. Open the Network tab; click **Connect Adobe Sign**. Confirm:

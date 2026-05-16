@@ -1,22 +1,23 @@
 # HB Intel My Dashboard — My Work Shell and Adobe Sign Action Queue
+
 ## Authoritative Comprehensive Development Plan
 
 ---
 
 # 1. Title Page and Document Control
 
-| Field | Value |
-|---|---|
-| Document title | **HB Intel My Dashboard — My Work Shell and Adobe Sign Action Queue Comprehensive Development Plan** |
-| Artifact status | Final reconciled authoritative development plan |
-| Prepared | **2026-05-13** |
-| Initiative | HB Intel **My Dashboard** SPFx domain, **My Work shell**, and **Adobe Sign Action Queue** first module |
-| Final repo-truth continuation anchor | `d59cdf7a3b0aa1acea357ab1083022c5fa4fbe3b` |
-| Governing prior batch outputs | Batch 01 through Batch 07 |
-| Target SharePoint site | `https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard` |
-| Final target hosted page | `https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard/SitePages/Home.aspx` |
-| Plan posture | Closed-decision planning artifact; no runtime implementation and no code-agent prompt package |
-| Downstream use | Authoritative source for later implementation-package decomposition and code-agent prompts |
+| Field                                | Value                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Document title                       | **HB Intel My Dashboard — My Work Shell and Adobe Sign Action Queue Comprehensive Development Plan**   |
+| Artifact status                      | Final reconciled authoritative development plan                                                        |
+| Prepared                             | **2026-05-13**                                                                                         |
+| Initiative                           | HB Intel **My Dashboard** SPFx domain, **My Work shell**, and **Adobe Sign Action Queue** first module |
+| Final repo-truth continuation anchor | `d59cdf7a3b0aa1acea357ab1083022c5fa4fbe3b`                                                             |
+| Governing prior batch outputs        | Batch 01 through Batch 07                                                                              |
+| Target SharePoint site               | `https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard`                                          |
+| Final target hosted page             | `https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard/SitePages/Home.aspx`                      |
+| Plan posture                         | Closed-decision planning artifact; no runtime implementation and no code-agent prompt package          |
+| Downstream use                       | Authoritative source for later implementation-package decomposition and code-agent prompts             |
 
 ## 1.1 Document Purpose
 
@@ -69,7 +70,7 @@ The first implementation should establish:
 - an external-system integration pattern,
 - and a hosted evidence discipline suitable for future personal-work modules.
 
-The **Adobe Sign Action Queue** is the first module because it is:
+The **Adobe Sign** module lane is the first module because it is:
 
 - clearly user-specific,
 - source-system governed,
@@ -85,8 +86,9 @@ At successful MVP completion, a signed-in HB employee should be able to:
 - view a polished **My Work** shell inside the standalone **HB Intel My Dashboard** web part,
 - see a meaningful home-surface summary of work requiring attention,
 - inspect Adobe Sign agreements that require the current user’s action,
+- switch to a completed-agreements view in the same card header,
 - understand the action category, source state, refresh state, and urgency cue where source data supports it,
-- navigate into a focused Adobe Sign module view,
+- stay on the home surface and switch views within one Adobe Sign card,
 - open Adobe Sign through a source handoff only where the backend provides a validated URL,
 - receive clear, professional state messaging when:
   - no queue items are present,
@@ -131,7 +133,7 @@ Still absent or incomplete at the final synthesis anchor:
 - My Work frontend read-model clients,
 - backend My Work read-model route host,
 - Adobe Sign OAuth/grant store/provider implementation,
-- Adobe Sign queue card and focused module UI,
+- Adobe Sign queue/completed card UI,
 - My Dashboard hosted Playwright evidence lane,
 - runtime package version proof seam for hosted validation,
 - final repo documentation authority reconciliation.
@@ -247,10 +249,10 @@ The API permission request is already aligned to:
 The runtime config seam already supports:
 
 ```ts
-functionAppUrl
-backendMode
-allowBackendModeSwitch
-apiAudience
+functionAppUrl;
+backendMode;
+allowBackendModeSwitch;
+apiAudience;
 ```
 
 The final plan keeps this architecture unchanged.
@@ -334,38 +336,38 @@ docs/architecture/evidence/my-dashboard-live/
 
 ## 4.1 Canonical Product Vocabulary
 
-| Concept | Canonical term |
-|---|---|
-| SharePoint site | **My Dashboard** |
-| SPFx product/web part | **HB Intel My Dashboard** |
-| Internal shell | **My Work shell** |
-| First surface | **My Work Home** |
-| First module | **Adobe Sign Action Queue** |
-| Source handoff button language | **Open in Adobe Sign** or **Open agreement in Adobe Sign** |
-| Authenticated HB user | **Authenticated actor** |
-| Mapped Adobe OAuth-backed identity | **Adobe principal** |
-| UI/backend data contract | **Read-model envelope** |
+| Concept                            | Canonical term                                             |
+| ---------------------------------- | ---------------------------------------------------------- |
+| SharePoint site                    | **My Dashboard**                                           |
+| SPFx product/web part              | **HB Intel My Dashboard**                                  |
+| Internal shell                     | **My Work shell**                                          |
+| First surface                      | **My Work Home**                                           |
+| First module                       | **Adobe Sign Action Queue**                                |
+| Source handoff button language     | **Open in Adobe Sign** or **Open agreement in Adobe Sign** |
+| Authenticated HB user              | **Authenticated actor**                                    |
+| Mapped Adobe OAuth-backed identity | **Adobe principal**                                        |
+| UI/backend data contract           | **Read-model envelope**                                    |
 
 ## 4.2 Canonical IDs
 
-| Concept | ID |
-|---|---|
-| App/domain folder | `my-dashboard` |
-| Shell namespace | `my-work` |
-| Primary surface | `my-work-home` |
-| First module | `adobe-sign-action-queue` |
+| Concept           | ID                        |
+| ----------------- | ------------------------- |
+| App/domain folder | `my-dashboard`            |
+| Shell namespace   | `my-work`                 |
+| Primary surface   | `my-work-home`            |
+| First module      | `adobe-sign-action-queue` |
 
 ## 4.3 Distinct from PCC Adobe Sign
 
 PCC may retain its own `adobe-sign` project-adjacent launch concept. My Dashboard’s `adobe-sign-action-queue` is different:
 
-| Dimension | PCC `adobe-sign` | My Dashboard `adobe-sign-action-queue` |
-|---|---|---|
-| Context | Project | User |
-| Purpose | Project-related launch/reference | Current employee action queue |
-| Data posture | Launch-oriented | Read-model-driven |
-| Actor logic | Project context | Authenticated person context |
-| Live integration need | Not equivalent | Delegated Adobe principal mapping |
+| Dimension             | PCC `adobe-sign`                 | My Dashboard `adobe-sign-action-queue` |
+| --------------------- | -------------------------------- | -------------------------------------- |
+| Context               | Project                          | User                                   |
+| Purpose               | Project-related launch/reference | Current employee action queue          |
+| Data posture          | Launch-oriented                  | Read-model-driven                      |
+| Actor logic           | Project context                  | Authenticated person context           |
+| Live integration need | Not equivalent                   | Delegated Adobe principal mapping      |
 
 They must not be collapsed into a single product concept.
 
@@ -377,8 +379,7 @@ The MVP includes:
 - SPFx packaging and hosted deployment posture,
 - My Work shell and grouped module navigation,
 - My Work Home surface,
-- Adobe Sign Action Queue dashboard card,
-- focused Adobe Sign Action Queue module,
+- Adobe Sign single-card module with in-header `Action Queue` / `Completed` views,
 - typed My Work read-model contracts,
 - frontend My Work read-model client factory,
 - backend My Work read-model host,
@@ -429,10 +430,11 @@ Authenticated HB employee using the My Dashboard communication site.
 ## 5.3 Supporting User Stories
 
 - As a user with no pending Adobe Sign work, I want a clear empty state so I know the queue is current.
+- As a user, I want completed Adobe Sign agreements from the last 30 days to be available in the same card without opening another module route.
 - As a user who has not authorized Adobe Sign, I want a clear authorization-required state rather than a blank module.
 - As a user whose Adobe identity cannot be mapped, I want a calm, specific principal-resolution state rather than an opaque failure.
 - As a user when the Adobe source is degraded, I want the dashboard to say so honestly.
-- As a user with many pending agreements, I want a focused module view with controlled pagination rather than an overloaded dashboard card.
+- As a user with many pending agreements, I want the home card to stay compact and truthful while still providing source handoff where available.
 - As a user, I want handoff links only when they are valid and safe.
 
 ## 5.4 UX Intent
@@ -473,11 +475,13 @@ Technical terms remain available in structured logs/tests/docs, not in end-user 
 ## 6.1 Final Target Site and Page
 
 ### Site
+
 ```text
 https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard
 ```
 
 ### Page
+
 ```text
 https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard/SitePages/Home.aspx
 ```
@@ -694,13 +698,13 @@ docs/architecture/evidence/my-dashboard-live/
 
 Current package posture should remain:
 
-| Item | Value |
-|---|---|
-| Solution name | `hb-intel-my-dashboard` |
-| Solution version at synthesis anchor | `1.0.0.1` |
-| Web part manifest version | `1.0.0.1` |
-| Zipped package | `solution/hb-intel-my-dashboard.sppkg` |
-| Web part ID | `412eb9fd-2eb2-4f7d-a4f1-7865e339a369` |
+| Item                                 | Value                                  |
+| ------------------------------------ | -------------------------------------- |
+| Solution name                        | `hb-intel-my-dashboard`                |
+| Solution version at synthesis anchor | `1.0.0.1`                              |
+| Web part manifest version            | `1.0.0.1`                              |
+| Zipped package                       | `solution/hb-intel-my-dashboard.sppkg` |
+| Web part ID                          | `412eb9fd-2eb2-4f7d-a4f1-7865e339a369` |
 
 ## 8.2 Existing Runtime Marker
 
@@ -713,7 +717,7 @@ __hbIntel_myDashboard
 with:
 
 ```ts
-runtimeMarkerId
+runtimeMarkerId;
 ```
 
 This should remain.
@@ -723,7 +727,7 @@ This should remain.
 Before hosted validation can be considered complete, the global runtime marker must expose a governed version proof such as:
 
 ```ts
-runtimePackageVersion
+runtimePackageVersion;
 ```
 
 or an equivalent compile-time/runtime-bound value derived from the package version authority.
@@ -894,13 +898,13 @@ Already present in repo:
 
 Current registry state:
 
-| Item | Current repo value |
-|---|---|
-| Primary surface | `my-work-home` |
-| Module | `adobe-sign-action-queue` |
-| Module state | `read-only` |
-| Source system | `Adobe Sign` |
-| Selectable | `true` |
+| Item            | Current repo value        |
+| --------------- | ------------------------- |
+| Primary surface | `my-work-home`            |
+| Module          | `adobe-sign-action-queue` |
+| Module state    | `read-only`               |
+| Source system   | `Adobe Sign`              |
+| Selectable      | `true`                    |
 
 ## 10.2 MVP Navigation Behavior
 
@@ -954,16 +958,19 @@ The hero should anchor:
 ## 11.2 Hero Text
 
 ### Primary title
+
 ```text
 My Dashboard
 ```
 
 ### Secondary title
+
 ```text
 My Work
 ```
 
 ### Description
+
 Use production-grade copy similar in intent to:
 
 > A personal command surface for work that needs your attention across connected HB systems.
@@ -1009,17 +1016,20 @@ Render:
 ## 11.5 Home Card Purposes
 
 ### Work Summary Card
+
 - total action-item count,
 - connected/degraded source count,
 - concise orientation.
 
 ### Adobe Sign Action Queue Card
+
 - pending count,
 - actionable type mix,
 - up to five preview items if available,
 - “View queue” affordance.
 
 ### Source Readiness Card
+
 - configuration/authorization/principal/source status summary,
 - calm explanation,
 - where appropriate, an authorize/reconnect action only if the live OAuth implementation is enabled.
@@ -1130,10 +1140,10 @@ No user email, user ID, arbitrary sort override, arbitrary source filter, or raw
 
 Mode semantics:
 
-| Mode | Meaning |
-|---|---|
+| Mode      | Meaning                                                           |
+| --------- | ----------------------------------------------------------------- |
 | `fixture` | UI consumes deterministic fixture output or safe client fallback. |
-| `backend` | UI successfully consumed protected backend route output. |
+| `backend` | UI successfully consumed protected backend route output.          |
 
 The frontend envelope mode does **not** express whether the backend itself used a mock provider or live Adobe provider.
 
@@ -1196,12 +1206,12 @@ Those require a deliberate product decision, DTO update, UX review, and fixture/
 The summary model should support:
 
 ```ts
-totalPending
-awaitingSignature
-awaitingApproval
-awaitingOtherAction
-expiringSoon
-countBasis
+totalPending;
+awaitingSignature;
+awaitingApproval;
+awaitingOtherAction;
+expiringSoon;
+countBasis;
 ```
 
 `countBasis` must make clear whether counts are:
@@ -1256,10 +1266,10 @@ This wiring remains the architectural foundation.
 Required runtime inputs remain:
 
 ```ts
-functionAppUrl
-backendMode
-allowBackendModeSwitch
-apiAudience
+functionAppUrl;
+backendMode;
+allowBackendModeSwitch;
+apiAudience;
 ```
 
 No additional browser-owned Adobe token/config key should be introduced.
@@ -1295,6 +1305,7 @@ The My Work routes should use this existing foundation rather than build paralle
 Adobe queue access must be keyed to a stable HB actor identity, not mutable email-like claims.
 
 ### Final MVP actor key
+
 ```text
 configured tenant ID + claims.oid
 ```
@@ -1472,10 +1483,10 @@ The provider should construct bounded search requests that target:
 
 Final MVP defaults:
 
-| Surface | Page size |
-|---|---|
-| Dashboard home preview | Up to 5 items after normalization |
-| Focused queue initial page | 25 items |
+| Surface                        | Page size                           |
+| ------------------------------ | ----------------------------------- |
+| Dashboard home preview         | Up to 5 items after normalization   |
+| Focused queue initial page     | 25 items                            |
 | Focused queue subsequent pages | Cursor-based controlled “Load more” |
 
 ## 17.4 Pagination — Final Decision
@@ -1621,10 +1632,10 @@ This contract should remain stable.
 
 ## 19.2 Backend Mode Behavior
 
-| Mode | Purpose |
-|---|---|
+| Mode         | Purpose                                                       |
+| ------------ | ------------------------------------------------------------- |
 | `production` | Protected backend route activation when readiness checks pass |
-| `ui-review` | Deterministic review/fixture posture where enabled |
+| `ui-review`  | Deterministic review/fixture posture where enabled            |
 
 ## 19.3 Production Readiness Checks
 
@@ -1640,12 +1651,14 @@ This should be extended only where necessary to report additional My Dashboard r
 The final implementation should distinguish:
 
 ### Frontend production readiness
+
 - function app URL configured,
 - API audience configured,
 - SPFx token provider created,
 - backend mode allowed.
 
 ### Adobe provider readiness
+
 - Adobe CUSTOMER app configured server-side,
 - OAuth endpoints configured,
 - grant store available,
@@ -1944,31 +1957,31 @@ Fixtures must be deterministic, scenario-specific, isolated, and sufficient to d
 
 ## 24.2 Required Home Fixtures
 
-| Fixture | Purpose |
-|---|---|
-| Home available with queue preview | Normal home dashboard |
-| Home available with no Adobe items | Valid empty queue home state |
-| Home partial | Source partially degraded |
-| Home configuration required | Integration not configured |
-| Home authorization required | OAuth authorization missing/expired |
-| Home principal unresolved | HB actor not mapped to Adobe grant |
-| Home source unavailable | Adobe provider unavailable |
-| Home backend unavailable fallback | Frontend safe fallback behavior |
+| Fixture                            | Purpose                             |
+| ---------------------------------- | ----------------------------------- |
+| Home available with queue preview  | Normal home dashboard               |
+| Home available with no Adobe items | Valid empty queue home state        |
+| Home partial                       | Source partially degraded           |
+| Home configuration required        | Integration not configured          |
+| Home authorization required        | OAuth authorization missing/expired |
+| Home principal unresolved          | HB actor not mapped to Adobe grant  |
+| Home source unavailable            | Adobe provider unavailable          |
+| Home backend unavailable fallback  | Frontend safe fallback behavior     |
 
 ## 24.3 Required Queue Fixtures
 
-| Fixture | Purpose |
-|---|---|
-| Queue populated with all six action types | Status/action mapping |
-| Queue empty | Empty state |
-| Queue with expiring-soon examples | Urgency rules |
-| Queue paginated | Load more/cursor path |
-| Queue partial with warning | Degraded but usable state |
-| Queue authorization required | Connect/reauthorize UI |
-| Queue principal unresolved | Resolver failure state |
-| Queue configuration required | Provider disabled/missing setup |
-| Queue source unavailable | Upstream outage |
-| Queue backend unavailable fallback | Frontend transport degradation |
+| Fixture                                   | Purpose                         |
+| ----------------------------------------- | ------------------------------- |
+| Queue populated with all six action types | Status/action mapping           |
+| Queue empty                               | Empty state                     |
+| Queue with expiring-soon examples         | Urgency rules                   |
+| Queue paginated                           | Load more/cursor path           |
+| Queue partial with warning                | Degraded but usable state       |
+| Queue authorization required              | Connect/reauthorize UI          |
+| Queue principal unresolved                | Resolver failure state          |
+| Queue configuration required              | Provider disabled/missing setup |
+| Queue source unavailable                  | Upstream outage                 |
+| Queue backend unavailable fallback        | Frontend transport degradation  |
 
 ## 24.4 Determinism Rules
 
@@ -1997,21 +2010,21 @@ Validation is not a late-stage smoke test. It is an implementation discipline sp
 
 ## 25.2 Required Validation Categories
 
-| Category | Required proof |
-|---|---|
-| Model contracts | Unions, envelope shape, fixture shape, readonly posture |
-| Navigation registry | Canonical IDs, selectable states, safe normalization |
-| Shell state | Primary selection, module selection, clear behavior |
-| Shell semantics | Active panel, tab semantics, menu keyboard interactions |
-| Home surface | Correct card choreography by source state |
-| Queue UI | State cards, list, summary, CTA visibility, Load more |
-| Frontend clients | URL construction, auth header injection, fallback behavior |
-| Backend routes | Exact GET routes, `withAuth`, telemetry wrapper, status taxonomy |
+| Category               | Required proof                                                         |
+| ---------------------- | ---------------------------------------------------------------------- |
+| Model contracts        | Unions, envelope shape, fixture shape, readonly posture                |
+| Navigation registry    | Canonical IDs, selectable states, safe normalization                   |
+| Shell state            | Primary selection, module selection, clear behavior                    |
+| Shell semantics        | Active panel, tab semantics, menu keyboard interactions                |
+| Home surface           | Correct card choreography by source state                              |
+| Queue UI               | State cards, list, summary, CTA visibility, Load more                  |
+| Frontend clients       | URL construction, auth header injection, fallback behavior             |
+| Backend routes         | Exact GET routes, `withAuth`, telemetry wrapper, status taxonomy       |
 | Adobe adapter/provider | Principal mapping, search query construction, source-state translation |
-| OAuth | Start/callback/token lifecycle under controlled tests |
-| Packaging | `.sppkg`, runtime marker, critical path proof |
-| Hosted live lane | Page load, marker/version, fit, states, evidence |
-| Evidence sanitation | No secret/data leakage |
+| OAuth                  | Start/callback/token lifecycle under controlled tests                  |
+| Packaging              | `.sppkg`, runtime marker, critical path proof                          |
+| Hosted live lane       | Page load, marker/version, fit, states, evidence                       |
+| Evidence sanitation    | No secret/data leakage                                                 |
 
 ## 25.3 Hosted Environment Variables
 
@@ -2184,82 +2197,82 @@ Produce:
 
 ## 27.1 R-01 — Adobe App Registration Readiness
 
-| Field | Detail |
-|---|---|
-| Risk | OAuth app, redirect URI, secrets, or tenant approvals are not ready. |
-| Impact | Live Adobe provider cannot be declared complete. |
+| Field      | Detail                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------ |
+| Risk       | OAuth app, redirect URI, secrets, or tenant approvals are not ready.                       |
+| Impact     | Live Adobe provider cannot be declared complete.                                           |
 | Mitigation | Build architecture/provider seams; gate live enablement; fixture-mode UI remains valuable. |
 
 ## 27.2 R-02 — Refresh Token Storage and Secret Handling
 
-| Field | Detail |
-|---|---|
-| Risk | Delegated refresh-token persistence is under-designed. |
-| Impact | Security exposure or unstable live provider. |
+| Field      | Detail                                                                |
+| ---------- | --------------------------------------------------------------------- |
+| Risk       | Delegated refresh-token persistence is under-designed.                |
+| Impact     | Security exposure or unstable live provider.                          |
 | Mitigation | Explicit backend grant store, encryption, no frontend token exposure. |
 
 ## 27.3 R-03 — Actor/Adobe Principal Mapping Failure
 
-| Field | Detail |
-|---|---|
-| Risk | Authenticated HB actor cannot be safely mapped to Adobe OAuth grant. |
-| Impact | Incorrect personalization or false queue results. |
+| Field      | Detail                                                                     |
+| ---------- | -------------------------------------------------------------------------- |
+| Risk       | Authenticated HB actor cannot be safely mapped to Adobe OAuth grant.       |
+| Impact     | Incorrect personalization or false queue results.                          |
 | Mitigation | Stable `tenant + oid` key; no shared fallback; principal-unresolved state. |
 
 ## 27.4 R-04 — Source URL Safety
 
-| Field | Detail |
-|---|---|
-| Risk | Unsafe guessed URLs or misuse of signing URLs. |
-| Impact | Security/UX failure. |
+| Field      | Detail                                                                                    |
+| ---------- | ----------------------------------------------------------------------------------------- |
+| Risk       | Unsafe guessed URLs or misuse of signing URLs.                                            |
+| Impact     | Security/UX failure.                                                                      |
 | Mitigation | Backend-validated URLs only; row CTA optional; signing URL not default row-open contract. |
 
 ## 27.5 R-05 — Adobe Throttling and Polling Policy
 
-| Field | Detail |
-|---|---|
-| Risk | Repeated refresh requests or naive retries cause 429s or worsening limits. |
-| Impact | Provider degradation and poor user experience. |
+| Field      | Detail                                                                          |
+| ---------- | ------------------------------------------------------------------------------- |
+| Risk       | Repeated refresh requests or naive retries cause 429s or worsening limits.      |
+| Impact     | Provider degradation and poor user experience.                                  |
 | Mitigation | No auto-polling, manual refresh only, debounce, `Retry-After`, bounded retries. |
 
 ## 27.6 R-06 — Queue Misrepresentation Through Stale Data
 
-| Field | Detail |
-|---|---|
-| Risk | Cached or partial data is shown as current. |
-| Impact | User acts on misleading information. |
+| Field      | Detail                                                                        |
+| ---------- | ----------------------------------------------------------------------------- |
+| Risk       | Cached or partial data is shown as current.                                   |
+| Impact     | User acts on misleading information.                                          |
 | Mitigation | No durable cache in MVP; explicit freshness metadata; honest source-state UX. |
 
 ## 27.7 R-07 — Telemetry or Evidence Leakage
 
-| Field | Detail |
-|---|---|
-| Risk | Agreement names, sender identity, URLs, or tokens enter logs/evidence. |
-| Impact | Privacy/security breach. |
+| Field      | Detail                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------- |
+| Risk       | Agreement names, sender identity, URLs, or tokens enter logs/evidence.                      |
+| Impact     | Privacy/security breach.                                                                    |
 | Mitigation | Explicit telemetry allow/prohibit matrix; evidence sanitization; no raw row payload output. |
 
 ## 27.8 R-08 — Local-Only False Confidence
 
-| Field | Detail |
-|---|---|
-| Risk | Workbench/local validation misses communication-site behavior. |
-| Impact | Release failure in target SharePoint host. |
-| Mitigation | Hosted full-width validation is a hard gate. |
+| Field      | Detail                                                         |
+| ---------- | -------------------------------------------------------------- |
+| Risk       | Workbench/local validation misses communication-site behavior. |
+| Impact     | Release failure in target SharePoint host.                     |
+| Mitigation | Hosted full-width validation is a hard gate.                   |
 
 ## 27.9 R-09 — Runtime Package Drift
 
-| Field | Detail |
-|---|---|
-| Risk | Hosted page loads an older or mismatched package. |
-| Impact | Evidence proves wrong runtime. |
+| Field      | Detail                                                       |
+| ---------- | ------------------------------------------------------------ |
+| Risk       | Hosted page loads an older or mismatched package.            |
+| Impact     | Evidence proves wrong runtime.                               |
 | Mitigation | Runtime package version stamp and hosted equality assertion. |
 
 ## 27.10 R-10 — Repository Planning Drift
 
-| Field | Detail |
-|---|---|
-| Risk | README/outline/batch naming stay stale after final synthesis. |
-| Impact | Later implementation prompts inherit obsolete assumptions. |
+| Field      | Detail                                                          |
+| ---------- | --------------------------------------------------------------- |
+| Risk       | README/outline/batch naming stay stale after final synthesis.   |
+| Impact     | Later implementation prompts inherit obsolete assumptions.      |
 | Mitigation | Phase 0 authority reconciliation before code prompt generation. |
 
 ---
@@ -2323,19 +2336,19 @@ Microsoft’s current guidance materially supports this posture. [M3] [M4]
 
 This section closes the open items identified in the earlier outline.
 
-| Prior open item | Final resolution |
-|---|---|
-| Final SharePoint page URL | **Closed:** `https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard/SitePages/Home.aspx` |
-| Adobe OAuth onboarding in MVP | **Closed:** architecture and implementation scope include OAuth onboarding; live enablement is gated on external app/secret/redirect/grant-store readiness |
-| Source-unavailable transport | **Closed:** HTTP 200 + typed degraded envelope for expected source degradation |
-| Queue cache posture | **Closed:** no durable queue cache in MVP |
-| Actor email-claim precedence | **Closed:** no authorization key based on email/UPN; use configured tenant context + `oid` |
-| Expiring-soon threshold | **Closed:** 7 calendar days, only when source expiration date exists |
-| Focused queue pagination | **Closed:** cursor-based explicit `Load more` pagination in MVP; no infinite scroll |
-| Property-pane operational config exposure | **Closed:** no operational backend/Adobe auth config exposure in property pane |
-| Runtime package version proof | **Closed:** required before hosted final acceptance |
-| Package feature description drift | **Closed:** implementation cleanup required to remove HBCentral wording |
-| Batch 07 stale “shell absent” wording | **Closed:** corrected by repo truth; shell/nav/state spine exists and final plan treats it as landed |
+| Prior open item                           | Final resolution                                                                                                                                           |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Final SharePoint page URL                 | **Closed:** `https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard/SitePages/Home.aspx`                                                              |
+| Adobe OAuth onboarding in MVP             | **Closed:** architecture and implementation scope include OAuth onboarding; live enablement is gated on external app/secret/redirect/grant-store readiness |
+| Source-unavailable transport              | **Closed:** HTTP 200 + typed degraded envelope for expected source degradation                                                                             |
+| Queue cache posture                       | **Closed:** no durable queue cache in MVP                                                                                                                  |
+| Actor email-claim precedence              | **Closed:** no authorization key based on email/UPN; use configured tenant context + `oid`                                                                 |
+| Expiring-soon threshold                   | **Closed:** 7 calendar days, only when source expiration date exists                                                                                       |
+| Focused queue pagination                  | **Closed:** cursor-based explicit `Load more` pagination in MVP; no infinite scroll                                                                        |
+| Property-pane operational config exposure | **Closed:** no operational backend/Adobe auth config exposure in property pane                                                                             |
+| Runtime package version proof             | **Closed:** required before hosted final acceptance                                                                                                        |
+| Package feature description drift         | **Closed:** implementation cleanup required to remove HBCentral wording                                                                                    |
+| Batch 07 stale “shell absent” wording     | **Closed:** corrected by repo truth; shell/nav/state spine exists and final plan treats it as landed                                                       |
 
 ## 29.1 Deliberate Deferrals
 
@@ -2456,87 +2469,87 @@ The prompt package should not reopen architecture decisions. It should translate
 
 ## B.1 Microsoft / SharePoint / SPFx
 
-| ID | Source | Use |
-|---|---|---|
-| M1 | Microsoft Learn — *Use web parts with the full-width column* | Full-width communication-site support; `supportsFullBleed`; workbench limitation |
-| M2 | Microsoft Learn — *Manage access to Microsoft Entra ID-secured APIs* | SharePoint admin API permission approval |
-| M3 | Microsoft Learn — *Secure applications and APIs by validating claims* | `tid` + `oid`, subject validation, warning against email/UPN authorization |
-| M4 | Microsoft Learn — *ID token claims reference* | Mutable claim caution for `preferred_username` / `email` |
+| ID  | Source                                                                | Use                                                                              |
+| --- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| M1  | Microsoft Learn — _Use web parts with the full-width column_          | Full-width communication-site support; `supportsFullBleed`; workbench limitation |
+| M2  | Microsoft Learn — _Manage access to Microsoft Entra ID-secured APIs_  | SharePoint admin API permission approval                                         |
+| M3  | Microsoft Learn — _Secure applications and APIs by validating claims_ | `tid` + `oid`, subject validation, warning against email/UPN authorization       |
+| M4  | Microsoft Learn — _ID token claims reference_                         | Mutable claim caution for `preferred_username` / `email`                         |
 
 ## B.2 Adobe Acrobat Sign
 
-| ID | Source | Use |
-|---|---|---|
-| A1 | Adobe — *Partner Application Quickstart* | CUSTOMER vs PARTNER app domain posture |
-| A2 | Adobe — *Managing OAuth Tokens* | Access token and refresh-token lifecycle |
-| A3 | Adobe — *Acrobat Sign API Best Practices* | Base URI/access point, `POST v6/search`, signing URL posture, retry behavior |
-| A4 | Adobe — *API Agreement Statuses, Recipient Statuses, Agreement Events, and Webhook Events* | Exact current-user actionable recipient statuses |
-| A5 | Adobe — *API Usage* / current throttling guidance | 429, `Retry-After`, polling caution |
-| A6 | Adobe — *Acrobat Sign Release Notes* | Late-2025 polling-policy posture for GET endpoints |
+| ID  | Source                                                                                     | Use                                                                          |
+| --- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| A1  | Adobe — _Partner Application Quickstart_                                                   | CUSTOMER vs PARTNER app domain posture                                       |
+| A2  | Adobe — _Managing OAuth Tokens_                                                            | Access token and refresh-token lifecycle                                     |
+| A3  | Adobe — _Acrobat Sign API Best Practices_                                                  | Base URI/access point, `POST v6/search`, signing URL posture, retry behavior |
+| A4  | Adobe — _API Agreement Statuses, Recipient Statuses, Agreement Events, and Webhook Events_ | Exact current-user actionable recipient statuses                             |
+| A5  | Adobe — _API Usage_ / current throttling guidance                                          | 429, `Retry-After`, polling caution                                          |
+| A6  | Adobe — _Acrobat Sign Release Notes_                                                       | Late-2025 polling-policy posture for GET endpoints                           |
 
 ## B.3 Testing / Accessibility
 
-| ID | Source | Use |
-|---|---|---|
-| P1 | Playwright — *Authentication* | Storage-state sensitivity and repository exclusion |
-| P2 | Playwright — *Locators* | Prefer role-based locators and explicit stable selectors |
-| P3 | Playwright — *Visual comparisons* | Screenshot environmental variability |
-| W1 | W3C WAI-ARIA APG — *Tabs Pattern* | Tablist/tab/tabpanel semantics and keyboard expectations |
+| ID  | Source                            | Use                                                      |
+| --- | --------------------------------- | -------------------------------------------------------- |
+| P1  | Playwright — _Authentication_     | Storage-state sensitivity and repository exclusion       |
+| P2  | Playwright — _Locators_           | Prefer role-based locators and explicit stable selectors |
+| P3  | Playwright — _Visual comparisons_ | Screenshot environmental variability                     |
+| W1  | W3C WAI-ARIA APG — _Tabs Pattern_ | Tablist/tab/tabpanel semantics and keyboard expectations |
 
 ---
 
 # Appendix C — Master Decision Register
 
-| ID | Decision | Status |
-|---|---|---|
-| D-01 | My Dashboard is a standalone SPFx domain | Closed |
-| D-02 | My Work is the internal shell/workspace | Closed |
-| D-03 | Adobe Sign Action Queue is first module | Closed |
-| D-04 | PCC shell is primary shell basis | Closed |
-| D-05 | HB Homepage shell is secondary host-fit reference only | Closed |
-| D-06 | Target hosted page is MyDashboard `/SitePages/Home.aspx` | Closed |
-| D-07 | Full-width communication-site placement required | Closed |
-| D-08 | SharePoint host only; Teams deferred | Closed |
-| D-09 | Protected API permission remains `HB SharePoint Creator` / `access_as_user` | Closed |
+| ID   | Decision                                                                                            | Status |
+| ---- | --------------------------------------------------------------------------------------------------- | ------ |
+| D-01 | My Dashboard is a standalone SPFx domain                                                            | Closed |
+| D-02 | My Work is the internal shell/workspace                                                             | Closed |
+| D-03 | Adobe Sign Action Queue is first module                                                             | Closed |
+| D-04 | PCC shell is primary shell basis                                                                    | Closed |
+| D-05 | HB Homepage shell is secondary host-fit reference only                                              | Closed |
+| D-06 | Target hosted page is MyDashboard `/SitePages/Home.aspx`                                            | Closed |
+| D-07 | Full-width communication-site placement required                                                    | Closed |
+| D-08 | SharePoint host only; Teams deferred                                                                | Closed |
+| D-09 | Protected API permission remains `HB SharePoint Creator` / `access_as_user`                         | Closed |
 | D-10 | Runtime config keys remain `functionAppUrl`, `backendMode`, `allowBackendModeSwitch`, `apiAudience` | Closed |
-| D-11 | Read-model routes are exactly `my-work/me/home` and `my-work/me/adobe-sign/action-queue` | Closed |
-| D-12 | Read-model source-status taxonomy fixed | Closed |
-| D-13 | Query actor override prohibited | Closed |
-| D-14 | Actor key uses tenant context + `oid` | Closed |
-| D-15 | UPN/email not used for authorization key | Closed |
-| D-16 | App-only tokens not eligible for user queue reads | Closed |
-| D-17 | Adobe auth uses delegated OAuth auth-code flow | Closed |
-| D-18 | Adobe app posture is CUSTOMER | Closed |
-| D-19 | Search baseline uses `POST v6/search` | Closed |
-| D-20 | Exact six Adobe action statuses retained | Closed |
-| D-21 | Row handoff URL is optional and backend-validated | Closed |
-| D-22 | Signing URLs not default row-open contract | Closed |
-| D-23 | No auto-polling | Closed |
-| D-24 | No durable queue cache in MVP | Closed |
-| D-25 | Manual refresh in focused module only | Closed |
-| D-26 | Expiring soon = within 7 calendar days | Closed |
-| D-27 | Focused module uses explicit Load more pagination | Closed |
-| D-28 | Hosted runtime version proof required | Closed |
-| D-29 | Hosted evidence lane under `e2e/my-dashboard-live` | Closed |
-| D-30 | HBCentral package-description drift must be corrected | Closed |
+| D-11 | Read-model routes are exactly `my-work/me/home` and `my-work/me/adobe-sign/action-queue`            | Closed |
+| D-12 | Read-model source-status taxonomy fixed                                                             | Closed |
+| D-13 | Query actor override prohibited                                                                     | Closed |
+| D-14 | Actor key uses tenant context + `oid`                                                               | Closed |
+| D-15 | UPN/email not used for authorization key                                                            | Closed |
+| D-16 | App-only tokens not eligible for user queue reads                                                   | Closed |
+| D-17 | Adobe auth uses delegated OAuth auth-code flow                                                      | Closed |
+| D-18 | Adobe app posture is CUSTOMER                                                                       | Closed |
+| D-19 | Search baseline uses `POST v6/search`                                                               | Closed |
+| D-20 | Exact six Adobe action statuses retained                                                            | Closed |
+| D-21 | Row handoff URL is optional and backend-validated                                                   | Closed |
+| D-22 | Signing URLs not default row-open contract                                                          | Closed |
+| D-23 | No auto-polling                                                                                     | Closed |
+| D-24 | No durable queue cache in MVP                                                                       | Closed |
+| D-25 | Manual refresh in focused module only                                                               | Closed |
+| D-26 | Expiring soon = within 7 calendar days                                                              | Closed |
+| D-27 | Focused module uses explicit Load more pagination                                                   | Closed |
+| D-28 | Hosted runtime version proof required                                                               | Closed |
+| D-29 | Hosted evidence lane under `e2e/my-dashboard-live`                                                  | Closed |
+| D-30 | HBCentral package-description drift must be corrected                                               | Closed |
 
 ---
 
 # Appendix D — Implementation Dependency Matrix
 
-| Implementation stream | Depends on |
-|---|---|
-| Authority docs cleanup | Final plan artifact |
-| Shell completion | Existing MyWorkShell/navigation/state |
-| Home surface | Shell router + home read-model contract |
-| Shared model contracts | Final read-model decisions |
-| Frontend clients | Shared contracts + runtime config |
-| Backend route host | Shared contracts + auth middleware precedent |
-| Adobe OAuth/provider | Backend host + stable actor mapping + secure token-store decision |
-| Adobe queue UI | Read-model contract + shell/home surface |
-| Refresh/pagination UX | Queue UI + route query contract |
-| Hosted evidence lane | Runtime marker/version seam + deployed package |
-| Final release closeout | All prior streams + sanitized evidence |
+| Implementation stream  | Depends on                                                        |
+| ---------------------- | ----------------------------------------------------------------- |
+| Authority docs cleanup | Final plan artifact                                               |
+| Shell completion       | Existing MyWorkShell/navigation/state                             |
+| Home surface           | Shell router + home read-model contract                           |
+| Shared model contracts | Final read-model decisions                                        |
+| Frontend clients       | Shared contracts + runtime config                                 |
+| Backend route host     | Shared contracts + auth middleware precedent                      |
+| Adobe OAuth/provider   | Backend host + stable actor mapping + secure token-store decision |
+| Adobe queue UI         | Read-model contract + shell/home surface                          |
+| Refresh/pagination UX  | Queue UI + route query contract                                   |
+| Hosted evidence lane   | Runtime marker/version seam + deployed package                    |
+| Final release closeout | All prior streams + sanitized evidence                            |
 
 ---
 
@@ -2545,17 +2558,20 @@ The prompt package should not reopen architecture decisions. It should translate
 This appendix does **not** provide prompts. It provides the recommended implementation package architecture.
 
 ## E.1 Prompt Group 00 — Authority and Repo-Truth Alignment
+
 - reconcile README/outline/final-plan authority,
 - correct stale HBCentral feature description planning note,
 - establish exact continuation baseline.
 
 ## E.2 Prompt Group 01 — My Work Shell Completion
+
 - hero band,
 - surface router,
 - bento layout,
 - responsive/semantic tests.
 
 ## E.3 Prompt Group 02 — Shared My Work Read-Model Contracts
+
 - DTOs,
 - warning taxonomy,
 - fixtures,
@@ -2563,12 +2579,14 @@ This appendix does **not** provide prompts. It provides the recommended implemen
 - tests.
 
 ## E.4 Prompt Group 03 — Frontend Client and Hooks
+
 - fixture/backend clients,
 - state mapping,
 - home/queue hooks,
 - fallback semantics.
 
 ## E.5 Prompt Group 04 — Backend My Work Host
+
 - protected routes,
 - route registration,
 - mock provider,
@@ -2576,6 +2594,7 @@ This appendix does **not** provide prompts. It provides the recommended implemen
 - tests.
 
 ## E.6 Prompt Group 05 — Home Surface and Adobe Queue UI
+
 - cards,
 - focused module,
 - states,
@@ -2584,6 +2603,7 @@ This appendix does **not** provide prompts. It provides the recommended implemen
 - pagination.
 
 ## E.7 Prompt Group 06 — Adobe OAuth and Live Provider Backbone
+
 - actor resolver,
 - grant store,
 - OAuth flow,
@@ -2592,18 +2612,21 @@ This appendix does **not** provide prompts. It provides the recommended implemen
 - URL policy.
 
 ## E.8 Prompt Group 07 — Operational Hardening
+
 - throttle/retry behavior,
 - telemetry safety,
 - error sanitization,
 - privacy and source-state tests.
 
 ## E.9 Prompt Group 08 — Packaging, Runtime Proof, and Hosted Evidence
+
 - runtime version stamp,
 - critical runtime path expansion,
 - My Dashboard live evidence harness,
 - hosted validation lane.
 
 ## E.10 Prompt Group 09 — Documentation, Runbooks, and Closeout
+
 - app/backend READMEs,
 - OAuth support runbook,
 - deployment checklist,

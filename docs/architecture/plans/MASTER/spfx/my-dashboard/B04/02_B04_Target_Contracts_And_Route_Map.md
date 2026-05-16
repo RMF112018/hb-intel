@@ -8,8 +8,7 @@ This file is the compact contract sheet for B04 implementation. Local prompts ma
 
 ```ts
 export const MY_WORK_READ_MODEL_MODES = ['fixture', 'backend'] as const;
-export type MyWorkReadModelMode =
-  (typeof MY_WORK_READ_MODEL_MODES)[number];
+export type MyWorkReadModelMode = (typeof MY_WORK_READ_MODEL_MODES)[number];
 ```
 
 ## 3. Source-status vocabulary
@@ -68,8 +67,8 @@ export interface MyWorkReadModelEnvelope<T> {
 ```ts
 export const MY_WORK_READ_MODEL_ROUTE_PATHS = {
   home: 'my-work/me/home',
-  'adobe-sign-action-queue':
-    'my-work/me/adobe-sign/action-queue',
+  'adobe-sign-action-queue': 'my-work/me/adobe-sign/action-queue',
+  'adobe-sign-recent-completions': 'my-work/me/adobe-sign/recent-completions',
 } as const;
 ```
 
@@ -78,21 +77,22 @@ export const MY_WORK_READ_MODEL_ROUTE_PATHS = {
 ```http
 GET /api/my-work/me/home
 GET /api/my-work/me/adobe-sign/action-queue
+GET /api/my-work/me/adobe-sign/recent-completions
 ```
 
 ## 8. Frontend client interface
 
 ```ts
 export interface IMyWorkReadModelClient {
-  getMyWorkHome(): Promise<
-    MyWorkReadModelEnvelope<MyWorkHomeReadModel>
-  >;
+  getMyWorkHome(): Promise<MyWorkReadModelEnvelope<MyWorkHomeReadModel>>;
 
   getAdobeSignActionQueue(
     query?: MyWorkAdobeSignActionQueueQuery,
-  ): Promise<
-    MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>
-  >;
+  ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>>;
+
+  getAdobeSignRecentCompletions(
+    query?: MyWorkAdobeSignRecentCompletionsQuery,
+  ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignRecentCompletionsReadModel>>;
 }
 ```
 
@@ -106,12 +106,30 @@ export interface MyWorkAdobeSignActionQueueQuery {
 ```
 
 ### Query validation rules
-| Field | Rule |
-|---|---|
-| `pageSize` | integer, default `25`, minimum `1`, maximum `50` |
-| `cursor` | optional opaque string |
-| actor/email/user/principal | prohibited |
-| filter/sort | not exposed in B04 |
+
+| Field                      | Rule                                             |
+| -------------------------- | ------------------------------------------------ |
+| `pageSize`                 | integer, default `25`, minimum `1`, maximum `50` |
+| `cursor`                   | optional opaque string                           |
+| actor/email/user/principal | prohibited                                       |
+| filter/sort                | not exposed in B04                               |
+
+## 9.1 Recent completions query contract
+
+```ts
+export interface MyWorkAdobeSignRecentCompletionsQuery {
+  readonly pageSize?: number;
+  readonly cursor?: string;
+}
+```
+
+### Query validation rules
+
+| Field                      | Rule                                             |
+| -------------------------- | ------------------------------------------------ |
+| `pageSize`                 | integer, default `25`, minimum `1`, maximum `50` |
+| `cursor`                   | optional opaque string, max 256 chars            |
+| actor/email/user/principal | prohibited; actor derives from auth claims only  |
 
 ## 10. Home read model
 
@@ -164,14 +182,14 @@ export const MY_WORK_ADOBE_SIGN_REQUIRED_ACTIONS = [
 
 ## 14. Adobe status mapping
 
-| Adobe recipient status | Required action |
-|---|---|
-| `WAITING_FOR_MY_SIGNATURE` | `signature` |
-| `WAITING_FOR_MY_APPROVAL` | `approval` |
-| `WAITING_FOR_MY_ACCEPTANCE` | `acceptance` |
+| Adobe recipient status           | Required action   |
+| -------------------------------- | ----------------- |
+| `WAITING_FOR_MY_SIGNATURE`       | `signature`       |
+| `WAITING_FOR_MY_APPROVAL`        | `approval`        |
+| `WAITING_FOR_MY_ACCEPTANCE`      | `acceptance`      |
 | `WAITING_FOR_MY_ACKNOWLEDGEMENT` | `acknowledgement` |
-| `WAITING_FOR_MY_FORM_FILLING` | `form-filling` |
-| `WAITING_FOR_MY_DELEGATION` | `delegation` |
+| `WAITING_FOR_MY_FORM_FILLING`    | `form-filling`    |
+| `WAITING_FOR_MY_DELEGATION`      | `delegation`      |
 
 ## 15. Queue item DTO
 
@@ -230,10 +248,7 @@ export interface MyWorkAdobeSignActionQueuePagination {
 ```
 
 ```ts
-export type MyWorkFreshnessState =
-  | 'fresh'
-  | 'stale'
-  | 'unknown';
+export type MyWorkFreshnessState = 'fresh' | 'stale' | 'unknown';
 
 export interface MyWorkAdobeSignActionQueueFreshness {
   readonly state: MyWorkFreshnessState;
@@ -256,24 +271,39 @@ export interface MyWorkAdobeSignActionQueueReadModel {
 
 ## 19. HTTP and source-state matrix
 
-| Scenario | HTTP | Envelope status |
-|---|---:|---|
-| populated queue | 200 | `available` |
-| empty healthy queue | 200 | `available` |
-| safe partial result | 200 | `partial` |
-| config absent | 200 | `configuration-required` |
-| OAuth/re-auth required | 200 | `authorization-required` |
-| actor cannot map to Adobe principal | 200 | `principal-unresolved` |
-| upstream source unavailable | 200 | `source-unavailable` |
-| browser cannot consume HB backend | client fallback | `backend-unavailable` |
-| invalid backend auth | 401 | no envelope |
-| forbidden backend access | 403 | no envelope |
-| invalid queue query | 400 | no envelope |
-| unhandled backend exception | 500 | no envelope |
+| Scenario                            |            HTTP | Envelope status          |
+| ----------------------------------- | --------------: | ------------------------ |
+| populated queue                     |             200 | `available`              |
+| empty healthy queue                 |             200 | `available`              |
+| safe partial result                 |             200 | `partial`                |
+| config absent                       |             200 | `configuration-required` |
+| OAuth/re-auth required              |             200 | `authorization-required` |
+| actor cannot map to Adobe principal |             200 | `principal-unresolved`   |
+| upstream source unavailable         |             200 | `source-unavailable`     |
+| browser cannot consume HB backend   | client fallback | `backend-unavailable`    |
+| invalid backend auth                |             401 | no envelope              |
+| forbidden backend access            |             403 | no envelope              |
+| invalid queue query                 |             400 | no envelope              |
+| unhandled backend exception         |             500 | no envelope              |
+
+### Recent completions lane matrix
+
+| Scenario                            |            HTTP | Envelope status          |
+| ----------------------------------- | --------------: | ------------------------ |
+| completed rows returned             |             200 | `available`              |
+| no completed rows in 30-day window  |             200 | `available`              |
+| safe partial result                 |             200 | `partial`                |
+| config absent                       |             200 | `configuration-required` |
+| OAuth/re-auth required              |             200 | `authorization-required` |
+| actor cannot map to Adobe principal |             200 | `principal-unresolved`   |
+| upstream source unavailable         |             200 | `source-unavailable`     |
+| browser cannot consume HB backend   | client fallback | `backend-unavailable`    |
+| invalid completed query             |             400 | no envelope              |
 
 ## 20. Fixture closure requirements
 
 Fixtures must cover:
+
 - populated available queue,
 - empty available queue,
 - available paged queue,
@@ -285,4 +315,58 @@ Fixtures must cover:
 - backend unavailable,
 - deterministic warning and timestamp behavior.
 
+Recent completions fixtures must also cover:
+
+- available populated;
+- available empty;
+- available paged;
+- partial;
+- configuration required;
+- authorization required;
+- principal unresolved;
+- source unavailable;
+- backend unavailable.
+
 Populated queue fixture must include one item per actionable Adobe status.
+
+## 21. Recent completions DTO family (summary)
+
+```ts
+export interface MyWorkAdobeSignRecentCompletionsItem {
+  readonly itemId: string;
+  readonly sourceSystem: 'adobe-sign';
+  readonly agreementId: string;
+  readonly agreementName: string;
+  readonly agreementStatus: 'COMPLETED';
+  readonly sender?: MyWorkAdobeSignSenderSummary;
+  readonly completedAtUtc?: string;
+  readonly modifiedAtUtc?: string;
+  readonly sourceOpenUrl?: string;
+}
+
+export interface MyWorkAdobeSignRecentCompletionsSummary {
+  readonly countBasis: 'returned-items' | 'provider-total';
+  readonly completedAgreementCount: number;
+  readonly windowDays: 30;
+}
+
+export interface MyWorkAdobeSignRecentCompletionsPagination {
+  readonly pageSize: number;
+  readonly hasMore: boolean;
+  readonly nextCursor?: string;
+}
+
+export interface MyWorkAdobeSignRecentCompletionsFreshness {
+  readonly state: MyWorkFreshnessState;
+  readonly generatedAtUtc: string;
+  readonly lastSuccessfulSourceReadAtUtc?: string;
+}
+
+export interface MyWorkAdobeSignRecentCompletionsReadModel {
+  readonly moduleId: 'adobe-sign-recent-completions';
+  readonly summary: MyWorkAdobeSignRecentCompletionsSummary;
+  readonly items: readonly MyWorkAdobeSignRecentCompletionsItem[];
+  readonly pagination: MyWorkAdobeSignRecentCompletionsPagination;
+  readonly freshness: MyWorkAdobeSignRecentCompletionsFreshness;
+}
+```

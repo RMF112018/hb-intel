@@ -12,9 +12,10 @@ two-card bento grid:
 
 1. **My Projects** — assigned projects with dual SharePoint + Procore
    launch handoffs.
-2. **Adobe Sign Action Queue** — pending agreements that need the user's
-   signature, approval, acceptance, acknowledgement, form-filling, or
-   delegation.
+2. **Adobe Sign** — a single card with two in-header views:
+   - `Action Queue` for pending agreements that need user action;
+   - `Completed` for recent completed agreements (last 30 days,
+     newest-first), loaded lazily on first selection.
 
 There is no visible tab navigation, no module dropdown launcher, and no
 focused-module route. Each card owns its full state matrix (loading,
@@ -27,21 +28,21 @@ page.
 - **Header.** `MyWorkHeroBand` — authenticated time-of-day personalized
   greeting (no telemetry strip, no governance microcopy lane).
 - **Body.** `MyWorkBentoGrid` containing exactly two production cards in
-  static order: My Projects → Adobe Sign Action Queue.
+  static order: My Projects → Adobe Sign (Action Queue/Completed views).
 - **Span choreography.** Locked per responsive mode via
   `MyWorkCardSpanOverrides` declared in
   `src/surfaces/home/MyWorkHomeSurface.tsx`:
 
-  | Mode | My Projects | Adobe Sign |
-  | --- | ---: | ---: |
-  | phone | 1 | 1 |
-  | tabletPortrait | 2 | 2 |
-  | tabletLandscape | 6 | 6 |
-  | smallLaptop | 8 | 8 |
-  | standardLaptop | 6 | 4 |
-  | largeLaptop | 7 | 5 |
-  | desktop | 7 | 5 |
-  | ultrawide | 7 | 5 |
+  | Mode            | My Projects | Adobe Sign |
+  | --------------- | ----------: | ---------: |
+  | phone           |           1 |          1 |
+  | tabletPortrait  |           2 |          2 |
+  | tabletLandscape |           6 |          6 |
+  | smallLaptop     |           8 |          8 |
+  | standardLaptop  |           6 |          4 |
+  | largeLaptop     |           7 |          5 |
+  | desktop         |           7 |          5 |
+  | ultrawide       |           7 |          5 |
 
 - **Envelope-state variants.** When the read-model envelope is loading
   or in error, only the Adobe Sign card renders (it owns its loading
@@ -59,6 +60,15 @@ The app renders launch affordances; it does not own the source systems.
   the read-model item supplies a `sourceOpenUrl`; otherwise no anchor is
   rendered.
 
+## Adobe Sign read-model lanes
+
+- `GET /api/my-work/me/adobe-sign/action-queue` remains the pending lane.
+- `GET /api/my-work/me/adobe-sign/recent-completions` serves the completed
+  lane.
+- Both lanes are read-only and actor-bound through backend auth claims.
+- The completed lane is fetched lazily by the frontend only after the
+  user selects `Completed` in the card header.
+
 ## Authentication
 
 - Web API permission request: `HB SharePoint Creator` (scope
@@ -71,15 +81,15 @@ The app renders launch affordances; it does not own the source systems.
 
 ## Identity
 
-| Field | Value |
-| --- | --- |
-| Workspace package | `@hbc/spfx-my-dashboard` |
-| SPFx solution name | `hb-intel-my-dashboard` |
-| Package artifact | `solution/hb-intel-my-dashboard.sppkg` |
-| Web-part alias | `MyDashboardWebPart` |
-| Toolbox group | HB Intel |
-| Target host | SharePointWebPart (full-bleed, MyDashboard
-  communication-site home) |
+| Field                    | Value                                      |
+| ------------------------ | ------------------------------------------ |
+| Workspace package        | `@hbc/spfx-my-dashboard`                   |
+| SPFx solution name       | `hb-intel-my-dashboard`                    |
+| Package artifact         | `solution/hb-intel-my-dashboard.sppkg`     |
+| Web-part alias           | `MyDashboardWebPart`                       |
+| Toolbox group            | HB Intel                                   |
+| Target host              | SharePointWebPart (full-bleed, MyDashboard |
+| communication-site home) |
 
 The SPFx manifest version is owned by `config/package-solution.json`.
 Package-local commands below do not generate the `.sppkg` artifact;
