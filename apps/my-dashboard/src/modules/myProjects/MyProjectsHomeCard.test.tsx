@@ -109,7 +109,7 @@ describe('MyProjectsHomeCard', () => {
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
-  it('renders a tile with both action slots reachable inside the launch group (open by click)', async () => {
+  it('opens a per-tile launch menu exposing available SharePoint and Procore destinations', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
@@ -117,7 +117,7 @@ describe('MyProjectsHomeCard', () => {
       expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
-    // The fully-ready row (Harbor Office Renovation) has both action slots
+    // The fully-ready row (Harbor Office Renovation) has both destinations
     // available; find that tile so anchor assertions are deterministic.
     const tiles = Array.from(
       container.querySelectorAll<HTMLElement>('[data-my-projects-tile]'),
@@ -127,29 +127,36 @@ describe('MyProjectsHomeCard', () => {
     );
     expect(harborTile).toBeTruthy();
 
-    const trigger = harborTile!.querySelector('[data-my-projects-launch-trigger]') as HTMLButtonElement;
+    const trigger = harborTile!.querySelector(
+      '[data-my-projects-launch-trigger]',
+    ) as HTMLButtonElement;
     expect(trigger).not.toBeNull();
     fireEvent.click(trigger);
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
 
-    const sharePointLink = harborTile!.querySelector(
-      '[data-my-projects-action-slot="sharepoint"][data-my-projects-action-state="available"]',
+    const menu = document.body.querySelector('[data-my-projects-launch-menu]') as HTMLElement;
+    expect(menu).not.toBeNull();
+
+    const sharePointLink = menu.querySelector(
+      '[data-my-projects-launch-option="sharepoint"][data-my-projects-launch-option-state="available"]',
     ) as HTMLAnchorElement;
+    expect(sharePointLink.tagName).toBe('A');
     expect(sharePointLink.textContent).toBe('Open SharePoint Site');
     expect(sharePointLink.getAttribute('href')).toContain('https://');
     expect(sharePointLink.getAttribute('target')).toBe('_blank');
     expect(sharePointLink.getAttribute('rel')).toBe('noopener noreferrer');
 
-    const procoreLink = harborTile!.querySelector(
-      '[data-my-projects-action-slot="procore"][data-my-projects-action-state="available"]',
+    const procoreLink = menu.querySelector(
+      '[data-my-projects-launch-option="procore"][data-my-projects-launch-option-state="available"]',
     ) as HTMLAnchorElement;
+    expect(procoreLink.tagName).toBe('A');
     expect(procoreLink.textContent).toBe('Open Procore');
     expect(procoreLink.getAttribute('href')).toContain('https://app.procore.com/');
     expect(procoreLink.getAttribute('target')).toBe('_blank');
     expect(procoreLink.getAttribute('rel')).toBe('noopener noreferrer');
   });
 
-  it('renders unavailable actions without fake links once launch groups are opened', async () => {
+  it('renders unavailable launch options as non-anchor disabled menu items', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
@@ -157,16 +164,51 @@ describe('MyProjectsHomeCard', () => {
       expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
-    container
-      .querySelectorAll<HTMLButtonElement>('[data-my-projects-launch-trigger]')
-      .forEach((trigger) => fireEvent.click(trigger));
+    const triggers = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[data-my-projects-launch-trigger]'),
+    );
 
-    const unavailable = container.querySelectorAll('[data-my-projects-action-state="unavailable"]');
-    expect(unavailable.length).toBeGreaterThan(0);
-    unavailable.forEach((node) => {
-      expect(node.tagName).toBe('SPAN');
+    // Concurrency rule: only one menu open at a time. Visit each tile's
+    // menu and harvest unavailable options state-by-state.
+    const observed: HTMLElement[] = [];
+    for (const trigger of triggers) {
+      fireEvent.click(trigger);
+      const menu = document.body.querySelector('[data-my-projects-launch-menu]') as HTMLElement;
+      expect(menu).not.toBeNull();
+      menu
+        .querySelectorAll<HTMLElement>('[data-my-projects-launch-option-state="unavailable"]')
+        .forEach((node) => observed.push(node));
+      fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+    }
+
+    expect(observed.length).toBeGreaterThan(0);
+    observed.forEach((node) => {
+      expect(node.tagName).toBe('BUTTON');
       expect(node.getAttribute('href')).toBeNull();
+      expect(node.getAttribute('aria-disabled')).toBe('true');
     });
+  });
+
+  it('opens only one launch menu at a time across the tile grid', async () => {
+    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
+    const { container } = renderCard();
+
+    await waitFor(() =>
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
+    );
+
+    const triggers = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[data-my-projects-launch-trigger]'),
+    );
+    expect(triggers.length).toBeGreaterThanOrEqual(2);
+
+    fireEvent.click(triggers[0]!);
+    expect(document.body.querySelectorAll('[data-my-projects-launch-menu]').length).toBe(1);
+
+    fireEvent.click(triggers[1]!);
+    expect(document.body.querySelectorAll('[data-my-projects-launch-menu]').length).toBe(1);
+    expect(triggers[0]!.getAttribute('aria-expanded')).toBe('false');
+    expect(triggers[1]!.getAttribute('aria-expanded')).toBe('true');
   });
 
   it('does not render source/provenance pills on any tile', async () => {
@@ -393,7 +435,7 @@ describe('MyProjectsHomeCard', () => {
     expect(container.textContent ?? '').not.toContain('Launch List');
   });
 
-  it('maps procore-project-invalid warning to an unavailable tile action with accessible explanation', async () => {
+  it('maps procore-project-invalid warning to an unavailable menu option with accessible explanation', async () => {
     getMyProjectLinksMock.mockResolvedValue(makeInvalidProcoreEnvelope());
     const { container } = renderCard();
 
@@ -406,16 +448,18 @@ describe('MyProjectsHomeCard', () => {
     ) as HTMLButtonElement;
     fireEvent.click(trigger);
 
-    const unavailable = container.querySelector(
-      '[data-my-projects-action-slot="procore"][data-my-projects-action-state="unavailable"]',
-    ) as HTMLElement;
+    const unavailable = document.body.querySelector(
+      '[data-my-projects-launch-option="procore"][data-my-projects-launch-option-state="unavailable"]',
+    ) as HTMLButtonElement;
     expect(unavailable).not.toBeNull();
+    expect(unavailable.tagName).toBe('BUTTON');
+    expect(unavailable.getAttribute('aria-disabled')).toBe('true');
     expect(unavailable.getAttribute('aria-label')).toBe(
       'Procore unavailable due to invalid project token.',
     );
   });
 
-  it('keeps both action slots reachable in compact mode after opening the launch trigger', async () => {
+  it('opens the launch menu and exposes both options in compact (phone) mode', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard('phone');
 
@@ -432,9 +476,13 @@ describe('MyProjectsHomeCard', () => {
     ) as HTMLButtonElement;
     fireEvent.click(trigger);
 
+    const menu = document.body.querySelector('[data-my-projects-launch-menu]') as HTMLElement;
+    expect(menu).not.toBeNull();
     expect(
-      firstTile.querySelector('[data-my-projects-action-slot="sharepoint"]')?.textContent,
+      menu.querySelector('[data-my-projects-launch-option="sharepoint"]')?.textContent,
     ).toBeTruthy();
-    expect(firstTile.querySelector('[data-my-projects-action-slot="procore"]')?.textContent).toBeTruthy();
+    expect(
+      menu.querySelector('[data-my-projects-launch-option="procore"]')?.textContent,
+    ).toBeTruthy();
   });
 });

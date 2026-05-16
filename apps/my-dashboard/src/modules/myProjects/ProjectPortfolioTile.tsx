@@ -4,14 +4,13 @@ import {
   type MyProjectAssignmentRoleId,
   type MyProjectLinkItem,
 } from '@hbc/models/myWork';
+import { ProjectLaunchMenu } from './ProjectLaunchMenu.js';
 import styles from './ProjectPortfolioTile.module.css';
 
 export interface ProjectPortfolioTileProps {
   readonly row: MyProjectLinkItem;
-}
-
-function rowHasProcoreInvalidWarning(row: MyProjectLinkItem): boolean {
-  return row.warnings.some((warning) => warning.code === 'procore-project-invalid');
+  readonly isOpen: boolean;
+  readonly onOpenChange: (open: boolean) => void;
 }
 
 function sortedRoleLabels(
@@ -24,77 +23,8 @@ function sortedRoleLabels(
     .map((definition) => definition.displayLabel);
 }
 
-function TileActionSlot({
-  area,
-  row,
-}: {
-  readonly area: 'sharepoint' | 'procore';
-  readonly row: MyProjectLinkItem;
-}) {
-  if (area === 'sharepoint') {
-    const action = row.sharePointAction;
-    if (action.state === 'available' && action.href) {
-      return (
-        <a
-          href={action.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.actionLink}
-          data-my-projects-action-slot="sharepoint"
-          data-my-projects-action-state="available"
-        >
-          {action.label}
-        </a>
-      );
-    }
-    return (
-      <span
-        className={styles.actionUnavailable}
-        data-my-projects-action-slot="sharepoint"
-        data-my-projects-action-state="unavailable"
-        aria-label="SharePoint unavailable for this project."
-      >
-        SharePoint unavailable
-      </span>
-    );
-  }
-
-  const action = row.procoreAction;
-  if (action.state === 'available' && action.href) {
-    return (
-      <a
-        href={action.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={styles.actionLink}
-        data-my-projects-action-slot="procore"
-        data-my-projects-action-state="available"
-      >
-        Open Procore
-      </a>
-    );
-  }
-
-  const invalidToken = rowHasProcoreInvalidWarning(row);
-  const unavailableReason = invalidToken
-    ? 'Procore unavailable due to invalid project token.'
-    : 'Procore unavailable for this project.';
-  return (
-    <span
-      className={styles.actionUnavailable}
-      data-my-projects-action-slot="procore"
-      data-my-projects-action-state="unavailable"
-      aria-label={unavailableReason}
-    >
-      Procore unavailable
-    </span>
-  );
-}
-
-export function ProjectPortfolioTile({ row }: ProjectPortfolioTileProps) {
-  const launchRegionId = useId();
+export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortfolioTileProps) {
   const roleOverflowId = useId();
-  const [launchOpen, setLaunchOpen] = useState(false);
   const [roleOverflowOpen, setRoleOverflowOpen] = useState(false);
 
   const labels = sortedRoleLabels(row.assignmentRoles);
@@ -122,16 +52,7 @@ export function ProjectPortfolioTile({ row }: ProjectPortfolioTileProps) {
             {row.projectStage}
           </p>
         ) : null}
-        <button
-          type="button"
-          className={styles.openTrigger}
-          aria-expanded={launchOpen ? 'true' : 'false'}
-          aria-controls={launchRegionId}
-          onClick={() => setLaunchOpen((current) => !current)}
-          data-my-projects-launch-trigger=""
-        >
-          Open
-        </button>
+        <ProjectLaunchMenu row={row} isOpen={isOpen} onOpenChange={onOpenChange} />
       </div>
 
       {primaryRoleLabel ? (
@@ -163,16 +84,6 @@ export function ProjectPortfolioTile({ row }: ProjectPortfolioTileProps) {
           ) : null}
         </div>
       ) : null}
-
-      <div
-        id={launchRegionId}
-        className={styles.launchGroup}
-        data-my-projects-launch-group=""
-        hidden={!launchOpen}
-      >
-        <TileActionSlot area="sharepoint" row={row} />
-        <TileActionSlot area="procore" row={row} />
-      </div>
     </article>
   );
 }

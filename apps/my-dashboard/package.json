@@ -11,6 +11,7 @@
     "dev": "vite"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.27.0",
     "@hbc/auth": "workspace:*",
     "@hbc/models": "workspace:*",
     "@hbc/ui-kit": "workspace:*",

@@ -99,6 +99,7 @@ export function MyProjectsHomeCard({
   const [envelope, setEnvelope] = useState<MyWorkReadModelEnvelope<MyProjectLinksReadModel> | null>(
     null,
   );
+  const [openTileKey, setOpenTileKey] = useState<string | null>(null);
   const disclosureButtonRef = useRef<HTMLButtonElement | null>(null);
   const restoreDisclosureFocusRef = useRef(false);
 
@@ -166,6 +167,12 @@ export function MyProjectsHomeCard({
     }
   }, [expanded]);
 
+  useEffect(() => {
+    if (openTileKey && !displayedItems.some((row) => row.recordKey === openTileKey)) {
+      setOpenTileKey(null);
+    }
+  }, [displayedItems, openTileKey]);
+
   return (
     <MyWorkCard
       role="my-projects-home"
@@ -220,7 +227,12 @@ export function MyProjectsHomeCard({
             data-my-projects-mode={mode}
           >
             {displayedItems.map((row) => (
-              <ProjectPortfolioTile key={row.recordKey} row={row} />
+              <ProjectPortfolioTile
+                key={row.recordKey}
+                row={row}
+                isOpen={openTileKey === row.recordKey}
+                onOpenChange={(open) => setOpenTileKey(open ? row.recordKey : null)}
+              />
             ))}
           </div>
           {showRowDisclosure ? (

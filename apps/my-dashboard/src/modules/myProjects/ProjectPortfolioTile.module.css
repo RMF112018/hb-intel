@@ -1,6 +1,6 @@
 .tile {
   display: grid;
-  grid-template-rows: auto auto auto auto;
+  grid-template-rows: auto auto auto;
   gap: 8px;
   border: 1px solid var(--my-work-color-border);
   border-radius: calc(var(--my-work-radius-md) + 1px);
@@ -56,25 +56,6 @@
   flex: 1 1 auto;
 }
 
-.openTrigger {
-  flex: 0 0 auto;
-  min-height: 32px;
-  border-radius: var(--my-work-radius-md);
-  border: 1px solid var(--my-work-color-rail-accent);
-  background: #fff;
-  color: var(--my-work-color-text-primary);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 0 14px;
-  cursor: pointer;
-  transition: background-color 160ms ease-out;
-}
-
-.openTrigger:hover {
-  background: color-mix(in srgb, var(--my-work-color-rail-accent) 12%, #ffffff 88%);
-}
-
 .roleRow {
   display: flex;
   flex-wrap: wrap;
@@ -110,6 +91,11 @@
   cursor: pointer;
 }
 
+.roleOverflow:focus-visible {
+  outline: 2px solid var(--my-work-color-rail-accent);
+  outline-offset: 2px;
+}
+
 .roleOverflowDetails {
   width: 100%;
   font-size: 12px;
@@ -117,70 +103,8 @@
   overflow-wrap: anywhere;
 }
 
-.launchGroup {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  min-width: 0;
-}
-
-.actionLink,
-.actionUnavailable {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 36px;
-  border-radius: var(--my-work-radius-md);
-  border: 1px solid var(--my-work-color-border);
-  font-size: 12px;
-  font-weight: 700;
-  padding: 0 10px;
-  text-align: center;
-  overflow-wrap: anywhere;
-}
-
-.actionLink {
-  text-decoration: none;
-  background: var(--my-work-color-rail-accent);
-  border-color: var(--my-work-color-rail-accent);
-  color: #fff;
-}
-
-.actionLink:hover {
-  filter: brightness(1.03);
-}
-
-.actionUnavailable {
-  background: color-mix(in srgb, var(--my-work-color-rail) 74%, #ffffff 26%);
-  color: var(--my-work-color-text-muted);
-}
-
-.openTrigger:focus-visible,
-.roleOverflow:focus-visible,
-.actionLink:focus-visible {
-  outline: 2px solid var(--my-work-color-rail-accent);
-  outline-offset: 2px;
-}
-
 :global([data-my-work-mode='phone']) .meta,
 :global([data-my-work-mode='tabletPortrait']) .meta {
   flex-direction: column;
   align-items: stretch;
-}
-
-:global([data-my-work-mode='phone']) .openTrigger,
-:global([data-my-work-mode='tabletPortrait']) .openTrigger {
-  width: 100%;
-}
-
-:global([data-my-work-mode='phone']) .launchGroup,
-:global([data-my-work-mode='tabletPortrait']) .launchGroup {
-  grid-template-columns: 1fr;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .openTrigger,
-  .actionLink {
-    transition: none;
-  }
 }
