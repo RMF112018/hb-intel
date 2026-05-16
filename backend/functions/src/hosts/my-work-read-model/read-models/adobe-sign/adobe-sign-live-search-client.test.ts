@@ -176,7 +176,7 @@ describe('createAdobeSignLiveSearchClient — request shape', () => {
         },
         startIndex: 5,
         pageSize: 10,
-        sortByField: 'CREATED_DATE',
+        sortByField: 'MODIFIED_DATE',
         sortOrder: 'DESC',
       },
     });
@@ -476,8 +476,8 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
   });
 
   it('HTTP 400 with unsafe provider error narrative omits providerErrorCode', async () => {
-    const fetchSpy = vi.fn(
-      async () => jsonResponse({ error: 'Request body is not valid for this endpoint' }, 400),
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({ error: 'Request body is not valid for this endpoint' }, 400),
     );
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
     expect(await client.search(VALID_INPUT)).toEqual({
@@ -1075,7 +1075,9 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
   });
 
   it('2xx with page.nextCursor exposes nested page cursor diagnostics', async () => {
-    const fetchSpy = vi.fn(async () => jsonResponse({ page: { nextCursor: 'opaque' }, userAgreementList: [] }));
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({ page: { nextCursor: 'opaque' }, userAgreementList: [] }),
+    );
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
     expect(await client.search(VALID_INPUT)).toEqual({
       status: 'unreachable',
@@ -1137,7 +1139,9 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
     const fetchSpy = vi.fn(async () =>
       jsonResponse({
         page: {},
-        userAgreementList: [{ id: 'agreement-1', name: 'Agreement One', status: 'WAITING_FOR_MY_SIGNATURE' }],
+        userAgreementList: [
+          { id: 'agreement-1', name: 'Agreement One', status: 'WAITING_FOR_MY_SIGNATURE' },
+        ],
       }),
     );
     const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });

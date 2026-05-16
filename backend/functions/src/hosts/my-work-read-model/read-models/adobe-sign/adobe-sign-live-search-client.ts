@@ -195,9 +195,11 @@ function buildSearchRequestDiagnostics(
     agreementAssetsCriteriaAgreementTypeCount: criteriaTypeValues.length,
     agreementAssetsCriteriaSignedStatusCount: criteriaStatusValues.length,
     agreementAssetsCriteriaHasModifiedDateField:
-      criteriaObj !== undefined && Object.prototype.hasOwnProperty.call(criteriaObj, 'modifiedDate'),
+      criteriaObj !== undefined &&
+      Object.prototype.hasOwnProperty.call(criteriaObj, 'modifiedDate'),
     agreementAssetsCriteriaModifiedDateHasRangeField:
-      modifiedDateObj !== undefined && Object.prototype.hasOwnProperty.call(modifiedDateObj, 'range'),
+      modifiedDateObj !== undefined &&
+      Object.prototype.hasOwnProperty.call(modifiedDateObj, 'range'),
     agreementAssetsCriteriaModifiedDateRangeHasLowerBoundField: hasLowerBound,
     agreementAssetsCriteriaModifiedDateRangeHasUpperBoundField: hasUpperBound,
     agreementAssetsCriteriaHasSortByField:
@@ -280,53 +282,53 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
   if (parsed === null || typeof parsed !== 'object') {
     return attachDeterministicShapeDiagnostics(
       {
-      bodyWasJsonObject: false,
-      topLevelKeyCount: 0,
-      hasTopLevelAgreementsArray: false,
-      hasSearchAgreementsResponseField: false,
-      hasNextCursorField: false,
-      hasPageField: false,
-      pageWasObject: false,
-      pageHasNextCursorField: false,
-      hasUserAgreementListField: false,
-      hasUserAgreementListArray: false,
-      userAgreementListHasAtLeastOneItem: false,
-      firstUserAgreementWasObject: false,
-      firstUserAgreementHasIdField: false,
-      firstUserAgreementHasNameField: false,
-      firstUserAgreementHasStatusField: false,
-      firstUserAgreementHasRecipientStatusField: false,
-      hasAgreementAssetsField: false,
-      hasAgreementAssetsArray: false,
-      hasResultsField: false,
-      hasResultsArray: false,
-      hasSearchResultsField: false,
-      hasSearchResultsArray: false,
-      hasResultListField: false,
-      hasResultListArray: false,
-      hasPageInfoField: false,
-      hasTotalCountField: false,
-      hasCurrentPageField: false,
-      hasTotalPagesField: false,
-      hasAgreementAssetListField: false,
-      hasAgreementAssetListArray: false,
-      hasAgreementAssetsListField: false,
-      hasAgreementAssetsListArray: false,
-      hasAgreementAssetSearchResultsField: false,
-      hasAgreementAssetSearchResultsArray: false,
-      hasAgreementAssetSearchResultListField: false,
-      hasAgreementAssetSearchResultListArray: false,
-      hasSearchResultField: false,
-      searchResultWasObject: false,
-      searchResultHasAgreementAssetsField: false,
-      searchResultHasAgreementAssetsArray: false,
-      hasPagingInfoField: false,
-      hasPaginationField: false,
-      hasPageDataField: false,
-      hasTotalHitsField: false,
-      hasTotalRecordsField: false,
-      hasStartIndexField: false,
-      hasPageSizeField: false,
+        bodyWasJsonObject: false,
+        topLevelKeyCount: 0,
+        hasTopLevelAgreementsArray: false,
+        hasSearchAgreementsResponseField: false,
+        hasNextCursorField: false,
+        hasPageField: false,
+        pageWasObject: false,
+        pageHasNextCursorField: false,
+        hasUserAgreementListField: false,
+        hasUserAgreementListArray: false,
+        userAgreementListHasAtLeastOneItem: false,
+        firstUserAgreementWasObject: false,
+        firstUserAgreementHasIdField: false,
+        firstUserAgreementHasNameField: false,
+        firstUserAgreementHasStatusField: false,
+        firstUserAgreementHasRecipientStatusField: false,
+        hasAgreementAssetsField: false,
+        hasAgreementAssetsArray: false,
+        hasResultsField: false,
+        hasResultsArray: false,
+        hasSearchResultsField: false,
+        hasSearchResultsArray: false,
+        hasResultListField: false,
+        hasResultListArray: false,
+        hasPageInfoField: false,
+        hasTotalCountField: false,
+        hasCurrentPageField: false,
+        hasTotalPagesField: false,
+        hasAgreementAssetListField: false,
+        hasAgreementAssetListArray: false,
+        hasAgreementAssetsListField: false,
+        hasAgreementAssetsListArray: false,
+        hasAgreementAssetSearchResultsField: false,
+        hasAgreementAssetSearchResultsArray: false,
+        hasAgreementAssetSearchResultListField: false,
+        hasAgreementAssetSearchResultListArray: false,
+        hasSearchResultField: false,
+        searchResultWasObject: false,
+        searchResultHasAgreementAssetsField: false,
+        searchResultHasAgreementAssetsArray: false,
+        hasPagingInfoField: false,
+        hasPaginationField: false,
+        hasPageDataField: false,
+        hasTotalHitsField: false,
+        hasTotalRecordsField: false,
+        hasStartIndexField: false,
+        hasPageSizeField: false,
       },
       undefined,
     );
@@ -351,74 +353,78 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
     : undefined;
   return attachDeterministicShapeDiagnostics(
     {
-    bodyWasJsonObject: true,
-    topLevelKeyCount: Object.keys(body).length,
-    hasTopLevelAgreementsArray: Array.isArray(body.agreements),
-    hasSearchAgreementsResponseField: Object.prototype.hasOwnProperty.call(
-      body,
-      'searchAgreementsResponse',
-    ),
-    hasNextCursorField: Object.prototype.hasOwnProperty.call(body, 'nextCursor'),
-    hasPageField: Object.prototype.hasOwnProperty.call(body, 'page'),
-    pageWasObject,
-    pageHasNextCursorField:
-      pageWasObject && Object.prototype.hasOwnProperty.call(page as Record<string, unknown>, 'nextCursor'),
-    hasUserAgreementListField: Object.prototype.hasOwnProperty.call(body, 'userAgreementList'),
-    hasUserAgreementListArray,
-    userAgreementListHasAtLeastOneItem,
-    firstUserAgreementWasObject,
-    firstUserAgreementHasIdField:
-      firstUserAgreementRecord !== undefined &&
-      Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'id'),
-    firstUserAgreementHasNameField:
-      firstUserAgreementRecord !== undefined &&
-      Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'name'),
-    firstUserAgreementHasStatusField:
-      firstUserAgreementRecord !== undefined &&
-      Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'status'),
-    firstUserAgreementHasRecipientStatusField:
-      firstUserAgreementRecord !== undefined &&
-      Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'recipientStatus'),
-    hasAgreementAssetsField: Object.prototype.hasOwnProperty.call(body, 'agreementAssets'),
-    hasAgreementAssetsArray: Array.isArray(body.agreementAssets),
-    hasResultsField: Object.prototype.hasOwnProperty.call(body, 'results'),
-    hasResultsArray: Array.isArray(body.results),
-    hasSearchResultsField: Object.prototype.hasOwnProperty.call(body, 'searchResults'),
-    hasSearchResultsArray: Array.isArray(body.searchResults),
-    hasResultListField: Object.prototype.hasOwnProperty.call(body, 'resultList'),
-    hasResultListArray: Array.isArray(body.resultList),
-    hasPageInfoField: Object.prototype.hasOwnProperty.call(body, 'pageInfo'),
-    hasTotalCountField: Object.prototype.hasOwnProperty.call(body, 'totalCount'),
-    hasCurrentPageField: Object.prototype.hasOwnProperty.call(body, 'currentPage'),
-    hasTotalPagesField: Object.prototype.hasOwnProperty.call(body, 'totalPages'),
-    hasAgreementAssetListField: Object.prototype.hasOwnProperty.call(body, 'agreementAssetList'),
-    hasAgreementAssetListArray: Array.isArray(body.agreementAssetList),
-    hasAgreementAssetsListField: Object.prototype.hasOwnProperty.call(body, 'agreementAssetsList'),
-    hasAgreementAssetsListArray: Array.isArray(body.agreementAssetsList),
-    hasAgreementAssetSearchResultsField: Object.prototype.hasOwnProperty.call(
-      body,
-      'agreementAssetSearchResults',
-    ),
-    hasAgreementAssetSearchResultsArray: Array.isArray(body.agreementAssetSearchResults),
-    hasAgreementAssetSearchResultListField: Object.prototype.hasOwnProperty.call(
-      body,
-      'agreementAssetSearchResultList',
-    ),
-    hasAgreementAssetSearchResultListArray: Array.isArray(body.agreementAssetSearchResultList),
-    hasSearchResultField: Object.prototype.hasOwnProperty.call(body, 'searchResult'),
-    searchResultWasObject,
-    searchResultHasAgreementAssetsField:
-      searchResultRecord !== undefined &&
-      Object.prototype.hasOwnProperty.call(searchResultRecord, 'agreementAssets'),
-    searchResultHasAgreementAssetsArray:
-      searchResultRecord !== undefined && Array.isArray(searchResultRecord.agreementAssets),
-    hasPagingInfoField: Object.prototype.hasOwnProperty.call(body, 'pagingInfo'),
-    hasPaginationField: Object.prototype.hasOwnProperty.call(body, 'pagination'),
-    hasPageDataField: Object.prototype.hasOwnProperty.call(body, 'pageData'),
-    hasTotalHitsField: Object.prototype.hasOwnProperty.call(body, 'totalHits'),
-    hasTotalRecordsField: Object.prototype.hasOwnProperty.call(body, 'totalRecords'),
-    hasStartIndexField: Object.prototype.hasOwnProperty.call(body, 'startIndex'),
-    hasPageSizeField: Object.prototype.hasOwnProperty.call(body, 'pageSize'),
+      bodyWasJsonObject: true,
+      topLevelKeyCount: Object.keys(body).length,
+      hasTopLevelAgreementsArray: Array.isArray(body.agreements),
+      hasSearchAgreementsResponseField: Object.prototype.hasOwnProperty.call(
+        body,
+        'searchAgreementsResponse',
+      ),
+      hasNextCursorField: Object.prototype.hasOwnProperty.call(body, 'nextCursor'),
+      hasPageField: Object.prototype.hasOwnProperty.call(body, 'page'),
+      pageWasObject,
+      pageHasNextCursorField:
+        pageWasObject &&
+        Object.prototype.hasOwnProperty.call(page as Record<string, unknown>, 'nextCursor'),
+      hasUserAgreementListField: Object.prototype.hasOwnProperty.call(body, 'userAgreementList'),
+      hasUserAgreementListArray,
+      userAgreementListHasAtLeastOneItem,
+      firstUserAgreementWasObject,
+      firstUserAgreementHasIdField:
+        firstUserAgreementRecord !== undefined &&
+        Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'id'),
+      firstUserAgreementHasNameField:
+        firstUserAgreementRecord !== undefined &&
+        Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'name'),
+      firstUserAgreementHasStatusField:
+        firstUserAgreementRecord !== undefined &&
+        Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'status'),
+      firstUserAgreementHasRecipientStatusField:
+        firstUserAgreementRecord !== undefined &&
+        Object.prototype.hasOwnProperty.call(firstUserAgreementRecord, 'recipientStatus'),
+      hasAgreementAssetsField: Object.prototype.hasOwnProperty.call(body, 'agreementAssets'),
+      hasAgreementAssetsArray: Array.isArray(body.agreementAssets),
+      hasResultsField: Object.prototype.hasOwnProperty.call(body, 'results'),
+      hasResultsArray: Array.isArray(body.results),
+      hasSearchResultsField: Object.prototype.hasOwnProperty.call(body, 'searchResults'),
+      hasSearchResultsArray: Array.isArray(body.searchResults),
+      hasResultListField: Object.prototype.hasOwnProperty.call(body, 'resultList'),
+      hasResultListArray: Array.isArray(body.resultList),
+      hasPageInfoField: Object.prototype.hasOwnProperty.call(body, 'pageInfo'),
+      hasTotalCountField: Object.prototype.hasOwnProperty.call(body, 'totalCount'),
+      hasCurrentPageField: Object.prototype.hasOwnProperty.call(body, 'currentPage'),
+      hasTotalPagesField: Object.prototype.hasOwnProperty.call(body, 'totalPages'),
+      hasAgreementAssetListField: Object.prototype.hasOwnProperty.call(body, 'agreementAssetList'),
+      hasAgreementAssetListArray: Array.isArray(body.agreementAssetList),
+      hasAgreementAssetsListField: Object.prototype.hasOwnProperty.call(
+        body,
+        'agreementAssetsList',
+      ),
+      hasAgreementAssetsListArray: Array.isArray(body.agreementAssetsList),
+      hasAgreementAssetSearchResultsField: Object.prototype.hasOwnProperty.call(
+        body,
+        'agreementAssetSearchResults',
+      ),
+      hasAgreementAssetSearchResultsArray: Array.isArray(body.agreementAssetSearchResults),
+      hasAgreementAssetSearchResultListField: Object.prototype.hasOwnProperty.call(
+        body,
+        'agreementAssetSearchResultList',
+      ),
+      hasAgreementAssetSearchResultListArray: Array.isArray(body.agreementAssetSearchResultList),
+      hasSearchResultField: Object.prototype.hasOwnProperty.call(body, 'searchResult'),
+      searchResultWasObject,
+      searchResultHasAgreementAssetsField:
+        searchResultRecord !== undefined &&
+        Object.prototype.hasOwnProperty.call(searchResultRecord, 'agreementAssets'),
+      searchResultHasAgreementAssetsArray:
+        searchResultRecord !== undefined && Array.isArray(searchResultRecord.agreementAssets),
+      hasPagingInfoField: Object.prototype.hasOwnProperty.call(body, 'pagingInfo'),
+      hasPaginationField: Object.prototype.hasOwnProperty.call(body, 'pagination'),
+      hasPageDataField: Object.prototype.hasOwnProperty.call(body, 'pageData'),
+      hasTotalHitsField: Object.prototype.hasOwnProperty.call(body, 'totalHits'),
+      hasTotalRecordsField: Object.prototype.hasOwnProperty.call(body, 'totalRecords'),
+      hasStartIndexField: Object.prototype.hasOwnProperty.call(body, 'startIndex'),
+      hasPageSizeField: Object.prototype.hasOwnProperty.call(body, 'pageSize'),
     },
     body,
   );
@@ -530,7 +536,7 @@ export function createAdobeSignLiveSearchClient(
                 },
                 startIndex,
                 pageSize: input.request.pageSize,
-                sortByField: 'CREATED_DATE',
+                sortByField: 'MODIFIED_DATE',
                 sortOrder: 'DESC',
               },
             }
@@ -541,7 +547,12 @@ export function createAdobeSignLiveSearchClient(
                 startIndex,
               },
             };
-      const searchRequestDiagnostics = buildSearchRequestDiagnostics(url, body, method, input.request);
+      const searchRequestDiagnostics = buildSearchRequestDiagnostics(
+        url,
+        body,
+        method,
+        input.request,
+      );
 
       const controller = new AbortController();
       const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
@@ -585,7 +596,9 @@ export function createAdobeSignLiveSearchClient(
         } catch {
           parsed = undefined;
         }
-        const providerErrorCode = normalizeSafeProviderErrorCode(readErrorCodeFromAdobeBody(parsed));
+        const providerErrorCode = normalizeSafeProviderErrorCode(
+          readErrorCodeFromAdobeBody(parsed),
+        );
         const providerFieldPresence = readProviderErrorFieldPresence(parsed);
         return {
           status: 'unreachable',
@@ -603,7 +616,9 @@ export function createAdobeSignLiveSearchClient(
         } catch {
           parsed = undefined;
         }
-        const providerErrorCode = normalizeSafeProviderErrorCode(readErrorCodeFromAdobeBody(parsed));
+        const providerErrorCode = normalizeSafeProviderErrorCode(
+          readErrorCodeFromAdobeBody(parsed),
+        );
         const providerFieldPresence = readProviderErrorFieldPresence(parsed);
         return {
           status: 'unreachable',
