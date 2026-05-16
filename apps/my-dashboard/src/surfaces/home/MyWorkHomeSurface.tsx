@@ -79,10 +79,19 @@ export function MyWorkHomeSurface({
     />
   );
 
+  const myProjectsCard = (
+    <MyProjectsHomeCard
+      getApiToken={getApiToken}
+      footprint="full"
+      spanOverrides={MY_PROJECTS_HOME_SPAN_OVERRIDES}
+    />
+  );
+
   if (readinessVariant === 'loading') {
     return (
       <>
         <span hidden data-my-work-readiness-state="loading" role="status" aria-live="polite" />
+        {myProjectsCard}
         {adobeCard}
       </>
     );
@@ -92,6 +101,7 @@ export function MyWorkHomeSurface({
     return (
       <>
         <span hidden data-my-work-readiness-state="error" role="alert" />
+        {myProjectsCard}
         {adobeCard}
       </>
     );
@@ -100,11 +110,7 @@ export function MyWorkHomeSurface({
   return (
     <>
       {statusMarker}
-      <MyProjectsHomeCard
-        getApiToken={getApiToken}
-        footprint="full"
-        spanOverrides={MY_PROJECTS_HOME_SPAN_OVERRIDES}
-      />
+      {myProjectsCard}
       {adobeCard}
     </>
   );

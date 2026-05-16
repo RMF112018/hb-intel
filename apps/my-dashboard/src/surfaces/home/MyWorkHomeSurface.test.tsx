@@ -190,31 +190,36 @@ describe('MyWorkHomeSurface — copy posture', () => {
 });
 
 describe('MyWorkHomeSurface — envelope-state variants', () => {
-  it('loading variant renders the loading marker AND the consolidated Adobe card (the card owns its loading state)', () => {
+  it('loading variant renders the loading marker plus both primary cards; Adobe card reports loading state', () => {
     const { container } = renderHome({ readinessVariant: 'loading' });
     expect(container.querySelector('[data-my-work-readiness-state="loading"]')).not.toBeNull();
-    // The Adobe card mounts in every readiness state so it owns its full state matrix.
-    expect(getCardRoles(container)).toEqual(['adobe-sign-action-queue']);
+    // Both primary cards mount in every readiness state so the page surface is
+    // fully composed and My Projects' /project-links request can start in
+    // parallel with /home.
+    expect(getCardRoles(container)).toEqual(['my-projects-home', 'adobe-sign-action-queue']);
     const adobeCard = container.querySelector(
       '[data-my-work-card-role="adobe-sign-action-queue"]',
     ) as HTMLElement;
     expect(adobeCard.getAttribute('data-adobe-sign-action-queue-state')).toBe('loading');
-    // Other cards do not render in loading state.
-    expect(container.querySelector('[data-my-work-card-role="my-projects-home"]')).toBeNull();
+    expect(container.querySelector('[data-my-work-card-role="my-projects-home"]')).not.toBeNull();
+    // Legacy-scaffold regression guard.
     expect(container.querySelector('[data-my-work-card-role="work-summary"]')).toBeNull();
     expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
   });
 
-  it('error variant renders the error marker AND the consolidated Adobe card with backend-unavailable state', () => {
+  it('error variant renders the error marker plus both primary cards; Adobe card reports backend-unavailable state', () => {
     const { container } = renderHome({ readinessVariant: 'error' });
     expect(container.querySelector('[data-my-work-readiness-state="error"]')).not.toBeNull();
-    expect(getCardRoles(container)).toEqual(['adobe-sign-action-queue']);
+    expect(getCardRoles(container)).toEqual(['my-projects-home', 'adobe-sign-action-queue']);
     const adobeCard = container.querySelector(
       '[data-my-work-card-role="adobe-sign-action-queue"]',
     ) as HTMLElement;
     expect(adobeCard.getAttribute('data-adobe-sign-action-queue-state')).toBe(
       'backend-unavailable',
     );
+    expect(container.querySelector('[data-my-work-card-role="my-projects-home"]')).not.toBeNull();
+    expect(container.querySelector('[data-my-work-card-role="work-summary"]')).toBeNull();
+    expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
   });
 
   it('ready + sourceStatus="partial" emits the two-card tree plus a hidden source-status marker', () => {

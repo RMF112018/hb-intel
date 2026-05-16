@@ -66,9 +66,7 @@ describe('MyWorkSurfaceRouter — single primary-page command surface', () => {
     const stub = makeStubClient();
     const { container } = renderRouter(stub);
     await waitFor(() =>
-      expect(
-        container.querySelector('[data-my-work-card-role="my-projects-home"]'),
-      ).not.toBeNull(),
+      expect(container.querySelector('[data-my-work-card-role="my-projects-home"]')).not.toBeNull(),
     );
     // The retired focused-Adobe queue-summary card must NOT appear.
     expect(
@@ -83,9 +81,7 @@ describe('MyWorkSurfaceRouter — single primary-page command surface', () => {
     const stub = makeStubClient();
     const { container } = renderRouter(stub);
     await waitFor(() =>
-      expect(
-        container.querySelector('[data-my-work-card-role="my-projects-home"]'),
-      ).not.toBeNull(),
+      expect(container.querySelector('[data-my-work-card-role="my-projects-home"]')).not.toBeNull(),
     );
     expect(container.querySelector('[data-my-work-surface-router]')).toBeNull();
   });
@@ -96,10 +92,7 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
     const stub = makeStubClient();
     const { container } = renderRouter(stub);
     await waitFor(() =>
-      expect(getCardRoles(container)).toEqual([
-        'my-projects-home',
-        'adobe-sign-action-queue',
-      ]),
+      expect(getCardRoles(container)).toEqual(['my-projects-home', 'adobe-sign-action-queue']),
     );
     expect(container.querySelector('[data-my-work-source-status="available"]')).not.toBeNull();
     expect(container.querySelector('[data-my-work-readiness-state="loading"]')).toBeNull();
@@ -113,10 +106,7 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
     await waitFor(() =>
       expect(container.querySelector('[data-my-work-source-status="partial"]')).not.toBeNull(),
     );
-    expect(getCardRoles(container)).toEqual([
-      'my-projects-home',
-      'adobe-sign-action-queue',
-    ]);
+    expect(getCardRoles(container)).toEqual(['my-projects-home', 'adobe-sign-action-queue']);
   });
 
   it('renders the home non-ready tree for "authorization-required" envelope', async () => {
@@ -129,20 +119,27 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
         container.querySelector('[data-my-work-source-status="authorization-required"]'),
       ).not.toBeNull(),
     );
-    expect(getCardRoles(container)).toEqual([
-      'my-projects-home',
-      'adobe-sign-action-queue',
-    ]);
+    expect(getCardRoles(container)).toEqual(['my-projects-home', 'adobe-sign-action-queue']);
     // Source Readiness card retired by Prompt 05.
     expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
   });
 
-  it('renders only the loading marker while getMyWorkHome has not resolved (no false ready flash)', () => {
+  it('renders both primary cards plus the loading marker while getMyWorkHome has not resolved (no false ready flash)', () => {
     const stub = makeStubClient({
       getMyWorkHome: vi.fn<IMyWorkReadModelClient['getMyWorkHome']>(() => new Promise(() => {})),
     });
     const { container } = renderRouter(stub);
     expect(container.querySelector('[data-my-work-readiness-state="loading"]')).not.toBeNull();
+    // Both primary cards must mount during home loading so My Projects'
+    // independent /project-links request can begin in parallel with /home.
+    expect(container.querySelector('[data-my-work-card-role="my-projects-home"]')).not.toBeNull();
+    expect(
+      container.querySelector('[data-my-work-card-role="adobe-sign-action-queue"]'),
+    ).not.toBeNull();
+    // No false ready flash: the resolved branch's source-status marker must
+    // not appear while the home envelope is still unresolved.
+    expect(container.querySelector('[data-my-work-source-status]')).toBeNull();
+    // Retired/legacy surface markers must still be absent.
     expect(
       container.querySelector('[data-my-work-card-role="adobe-sign-action-queue-home"]'),
     ).toBeNull();
