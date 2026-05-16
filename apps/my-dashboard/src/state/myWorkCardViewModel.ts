@@ -242,6 +242,32 @@ export function selectAdobeRecentCompletionsSummaryVmFromSummary(
   };
 }
 
+export function selectAdobeQueuePreviewContext(
+  displayedCount: number,
+  totalCount: number | null,
+): string | null {
+  if (totalCount === null || totalCount <= displayedCount) return null;
+  return `Showing ${displayedCount} of ${totalCount} agreements requiring action.`;
+}
+
+export function selectAdobeCompletedPreviewContext(
+  displayedCount: number,
+  totalCount: number | null,
+): string | null {
+  if (totalCount === null || totalCount <= displayedCount) return null;
+  return `Showing latest ${displayedCount} of ${totalCount} completed agreements.`;
+}
+
+export function selectAdobeCompletedSummaryRail(
+  summary: AdobeRecentCompletionsSummaryVm,
+): string | null {
+  if (summary.completedAgreementCount === null) return null;
+  if (summary.windowDays === null) {
+    return `${summary.completedAgreementCount} completed in the recent reporting window`;
+  }
+  return `${summary.completedAgreementCount} completed in the last ${summary.windowDays} days`;
+}
+
 export interface AdobeRecentCompletionsListItemVm {
   readonly itemId: string;
   readonly agreementName: string;
