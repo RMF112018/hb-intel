@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   MyProjectLinkItem,
   MyProjectLinksReadModel,
   MyWorkReadModelEnvelope,
   MyWorkReadModelSourceStatus,
 } from '@hbc/models/myWork';
+import { MY_WORK_MARK, markMyWork } from '../../runtime/myWorkPerformanceMarks.js';
 import { useMyWorkReadModelClient } from '../../runtime/MyWorkReadModelClientProvider.js';
 import { MyWorkCard } from '../../layout/MyWorkCard.js';
 import { useMyWorkBentoContext } from '../../layout/MyWorkBentoGrid.js';
@@ -117,6 +118,14 @@ export function MyProjectsHomeCard({ footprint = 'full', spanOverrides }: MyProj
       cancelled = true;
     };
   }, [client]);
+
+  const usefulEmittedRef = useRef(false);
+  useEffect(() => {
+    if (!isLoading && !usefulEmittedRef.current) {
+      usefulEmittedRef.current = true;
+      markMyWork(MY_WORK_MARK.moduleUseful('my-projects'));
+    }
+  }, [isLoading]);
 
   const sourceStatus: MyWorkReadModelSourceStatus = envelope?.sourceStatus ?? 'backend-unavailable';
   const items = envelope?.data.items ?? EMPTY_ITEMS;

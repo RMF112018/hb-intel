@@ -1,7 +1,8 @@
-import { useCallback, useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { MyWorkPrimarySurfaceId } from '@hbc/models/myWork';
 import { createMyWorkReadModelClient } from '../api/myWorkReadModelClientFactory.js';
 import { getApiAudience, getProductionConfigMissingKeys } from '../config/runtimeConfig.js';
+import { MY_WORK_MARK, markMyWork } from '../runtime/myWorkPerformanceMarks.js';
 import { useMyWorkShellState } from '../state/useMyWorkShellState.js';
 import { MyWorkBentoGrid } from '../layout/MyWorkBentoGrid.js';
 import { AdobeSignCallbackBanner } from './AdobeSignCallbackBanner.js';
@@ -83,6 +84,10 @@ export function MyWorkShell({
   const mode = useMyWorkContainerBreakpoint(shellRef, forceMode);
 
   const { activePrimarySurfaceId } = useMyWorkShellState();
+
+  useEffect(() => {
+    markMyWork(MY_WORK_MARK.shellMounted);
+  }, []);
 
   const themeStyle = useMemo(() => MY_WORK_THEME_VARS, []);
 

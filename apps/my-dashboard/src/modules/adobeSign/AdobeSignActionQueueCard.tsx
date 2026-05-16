@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   MyWorkHomeReadModel,
   MyWorkReadModelEnvelope,
@@ -23,6 +23,7 @@ import {
   selectAdobeSignCompletedViewStateCopy,
   selectAdobeSignSourceStatus,
 } from '../../state/myWorkCardViewModel.js';
+import { MY_WORK_MARK, markMyWork } from '../../runtime/myWorkPerformanceMarks.js';
 import { useMyWorkReadModelClient } from '../../runtime/MyWorkReadModelClientProvider.js';
 import { AdobeSignActivityList } from './AdobeSignActivityList.js';
 import { AdobeSignStatePanel } from './AdobeSignStatePanel.js';
@@ -125,6 +126,15 @@ export function AdobeSignActionQueueCard({
   const itemCount = previewItems.length;
 
   const stateMarker = resolveStateMarker(readinessVariant, effectiveSourceStatus, itemCount);
+
+  const usefulEmittedRef = useRef(false);
+  useEffect(() => {
+    if (stateMarker !== 'loading' && !usefulEmittedRef.current) {
+      usefulEmittedRef.current = true;
+      markMyWork(MY_WORK_MARK.moduleUseful(MODULE_ID));
+    }
+  }, [stateMarker]);
+
   const toggleVisible =
     stateMarker === 'partial' ||
     stateMarker === 'available-empty' ||

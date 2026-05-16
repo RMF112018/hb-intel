@@ -23,6 +23,8 @@ import type {
   MyWorkReadModelEnvelope,
 } from '@hbc/models/myWork';
 
+import { MY_WORK_MARK, markMyWork, measureMyWork } from '../runtime/myWorkPerformanceMarks.js';
+
 import {
   MY_WORK_READ_MODEL_ROUTE_PATHS,
   type AdobeSignOAuthStartInput,
@@ -122,42 +124,51 @@ class MyWorkBackendReadModelClient implements IMyWorkReadModelClient {
     fallback: () => Promise<MyWorkReadModelEnvelope<T>>,
     queryString = '',
   ): Promise<MyWorkReadModelEnvelope<T>> {
-    let token: string;
+    const startMark = MY_WORK_MARK.requestStart(routeId);
+    const endMark = MY_WORK_MARK.requestEnd(routeId);
+    const durationMark = MY_WORK_MARK.requestDuration(routeId);
+    markMyWork(startMark);
     try {
-      token = await this.getApiToken();
-    } catch {
-      return fallback();
-    }
-    if (!token || token.trim().length === 0) return fallback();
+      let token: string;
+      try {
+        token = await this.getApiToken();
+      } catch {
+        return await fallback();
+      }
+      if (!token || token.trim().length === 0) return await fallback();
 
-    const path = MY_WORK_READ_MODEL_ROUTE_PATHS[routeId];
-    const url = `${this.apiBaseUrl}/${path}${queryString}`;
+      const path = MY_WORK_READ_MODEL_ROUTE_PATHS[routeId];
+      const url = `${this.apiBaseUrl}/${path}${queryString}`;
 
-    let response: Response;
-    try {
-      response = await this.fetchImpl(url, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      });
-    } catch {
-      return fallback();
-    }
-    if (!response.ok) return fallback();
+      let response: Response;
+      try {
+        response = await this.fetchImpl(url, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        });
+      } catch {
+        return await fallback();
+      }
+      if (!response.ok) return await fallback();
 
-    let body: unknown;
-    try {
-      body = await response.json();
-    } catch {
-      return fallback();
+      let body: unknown;
+      try {
+        body = await response.json();
+      } catch {
+        return await fallback();
+      }
+      if (!isWrappedEnvelope<T>(body)) return await fallback();
+      // Overwrite any dataPath the backend may have set; only this client
+      // is allowed to stamp 'backend-live', and operators must trust the
+      // SPFx-side classification rather than a backend-provided value.
+      return { ...body.data, dataPath: 'backend-live' };
+    } finally {
+      markMyWork(endMark);
+      measureMyWork(durationMark, startMark, endMark);
     }
-    if (!isWrappedEnvelope<T>(body)) return fallback();
-    // Overwrite any dataPath the backend may have set; only this client
-    // is allowed to stamp 'backend-live', and operators must trust the
-    // SPFx-side classification rather than a backend-provided value.
-    return { ...body.data, dataPath: 'backend-live' };
   }
 
   async getMyWorkHome(): Promise<MyWorkReadModelEnvelope<MyWorkHomeReadModel>> {
