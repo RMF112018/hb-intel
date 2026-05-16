@@ -953,6 +953,27 @@ describe('AdobeSignActionQueueCard — item handoff actions', () => {
     });
   });
 
+  it('surfaces reconnect guidance for scope-insufficient resolver failures', async () => {
+    const resolveAdobeSignActionLink = vi.fn(async () => ({ status: 'scope-insufficient' as const }));
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      resolveAdobeSignActionLink,
+    });
+
+    const actNowButton = container.querySelector(
+      '[data-adobe-sign-row-primary-action="start"]',
+    ) as HTMLButtonElement | null;
+    expect(actNowButton).not.toBeNull();
+    fireEvent.click(actNowButton!);
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-adobe-sign-row-error]')?.textContent).toContain(
+        'Reconnect Adobe Sign to refresh permissions and try again.',
+      );
+    });
+  });
+
   it('opens redirect url on resolver success and clears failure state', async () => {
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
     const resolveAdobeSignActionLink = vi.fn(async () => ({

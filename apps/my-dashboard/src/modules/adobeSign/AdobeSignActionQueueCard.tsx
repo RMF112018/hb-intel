@@ -176,6 +176,7 @@ export function AdobeSignActionQueueCard({
         return 'Unable to open right now. Reconnect Adobe Sign and try again.';
       case 'principal-unresolved':
       case 'scope-insufficient':
+        return 'Unable to open right now. Reconnect Adobe Sign to refresh permissions and try again.';
       case 'source-unavailable':
       case 'not-ready':
       case 'no-action-url':

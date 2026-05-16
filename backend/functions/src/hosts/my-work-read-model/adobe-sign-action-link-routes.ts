@@ -28,6 +28,7 @@ import {
   createAdobeSignLiveActionLinkClient,
   type AdobeSignLiveActionLinkClientDeps,
 } from './read-models/adobe-sign/adobe-sign-live-action-link-client.js';
+import { parseAdobeSignScopes } from './read-models/adobe-sign/adobe-sign-config.js';
 import type {
   AdobeSignActionLinkClientResult,
   IAdobeSignActionLinkClient,
@@ -165,6 +166,14 @@ export function createAdobeSignActionLinkResolveHandler(deps: AdobeSignActionLin
       });
       return { status: 200, jsonBody: { data: { status: 'authorization-required' } } };
     }
+    if (token.status === 'scope-insufficient') {
+      trackEvent('adobeSign.actionLink.resolve.failure', {
+        domain: 'my-work-adobe-sign-action-link',
+        operation: 'resolve',
+        ...sanitizeResultForTelemetry({ status: 'scope-insufficient' }),
+      });
+      return { status: 200, jsonBody: { data: { status: 'scope-insufficient' } } };
+    }
     if (token.status === 'source-unavailable') {
       trackEvent('adobeSign.actionLink.resolve.failure', {
         domain: 'my-work-adobe-sign-action-link',
@@ -237,6 +246,7 @@ function buildDefaultTokenService(): IAdobeSignTokenService {
   return createAdobeSignTokenService({
     grantStore: grantStoreReadiness.store,
     refreshClient,
+    governedScopes: parseAdobeSignScopes(process.env.ADOBE_SIGN_OAUTH_SCOPES),
   });
 }
 

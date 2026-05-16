@@ -247,6 +247,40 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
     expect(flattened).not.toContain('accessToken');
   });
 
+  it('maps token scope-insufficient to scope-insufficient', async () => {
+    const mod = await importModule();
+    const trackEventSpy = vi.fn();
+    const handler = mod.createAdobeSignActionLinkResolveHandler({
+      resolveTenantId: () => '11111111-2222-3333-4444-555555555555',
+      tokenService: {
+        getAccessToken: vi.fn(async () => ({
+          status: 'scope-insufficient',
+          reason: 'grant-scope-insufficient',
+        })),
+      },
+      actionLinkClient: {
+        resolveActionLink: vi.fn(async () => ({ status: 'ok', redirectUrl: 'https://secure.example.com' })),
+      },
+      now: () => new Date('2026-05-16T16:00:00.000Z'),
+      trackEvent: trackEventSpy,
+    });
+
+    const response = await handler(
+      requestWithBody({
+        itemId: 'adobe-sign:agreement-1',
+        agreementId: 'agreement-1',
+        requiredAction: 'signature',
+      }),
+      {},
+      injectedAuth as any,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.jsonBody).toEqual({ data: { status: 'scope-insufficient' } });
+    const flattened = JSON.stringify(trackEventSpy.mock.calls);
+    expect(flattened).toContain('adobeSign.actionLink.resolve.failure');
+  });
+
   it('maps principal normalization failure to principal-unresolved', async () => {
     const mod = await importModule();
     const trackEventSpy = vi.fn();
@@ -333,6 +367,52 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
         redirectUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=1',
       },
     });
+  });
+
+  it('accepts all six requiredAction values and normalizes unresolved provider outcomes', async () => {
+    const mod = await importModule();
+    const calls: string[] = [];
+    const handler = mod.createAdobeSignActionLinkResolveHandler({
+      resolveTenantId: () => '11111111-2222-3333-4444-555555555555',
+      tokenService: {
+        getAccessToken: vi.fn(async () => ({
+          status: 'ok',
+          accessToken: 'at-1',
+          expiresAtUtc: '2026-05-16T16:00:00.000Z',
+          apiAccessPoint: 'https://api.na1.adobesign.com',
+        })),
+      },
+      actionLinkClient: {
+        resolveActionLink: vi.fn(async () => ({ status: 'no-recipient-match' })),
+      },
+      now: () => new Date('2026-05-16T16:00:00.000Z'),
+    });
+
+    const requiredActions = [
+      'signature',
+      'approval',
+      'acceptance',
+      'acknowledgement',
+      'form-filling',
+      'delegation',
+    ] as const;
+
+    for (const requiredAction of requiredActions) {
+      const response = await handler(
+        requestWithBody({
+          itemId: `adobe-sign:agreement-${requiredAction}`,
+          agreementId: 'agreement-1',
+          requiredAction,
+        }),
+        { log: vi.fn() },
+        injectedAuth as any,
+      );
+      expect(response.status).toBe(200);
+      expect(response.jsonBody).toEqual({ data: { status: 'no-action-url' } });
+      calls.push(requiredAction);
+    }
+
+    expect(calls).toEqual(requiredActions);
   });
 
   it('maps non-adobe provider URL to policy-rejected', async () => {

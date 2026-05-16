@@ -55,11 +55,17 @@ export type AdobeSignAccessTokenSourceUnavailableReason =
   | 'adobe-unreachable'
   | 'token-store-unavailable';
 
+export type AdobeSignAccessTokenScopeInsufficientReason = 'grant-scope-insufficient';
+
 export type AdobeSignAccessTokenAcquireResult =
   | AdobeSignAccessTokenAcquireOk
   | {
       readonly status: 'authorization-required';
       readonly reason: AdobeSignAccessTokenAuthorizationRequiredReason;
+    }
+  | {
+      readonly status: 'scope-insufficient';
+      readonly reason: AdobeSignAccessTokenScopeInsufficientReason;
     }
   | {
       readonly status: 'source-unavailable';
@@ -83,6 +89,8 @@ interface CachedToken {
 export interface AdobeSignTokenServiceDeps {
   readonly grantStore: IAdobeSignGrantStore;
   readonly refreshClient: IAdobeSignRefreshClient;
+  /** Optional governed scope envelope required by the resolver flow. */
+  readonly governedScopes?: readonly string[];
   /** Optional override of the refresh-margin used to decide cache freshness. */
   readonly refreshMarginMs?: number;
 }
@@ -113,7 +121,23 @@ export function createAdobeSignTokenService(
   deps: AdobeSignTokenServiceDeps,
 ): IAdobeSignTokenService {
   const margin = deps.refreshMarginMs ?? ADOBE_SIGN_ACCESS_TOKEN_REFRESH_MARGIN_MS;
+  const governedScopes = normalizeScopes(deps.governedScopes);
   const cache = new Map<AdobeSignActorKey, CachedToken>();
+
+  function normalizeScopes(scopes: readonly string[] | undefined): Set<string> {
+    return new Set(
+      (scopes ?? []).map((scope) => scope.trim().toLowerCase()).filter((scope) => scope.length > 0),
+    );
+  }
+
+  function grantedScopesCoverGovernedScopes(grantedScopes: readonly string[]): boolean {
+    if (governedScopes.size === 0) return true;
+    const granted = normalizeScopes(grantedScopes);
+    for (const scope of governedScopes) {
+      if (!granted.has(scope)) return false;
+    }
+    return true;
+  }
 
   return {
     async getAccessToken(actorKey, now, diagnostics) {
@@ -192,6 +216,14 @@ export function createAdobeSignTokenService(
       }
       if (grant.state === 'pending') {
         const result = { status: 'authorization-required', reason: 'no-grant-found' } as const;
+        trackTokenResult(result);
+        return result;
+      }
+      if (!grantedScopesCoverGovernedScopes(grant.grantedScopes)) {
+        const result = {
+          status: 'scope-insufficient',
+          reason: 'grant-scope-insufficient',
+        } as const;
         trackTokenResult(result);
         return result;
       }

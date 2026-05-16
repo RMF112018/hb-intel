@@ -49,6 +49,7 @@ const refreshOk = (
 const buildService = (
   grant: IAdobeSignGrantRecord | undefined,
   script: ReadonlyArray<AdobeSignRefreshResult>,
+  governedScopes?: readonly string[],
 ) => {
   const grantStore = createDeterministicMockGrantStore();
   if (grant) {
@@ -58,7 +59,7 @@ const buildService = (
     void grantStore.upsertGrant(grant);
   }
   const refreshClient = createDeterministicMockRefreshClient(script);
-  const service = createAdobeSignTokenService({ grantStore, refreshClient });
+  const service = createAdobeSignTokenService({ grantStore, refreshClient, governedScopes });
   return { service, grantStore, refreshClient };
 };
 
@@ -189,6 +190,25 @@ describe('token service — refresh revoked / invalid → authorization-required
     if (result.status !== 'authorization-required') return;
     expect(result.reason).toBe('no-grant-found');
     expect(refreshClient.callCount()).toBe(0);
+  });
+});
+
+describe('token service — governed scope sufficiency', () => {
+  it('returns scope-insufficient when grant scopes do not cover configured governed scopes', async () => {
+    const grant = activeGrant({ grantedScopes: ['agreement_read'] });
+    const { service, refreshClient } = buildService(grant, [], ['agreement_read', 'agreement_send']);
+    const result = await service.getAccessToken(ACTOR_KEY, NOW);
+    expect(result.status).toBe('scope-insufficient');
+    if (result.status !== 'scope-insufficient') return;
+    expect(result.reason).toBe('grant-scope-insufficient');
+    expect(refreshClient.callCount()).toBe(0);
+  });
+
+  it('allows token path when grant scopes cover configured governed scopes', async () => {
+    const grant = activeGrant({ grantedScopes: ['agreement_read', 'agreement_send'] });
+    const { service } = buildService(grant, [refreshOk()], ['agreement_read']);
+    const result = await service.getAccessToken(ACTOR_KEY, NOW);
+    expect(result.status).toBe('ok');
   });
 });
 
