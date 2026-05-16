@@ -28,6 +28,7 @@ export type MyProjectLinksRuntimeEventName =
   | 'myProjectLinks.read.reconcile.result';
 
 export type MyProjectLinksLoaderStage = 'token' | 'site' | 'list' | 'items' | 'other';
+export type RegistryCacheTelemetryState = 'hit' | 'miss' | 'coalesced';
 
 /**
  * Properties contributed by the provider for each runtime event.
@@ -64,6 +65,10 @@ export interface MyProjectLinksRuntimeDiagnosticProperties {
   readonly registryRowCount?: number;
   readonly projectsBounded?: boolean;
   readonly registryBounded?: boolean;
+  readonly registryCacheState?: RegistryCacheTelemetryState;
+  readonly registryCacheAgeMs?: number;
+  readonly registryServerFilterApplied?: boolean;
+  readonly registryFilterMode?: 'active-launch-eligible';
   // reconcile.result shape.
   readonly durationMs?: number;
   readonly matchedItemCount?: number;

@@ -125,8 +125,9 @@ describe('MyProjectLinksReadModelProvider', () => {
   });
 
   it('coalesces concurrent cache misses into one underlying registry load', async () => {
-    let resolveRegistry: ((value: Array<{ id: string; fields: Record<string, unknown> }>) => void) | null =
-      null;
+    let resolveRegistry:
+      | ((value: Array<{ id: string; fields: Record<string, unknown> }>) => void)
+      | null = null;
     const registryPromise = new Promise<Array<{ id: string; fields: Record<string, unknown> }>>(
       (resolve) => {
         resolveRegistry = resolve;
@@ -380,6 +381,417 @@ describe('MyProjectLinksReadModelProvider', () => {
         (warning) => warning.code === 'assignment-source-bounded',
       ),
     ).toBe(true);
+  });
+});
+
+describe('MyProjectLinksReadModelProvider — multi-platform launch (B05.10)', () => {
+  it('projects-only row with valid BuildingConnected + Document Crunch URLs renders both actions available with no BC/DC warnings', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 401,
+            projectNumber: '24-100-04',
+            projectName: 'Quad Platform',
+            year: 2024,
+            projectStage: 'Construction',
+            siteUrl: 'https://example.invalid/sites/quad',
+            procoreProject: 'valid_token',
+            buildingConnectedUrl: 'https://buildingconnected.example.invalid/quad',
+            documentCrunchUrl: 'https://documentcrunch.example.invalid/quad',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+        ],
+      }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    const item = envelope.data.items[0]!;
+    expect(item.buildingConnectedAction).toEqual({
+      state: 'available',
+      label: 'Open BuildingConnected',
+      href: 'https://buildingconnected.example.invalid/quad',
+    });
+    expect(item.documentCrunchAction).toEqual({
+      state: 'available',
+      label: 'Open Document Crunch',
+      href: 'https://documentcrunch.example.invalid/quad',
+    });
+    expect(item.warnings.some((w) => w.code === 'building-connected-launch-unavailable')).toBe(
+      false,
+    );
+    expect(item.warnings.some((w) => w.code === 'building-connected-url-invalid')).toBe(false);
+    expect(item.warnings.some((w) => w.code === 'document-crunch-launch-unavailable')).toBe(false);
+    expect(item.warnings.some((w) => w.code === 'document-crunch-url-invalid')).toBe(false);
+  });
+
+  it('projects-only row with empty BuildingConnected emits only building-connected-launch-unavailable', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 402,
+            projectNumber: '24-100-05',
+            projectName: 'BC Empty',
+            year: 2024,
+            siteUrl: 'https://example.invalid/sites/bcempty',
+            documentCrunchUrl: 'https://documentcrunch.example.invalid/bcempty',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+        ],
+      }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    const item = envelope.data.items[0]!;
+    expect(item.buildingConnectedAction).toEqual({
+      state: 'unavailable',
+      label: 'BuildingConnected unavailable',
+    });
+    expect(item.warnings.some((w) => w.code === 'building-connected-launch-unavailable')).toBe(
+      true,
+    );
+    expect(item.warnings.some((w) => w.code === 'building-connected-url-invalid')).toBe(false);
+  });
+
+  it('projects-only row with non-http(s) BuildingConnected emits both invalid + launch-unavailable warnings', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 403,
+            projectNumber: '24-100-06',
+            projectName: 'BC Mailto',
+            year: 2024,
+            siteUrl: 'https://example.invalid/sites/bcbad',
+            buildingConnectedUrl: 'mailto:vendor@example.invalid',
+            documentCrunchUrl: 'https://documentcrunch.example.invalid/bcbad',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+        ],
+      }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    const item = envelope.data.items[0]!;
+    expect(item.buildingConnectedAction.state).toBe('unavailable');
+    expect(item.warnings.some((w) => w.code === 'building-connected-url-invalid')).toBe(true);
+    expect(item.warnings.some((w) => w.code === 'building-connected-launch-unavailable')).toBe(
+      true,
+    );
+  });
+
+  it('projects-only row with empty Document Crunch emits only document-crunch-launch-unavailable', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 404,
+            projectNumber: '24-100-07',
+            projectName: 'DC Empty',
+            year: 2024,
+            siteUrl: 'https://example.invalid/sites/dcempty',
+            buildingConnectedUrl: 'https://buildingconnected.example.invalid/dcempty',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+        ],
+      }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    const item = envelope.data.items[0]!;
+    expect(item.documentCrunchAction).toEqual({
+      state: 'unavailable',
+      label: 'Document Crunch unavailable',
+    });
+    expect(item.warnings.some((w) => w.code === 'document-crunch-launch-unavailable')).toBe(true);
+    expect(item.warnings.some((w) => w.code === 'document-crunch-url-invalid')).toBe(false);
+  });
+
+  it('projects-only row with javascript: Document Crunch emits both invalid + launch-unavailable warnings', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 405,
+            projectNumber: '24-100-08',
+            projectName: 'DC JavaScript',
+            year: 2024,
+            siteUrl: 'https://example.invalid/sites/dcbad',
+            buildingConnectedUrl: 'https://buildingconnected.example.invalid/dcbad',
+            documentCrunchUrl: 'javascript:alert(1)',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+        ],
+      }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    const item = envelope.data.items[0]!;
+    expect(item.documentCrunchAction.state).toBe('unavailable');
+    expect(item.warnings.some((w) => w.code === 'document-crunch-url-invalid')).toBe(true);
+    expect(item.warnings.some((w) => w.code === 'document-crunch-launch-unavailable')).toBe(true);
+  });
+
+  it('merged row prefers Projects stage when both Projects and Registry stages are set', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 501,
+            projectNumber: '24-200-01',
+            projectName: 'Stage Precedence',
+            year: 2024,
+            projectStage: 'Pursuit',
+            siteUrl: 'https://example.invalid/sites/stage',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+        ],
+      }),
+      loadRegistryRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 91,
+            projectNumber: '24-200-01',
+            projectNameRaw: 'Stage Precedence',
+            legacyYear: 2024,
+            isActive: true,
+            folderWebUrl: 'https://example.invalid/folders/stage',
+            matchStatus: 'matched',
+            matchedProjectListItemId: 501,
+            projectStage: 'Construction',
+            roleArrays: {},
+          },
+        ],
+      }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    const item = envelope.data.items.find((row) => row.source === 'merged')!;
+    expect(item.projectStage).toBe('Pursuit');
+  });
+
+  it('merged row falls back to Registry stage when Projects stage is absent', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 502,
+            projectNumber: '24-200-02',
+            projectName: 'Stage Fallback',
+            year: 2024,
+            siteUrl: 'https://example.invalid/sites/fallback',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+        ],
+      }),
+      loadRegistryRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 92,
+            projectNumber: '24-200-02',
+            projectNameRaw: 'Stage Fallback',
+            legacyYear: 2024,
+            isActive: true,
+            folderWebUrl: 'https://example.invalid/folders/fallback',
+            matchStatus: 'matched',
+            matchedProjectListItemId: 502,
+            projectStage: 'Closeout',
+            roleArrays: {},
+          },
+        ],
+      }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    const item = envelope.data.items.find((row) => row.source === 'merged')!;
+    expect(item.projectStage).toBe('Closeout');
+  });
+
+  it('merged row keeps BC unavailable when Projects BC is empty even if Registry BC is set (Projects-primary, NOT Registry fallback)', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 503,
+            projectNumber: '24-200-03',
+            projectName: 'BC Source Boundary',
+            year: 2024,
+            projectStage: 'Construction',
+            siteUrl: 'https://example.invalid/sites/bcsrc',
+            documentCrunchUrl: 'https://documentcrunch.example.invalid/bcsrc',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+        ],
+      }),
+      loadRegistryRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 93,
+            projectNumber: '24-200-03',
+            projectNameRaw: 'BC Source Boundary',
+            legacyYear: 2024,
+            isActive: true,
+            folderWebUrl: 'https://example.invalid/folders/bcsrc',
+            matchStatus: 'matched',
+            matchedProjectListItemId: 503,
+            buildingConnectedUrl: 'https://buildingconnected.example.invalid/from-registry',
+            roleArrays: {},
+          },
+        ],
+      }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    const item = envelope.data.items.find((row) => row.source === 'merged')!;
+    expect(item.buildingConnectedAction).toEqual({
+      state: 'unavailable',
+      label: 'BuildingConnected unavailable',
+    });
+    expect(item.warnings.some((w) => w.code === 'building-connected-launch-unavailable')).toBe(
+      true,
+    );
+  });
+
+  it('legacy-only row carries Registry stage and Registry BC/DC links', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({ ok: true, rows: [], bounded: false }),
+      loadRegistryRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 94,
+            projectNumber: '23-900-01',
+            projectNameRaw: 'Legacy Stage Carrier',
+            legacyYear: 2023,
+            isActive: true,
+            folderWebUrl: 'https://example.invalid/folders/legacy-stage',
+            matchStatus: 'matched',
+            matchedProjectListItemId: null,
+            projectStage: 'Warranty',
+            buildingConnectedUrl: 'https://buildingconnected.example.invalid/legacy',
+            documentCrunchUrl: 'https://documentcrunch.example.invalid/legacy',
+            procoreProject: 'legacy_token',
+            roleArrays: { superintendentUpns: '["avery.lead@hb.example.com"]' },
+          },
+        ],
+      }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    const item = envelope.data.items.find((row) => row.source === 'legacy-only')!;
+    expect(item.projectStage).toBe('Warranty');
+    expect(item.buildingConnectedAction).toEqual({
+      state: 'available',
+      label: 'Open BuildingConnected',
+      href: 'https://buildingconnected.example.invalid/legacy',
+    });
+    expect(item.documentCrunchAction).toEqual({
+      state: 'available',
+      label: 'Open Document Crunch',
+      href: 'https://documentcrunch.example.invalid/legacy',
+    });
+  });
+
+  it('summary exposes per-platform ready counts and multiPlatformReadyCount on a mixed envelope', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        bounded: false,
+        rows: [
+          {
+            id: 601,
+            projectNumber: '24-300-01',
+            projectName: 'All Four',
+            year: 2024,
+            siteUrl: 'https://example.invalid/sites/all',
+            procoreProject: 'valid_token_1',
+            buildingConnectedUrl: 'https://buildingconnected.example.invalid/all',
+            documentCrunchUrl: 'https://documentcrunch.example.invalid/all',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+          {
+            id: 602,
+            projectNumber: '24-300-02',
+            projectName: 'SP+Procore Only',
+            year: 2024,
+            siteUrl: 'https://example.invalid/sites/sp-procore',
+            procoreProject: 'valid_token_2',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+          {
+            id: 603,
+            projectNumber: '24-300-03',
+            projectName: 'BC only',
+            year: 2024,
+            buildingConnectedUrl: 'https://buildingconnected.example.invalid/bc-only',
+            roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+        ],
+      }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    const summary = envelope.data.summary;
+    expect(summary.assignedProjectCount).toBe(3);
+    expect(summary.sharePointReadyCount).toBe(2);
+    expect(summary.procoreReadyCount).toBe(2);
+    expect(summary.dualLaunchReadyCount).toBe(2);
+    expect(summary.buildingConnectedReadyCount).toBe(2);
+    expect(summary.documentCrunchReadyCount).toBe(1);
+    expect(summary.noBuildingConnectedLaunchCount).toBe(1);
+    expect(summary.noDocumentCrunchLaunchCount).toBe(2);
+    expect(summary.multiPlatformReadyCount).toBe(1);
   });
 });
 
@@ -796,6 +1208,38 @@ describe('MyProjectLinksReadModelProvider — B05.8 Prompt 04 stage-duration eve
     expect(props.registryDurationMs).toBeGreaterThanOrEqual(0);
   });
 
+  it('emits registry cache/filter telemetry fields when the registry source provides them', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({ ok: true, rows: [], bounded: false }),
+      loadRegistryRows: async () => ({
+        ok: true,
+        rows: [],
+        bounded: false,
+        registryTelemetry: {
+          registryCacheState: 'coalesced',
+          registryCacheAgeMs: 17,
+          registryServerFilterApplied: true,
+          registryFilterMode: 'active-launch-eligible',
+        },
+      }),
+    });
+
+    await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
+
+    const sources = track.mock.calls.filter(
+      (call) => call[0] === 'myProjectLinks.read.sources.result',
+    );
+    expect(sources).toHaveLength(1);
+    expect(sources[0]?.[1]).toMatchObject({
+      registryCacheState: 'coalesced',
+      registryCacheAgeMs: 17,
+      registryServerFilterApplied: true,
+      registryFilterMode: 'active-launch-eligible',
+    });
+  });
+
   it('emits "myProjectLinks.read.reconcile.result" once per call with duration, matchedItemCount, sourceStatus, and safe summary counts', async () => {
     const { reporter, track } = makeReporter();
     const provider = new MyProjectLinksReadModelProvider({
@@ -958,9 +1402,9 @@ describe('reconcileProjectLinks', () => {
 
     expect(items).toHaveLength(1);
     expect(items[0]?.source).toBe('legacy-only');
-    expect(items[0]?.warnings.some((warning) => warning.code === 'legacy-match-state-excluded')).toBe(
-      true,
-    );
+    expect(
+      items[0]?.warnings.some((warning) => warning.code === 'legacy-match-state-excluded'),
+    ).toBe(true);
   });
 
   it('excludes inactive and non-eligible match statuses in legacy-only fallback rows', () => {

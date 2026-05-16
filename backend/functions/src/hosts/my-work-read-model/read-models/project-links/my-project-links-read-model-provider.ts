@@ -23,6 +23,7 @@ import type { MyWorkReadContext } from '../my-work-read-model-provider.js';
 import {
   classifyGraphErrorStage,
   sanitizeForTelemetry,
+  type RegistryCacheTelemetryState,
   type MyProjectLinksLoaderStage,
 } from './my-project-links-runtime-diagnostics.js';
 
@@ -31,7 +32,15 @@ const REGISTRY_SOURCE_CACHE_TTL_MS = 60_000;
 const REGISTRY_SOURCE_FILTER =
   "IsActive eq 1 and (MatchStatus eq 'matched' or MatchStatus eq 'unmatched' or MatchStatus eq 'review-required')";
 const PROCORE_TOKEN_PATTERN = /^[A-Za-z0-9_-]+$/;
-type RegistryCacheState = 'hit' | 'miss' | 'coalesced';
+type RegistryFilterMode = 'active-launch-eligible';
+type RegistryCacheState = RegistryCacheTelemetryState;
+
+interface IRegistrySourceTelemetry {
+  registryCacheState?: RegistryCacheState;
+  registryCacheAgeMs?: number;
+  registryServerFilterApplied?: boolean;
+  registryFilterMode?: RegistryFilterMode;
+}
 
 interface IProjectSourceRow {
   id: number;
@@ -41,6 +50,8 @@ interface IProjectSourceRow {
   projectStage?: string;
   siteUrl?: string;
   procoreProject?: string;
+  buildingConnectedUrl?: string;
+  documentCrunchUrl?: string;
   roleArrays: Partial<Record<string, unknown>>;
   legacyRoleFallbacks: {
     leadEstimatorUpn?: string;
@@ -62,6 +73,9 @@ interface ILegacyRegistrySourceRow {
   matchMethod?: string;
   matchedProjectListItemId: number | null;
   procoreProject?: string;
+  projectStage?: string;
+  buildingConnectedUrl?: string;
+  documentCrunchUrl?: string;
   roleArrays: Partial<Record<string, unknown>>;
 }
 
@@ -76,6 +90,7 @@ interface ISourceLoadResult<T> {
   failureStage?: MyProjectLinksLoaderStage;
   /** Sanitized error message (token/JWT-stripped), when ok is false. */
   failureMessage?: string;
+  registryTelemetry?: IRegistrySourceTelemetry;
 }
 
 interface IProjectLinksSourceDeps {
@@ -226,6 +241,86 @@ function buildProcoreAction(token: string | undefined): {
   };
 }
 
+function buildBuildingConnectedAction(rawUrl: string | undefined): {
+  action: MyProjectLinkItem['buildingConnectedAction'];
+  warnings: MyProjectLinkWarning[];
+} {
+  const warnings: MyProjectLinkWarning[] = [];
+  const trimmed = rawUrl?.trim();
+
+  if (!trimmed) {
+    warnings.push({ code: 'building-connected-launch-unavailable' });
+    return {
+      action: {
+        state: 'unavailable',
+        label: 'BuildingConnected unavailable',
+      },
+      warnings,
+    };
+  }
+
+  if (!/^https?:\/\//i.test(trimmed)) {
+    warnings.push({ code: 'building-connected-url-invalid' });
+    warnings.push({ code: 'building-connected-launch-unavailable' });
+    return {
+      action: {
+        state: 'unavailable',
+        label: 'BuildingConnected unavailable',
+      },
+      warnings,
+    };
+  }
+
+  return {
+    action: {
+      state: 'available',
+      label: 'Open BuildingConnected',
+      href: trimmed,
+    },
+    warnings,
+  };
+}
+
+function buildDocumentCrunchAction(rawUrl: string | undefined): {
+  action: MyProjectLinkItem['documentCrunchAction'];
+  warnings: MyProjectLinkWarning[];
+} {
+  const warnings: MyProjectLinkWarning[] = [];
+  const trimmed = rawUrl?.trim();
+
+  if (!trimmed) {
+    warnings.push({ code: 'document-crunch-launch-unavailable' });
+    return {
+      action: {
+        state: 'unavailable',
+        label: 'Document Crunch unavailable',
+      },
+      warnings,
+    };
+  }
+
+  if (!/^https?:\/\//i.test(trimmed)) {
+    warnings.push({ code: 'document-crunch-url-invalid' });
+    warnings.push({ code: 'document-crunch-launch-unavailable' });
+    return {
+      action: {
+        state: 'unavailable',
+        label: 'Document Crunch unavailable',
+      },
+      warnings,
+    };
+  }
+
+  return {
+    action: {
+      state: 'available',
+      label: 'Open Document Crunch',
+      href: trimmed,
+    },
+    warnings,
+  };
+}
+
 function buildProjectsOnlySharePointAction(siteUrl: string | undefined): {
   action: MyProjectLinkItem['sharePointAction'];
   warnings: MyProjectLinkWarning[];
@@ -371,6 +466,12 @@ function buildSummary(items: readonly MyProjectLinkItem[]): MyProjectLinksReadMo
     (item) => item.sharePointAction.state === 'available',
   ).length;
   const procoreReadyCount = items.filter((item) => item.procoreAction.state === 'available').length;
+  const buildingConnectedReadyCount = items.filter(
+    (item) => item.buildingConnectedAction.state === 'available',
+  ).length;
+  const documentCrunchReadyCount = items.filter(
+    (item) => item.documentCrunchAction.state === 'available',
+  ).length;
 
   return {
     assignedProjectCount: items.length,
@@ -382,6 +483,17 @@ function buildSummary(items: readonly MyProjectLinkItem[]): MyProjectLinksReadMo
     procoreReadyCount,
     noSharePointLaunchCount: items.length - sharePointReadyCount,
     noProcoreLaunchCount: items.length - procoreReadyCount,
+    buildingConnectedReadyCount,
+    documentCrunchReadyCount,
+    noBuildingConnectedLaunchCount: items.length - buildingConnectedReadyCount,
+    noDocumentCrunchLaunchCount: items.length - documentCrunchReadyCount,
+    multiPlatformReadyCount: items.filter(
+      (item) =>
+        item.sharePointAction.state === 'available' &&
+        item.procoreAction.state === 'available' &&
+        item.buildingConnectedAction.state === 'available' &&
+        item.documentCrunchAction.state === 'available',
+    ).length,
     projectsOnlyCount: items.filter((item) => item.source === 'projects-only').length,
     mergedCount: items.filter((item) => item.source === 'merged').length,
     legacyOnlyCount: items.filter((item) => item.source === 'legacy-only').length,
@@ -495,6 +607,12 @@ export function reconcileProjectLinks(
       : buildProjectsOnlySharePointAction(project.siteUrl);
 
     const procore = buildProcoreAction(project.procoreProject);
+    const buildingConnected = buildBuildingConnectedAction(project.buildingConnectedUrl);
+    const documentCrunch = buildDocumentCrunchAction(project.documentCrunchUrl);
+
+    // Stage precedence: Projects preferred; Registry stage is the fallback only
+    // when Projects stage is absent on a merged row.
+    const stage = project.projectStage ?? mergedRegistry?.projectStage;
 
     const itemWarnings: MyProjectLinkWarning[] = [];
     if (parsed.usedLegacyFallback) {
@@ -518,10 +636,12 @@ export function reconcileProjectLinks(
       source,
       projectName: project.projectName,
       projectNumber: project.projectNumber,
-      ...(project.projectStage ? { projectStage: project.projectStage } : {}),
+      ...(stage ? { projectStage: stage } : {}),
       assignmentRoles: parsed.roles,
       sharePointAction: sharePoint.action,
       procoreAction: procore.action,
+      buildingConnectedAction: buildingConnected.action,
+      documentCrunchAction: documentCrunch.action,
       provenance: {
         projectsListItemId: project.id,
         ...(mergedRegistry ? { legacyRegistryItemId: mergedRegistry.id } : {}),
@@ -533,7 +653,13 @@ export function reconcileProjectLinks(
           ? { fallbackMatchConfidence: mergedRegistry.matchConfidence }
           : {}),
       },
-      warnings: mergeWarnings(itemWarnings, sharePoint.warnings, procore.warnings),
+      warnings: mergeWarnings(
+        itemWarnings,
+        sharePoint.warnings,
+        procore.warnings,
+        buildingConnected.warnings,
+        documentCrunch.warnings,
+      ),
     });
   }
 
@@ -552,6 +678,8 @@ export function reconcileProjectLinks(
 
     const sharePoint = buildLegacyOnlySharePointAction(registry.folderWebUrl);
     const procore = buildProcoreAction(registry.procoreProject);
+    const buildingConnected = buildBuildingConnectedAction(registry.buildingConnectedUrl);
+    const documentCrunch = buildDocumentCrunchAction(registry.documentCrunchUrl);
     const itemWarnings: MyProjectLinkWarning[] = [{ code: 'legacy-role-data-preserved' }];
     if (sourceStatuses.projects.bounded || sourceStatuses.registry.bounded) {
       itemWarnings.push({ code: 'assignment-source-bounded' });
@@ -568,9 +696,12 @@ export function reconcileProjectLinks(
       source: 'legacy-only',
       projectName: registry.projectNameRaw || registry.projectNumber,
       projectNumber: registry.projectNumber,
+      ...(registry.projectStage ? { projectStage: registry.projectStage } : {}),
       assignmentRoles: roles,
       sharePointAction: sharePoint.action,
       procoreAction: procore.action,
+      buildingConnectedAction: buildingConnected.action,
+      documentCrunchAction: documentCrunch.action,
       provenance: {
         legacyRegistryItemId: registry.id,
         ...(registry.matchedProjectListItemId != null
@@ -579,7 +710,13 @@ export function reconcileProjectLinks(
         ...(registry.matchMethod ? { fallbackMatchMethod: registry.matchMethod } : {}),
         ...(registry.matchConfidence ? { fallbackMatchConfidence: registry.matchConfidence } : {}),
       },
-      warnings: mergeWarnings(itemWarnings, sharePoint.warnings, procore.warnings),
+      warnings: mergeWarnings(
+        itemWarnings,
+        sharePoint.warnings,
+        procore.warnings,
+        buildingConnected.warnings,
+        documentCrunch.warnings,
+      ),
     });
   }
 
@@ -649,7 +786,10 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
   let cachedRegistryResult: ISourceLoadResult<ILegacyRegistrySourceRow> | null = null;
   let cachedRegistryAtMs: number | null = null;
   let inFlightRegistryLoad: Promise<ISourceLoadResult<ILegacyRegistrySourceRow>> | null = null;
-  const markRegistryCacheState = (_state: RegistryCacheState): void => {};
+  let lastRegistryCacheState: RegistryCacheState = 'miss';
+  const markRegistryCacheState = (state: RegistryCacheState): void => {
+    lastRegistryCacheState = state;
+  };
 
   const projectSelectFields = [
     'Title',
@@ -659,6 +799,8 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
     resolveSpField('projectStage'),
     resolveSpField('siteUrl'),
     resolveSpField('procoreProject'),
+    resolveSpField('buildingConnectedUrl'),
+    resolveSpField('documentCrunchUrl'),
     resolveSpField('leadEstimatorUpn'),
     resolveSpField('supportingEstimatorUpns'),
     resolveSpField('projectManagerUpn'),
@@ -677,6 +819,9 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
     'MatchedProjectListItemId',
     'IsActive',
     'procoreProject',
+    'projectStage',
+    'buildingConnectedUrl',
+    'documentCrunchUrl',
     ...MY_PROJECT_ASSIGNMENT_ROLE_DEFINITIONS.map((definition) => definition.internalField),
   ] as const;
 
@@ -704,6 +849,10 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
               projectStage: trimToString(row[resolveSpField('projectStage')]) || undefined,
               siteUrl: readOptionalUrl(row[resolveSpField('siteUrl')]),
               procoreProject: trimToString(row[resolveSpField('procoreProject')]) || undefined,
+              buildingConnectedUrl:
+                trimToString(row[resolveSpField('buildingConnectedUrl')]) || undefined,
+              documentCrunchUrl:
+                trimToString(row[resolveSpField('documentCrunchUrl')]) || undefined,
               roleArrays: buildRoleFieldObjectFromRow(row),
               legacyRoleFallbacks: {
                 leadEstimatorUpn:
@@ -743,12 +892,29 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
         nowMs - cachedRegistryAtMs < REGISTRY_SOURCE_CACHE_TTL_MS
       ) {
         markRegistryCacheState('hit');
-        return cachedRegistryResult;
+        return {
+          ...cachedRegistryResult,
+          registryTelemetry: {
+            registryCacheState: 'hit',
+            registryCacheAgeMs: Math.max(0, nowMs - cachedRegistryAtMs),
+            registryServerFilterApplied: true,
+            registryFilterMode: 'active-launch-eligible',
+          },
+        };
       }
 
       if (inFlightRegistryLoad) {
         markRegistryCacheState('coalesced');
-        return inFlightRegistryLoad;
+        const result = await inFlightRegistryLoad;
+        return {
+          ...result,
+          registryTelemetry: {
+            ...(result.registryTelemetry ?? {}),
+            registryCacheState: 'coalesced',
+            registryServerFilterApplied: true,
+            registryFilterMode: 'active-launch-eligible',
+          },
+        };
       }
       markRegistryCacheState('miss');
 
@@ -774,6 +940,9 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
               matchMethod: trimToString(row.MatchMethod) || undefined,
               matchedProjectListItemId: readOptionalNumber(row.MatchedProjectListItemId),
               procoreProject: trimToString(row.procoreProject) || undefined,
+              projectStage: trimToString(row.projectStage) || undefined,
+              buildingConnectedUrl: trimToString(row.buildingConnectedUrl) || undefined,
+              documentCrunchUrl: trimToString(row.documentCrunchUrl) || undefined,
               roleArrays: buildRoleFieldObjectFromRow(row),
             };
           });
@@ -782,6 +951,12 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
             ok: true,
             rows: mapped,
             bounded: rows.length >= MAX_SOURCE_ROWS,
+            registryTelemetry: {
+              registryCacheState: lastRegistryCacheState,
+              registryCacheAgeMs: 0,
+              registryServerFilterApplied: true,
+              registryFilterMode: 'active-launch-eligible',
+            },
           };
           cachedRegistryResult = result;
           cachedRegistryAtMs = Date.now();
@@ -794,6 +969,11 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
             failure: 'legacy-registry-source-failed',
             failureStage: classifyGraphErrorStage(error),
             failureMessage: sanitizeForTelemetry(error),
+            registryTelemetry: {
+              registryCacheState: lastRegistryCacheState,
+              registryServerFilterApplied: true,
+              registryFilterMode: 'active-launch-eligible',
+            },
           };
         } finally {
           inFlightRegistryLoad = null;
@@ -870,6 +1050,20 @@ export class MyProjectLinksReadModelProvider {
           registryRowCount: registry.ok ? registry.rows.length : 0,
           projectsBounded: projects.ok ? projects.bounded : false,
           registryBounded: registry.ok ? registry.bounded : false,
+          ...(registry.registryTelemetry?.registryCacheState
+            ? { registryCacheState: registry.registryTelemetry.registryCacheState }
+            : {}),
+          ...(registry.registryTelemetry?.registryCacheAgeMs !== undefined
+            ? { registryCacheAgeMs: registry.registryTelemetry.registryCacheAgeMs }
+            : {}),
+          ...(registry.registryTelemetry?.registryServerFilterApplied !== undefined
+            ? {
+                registryServerFilterApplied: registry.registryTelemetry.registryServerFilterApplied,
+              }
+            : {}),
+          ...(registry.registryTelemetry?.registryFilterMode
+            ? { registryFilterMode: registry.registryTelemetry.registryFilterMode }
+            : {}),
         },
       );
     }
