@@ -1,0 +1,66 @@
+[
+  {
+    "id": "D-01",
+    "decision": "Adobe Sign card is a compact operational companion module, not a mini Adobe app."
+  },
+  {
+    "id": "D-02",
+    "decision": "My Projects remains dominant; Adobe Sign remains secondary; do not stretch Adobe to sibling height."
+  },
+  {
+    "id": "D-03",
+    "decision": "Eyebrow remains 'Adobe Sign'; title becomes 'Agreement Activity'."
+  },
+  {
+    "id": "D-04",
+    "decision": "View switch labels remain Action Queue and Completed."
+  },
+  {
+    "id": "D-05",
+    "decision": "View switch sits below stable heading and uses manual-activation tab semantics."
+  },
+  {
+    "id": "D-06",
+    "decision": "Visible status chip and freshness rail are required."
+  },
+  {
+    "id": "D-07",
+    "decision": "Preserve existing home-surface span overrides unless Prompt 06 proves impossible and stops."
+  },
+  {
+    "id": "D-08",
+    "decision": "Remove MyWorkCard.titleContent and Adobe-specific shared CSS."
+  },
+  {
+    "id": "D-09",
+    "decision": "Rows are not whole-row click targets; use explicit Open link only when sourceOpenUrl exists."
+  },
+  {
+    "id": "D-10",
+    "decision": "No synthesized Adobe URLs and no generic footer destination without truthful repo-supported URL."
+  },
+  {
+    "id": "D-11",
+    "decision": "Preview-limit context is required when total > displayed."
+  },
+  {
+    "id": "D-12",
+    "decision": "Do not render 'Updated date unavailable'; use graceful metadata fallback."
+  },
+  {
+    "id": "D-13",
+    "decision": "Completed-panel lazy-fetch errors receive local Retry; Action Queue home-read errors do not."
+  },
+  {
+    "id": "D-14",
+    "decision": "No backend/functions contract changes in this package."
+  },
+  {
+    "id": "D-15",
+    "decision": "Do not add dependencies or lockfile/package drift."
+  },
+  {
+    "id": "D-16",
+    "decision": "Target post-remediation score is 48+/56; preferred target 50/56."
+  }
+]

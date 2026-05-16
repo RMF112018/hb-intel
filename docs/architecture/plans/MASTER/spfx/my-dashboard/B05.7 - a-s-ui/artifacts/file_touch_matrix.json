@@ -1,0 +1,50 @@
+{
+  "prompt02": [
+    "apps/my-dashboard/src/layout/MyWorkBentoGrid.module.css",
+    "apps/my-dashboard/src/layout/MyWorkCard.tsx",
+    "apps/my-dashboard/src/layout/MyWorkCard.module.css",
+    "apps/my-dashboard/src/layout/MyWorkCard.test.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.module.css"
+  ],
+  "prompt03": [
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.module.css",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignViewSwitch.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignStatusRail.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.test.tsx"
+  ],
+  "prompt04": [
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.module.css",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActivityRow.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActivityList.tsx",
+    "apps/my-dashboard/src/state/myWorkCardViewModel.ts",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.test.tsx"
+  ],
+  "prompt05": [
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.module.css",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignStatePanel.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/useAdobeSignRecentCompletionsReadModel.ts",
+    "apps/my-dashboard/src/modules/adobeSign/useAdobeSignRecentCompletionsReadModel.test.tsx",
+    "apps/my-dashboard/src/state/myWorkCardViewModel.ts",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.test.tsx"
+  ],
+  "prompt06": [
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.module.css",
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.test.tsx"
+  ],
+  "prompt07": [
+    "apps/my-dashboard/src/modules/adobeSign/AdobeSignActionQueueCard.test.tsx",
+    "apps/my-dashboard/src/modules/adobeSign/useAdobeSignRecentCompletionsReadModel.test.tsx",
+    "apps/my-dashboard/src/layout/MyWorkCard.test.tsx"
+  ],
+  "prompt08": [
+    "docs/architecture/plans/MASTER/spfx/my-dashboard/B05.5 - a-s-flagship-uiux/README.md",
+    "docs/architecture/plans/MASTER/spfx/my-dashboard/B05.5 - a-s-flagship-uiux/01_Implementation_Closeout.md",
+    "docs/architecture/plans/MASTER/spfx/my-dashboard/B05.5 - a-s-flagship-uiux/02_Validation_And_Evidence_Register.md",
+    "docs/architecture/plans/MASTER/spfx/my-dashboard/B05.5 - a-s-flagship-uiux/03_Reaudit_Scorecard.md"
+  ]
+}

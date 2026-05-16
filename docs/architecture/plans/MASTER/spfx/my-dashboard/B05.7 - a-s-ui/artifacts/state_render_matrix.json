@@ -1,0 +1,177 @@
+{
+  "actionQueue": {
+    "loading": {
+      "chip": "Loading",
+      "summary": false,
+      "panel": "loading",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": false
+    },
+    "available-empty": {
+      "chip": "Ready",
+      "summary": false,
+      "panel": "empty",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": false
+    },
+    "available-items": {
+      "chip": "Ready",
+      "summary": true,
+      "panel": null,
+      "list": true,
+      "cta": false,
+      "preview": "when total > shown",
+      "retry": false
+    },
+    "partial": {
+      "chip": "Partial data",
+      "summary": true,
+      "panel": "partial",
+      "list": true,
+      "cta": false,
+      "preview": "when total > shown",
+      "retry": false
+    },
+    "authorization-required": {
+      "chip": "Connect required",
+      "summary": false,
+      "panel": "authorization",
+      "list": false,
+      "cta": "Connect Adobe Sign",
+      "preview": false,
+      "retry": false
+    },
+    "configuration-required": {
+      "chip": "Configuration required",
+      "summary": false,
+      "panel": "configuration",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": false
+    },
+    "principal-unresolved": {
+      "chip": "Account needs attention",
+      "summary": false,
+      "panel": "principal",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": false
+    },
+    "source-unavailable": {
+      "chip": "Temporarily unavailable",
+      "summary": false,
+      "panel": "source unavailable",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": false
+    },
+    "backend-unavailable": {
+      "chip": "Temporarily unavailable",
+      "summary": false,
+      "panel": "backend unavailable",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": false
+    }
+  },
+  "completed": {
+    "idle": {
+      "chip": "Ready",
+      "summary": false,
+      "panel": null,
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": false
+    },
+    "loading": {
+      "chip": "Loading history",
+      "summary": false,
+      "panel": "loading",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": false
+    },
+    "available-empty": {
+      "chip": "Ready",
+      "summary": false,
+      "panel": "empty",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": false
+    },
+    "available-items": {
+      "chip": "Ready",
+      "summary": true,
+      "panel": null,
+      "list": true,
+      "cta": false,
+      "preview": "when total > shown",
+      "retry": false
+    },
+    "partial": {
+      "chip": "Partial data",
+      "summary": true,
+      "panel": "partial",
+      "list": true,
+      "cta": false,
+      "preview": "when total > shown",
+      "retry": false
+    },
+    "authorization-required": {
+      "chip": "Authorization required",
+      "summary": false,
+      "panel": "authorization",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": true
+    },
+    "configuration-required": {
+      "chip": "Configuration required",
+      "summary": false,
+      "panel": "configuration",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": true
+    },
+    "principal-unresolved": {
+      "chip": "Account needs attention",
+      "summary": false,
+      "panel": "principal",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": true
+    },
+    "source-unavailable": {
+      "chip": "Temporarily unavailable",
+      "summary": false,
+      "panel": "source unavailable",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": true
+    },
+    "backend-unavailable": {
+      "chip": "Temporarily unavailable",
+      "summary": false,
+      "panel": "backend unavailable",
+      "list": false,
+      "cta": false,
+      "preview": false,
+      "retry": true
+    }
+  }
+}
