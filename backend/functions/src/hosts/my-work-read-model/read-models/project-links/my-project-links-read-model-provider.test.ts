@@ -39,7 +39,7 @@ function makeGraphRegistryItem(
 }
 
 describe('MyProjectLinksReadModelProvider', () => {
-  it('passes the launch-eligible registry filter to Graph listItems', async () => {
+  it('calls registry Graph listItems without server-side filter and preserves top bound', async () => {
     const listItemsSpy = vi
       .spyOn(GraphListClient.prototype, 'listItems')
       .mockImplementation(async (listTitle) => {
@@ -56,10 +56,9 @@ describe('MyProjectLinksReadModelProvider', () => {
       );
       expect(registryCall).toBeDefined();
       expect(registryCall?.[1]).toMatchObject({
-        filter:
-          "IsActive eq 1 and (MatchStatus eq 'matched' or MatchStatus eq 'unmatched' or MatchStatus eq 'review-required')",
         top: 25000,
       });
+      expect(registryCall?.[1]).not.toHaveProperty('filter');
     } finally {
       listItemsSpy.mockRestore();
     }
@@ -1220,8 +1219,8 @@ describe('MyProjectLinksReadModelProvider — B05.8 Prompt 04 stage-duration eve
         registryTelemetry: {
           registryCacheState: 'coalesced',
           registryCacheAgeMs: 17,
-          registryServerFilterApplied: true,
-          registryFilterMode: 'active-launch-eligible',
+          registryServerFilterApplied: false,
+          registryFilterMode: 'disabled-correctness-recovery',
         },
       }),
     });
@@ -1235,8 +1234,8 @@ describe('MyProjectLinksReadModelProvider — B05.8 Prompt 04 stage-duration eve
     expect(sources[0]?.[1]).toMatchObject({
       registryCacheState: 'coalesced',
       registryCacheAgeMs: 17,
-      registryServerFilterApplied: true,
-      registryFilterMode: 'active-launch-eligible',
+      registryServerFilterApplied: false,
+      registryFilterMode: 'disabled-correctness-recovery',
     });
   });
 

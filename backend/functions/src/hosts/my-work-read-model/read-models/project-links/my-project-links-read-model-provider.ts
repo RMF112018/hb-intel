@@ -29,10 +29,8 @@ import {
 
 const MAX_SOURCE_ROWS = 25000;
 const REGISTRY_SOURCE_CACHE_TTL_MS = 60_000;
-const REGISTRY_SOURCE_FILTER =
-  "IsActive eq 1 and (MatchStatus eq 'matched' or MatchStatus eq 'unmatched' or MatchStatus eq 'review-required')";
 const PROCORE_TOKEN_PATTERN = /^[A-Za-z0-9_-]+$/;
-type RegistryFilterMode = 'active-launch-eligible';
+type RegistryFilterMode = 'disabled-correctness-recovery';
 type RegistryCacheState = RegistryCacheTelemetryState;
 
 interface IRegistrySourceTelemetry {
@@ -897,8 +895,8 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
           registryTelemetry: {
             registryCacheState: 'hit',
             registryCacheAgeMs: Math.max(0, nowMs - cachedRegistryAtMs),
-            registryServerFilterApplied: true,
-            registryFilterMode: 'active-launch-eligible',
+            registryServerFilterApplied: false,
+            registryFilterMode: 'disabled-correctness-recovery',
           },
         };
       }
@@ -911,8 +909,8 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
           registryTelemetry: {
             ...(result.registryTelemetry ?? {}),
             registryCacheState: 'coalesced',
-            registryServerFilterApplied: true,
-            registryFilterMode: 'active-launch-eligible',
+            registryServerFilterApplied: false,
+            registryFilterMode: 'disabled-correctness-recovery',
           },
         };
       }
@@ -921,7 +919,6 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
       const loadPromise = (async (): Promise<ISourceLoadResult<ILegacyRegistrySourceRow>> => {
         try {
           const rows = await graph.listItems(LEGACY_FALLBACK_REGISTRY_LIST_TITLE, {
-            filter: REGISTRY_SOURCE_FILTER,
             select: [...registrySelectFields],
             top: MAX_SOURCE_ROWS,
           });
@@ -954,8 +951,8 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
             registryTelemetry: {
               registryCacheState: lastRegistryCacheState,
               registryCacheAgeMs: 0,
-              registryServerFilterApplied: true,
-              registryFilterMode: 'active-launch-eligible',
+              registryServerFilterApplied: false,
+              registryFilterMode: 'disabled-correctness-recovery',
             },
           };
           cachedRegistryResult = result;
@@ -971,8 +968,8 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
             failureMessage: sanitizeForTelemetry(error),
             registryTelemetry: {
               registryCacheState: lastRegistryCacheState,
-              registryServerFilterApplied: true,
-              registryFilterMode: 'active-launch-eligible',
+              registryServerFilterApplied: false,
+              registryFilterMode: 'disabled-correctness-recovery',
             },
           };
         } finally {

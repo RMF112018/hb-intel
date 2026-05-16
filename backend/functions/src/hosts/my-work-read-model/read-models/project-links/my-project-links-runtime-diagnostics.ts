@@ -68,7 +68,7 @@ export interface MyProjectLinksRuntimeDiagnosticProperties {
   readonly registryCacheState?: RegistryCacheTelemetryState;
   readonly registryCacheAgeMs?: number;
   readonly registryServerFilterApplied?: boolean;
-  readonly registryFilterMode?: 'active-launch-eligible';
+  readonly registryFilterMode?: 'active-launch-eligible' | 'disabled-correctness-recovery';
   // reconcile.result shape.
   readonly durationMs?: number;
   readonly matchedItemCount?: number;
