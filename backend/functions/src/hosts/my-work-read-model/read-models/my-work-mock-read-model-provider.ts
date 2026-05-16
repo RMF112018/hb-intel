@@ -16,6 +16,8 @@
 import type {
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
+  MyWorkAdobeSignRecentCompletionsQuery,
+  MyWorkAdobeSignRecentCompletionsReadModel,
   MyWorkHomeReadModel,
   MyProjectLinksReadModel,
   MyWorkReadModelEnvelope,
@@ -57,6 +59,20 @@ export class MyWorkMockReadModelProvider implements IMyWorkReadModelProvider {
     const scenario =
       typeof query.cursor === 'string' && query.cursor.length > 0 ? 'available-paged' : 'available';
     const base = MY_WORK_FIXTURES['adobe-sign-action-queue'][scenario];
+    return { ...base, generatedAtUtc: this.now() };
+  }
+
+  async getAdobeSignRecentCompletions(
+    _context: MyWorkReadContext,
+    query: MyWorkAdobeSignRecentCompletionsQuery,
+  ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignRecentCompletionsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      const base = MY_WORK_FIXTURES['adobe-sign-recent-completions']['backend-unavailable'];
+      return { ...base, generatedAtUtc: this.now() };
+    }
+    const scenario =
+      typeof query.cursor === 'string' && query.cursor.length > 0 ? 'available-paged' : 'available';
+    const base = MY_WORK_FIXTURES['adobe-sign-recent-completions'][scenario];
     return { ...base, generatedAtUtc: this.now() };
   }
 

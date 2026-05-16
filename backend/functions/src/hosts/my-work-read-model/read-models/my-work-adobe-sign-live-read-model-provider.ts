@@ -31,27 +31,33 @@
 import type {
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
+  MyWorkAdobeSignRecentCompletionsQuery,
+  MyWorkAdobeSignRecentCompletionsReadModel,
   MyWorkHomeReadModel,
   MyWorkReadModelEnvelope,
 } from '@hbc/models/myWork';
 
 import type { IAdobeSignActionQueueAdapter } from './adobe-sign/adobe-sign-action-queue-adapter.js';
+import type { IAdobeSignRecentCompletionsAdapter } from './adobe-sign/adobe-sign-recent-completions-adapter.js';
 import type { MyWorkReadContext } from './my-work-read-model-provider.js';
 
 const HOME_PREVIEW_ITEM_LIMIT = 5 as const;
 
 export interface MyWorkAdobeSignLiveReadModelProviderOptions {
   readonly actionQueueAdapter: IAdobeSignActionQueueAdapter;
+  readonly recentCompletionsAdapter: IAdobeSignRecentCompletionsAdapter;
   /** Defaults to `() => new Date()` so tests can pin `generatedAtUtc`. */
   readonly now?: () => Date;
 }
 
 export class MyWorkAdobeSignLiveReadModelProvider {
   private readonly actionQueueAdapter: IAdobeSignActionQueueAdapter;
+  private readonly recentCompletionsAdapter: IAdobeSignRecentCompletionsAdapter;
   private readonly now: () => Date;
 
   constructor(options: MyWorkAdobeSignLiveReadModelProviderOptions) {
     this.actionQueueAdapter = options.actionQueueAdapter;
+    this.recentCompletionsAdapter = options.recentCompletionsAdapter;
     this.now = options.now ?? (() => new Date());
   }
 
@@ -60,6 +66,13 @@ export class MyWorkAdobeSignLiveReadModelProvider {
     query: MyWorkAdobeSignActionQueueQuery,
   ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>> {
     return this.actionQueueAdapter.getActionQueue(context, query);
+  }
+
+  async getAdobeSignRecentCompletions(
+    context: MyWorkReadContext,
+    query: MyWorkAdobeSignRecentCompletionsQuery,
+  ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignRecentCompletionsReadModel>> {
+    return this.recentCompletionsAdapter.getRecentCompletions(context, query);
   }
 
   async getMyWorkHome(

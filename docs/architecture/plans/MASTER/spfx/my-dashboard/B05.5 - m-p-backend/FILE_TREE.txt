@@ -1,0 +1,14 @@
+HB_Intel_Federated_HB_SharePoint_Creator_Graph_Access_Backend_Prompt_Package/
+├── README.md
+├── PACKAGE_MANIFEST.md
+├── FILE_TREE.txt
+├── prompts/
+│   ├── Prompt_01_Implement_Federated_HB_SharePoint_Creator_Graph_Token_Path.md
+│   └── Prompt_02_Reconcile_Docs_Deployment_Prerequisites_And_Hosted_Proof.md
+└── supporting/
+    ├── 00_Locked_Current_State_And_Root_Cause.md
+    ├── 01_Operator_Completed_Entra_Federated_Credential_Evidence.md
+    ├── 02_Repo_Truth_Inspection_Seams.md
+    ├── 03_Implementation_Guardrails_And_Non_Negotiables.md
+    ├── 04_Runtime_Proof_Checklist_And_KQL.md
+    └── 05_Commit_Closeout_Template.md

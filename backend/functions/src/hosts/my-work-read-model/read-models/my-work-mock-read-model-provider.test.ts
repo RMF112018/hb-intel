@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
+  ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE_PAGED,
+  ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE,
   ADOBE_SIGN_QUEUE_AVAILABLE,
   ADOBE_SIGN_QUEUE_AVAILABLE_PAGED,
   ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
@@ -38,6 +41,15 @@ describe('MyWorkMockReadModelProvider — default posture', () => {
     const envelope = await provider.getAdobeSignActionQueue(FIXTURE_CONTEXT, {});
     expect(envelope).toEqual({
       ...ADOBE_SIGN_QUEUE_AVAILABLE,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+    });
+  });
+
+  it('returns the AVAILABLE recent-completions envelope when query has no cursor', async () => {
+    const provider = new MyWorkMockReadModelProvider();
+    const envelope = await provider.getAdobeSignRecentCompletions(FIXTURE_CONTEXT, {});
+    expect(envelope).toEqual({
+      ...ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
     });
   });
@@ -91,6 +103,24 @@ describe('MyWorkMockReadModelProvider — backend-unavailable posture', () => {
     });
   });
 
+  it('returns the BACKEND_UNAVAILABLE recent-completions envelope regardless of cursor', async () => {
+    const provider = new MyWorkMockReadModelProvider({
+      simulateBackendUnavailable: true,
+    });
+    const without = await provider.getAdobeSignRecentCompletions(FIXTURE_CONTEXT, {});
+    const withCursor = await provider.getAdobeSignRecentCompletions(FIXTURE_CONTEXT, {
+      cursor: 'cursor-page-2',
+    });
+    expect(without).toEqual({
+      ...ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+    });
+    expect(withCursor).toEqual({
+      ...ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+    });
+  });
+
   it('returns the BACKEND_UNAVAILABLE project-links envelope', async () => {
     const provider = new MyWorkMockReadModelProvider({
       simulateBackendUnavailable: true,
@@ -114,6 +144,17 @@ describe('MyWorkMockReadModelProvider — paged cursor selection', () => {
       generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
     });
   });
+
+  it('returns the AVAILABLE_PAGED recent-completions envelope when a non-empty cursor is supplied', async () => {
+    const provider = new MyWorkMockReadModelProvider();
+    const envelope = await provider.getAdobeSignRecentCompletions(FIXTURE_CONTEXT, {
+      cursor: 'cursor-page-2',
+    });
+    expect(envelope).toEqual({
+      ...ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE_PAGED,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+    });
+  });
 });
 
 describe('MyWorkMockReadModelProvider — clock override', () => {
@@ -123,8 +164,11 @@ describe('MyWorkMockReadModelProvider — clock override', () => {
     });
     const home = await provider.getMyWorkHome(FIXTURE_CONTEXT);
     const queue = await provider.getAdobeSignActionQueue(FIXTURE_CONTEXT, {});
+    const completed = await provider.getAdobeSignRecentCompletions(FIXTURE_CONTEXT, {});
     expect(home.generatedAtUtc).toBe('2030-01-01T00:00:00.000Z');
     expect(queue.generatedAtUtc).toBe('2030-01-01T00:00:00.000Z');
+    expect(completed.generatedAtUtc).toBe('2030-01-01T00:00:00.000Z');
     expect(queue.data.freshness.generatedAtUtc).toBe(MY_WORK_FIXTURE_GENERATED_AT_UTC);
+    expect(completed.data.freshness.generatedAtUtc).toBe(MY_WORK_FIXTURE_GENERATED_AT_UTC);
   });
 });

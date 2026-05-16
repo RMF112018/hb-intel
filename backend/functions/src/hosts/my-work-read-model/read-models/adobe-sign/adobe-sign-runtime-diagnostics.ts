@@ -12,7 +12,8 @@ export type AdobeSignRuntimeDiagnosticEventName =
   | 'adobeSign.read.tokenAcquisition.result'
   | 'adobeSign.read.refresh.result'
   | 'adobeSign.read.search.result'
-  | 'adobeSign.read.actionQueue.result';
+  | 'adobeSign.read.actionQueue.result'
+  | 'adobeSign.read.recentCompletions.result';
 
 export type AdobeSignTableStoreOperation =
   | 'find-grant'
@@ -146,13 +147,20 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly searchProviderResponseHasErrorField?: boolean;
   readonly searchProviderResponseHasCodeField?: boolean;
   readonly sourceStatus?: string;
-  readonly resultStage?: AdobeSignActionQueueResultStage;
+  readonly resultStage?: AdobeSignActionQueueResultStage | AdobeSignRecentCompletionsResultStage;
   readonly warningCodes?: readonly string[];
   readonly itemCount?: number;
   readonly hasMore?: boolean;
+  readonly windowDays?: 30;
 }
 
 export type AdobeSignActionQueueResultStage =
+  | 'principal-resolution'
+  | 'token-acquisition'
+  | 'search'
+  | 'mapped-results';
+
+export type AdobeSignRecentCompletionsResultStage =
   | 'principal-resolution'
   | 'token-acquisition'
   | 'search'

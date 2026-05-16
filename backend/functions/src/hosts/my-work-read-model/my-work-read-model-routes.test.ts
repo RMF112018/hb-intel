@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
   ADOBE_SIGN_QUEUE_AVAILABLE,
   MY_PROJECT_LINKS_AVAILABLE,
   MY_WORK_HOME_AVAILABLE,
@@ -11,6 +12,7 @@ const registrations: Array<{ name: string; config: any }> = [];
 const provider = {
   getMyWorkHome: vi.fn(),
   getAdobeSignActionQueue: vi.fn(),
+  getAdobeSignRecentCompletions: vi.fn(),
   getMyProjectLinks: vi.fn(),
 };
 
@@ -71,17 +73,19 @@ describe('my-work-read-model-routes — registration shape', () => {
     registrations.length = 0;
     provider.getMyWorkHome.mockReset();
     provider.getAdobeSignActionQueue.mockReset();
+    provider.getAdobeSignRecentCompletions.mockReset();
     provider.getMyProjectLinks.mockReset();
     injectedAuth = DEFAULT_AUTH;
     vi.resetModules();
     await import('./my-work-read-model-routes.js');
   });
 
-  it('registers exactly three read-model routes and no others', () => {
-    expect(registrations).toHaveLength(3);
+  it('registers exactly four read-model routes and no others', () => {
+    expect(registrations).toHaveLength(4);
     const names = registrations.map((r) => r.name).sort();
     expect(names).toEqual([
       'getMyWorkAdobeSignActionQueue',
+      'getMyWorkAdobeSignRecentCompletions',
       'getMyWorkHome',
       'getMyWorkProjectLinks',
     ]);
@@ -97,6 +101,13 @@ describe('my-work-read-model-routes — registration shape', () => {
   it('binds the Adobe queue route to the canonical B04 path', () => {
     const reg = findRegistration('getMyWorkAdobeSignActionQueue');
     expect(reg.config.route).toBe('my-work/me/adobe-sign/action-queue');
+    expect(reg.config.methods).toEqual(['GET']);
+    expect(reg.config.authLevel).toBe('anonymous');
+  });
+
+  it('binds the Adobe recent-completions route to the canonical path', () => {
+    const reg = findRegistration('getMyWorkAdobeSignRecentCompletions');
+    expect(reg.config.route).toBe('my-work/me/adobe-sign/recent-completions');
     expect(reg.config.methods).toEqual(['GET']);
     expect(reg.config.authLevel).toBe('anonymous');
   });
@@ -128,6 +139,7 @@ describe('my-work-read-model-routes — getMyWorkHome handler', () => {
     registrations.length = 0;
     provider.getMyWorkHome.mockReset();
     provider.getAdobeSignActionQueue.mockReset();
+    provider.getAdobeSignRecentCompletions.mockReset();
     provider.getMyProjectLinks.mockReset();
     injectedAuth = DEFAULT_AUTH;
     vi.resetModules();
@@ -188,6 +200,7 @@ describe('my-work-read-model-routes — getMyWorkAdobeSignActionQueue handler', 
     registrations.length = 0;
     provider.getMyWorkHome.mockReset();
     provider.getAdobeSignActionQueue.mockReset();
+    provider.getAdobeSignRecentCompletions.mockReset();
     provider.getMyProjectLinks.mockReset();
     injectedAuth = DEFAULT_AUTH;
     vi.resetModules();
@@ -268,11 +281,97 @@ describe('my-work-read-model-routes — getMyWorkAdobeSignActionQueue handler', 
   });
 });
 
+describe('my-work-read-model-routes — getMyWorkAdobeSignRecentCompletions handler', () => {
+  beforeEach(async () => {
+    registrations.length = 0;
+    provider.getMyWorkHome.mockReset();
+    provider.getAdobeSignActionQueue.mockReset();
+    provider.getAdobeSignRecentCompletions.mockReset();
+    provider.getMyProjectLinks.mockReset();
+    injectedAuth = DEFAULT_AUTH;
+    vi.resetModules();
+    await import('./my-work-read-model-routes.js');
+  });
+
+  it('returns 200 with { data: envelope } when no query parameters are supplied', async () => {
+    provider.getAdobeSignRecentCompletions.mockResolvedValueOnce(ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE);
+    const reg = findRegistration('getMyWorkAdobeSignRecentCompletions');
+    const response = await reg.config.handler(buildRequest(), {});
+    expect(response.status).toBe(200);
+    expect(provider.getAdobeSignRecentCompletions).toHaveBeenCalledTimes(1);
+    const [, query] = provider.getAdobeSignRecentCompletions.mock.calls[0]!;
+    expect(query).toEqual({});
+  });
+
+  it('parses pageSize and cursor and forwards them to the provider', async () => {
+    provider.getAdobeSignRecentCompletions.mockResolvedValueOnce(ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE);
+    const reg = findRegistration('getMyWorkAdobeSignRecentCompletions');
+    await reg.config.handler(buildRequest('pageSize=10&cursor=abc'), {});
+    const [, query] = provider.getAdobeSignRecentCompletions.mock.calls[0]!;
+    expect(query).toEqual({ pageSize: 10, cursor: 'abc' });
+  });
+
+  it.each([
+    ['pageSize=0', 'lower bound'],
+    ['pageSize=51', 'upper bound'],
+    ['pageSize=abc', 'non-numeric'],
+    ['pageSize=1.5', 'non-integer'],
+  ])('returns 400 VALIDATION_ERROR for pageSize \"%s\" (%s)', async (qs) => {
+    const reg = findRegistration('getMyWorkAdobeSignRecentCompletions');
+    const response = await reg.config.handler(buildRequest(qs), {});
+    expect(response.status).toBe(400);
+    expect(response.jsonBody).toMatchObject({
+      code: 'VALIDATION_ERROR',
+      requestId: 'req-123',
+    });
+    expect(provider.getAdobeSignRecentCompletions).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 VALIDATION_ERROR for an over-long cursor', async () => {
+    const longCursor = 'c'.repeat(257);
+    const reg = findRegistration('getMyWorkAdobeSignRecentCompletions');
+    const response = await reg.config.handler(buildRequest(`cursor=${longCursor}`), {});
+    expect(response.status).toBe(400);
+    expect(response.jsonBody).toMatchObject({ code: 'VALIDATION_ERROR' });
+    expect(provider.getAdobeSignRecentCompletions).not.toHaveBeenCalled();
+  });
+
+  it('ignores actor/user/principal/email/upn query parameters', async () => {
+    provider.getAdobeSignRecentCompletions.mockResolvedValueOnce(ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE);
+    const reg = findRegistration('getMyWorkAdobeSignRecentCompletions');
+    await reg.config.handler(
+      buildRequest(
+        'actor=mallory&user=mallory&principal=mallory&email=mallory@example.com&upn=mallory&pageSize=25',
+      ),
+      {},
+    );
+    const [context, query] = provider.getAdobeSignRecentCompletions.mock.calls[0]!;
+    expect(query).toEqual({ pageSize: 25 });
+    expect(context.actor).toMatchObject({
+      displayName: 'Avery Lead',
+      principalName: 'avery@hbc.test',
+      hbcUserId: 'oid-fixture',
+    });
+  });
+
+  it('returns 500 INTERNAL_ERROR when the provider throws', async () => {
+    provider.getAdobeSignRecentCompletions.mockRejectedValueOnce(new Error('boom'));
+    const reg = findRegistration('getMyWorkAdobeSignRecentCompletions');
+    const response = await reg.config.handler(buildRequest(), {});
+    expect(response.status).toBe(500);
+    expect(response.jsonBody).toMatchObject({
+      code: 'INTERNAL_ERROR',
+      requestId: 'req-123',
+    });
+  });
+});
+
 describe('my-work-read-model-routes — getMyWorkProjectLinks handler', () => {
   beforeEach(async () => {
     registrations.length = 0;
     provider.getMyWorkHome.mockReset();
     provider.getAdobeSignActionQueue.mockReset();
+    provider.getAdobeSignRecentCompletions.mockReset();
     provider.getMyProjectLinks.mockReset();
     injectedAuth = DEFAULT_AUTH;
     vi.resetModules();

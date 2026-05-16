@@ -1,0 +1,17 @@
+{
+  "package": "HB_Intel_Federated_HB_SharePoint_Creator_Graph_Access_Backend_Prompt_Package",
+  "files": [
+    "FILE_TREE.txt",
+    "PACKAGE_MANIFEST.md",
+    "README.md",
+    "prompts/Prompt_01_Implement_Federated_HB_SharePoint_Creator_Graph_Token_Path.md",
+    "prompts/Prompt_02_Reconcile_Docs_Deployment_Prerequisites_And_Hosted_Proof.md",
+    "supporting/00_Locked_Current_State_And_Root_Cause.md",
+    "supporting/01_Operator_Completed_Entra_Federated_Credential_Evidence.md",
+    "supporting/02_Repo_Truth_Inspection_Seams.md",
+    "supporting/03_Implementation_Guardrails_And_Non_Negotiables.md",
+    "supporting/04_Runtime_Proof_Checklist_And_KQL.md",
+    "supporting/05_Commit_Closeout_Template.md"
+  ],
+  "zip": "HB_Intel_Federated_HB_SharePoint_Creator_Graph_Access_Backend_Prompt_Package.zip"
+}

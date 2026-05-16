@@ -133,6 +133,7 @@ describe('resolveMyWorkReadModelProvider', () => {
       const provider = resolveMyWorkReadModelProvider(fullProductionEnv());
       expect(typeof provider.getMyWorkHome).toBe('function');
       expect(typeof provider.getAdobeSignActionQueue).toBe('function');
+      expect(typeof provider.getAdobeSignRecentCompletions).toBe('function');
       expect(typeof provider.getMyProjectLinks).toBe('function');
     } finally {
       if (previous === undefined) delete process.env.AZURE_TABLE_ENDPOINT;
@@ -148,6 +149,8 @@ describe('resolveMyWorkReadModelProvider', () => {
     expect(home.sourceStatus).toBe('backend-unavailable');
     const queue = await provider.getAdobeSignActionQueue(fixtureContext, {});
     expect(queue.sourceStatus).toBe('backend-unavailable');
+    const completed = await provider.getAdobeSignRecentCompletions(fixtureContext, {});
+    expect(completed.sourceStatus).toBe('backend-unavailable');
   });
 
   it('preserves the project-links delegation across all modes', async () => {

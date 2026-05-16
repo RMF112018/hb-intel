@@ -22,7 +22,11 @@ import {
   type InvocationContext,
 } from '@azure/functions';
 
-import type { MyWorkActorSummary, MyWorkAdobeSignActionQueueQuery } from '@hbc/models/myWork';
+import type {
+  MyWorkActorSummary,
+  MyWorkAdobeSignActionQueueQuery,
+  MyWorkAdobeSignRecentCompletionsQuery,
+} from '@hbc/models/myWork';
 
 import { withAuth } from '../../middleware/auth.js';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
@@ -57,6 +61,52 @@ type QueueQueryParseResult =
   | { readonly ok: false; readonly response: HttpResponseInit };
 
 const parseQueueQuery = (request: HttpRequest, requestId: string): QueueQueryParseResult => {
+  const pageSizeRaw = request.query.get('pageSize');
+  const cursorRaw = request.query.get('cursor');
+  const query: { pageSize?: number; cursor?: string } = {};
+
+  if (pageSizeRaw !== null && pageSizeRaw !== '') {
+    const parsed = Number(pageSizeRaw);
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 50) {
+      return {
+        ok: false,
+        response: errorResponse(
+          400,
+          'VALIDATION_ERROR',
+          'pageSize must be an integer between 1 and 50',
+          requestId,
+        ),
+      };
+    }
+    query.pageSize = parsed;
+  }
+
+  if (cursorRaw !== null && cursorRaw.length > 0) {
+    if (cursorRaw.length > MAX_CURSOR_LENGTH) {
+      return {
+        ok: false,
+        response: errorResponse(
+          400,
+          'VALIDATION_ERROR',
+          `cursor must be at most ${MAX_CURSOR_LENGTH} characters`,
+          requestId,
+        ),
+      };
+    }
+    query.cursor = cursorRaw;
+  }
+
+  return { ok: true, query };
+};
+
+type RecentCompletionsQueryParseResult =
+  | { readonly ok: true; readonly query: MyWorkAdobeSignRecentCompletionsQuery }
+  | { readonly ok: false; readonly response: HttpResponseInit };
+
+const parseRecentCompletionsQuery = (
+  request: HttpRequest,
+  requestId: string,
+): RecentCompletionsQueryParseResult => {
   const pageSizeRaw = request.query.get('pageSize');
   const cursorRaw = request.query.get('cursor');
   const query: { pageSize?: number; cursor?: string } = {};
@@ -187,6 +237,40 @@ app.http('getMyWorkAdobeSignActionQueue', {
       {
         domain: 'my-work-read-model',
         operation: 'getMyWorkAdobeSignActionQueue',
+      },
+    ),
+  ),
+});
+
+app.http('getMyWorkAdobeSignRecentCompletions', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'my-work/me/adobe-sign/recent-completions',
+  handler: withAuth(
+    withTelemetry(
+      async (
+        request: HttpRequest,
+        _context: InvocationContext,
+        auth,
+      ): Promise<HttpResponseInit> => {
+        const requestId = extractOrGenerateRequestId(request);
+        const parsed = parseRecentCompletionsQuery(request, requestId);
+        if (!parsed.ok) return parsed.response;
+        try {
+          const context: MyWorkReadContext = {
+            actor: actorFromClaims(auth.claims),
+            requestId,
+            diagnostics: createAdobeSignRuntimeDiagnosticsReporter(_context, requestId),
+          };
+          const envelope = await provider.getAdobeSignRecentCompletions(context, parsed.query);
+          return successResponse(envelope);
+        } catch {
+          return errorResponse(500, 'INTERNAL_ERROR', 'Internal server error', requestId);
+        }
+      },
+      {
+        domain: 'my-work-read-model',
+        operation: 'getMyWorkAdobeSignRecentCompletions',
       },
     ),
   ),

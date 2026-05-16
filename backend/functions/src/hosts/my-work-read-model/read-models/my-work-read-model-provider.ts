@@ -17,6 +17,8 @@ import type {
   MyWorkActorSummary,
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
+  MyWorkAdobeSignRecentCompletionsQuery,
+  MyWorkAdobeSignRecentCompletionsReadModel,
   MyWorkHomeReadModel,
   MyProjectLinksReadModel,
   MyWorkReadModelEnvelope,
@@ -38,6 +40,10 @@ export interface IMyWorkReadModelProvider {
     context: MyWorkReadContext,
     query: MyWorkAdobeSignActionQueueQuery,
   ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>>;
+  getAdobeSignRecentCompletions(
+    context: MyWorkReadContext,
+    query: MyWorkAdobeSignRecentCompletionsQuery,
+  ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignRecentCompletionsReadModel>>;
 
   getMyProjectLinks(
     context: MyWorkReadContext,

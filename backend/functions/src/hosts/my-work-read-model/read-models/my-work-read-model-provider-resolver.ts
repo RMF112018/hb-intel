@@ -32,6 +32,10 @@ import {
   createAdobeSignActionQueueAdapter,
   type IAdobeSignActionQueueAdapter,
 } from './adobe-sign/adobe-sign-action-queue-adapter.js';
+import {
+  createAdobeSignRecentCompletionsAdapter,
+  type IAdobeSignRecentCompletionsAdapter,
+} from './adobe-sign/adobe-sign-recent-completions-adapter.js';
 import type { EnvLike } from './adobe-sign/adobe-sign-config.js';
 import { resolveAdobeSignOAuthConfigReadiness } from './adobe-sign/adobe-sign-config.js';
 import { resolveAdobeSignGrantStore } from './adobe-sign/adobe-sign-grant-store.js';
@@ -57,7 +61,11 @@ export type AdobeSignLiveStackCompositionReason =
   | 'cipher-key-not-ready';
 
 export type AdobeSignLiveStackComposition =
-  | { readonly status: 'ready'; readonly actionQueueAdapter: IAdobeSignActionQueueAdapter }
+  | {
+      readonly status: 'ready';
+      readonly actionQueueAdapter: IAdobeSignActionQueueAdapter;
+      readonly recentCompletionsAdapter: IAdobeSignRecentCompletionsAdapter;
+    }
   | {
       readonly status: 'configuration-required';
       readonly reason: AdobeSignLiveStackCompositionReason;
@@ -107,8 +115,14 @@ export function composeAdobeSignLiveStack(env: EnvLike): AdobeSignLiveStackCompo
     searchClient,
     now: () => new Date(),
   });
+  const recentCompletionsAdapter = createAdobeSignRecentCompletionsAdapter({
+    resolvePrincipal,
+    tokenService,
+    searchClient,
+    now: () => new Date(),
+  });
 
-  return { status: 'ready', actionQueueAdapter };
+  return { status: 'ready', actionQueueAdapter, recentCompletionsAdapter };
 }
 
 export interface ResolveMyWorkReadModelProviderOptions {
@@ -130,6 +144,7 @@ function composeLiveProvider(
 ): IMyWorkReadModelProvider {
   const adobeProvider = new MyWorkAdobeSignLiveReadModelProvider({
     actionQueueAdapter: composition.actionQueueAdapter,
+    recentCompletionsAdapter: composition.recentCompletionsAdapter,
     now: options?.now ?? (() => new Date()),
   });
   const projectLinksProvider = options?.projectLinksProvider ?? new MyProjectLinksReadModelProvider();
@@ -137,6 +152,8 @@ function composeLiveProvider(
     getMyWorkHome: (context) => adobeProvider.getMyWorkHome(context),
     getAdobeSignActionQueue: (context, query) =>
       adobeProvider.getAdobeSignActionQueue(context, query),
+    getAdobeSignRecentCompletions: (context, query) =>
+      adobeProvider.getAdobeSignRecentCompletions(context, query),
     getMyProjectLinks: (context) => projectLinksProvider.getMyProjectLinks(context),
   };
 }
@@ -150,6 +167,8 @@ function composeFallbackProvider(
     getMyWorkHome: (context) => mockProvider.getMyWorkHome(context),
     getAdobeSignActionQueue: (context, query) =>
       mockProvider.getAdobeSignActionQueue(context, query),
+    getAdobeSignRecentCompletions: (context, query) =>
+      mockProvider.getAdobeSignRecentCompletions(context, query),
     getMyProjectLinks: (context) => projectLinksProvider.getMyProjectLinks(context),
   };
 }
@@ -163,6 +182,8 @@ function composeMockProvider(
     getMyWorkHome: (context) => mockProvider.getMyWorkHome(context),
     getAdobeSignActionQueue: (context, query) =>
       mockProvider.getAdobeSignActionQueue(context, query),
+    getAdobeSignRecentCompletions: (context, query) =>
+      mockProvider.getAdobeSignRecentCompletions(context, query),
     getMyProjectLinks: (context) => projectLinksProvider.getMyProjectLinks(context),
   };
 }
