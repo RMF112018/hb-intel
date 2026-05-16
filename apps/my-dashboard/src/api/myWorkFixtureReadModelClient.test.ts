@@ -7,6 +7,9 @@ import {
   ADOBE_SIGN_QUEUE_AVAILABLE,
   ADOBE_SIGN_QUEUE_AVAILABLE_PAGED,
   ADOBE_SIGN_QUEUE_BACKEND_UNAVAILABLE,
+  ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
+  ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE_PAGED,
+  ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE,
   MY_PROJECT_LINKS_AVAILABLE,
   MY_PROJECT_LINKS_BACKEND_UNAVAILABLE,
   MY_WORK_FIXTURE_GENERATED_AT_UTC,
@@ -46,6 +49,16 @@ describe('My Work fixture read-model client — default posture', () => {
     const envelope = await client.getAdobeSignActionQueue({ pageSize: 10 });
     expect(envelope.sourceStatus).toBe('available');
     expect(envelope.data.pagination.hasMore).toBe(false);
+  });
+
+  it('returns the AVAILABLE recent-completions envelope when no cursor is supplied', async () => {
+    const client = createMyWorkFixtureReadModelClient();
+    const envelope = await client.getAdobeSignRecentCompletions!();
+    expect(envelope).toEqual({
+      ...ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
+    });
   });
 
   it('returns the AVAILABLE project-links envelope', async () => {
@@ -103,6 +116,26 @@ describe('My Work fixture read-model client — backend-unavailable posture', ()
       dataPath: 'fixture-ui-review',
     });
   });
+
+  it('returns the BACKEND_UNAVAILABLE recent-completions envelope regardless of cursor', async () => {
+    const client = createMyWorkFixtureReadModelClient({
+      simulateBackendUnavailable: true,
+    });
+    const withoutCursor = await client.getAdobeSignRecentCompletions!();
+    const withCursor = await client.getAdobeSignRecentCompletions!({
+      cursor: 'cursor-page-2',
+    });
+    expect(withoutCursor).toEqual({
+      ...ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
+    });
+    expect(withCursor).toEqual({
+      ...ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
+    });
+  });
 });
 
 describe('My Work fixture read-model client — paged cursor handling', () => {
@@ -121,6 +154,25 @@ describe('My Work fixture read-model client — paged cursor handling', () => {
   it('ignores an empty-string cursor and returns the AVAILABLE queue envelope', async () => {
     const client = createMyWorkFixtureReadModelClient();
     const envelope = await client.getAdobeSignActionQueue({ cursor: '' });
+    expect(envelope.sourceStatus).toBe('available');
+    expect(envelope.data.pagination.hasMore).toBe(false);
+  });
+
+  it('returns the AVAILABLE_PAGED recent-completions envelope when a non-empty cursor is provided', async () => {
+    const client = createMyWorkFixtureReadModelClient();
+    const envelope = await client.getAdobeSignRecentCompletions!({
+      cursor: 'cursor-page-2',
+    });
+    expect(envelope).toEqual({
+      ...ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE_PAGED,
+      generatedAtUtc: MY_WORK_FIXTURE_GENERATED_AT_UTC,
+      dataPath: 'fixture-ui-review',
+    });
+  });
+
+  it('ignores an empty-string cursor and returns the AVAILABLE recent-completions envelope', async () => {
+    const client = createMyWorkFixtureReadModelClient();
+    const envelope = await client.getAdobeSignRecentCompletions!({ cursor: '' });
     expect(envelope.sourceStatus).toBe('available');
     expect(envelope.data.pagination.hasMore).toBe(false);
   });

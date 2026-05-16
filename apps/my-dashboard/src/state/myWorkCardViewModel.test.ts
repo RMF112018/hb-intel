@@ -20,7 +20,10 @@ import {
   requiredActionLabel,
   selectAdobeAgreementListVmFromItems,
   selectAdobeQueueSummaryVmFromSummary,
+  selectAdobeRecentCompletionsListVmFromItems,
+  selectAdobeRecentCompletionsSummaryVmFromSummary,
   selectAdobeSignActionQueueStateCopy,
+  selectAdobeSignCompletedViewStateCopy,
   selectAdobeSignSourceStatus,
   sourceStatusCopy,
 } from './myWorkCardViewModel.js';
@@ -352,5 +355,91 @@ describe('selectAdobeSignActionQueueStateCopy', () => {
         expect(copy.secondaryBody.toLowerCase()).not.toContain('live');
       }
     }
+  });
+});
+
+describe('completed selectors', () => {
+  it('maps completed summary values and refresh label', () => {
+    const summaryVm = selectAdobeRecentCompletionsSummaryVmFromSummary(
+      {
+        countBasis: 'returned-items',
+        completedAgreementCount: 3,
+        windowDays: 30,
+      },
+      '2026-05-12T12:00:00.000Z',
+    );
+    expect(summaryVm.completedAgreementCount).toBe(3);
+    expect(summaryVm.windowDays).toBe(30);
+    expect(summaryVm.lastRefreshedLabel).not.toBe('Pending source connection');
+  });
+
+  it('returns fallback completed summary when summary is undefined', () => {
+    const summaryVm = selectAdobeRecentCompletionsSummaryVmFromSummary(undefined);
+    expect(summaryVm.completedAgreementCount).toBeNull();
+    expect(summaryVm.windowDays).toBeNull();
+    expect(summaryVm.lastRefreshedLabel).toBe('Pending source connection');
+  });
+
+  it('maps completed list items with date label precedence and no required-action leakage', () => {
+    const vm = selectAdobeRecentCompletionsListVmFromItems([
+      {
+        itemId: 'adobe-sign:completed-agreement-1',
+        sourceSystem: 'adobe-sign',
+        agreementId: 'a1',
+        agreementName: 'Agreement 1',
+        agreementStatus: 'COMPLETED',
+        sender: { displayName: 'Sender A' },
+        completedAtUtc: '2026-05-10T10:00:00.000Z',
+        modifiedAtUtc: '2026-05-10T11:00:00.000Z',
+        sourceOpenUrl: 'https://secure.na1.adobesign.com/account/agreementView?aid=1',
+      },
+      {
+        itemId: 'adobe-sign:completed-agreement-2',
+        sourceSystem: 'adobe-sign',
+        agreementId: 'a2',
+        agreementName: 'Agreement 2',
+        agreementStatus: 'COMPLETED',
+        modifiedAtUtc: '2026-05-09T11:00:00.000Z',
+      },
+      {
+        itemId: 'adobe-sign:completed-agreement-3',
+        sourceSystem: 'adobe-sign',
+        agreementId: 'a3',
+        agreementName: 'Agreement 3',
+        agreementStatus: 'COMPLETED',
+      },
+    ]);
+
+    expect(vm.isEmpty).toBe(false);
+    expect(vm.items).toHaveLength(3);
+    expect(vm.items[0]?.senderLabel).toBe('Sender A');
+    expect(vm.items[0]?.dateLabel?.startsWith('Completed ')).toBe(true);
+    expect(vm.items[1]?.dateLabel?.startsWith('Updated ')).toBe(true);
+    expect(vm.items[2]?.dateLabel).toBeNull();
+    expect(vm.items[0]?.sourceOpenUrl).toContain('adobesign.com');
+    expect((vm.items[0] as unknown as Record<string, unknown>).requiredAction).toBeUndefined();
+    expect((vm.items[0] as unknown as Record<string, unknown>).requiredActionLabel).toBeUndefined();
+  });
+
+  it('returns empty vm when completed items are undefined', () => {
+    const vm = selectAdobeRecentCompletionsListVmFromItems(undefined);
+    expect(vm.items).toEqual([]);
+    expect(vm.isEmpty).toBe(true);
+    expect(vm.hasMore).toBe(false);
+  });
+
+  it('returns locked completed copy for available/partial/unavailable states', () => {
+    expect(selectAdobeSignCompletedViewStateCopy('available').body).toBe(
+      'No completed Adobe Sign agreements were found in the last 30 days.',
+    );
+    expect(selectAdobeSignCompletedViewStateCopy('partial').body).toBe(
+      'Some completed agreement details may be incomplete. Showing the latest available Adobe Sign results.',
+    );
+    expect(selectAdobeSignCompletedViewStateCopy('source-unavailable').body).toBe(
+      'Recently completed Adobe Sign agreements are temporarily unavailable.',
+    );
+    expect(selectAdobeSignCompletedViewStateCopy(undefined).body).toBe(
+      'Recently completed Adobe Sign agreements are temporarily unavailable.',
+    );
   });
 });

@@ -17,6 +17,8 @@ import type {
   MyProjectLinksReadModel,
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
+  MyWorkAdobeSignRecentCompletionsQuery,
+  MyWorkAdobeSignRecentCompletionsReadModel,
   MyWorkHomeReadModel,
   MyWorkReadModelDataPath,
   MyWorkReadModelEnvelope,
@@ -80,6 +82,21 @@ class MyWorkFixtureReadModelClient implements IMyWorkReadModelClient {
     const base = this.simulateBackendUnavailable
       ? MY_WORK_FIXTURES['project-links']['backend-unavailable']
       : MY_WORK_FIXTURES['project-links'].available;
+    return { ...base, generatedAtUtc: this.now(), dataPath: this.dataPath };
+  }
+
+  async getAdobeSignRecentCompletions(
+    query?: MyWorkAdobeSignRecentCompletionsQuery,
+  ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignRecentCompletionsReadModel>> {
+    if (this.simulateBackendUnavailable) {
+      const base = MY_WORK_FIXTURES['adobe-sign-recent-completions']['backend-unavailable'];
+      return { ...base, generatedAtUtc: this.now(), dataPath: this.dataPath };
+    }
+    const scenario =
+      typeof query?.cursor === 'string' && query.cursor.length > 0
+        ? 'available-paged'
+        : 'available';
+    const base = MY_WORK_FIXTURES['adobe-sign-recent-completions'][scenario];
     return { ...base, generatedAtUtc: this.now(), dataPath: this.dataPath };
   }
 

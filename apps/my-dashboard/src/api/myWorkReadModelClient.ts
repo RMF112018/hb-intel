@@ -14,6 +14,8 @@ import {
   type MyProjectLinksReadModel,
   type MyWorkAdobeSignActionQueueQuery,
   type MyWorkAdobeSignActionQueueReadModel,
+  type MyWorkAdobeSignRecentCompletionsQuery,
+  type MyWorkAdobeSignRecentCompletionsReadModel,
   type MyWorkHomeReadModel,
   type MyWorkReadModelEnvelope,
   type MyWorkReadModelRouteKey,
@@ -25,6 +27,7 @@ export type MyWorkReadModelRouteId = MyWorkReadModelRouteKey;
 export const MY_WORK_READ_MODEL_ROUTE_IDS = [
   'home',
   'adobe-sign-action-queue',
+  'adobe-sign-recent-completions',
   'project-links',
 ] as const satisfies readonly MyWorkReadModelRouteKey[];
 
@@ -49,6 +52,9 @@ export interface IMyWorkReadModelClient {
   getAdobeSignActionQueue(
     query?: MyWorkAdobeSignActionQueueQuery,
   ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignActionQueueReadModel>>;
+  getAdobeSignRecentCompletions?(
+    query?: MyWorkAdobeSignRecentCompletionsQuery,
+  ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignRecentCompletionsReadModel>>;
   getMyProjectLinks(): Promise<MyWorkReadModelEnvelope<MyProjectLinksReadModel>>;
   /**
    * Issue a fresh Adobe Sign OAuth `state` and return the

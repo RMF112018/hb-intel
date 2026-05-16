@@ -2,11 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   ADOBE_SIGN_QUEUE_AVAILABLE,
+  ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
   MY_PROJECT_LINKS_AVAILABLE,
   MY_WORK_HOME_AVAILABLE,
 } from '@hbc/models/myWork/fixtures';
 
 import {
+  buildAdobeRecentCompletionsQueryString,
   buildAdobeQueueQueryString,
   createMyWorkBackendReadModelClient,
   normalizeBackendApiBaseUrl,
@@ -74,6 +76,25 @@ describe('buildAdobeQueueQueryString', () => {
     expect(buildAdobeQueueQueryString({ cursor: '' })).toBe('');
     expect(buildAdobeQueueQueryString({ pageSize: Number.NaN })).toBe('');
     expect(buildAdobeQueueQueryString({ pageSize: Number.POSITIVE_INFINITY })).toBe('');
+  });
+});
+
+describe('buildAdobeRecentCompletionsQueryString', () => {
+  it('returns empty string when no query supplied', () => {
+    expect(buildAdobeRecentCompletionsQueryString()).toBe('');
+    expect(buildAdobeRecentCompletionsQueryString({})).toBe('');
+  });
+
+  it('serializes pageSize and cursor', () => {
+    expect(buildAdobeRecentCompletionsQueryString({ pageSize: 25, cursor: 'abc' })).toBe(
+      '?pageSize=25&cursor=abc',
+    );
+  });
+
+  it('omits empty cursor and non-finite pageSize', () => {
+    expect(buildAdobeRecentCompletionsQueryString({ cursor: '' })).toBe('');
+    expect(buildAdobeRecentCompletionsQueryString({ pageSize: Number.NaN })).toBe('');
+    expect(buildAdobeRecentCompletionsQueryString({ pageSize: Number.POSITIVE_INFINITY })).toBe('');
   });
 });
 
@@ -155,6 +176,27 @@ describe('My Work backend read-model client — happy path', () => {
     expect(url).not.toContain('?');
     expect(init.method).toBe('GET');
     expect(init.headers.Authorization).toBe('Bearer tok-project-links');
+  });
+
+  it('issues a GET to the canonical recent-completions route with query string', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ data: ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok-recent-completions',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+
+    await client.getAdobeSignRecentCompletions!({ pageSize: 25, cursor: 'abc' });
+
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(url).toBe(
+      'https://example.invalid/api/my-work/me/adobe-sign/recent-completions?pageSize=25&cursor=abc',
+    );
+    expect(init.method).toBe('GET');
+    expect(init.headers.Authorization).toBe('Bearer tok-recent-completions');
   });
 
   it('does not include actor/user/principal/email/upn in the project-links URL', async () => {
@@ -337,6 +379,18 @@ describe('My Work backend read-model client — fallback paths', () => {
       fallback: makeBackendUnavailableFallback(),
     });
     const envelope = await client.getMyProjectLinks();
+    assertBackendUnavailable(envelope);
+  });
+
+  it('falls back for recent-completions when backend fetch throws', async () => {
+    const fetchSpy = vi.fn<MyWorkReadModelFetch>().mockRejectedValue(new Error('network down'));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    const envelope = await client.getAdobeSignRecentCompletions!();
     assertBackendUnavailable(envelope);
   });
 });

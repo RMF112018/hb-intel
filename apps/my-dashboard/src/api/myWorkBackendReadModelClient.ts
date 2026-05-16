@@ -17,6 +17,8 @@ import type {
   MyProjectLinksReadModel,
   MyWorkAdobeSignActionQueueQuery,
   MyWorkAdobeSignActionQueueReadModel,
+  MyWorkAdobeSignRecentCompletionsQuery,
+  MyWorkAdobeSignRecentCompletionsReadModel,
   MyWorkHomeReadModel,
   MyWorkReadModelEnvelope,
 } from '@hbc/models/myWork';
@@ -55,6 +57,21 @@ export const normalizeBackendApiBaseUrl = (input: string): string => {
 };
 
 export const buildAdobeQueueQueryString = (query?: MyWorkAdobeSignActionQueueQuery): string => {
+  if (!query) return '';
+  const params = new URLSearchParams();
+  if (typeof query.pageSize === 'number' && Number.isFinite(query.pageSize)) {
+    params.set('pageSize', String(query.pageSize));
+  }
+  if (typeof query.cursor === 'string' && query.cursor.length > 0) {
+    params.set('cursor', query.cursor);
+  }
+  const qs = params.toString();
+  return qs ? `?${qs}` : '';
+};
+
+export const buildAdobeRecentCompletionsQueryString = (
+  query?: MyWorkAdobeSignRecentCompletionsQuery,
+): string => {
   if (!query) return '';
   const params = new URLSearchParams();
   if (typeof query.pageSize === 'number' && Number.isFinite(query.pageSize)) {
@@ -154,6 +171,20 @@ class MyWorkBackendReadModelClient implements IMyWorkReadModelClient {
       'adobe-sign-action-queue',
       () => this.fallback.getAdobeSignActionQueue(query),
       buildAdobeQueueQueryString(query),
+    );
+  }
+
+  async getAdobeSignRecentCompletions(
+    query?: MyWorkAdobeSignRecentCompletionsQuery,
+  ): Promise<MyWorkReadModelEnvelope<MyWorkAdobeSignRecentCompletionsReadModel>> {
+    const fallbackRecentCompletions = this.fallback.getAdobeSignRecentCompletions;
+    if (!fallbackRecentCompletions) {
+      throw new Error('adobe-sign-recent-completions-fallback-method-missing');
+    }
+    return this.callBackend(
+      'adobe-sign-recent-completions',
+      () => fallbackRecentCompletions.call(this.fallback, query),
+      buildAdobeRecentCompletionsQueryString(query),
     );
   }
 

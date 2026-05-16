@@ -21,6 +21,8 @@ import type {
   MyProjectLinksReadModel,
   MyWorkAdobeSignActionQueueItem,
   MyWorkAdobeSignActionQueueSummary,
+  MyWorkAdobeSignRecentCompletionsItem,
+  MyWorkAdobeSignRecentCompletionsSummary,
   MyWorkAdobeSignRequiredAction,
   MyWorkHomeReadModel,
   MyWorkReadModelEnvelope,
@@ -214,6 +216,98 @@ export interface AdobeAgreementListVm {
   readonly items: readonly AdobeAgreementListItem[];
   readonly isEmpty: boolean;
   readonly hasMore: boolean;
+}
+
+export interface AdobeRecentCompletionsSummaryVm {
+  readonly completedAgreementCount: number | null;
+  readonly windowDays: 30 | null;
+  readonly lastRefreshedLabel: string;
+}
+
+const ADOBE_RECENT_COMPLETIONS_SUMMARY_FALLBACK: AdobeRecentCompletionsSummaryVm = {
+  completedAgreementCount: null,
+  windowDays: null,
+  lastRefreshedLabel: PENDING_REFRESH_FALLBACK,
+};
+
+export function selectAdobeRecentCompletionsSummaryVmFromSummary(
+  summary: MyWorkAdobeSignRecentCompletionsSummary | undefined,
+  generatedAtUtc?: string,
+): AdobeRecentCompletionsSummaryVm {
+  if (!summary) return ADOBE_RECENT_COMPLETIONS_SUMMARY_FALLBACK;
+  return {
+    completedAgreementCount: summary.completedAgreementCount,
+    windowDays: summary.windowDays,
+    lastRefreshedLabel: formatGeneratedAtUtc(generatedAtUtc),
+  };
+}
+
+export interface AdobeRecentCompletionsListItemVm {
+  readonly itemId: string;
+  readonly agreementName: string;
+  readonly senderLabel: string | null;
+  readonly dateLabel: string | null;
+  readonly sourceOpenUrl?: string;
+}
+
+export interface AdobeRecentCompletionsListVm {
+  readonly items: readonly AdobeRecentCompletionsListItemVm[];
+  readonly isEmpty: boolean;
+  readonly hasMore: boolean;
+}
+
+export function selectAdobeRecentCompletionsListVmFromItems(
+  items: readonly MyWorkAdobeSignRecentCompletionsItem[] | undefined,
+  hasMore = false,
+): AdobeRecentCompletionsListVm {
+  if (!items) {
+    return { items: [], isEmpty: true, hasMore: false };
+  }
+
+  const mapped = items.map<AdobeRecentCompletionsListItemVm>((it) => {
+    const dateLabel = it.completedAtUtc
+      ? `Completed ${formatGeneratedAtUtc(it.completedAtUtc)}`
+      : it.modifiedAtUtc
+        ? `Updated ${formatGeneratedAtUtc(it.modifiedAtUtc)}`
+        : null;
+    return {
+      itemId: it.itemId,
+      agreementName: it.agreementName,
+      senderLabel: it.sender?.displayName ?? null,
+      dateLabel,
+      sourceOpenUrl: it.sourceOpenUrl,
+    };
+  });
+
+  return {
+    items: mapped,
+    isEmpty: mapped.length === 0,
+    hasMore,
+  };
+}
+
+export interface AdobeSignCompletedViewStateCopy {
+  readonly body: string;
+}
+
+export function selectAdobeSignCompletedViewStateCopy(
+  status: MyWorkReadModelSourceStatus | undefined,
+): AdobeSignCompletedViewStateCopy {
+  if (status === 'partial') {
+    return {
+      body: 'Some completed agreement details may be incomplete. Showing the latest available Adobe Sign results.',
+    };
+  }
+
+  if (status === 'available') {
+    return {
+      body: 'No completed Adobe Sign agreements were found in the last 30 days.',
+    };
+  }
+
+  return {
+    body: 'Recently completed Adobe Sign agreements are temporarily unavailable.',
+  };
 }
 
 /**
