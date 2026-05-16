@@ -2,6 +2,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MY_WORK_READ_MODEL_ROUTE_PATHS } from '@hbc/models/myWork';
 
+/**
+ * Model route keys whose canonical path is published in the model contract
+ * but is intentionally NOT yet registered as a backend route — the model
+ * shape can ship ahead of the live route so frontend, fixtures, and type
+ * consumers can adopt it before the backend wave wires it. When the route
+ * IS wired, remove the key from this list (the pending-keys-have-zero-
+ * registrations test below will fail and force the cleanup).
+ */
+const MODEL_ROUTE_KEYS_PENDING_REGISTRATION: ReadonlyArray<
+  keyof typeof MY_WORK_READ_MODEL_ROUTE_PATHS
+> = ['adobe-sign-recent-completions'];
+
 const registrations: Array<{ name: string; config: any }> = [];
 
 vi.mock('@azure/functions', () => ({
@@ -59,17 +71,40 @@ describe('my-work-read-model route ↔ model agreement', () => {
     expect(reg?.config.route).toBe(MY_WORK_READ_MODEL_ROUTE_PATHS['project-links']);
   });
 
-  it('registers exactly one route per model route key — no duplicates and no alternate slugs', () => {
+  it('registers exactly one route per registered model route key — no duplicates and no alternate slugs', () => {
     const modelKeys = Object.keys(MY_WORK_READ_MODEL_ROUTE_PATHS) as ReadonlyArray<
       keyof typeof MY_WORK_READ_MODEL_ROUTE_PATHS
     >;
-    expect(modelKeys).toHaveLength(3);
-    for (const key of modelKeys) {
+    const registeredKeys = modelKeys.filter(
+      (k) => !MODEL_ROUTE_KEYS_PENDING_REGISTRATION.includes(k),
+    );
+    // Sentinel: every model key must be classified as either registered or
+    // pending. Adding a 5th model key without classifying it fails here and
+    // forces the engineer to decide which set it belongs to.
+    expect(registeredKeys.length + MODEL_ROUTE_KEYS_PENDING_REGISTRATION.length).toBe(
+      modelKeys.length,
+    );
+    expect(registeredKeys.length).toBeGreaterThan(0);
+    for (const key of registeredKeys) {
       const path = MY_WORK_READ_MODEL_ROUTE_PATHS[key];
       const matches = registrations.filter((r) => r.config.route === path);
       expect(matches, `route registered exactly once: ${path}`).toHaveLength(1);
     }
-    expect(registrations).toHaveLength(modelKeys.length);
+    expect(registrations).toHaveLength(registeredKeys.length);
+  });
+
+  it('does not register any backend route for a pending model route key', () => {
+    // Forcing function: when the recent-completions wave wires the live route,
+    // this test fails until the key is removed from
+    // MODEL_ROUTE_KEYS_PENDING_REGISTRATION (and a per-route binding test is
+    // added like the existing three above).
+    for (const key of MODEL_ROUTE_KEYS_PENDING_REGISTRATION) {
+      const path = MY_WORK_READ_MODEL_ROUTE_PATHS[key];
+      const matches = registrations.filter((r) => r.config.route === path);
+      expect(matches, `pending model key '${key}' must have zero route registrations`).toHaveLength(
+        0,
+      );
+    }
   });
 
   it('does not register any path outside the canonical model route map', () => {
