@@ -424,7 +424,7 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
   );
 }
 
-function mapRow(row: unknown): AdobeSignSearchClientItem | undefined {
+function mapActionQueueRow(row: unknown): AdobeSignSearchClientItem | undefined {
   const agreementId = readStringField(row, 'id');
   const agreementName = readStringField(row, 'name');
   const recipientStatus = readStringField(row, 'recipientStatus');
@@ -438,6 +438,7 @@ function mapRow(row: unknown): AdobeSignSearchClientItem | undefined {
   const sourceOpenUrlCandidate = readSourceOpenUrlCandidate(row);
 
   return {
+    intent: 'action-queue',
     agreementId,
     agreementName,
     recipientStatus,
@@ -448,6 +449,40 @@ function mapRow(row: unknown): AdobeSignSearchClientItem | undefined {
     ...(expirationAtUtc !== undefined ? { expirationAtUtc } : {}),
     ...(sourceOpenUrlCandidate !== undefined ? { sourceOpenUrlCandidate } : {}),
   };
+}
+
+function mapRecentCompletionsRow(row: unknown): AdobeSignSearchClientItem | undefined {
+  const agreementId = readStringField(row, 'id');
+  const agreementName = readStringField(row, 'name');
+  if (!agreementId || !agreementName) return undefined;
+
+  const recipientStatus = readStringField(row, 'recipientStatus');
+  const senderDisplayName = readNestedString(row, 'senderInfo', 'name');
+  const senderEmail = readNestedString(row, 'senderInfo', 'email');
+  const createdAtUtc = readStringField(row, 'displayDate');
+  const modifiedAtUtc = readStringField(row, 'lastUpdate');
+  const expirationAtUtc = readStringField(row, 'expirationTime');
+  const sourceOpenUrlCandidate = readSourceOpenUrlCandidate(row);
+
+  return {
+    intent: 'recent-completions',
+    agreementId,
+    agreementName,
+    ...(recipientStatus !== undefined ? { recipientStatus } : {}),
+    ...(senderDisplayName !== undefined ? { senderDisplayName } : {}),
+    ...(senderEmail !== undefined ? { senderEmail } : {}),
+    ...(createdAtUtc !== undefined ? { createdAtUtc } : {}),
+    ...(modifiedAtUtc !== undefined ? { modifiedAtUtc } : {}),
+    ...(expirationAtUtc !== undefined ? { expirationAtUtc } : {}),
+    ...(sourceOpenUrlCandidate !== undefined ? { sourceOpenUrlCandidate } : {}),
+  };
+}
+
+function mapRowForIntent(
+  row: unknown,
+  intent: AdobeSignSearchClientInput['request']['intent'],
+): AdobeSignSearchClientItem | undefined {
+  return intent === 'recent-completions' ? mapRecentCompletionsRow(row) : mapActionQueueRow(row);
 }
 
 function readAgreementsRows(parsed: Record<string, unknown>): readonly unknown[] | undefined {
@@ -611,7 +646,7 @@ export function createAdobeSignLiveSearchClient(
 
       const items: AdobeSignSearchClientItem[] = [];
       for (const row of rawAgreements) {
-        const mapped = mapRow(row);
+        const mapped = mapRowForIntent(row, input.request.intent);
         if (mapped !== undefined) items.push(mapped);
       }
 

@@ -208,6 +208,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
     if (result.status !== 'ok') return;
     expect(result.items).toEqual([
       {
+        intent: 'action-queue',
         agreementId: 'agreement-1',
         agreementName: 'Envelope Name',
         recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
@@ -260,6 +261,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
     if (result.status !== 'ok') return;
     expect(result.items).toHaveLength(3);
     expect(result.items[0]).toMatchObject({
+      intent: 'action-queue',
       agreementId: 'agr-1',
       agreementName: 'Contract A',
       recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
@@ -271,6 +273,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       sourceOpenUrlCandidate: 'https://secure.na1.adobesign.com/account/agreementView?aid=1',
     });
     expect(result.items[1]).toEqual({
+      intent: 'action-queue',
       agreementId: 'agr-2',
       agreementName: 'Contract B',
       recipientStatus: 'WAITING_FOR_MY_APPROVAL',
@@ -297,6 +300,76 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.items.map((item) => item.agreementId)).toEqual(['agr-1', 'agr-3']);
+  });
+
+  it('drops action-queue rows missing recipientStatus', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreements: [{ id: 'agr-1', name: 'No Recipient Status' }],
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.items).toEqual([]);
+  });
+
+  it('retains recent-completions rows missing recipientStatus', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreements: [{ id: 'agr-1', name: 'Completed Without Recipient Status' }],
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search({
+      ...VALID_INPUT,
+      request: buildAdobeSignRecentCompletionsRequest({
+        now: new Date('2026-05-15T12:00:00.000Z'),
+        pageSize: 10,
+      }),
+    });
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.items).toEqual([
+      {
+        intent: 'recent-completions',
+        agreementId: 'agr-1',
+        agreementName: 'Completed Without Recipient Status',
+      },
+    ]);
+  });
+
+  it('preserves optional recipientStatus passthrough for recent-completions rows', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreements: [
+          {
+            id: 'agr-1',
+            name: 'Completed Agreement',
+            recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+          },
+        ],
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search({
+      ...VALID_INPUT,
+      request: buildAdobeSignRecentCompletionsRequest({
+        now: new Date('2026-05-15T12:00:00.000Z'),
+        pageSize: 10,
+      }),
+    });
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.items).toEqual([
+      {
+        intent: 'recent-completions',
+        agreementId: 'agr-1',
+        agreementName: 'Completed Agreement',
+        recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+      },
+    ]);
   });
 
   it('omits nextCursor when absent from the response', async () => {

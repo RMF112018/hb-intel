@@ -27,6 +27,7 @@ describe('createDeterministicMockSearchClient', () => {
       status: 'ok',
       items: [
         {
+          intent: 'action-queue',
           agreementId: 'agr-1',
           agreementName: 'Contract One',
           recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
@@ -40,8 +41,8 @@ describe('createDeterministicMockSearchClient', () => {
     };
     const client = createDeterministicMockSearchClient([okOne, okTwo]);
 
-    await expect(client.search(input())).resolves.toBe(okOne);
-    await expect(client.search(input())).resolves.toBe(okTwo);
+    await expect(client.search(input())).resolves.toEqual(okOne);
+    await expect(client.search(input())).resolves.toEqual(okTwo);
     expect(client.callCount()).toBe(2);
   });
 

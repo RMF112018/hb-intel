@@ -42,7 +42,8 @@ export interface AdobeSignSearchClientInput {
  * the six MVP user-action union; filtering and typing happens in the
  * adapter.
  */
-export interface AdobeSignSearchClientItem {
+export interface AdobeSignActionQueueSearchClientItem {
+  readonly intent: 'action-queue';
   readonly agreementId: string;
   readonly agreementName: string;
   readonly recipientStatus: string;
@@ -62,6 +63,23 @@ export interface AdobeSignSearchClientItem {
    */
   readonly sourceOpenUrlCandidate?: string;
 }
+
+export interface AdobeSignRecentCompletionsSearchClientItem {
+  readonly intent: 'recent-completions';
+  readonly agreementId: string;
+  readonly agreementName: string;
+  readonly senderDisplayName?: string;
+  readonly senderEmail?: string;
+  readonly createdAtUtc?: string;
+  readonly modifiedAtUtc?: string;
+  readonly expirationAtUtc?: string;
+  readonly sourceOpenUrlCandidate?: string;
+  readonly recipientStatus?: string;
+}
+
+export type AdobeSignSearchClientItem =
+  | AdobeSignActionQueueSearchClientItem
+  | AdobeSignRecentCompletionsSearchClientItem;
 
 export type AdobeSignSearchResult =
   | {
@@ -187,7 +205,17 @@ export interface IAdobeSignSearchClient {
 // Deterministic test client — never auto-selected in production.
 // ---------------------------------------------------------------------------
 
-export type DeterministicSearchScript = ReadonlyArray<AdobeSignSearchResult>;
+type LegacyAdobeSignSearchClientItem = Omit<AdobeSignActionQueueSearchClientItem, 'intent'> &
+  Partial<Pick<AdobeSignActionQueueSearchClientItem, 'intent'>>;
+
+export type DeterministicSearchScript = ReadonlyArray<
+  | {
+      readonly status: 'ok';
+      readonly items: readonly LegacyAdobeSignSearchClientItem[];
+      readonly nextCursor?: string;
+    }
+  | Exclude<AdobeSignSearchResult, { readonly status: 'ok' }>
+>;
 
 export interface DeterministicMockSearchClient extends IAdobeSignSearchClient {
   readonly callCount: () => number;
@@ -213,7 +241,29 @@ export function createDeterministicMockSearchClient(
       if (cursor >= remaining.length) {
         throw new Error('ADOBE_SIGN_SEARCH_CLIENT mock exhausted');
       }
-      return remaining[cursor++]!;
+      const result = remaining[cursor++]!;
+      if (result.status !== 'ok') return result;
+      return {
+        ...result,
+        items: result.items.map<AdobeSignSearchClientItem>((item) => {
+          if (item.intent === 'action-queue') {
+            return {
+              ...item,
+              intent: 'action-queue',
+            };
+          }
+          if (input.request.intent === 'recent-completions') {
+            return {
+              ...item,
+              intent: 'recent-completions',
+            };
+          }
+          return {
+            ...item,
+            intent: 'action-queue',
+          } as AdobeSignActionQueueSearchClientItem;
+        }),
+      };
     },
     callCount: () => calls,
     capturedInputs: () => captured.slice(),

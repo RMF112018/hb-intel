@@ -479,6 +479,10 @@ export function createAdobeSignActionQueueAdapter(
       let anyCandidateOmitted = false;
       const rejectedReasons = new Set<string>();
       for (const row of searchResult.items) {
+        if (row.intent !== 'action-queue') {
+          droppedCount++;
+          continue;
+        }
         if (!isActionableStatus(row.recipientStatus)) {
           droppedCount++;
           continue;
