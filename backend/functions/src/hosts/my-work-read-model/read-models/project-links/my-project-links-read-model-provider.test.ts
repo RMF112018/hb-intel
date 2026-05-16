@@ -17,6 +17,27 @@ const CONTEXT: MyWorkReadContext = {
   requestId: 'req-1',
 };
 
+function makeGraphRegistryItem(
+  id: string,
+  matchStatus: string = 'matched',
+): { id: string; fields: Record<string, unknown> } {
+  return {
+    id,
+    fields: {
+      ProjectNumber: '24-100-01',
+      ProjectNameRaw: 'Alpha Registry',
+      LegacyYear: 2024,
+      FolderWebUrl: 'https://example.invalid/folders/alpha',
+      MatchStatus: matchStatus,
+      MatchConfidence: 'high',
+      MatchMethod: 'project-number-exact',
+      MatchedProjectListItemId: 101,
+      IsActive: true,
+      procoreProject: 'legacy-1',
+    },
+  };
+}
+
 describe('MyProjectLinksReadModelProvider', () => {
   it('passes the launch-eligible registry filter to Graph listItems', async () => {
     const listItemsSpy = vi
@@ -58,6 +79,135 @@ describe('MyProjectLinksReadModelProvider', () => {
 
     expect(envelope.sourceStatus).toBe('principal-unresolved');
     expect(envelope.data.items).toHaveLength(0);
+  });
+
+  it('treats first registry read as cache miss and invokes underlying loader', async () => {
+    const listItemsSpy = vi
+      .spyOn(GraphListClient.prototype, 'listItems')
+      .mockImplementation(async (listTitle) => {
+        if (listTitle === 'Projects') return [];
+        if (listTitle === 'Legacy Project Fallback Registry') return [makeGraphRegistryItem('9')];
+        return [];
+      });
+    try {
+      const provider = new MyProjectLinksReadModelProvider();
+      await provider.getMyProjectLinks(CONTEXT);
+
+      const registryCalls = listItemsSpy.mock.calls.filter(
+        (call) => call[0] === 'Legacy Project Fallback Registry',
+      );
+      expect(registryCalls).toHaveLength(1);
+    } finally {
+      listItemsSpy.mockRestore();
+    }
+  });
+
+  it('serves second registry read from cache within TTL without second loader invocation', async () => {
+    const listItemsSpy = vi
+      .spyOn(GraphListClient.prototype, 'listItems')
+      .mockImplementation(async (listTitle) => {
+        if (listTitle === 'Projects') return [];
+        if (listTitle === 'Legacy Project Fallback Registry') return [makeGraphRegistryItem('9')];
+        return [];
+      });
+    try {
+      const provider = new MyProjectLinksReadModelProvider();
+      await provider.getMyProjectLinks(CONTEXT);
+      await provider.getMyProjectLinks(CONTEXT);
+
+      const registryCalls = listItemsSpy.mock.calls.filter(
+        (call) => call[0] === 'Legacy Project Fallback Registry',
+      );
+      expect(registryCalls).toHaveLength(1);
+    } finally {
+      listItemsSpy.mockRestore();
+    }
+  });
+
+  it('coalesces concurrent cache misses into one underlying registry load', async () => {
+    let resolveRegistry: ((value: Array<{ id: string; fields: Record<string, unknown> }>) => void) | null =
+      null;
+    const registryPromise = new Promise<Array<{ id: string; fields: Record<string, unknown> }>>(
+      (resolve) => {
+        resolveRegistry = resolve;
+      },
+    );
+    const listItemsSpy = vi
+      .spyOn(GraphListClient.prototype, 'listItems')
+      .mockImplementation(async (listTitle) => {
+        if (listTitle === 'Projects') return [];
+        if (listTitle === 'Legacy Project Fallback Registry') return registryPromise;
+        return [];
+      });
+    try {
+      const provider = new MyProjectLinksReadModelProvider();
+      const first = provider.getMyProjectLinks(CONTEXT);
+      const second = provider.getMyProjectLinks(CONTEXT);
+
+      expect(
+        listItemsSpy.mock.calls.filter((call) => call[0] === 'Legacy Project Fallback Registry'),
+      ).toHaveLength(1);
+
+      resolveRegistry?.([makeGraphRegistryItem('9')]);
+      await Promise.all([first, second]);
+    } finally {
+      listItemsSpy.mockRestore();
+    }
+  });
+
+  it('does not cache failures and retries registry loader on next request', async () => {
+    let registryAttempts = 0;
+    const listItemsSpy = vi
+      .spyOn(GraphListClient.prototype, 'listItems')
+      .mockImplementation(async (listTitle) => {
+        if (listTitle === 'Projects') return [];
+        if (listTitle === 'Legacy Project Fallback Registry') {
+          registryAttempts += 1;
+          if (registryAttempts === 1) throw new Error('graph GET /sites/mock -> 500: boom');
+          return [makeGraphRegistryItem('9')];
+        }
+        return [];
+      });
+    try {
+      const provider = new MyProjectLinksReadModelProvider();
+      const first = await provider.getMyProjectLinks(CONTEXT);
+      const second = await provider.getMyProjectLinks(CONTEXT);
+
+      expect(first.data.sourceReadiness.legacyFallbackRegistry).toBe('source-unavailable');
+      expect(second.data.sourceReadiness.legacyFallbackRegistry).toBe('available');
+      expect(
+        listItemsSpy.mock.calls.filter((call) => call[0] === 'Legacy Project Fallback Registry'),
+      ).toHaveLength(2);
+    } finally {
+      listItemsSpy.mockRestore();
+    }
+  });
+
+  it('reloads registry source rows after cache TTL expiry', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-16T00:00:00.000Z'));
+    const listItemsSpy = vi
+      .spyOn(GraphListClient.prototype, 'listItems')
+      .mockImplementation(async (listTitle) => {
+        if (listTitle === 'Projects') return [];
+        if (listTitle === 'Legacy Project Fallback Registry') return [makeGraphRegistryItem('9')];
+        return [];
+      });
+    try {
+      const provider = new MyProjectLinksReadModelProvider();
+      await provider.getMyProjectLinks(CONTEXT);
+      await provider.getMyProjectLinks(CONTEXT);
+      vi.setSystemTime(new Date('2026-05-16T00:01:01.000Z'));
+      await provider.getMyProjectLinks(CONTEXT);
+
+      const registryCalls = listItemsSpy.mock.calls.filter(
+        (call) => call[0] === 'Legacy Project Fallback Registry',
+      );
+      expect(registryCalls).toHaveLength(2);
+    } finally {
+      listItemsSpy.mockRestore();
+      vi.useRealTimers();
+    }
   });
 
   it('returns available with merged/project-only/legacy-only reconciliation and summary counts', async () => {

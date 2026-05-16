@@ -27,9 +27,11 @@ import {
 } from './my-project-links-runtime-diagnostics.js';
 
 const MAX_SOURCE_ROWS = 25000;
+const REGISTRY_SOURCE_CACHE_TTL_MS = 60_000;
 const REGISTRY_SOURCE_FILTER =
   "IsActive eq 1 and (MatchStatus eq 'matched' or MatchStatus eq 'unmatched' or MatchStatus eq 'review-required')";
 const PROCORE_TOKEN_PATTERN = /^[A-Za-z0-9_-]+$/;
+type RegistryCacheState = 'hit' | 'miss' | 'coalesced';
 
 interface IProjectSourceRow {
   id: number;
@@ -644,6 +646,10 @@ function selectDiagnostics(input: {
 
 function createDefaultSourceDeps(): IProjectLinksSourceDeps {
   const graph = new GraphListClient(getLegacyFallbackListHostSiteUrl());
+  let cachedRegistryResult: ISourceLoadResult<ILegacyRegistrySourceRow> | null = null;
+  let cachedRegistryAtMs: number | null = null;
+  let inFlightRegistryLoad: Promise<ISourceLoadResult<ILegacyRegistrySourceRow>> | null = null;
+  const markRegistryCacheState = (_state: RegistryCacheState): void => {};
 
   const projectSelectFields = [
     'Title',
@@ -730,46 +736,72 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
     },
 
     async loadRegistryRows(): Promise<ISourceLoadResult<ILegacyRegistrySourceRow>> {
-      try {
-        const rows = await graph.listItems(LEGACY_FALLBACK_REGISTRY_LIST_TITLE, {
-          filter: REGISTRY_SOURCE_FILTER,
-          select: [...registrySelectFields],
-          top: MAX_SOURCE_ROWS,
-        });
-
-        const mapped = rows.map((entry): ILegacyRegistrySourceRow => {
-          const row: Record<string, unknown> = { Id: Number(entry.id), ...entry.fields };
-          return {
-            id: Number(row.Id),
-            projectNumber: trimToString(row.ProjectNumber),
-            projectNameRaw: trimToString(row.ProjectNameRaw),
-            legacyYear: readOptionalNumber(row.LegacyYear),
-            isActive: row.IsActive === true || row.IsActive === 1 || row.IsActive === '1',
-            folderWebUrl: readOptionalUrl(row.FolderWebUrl),
-            matchStatus: trimToString(row.MatchStatus),
-            matchConfidence: trimToString(row.MatchConfidence) || undefined,
-            matchMethod: trimToString(row.MatchMethod) || undefined,
-            matchedProjectListItemId: readOptionalNumber(row.MatchedProjectListItemId),
-            procoreProject: trimToString(row.procoreProject) || undefined,
-            roleArrays: buildRoleFieldObjectFromRow(row),
-          };
-        });
-
-        return {
-          ok: true,
-          rows: mapped,
-          bounded: rows.length >= MAX_SOURCE_ROWS,
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          rows: [],
-          bounded: false,
-          failure: 'legacy-registry-source-failed',
-          failureStage: classifyGraphErrorStage(error),
-          failureMessage: sanitizeForTelemetry(error),
-        };
+      const nowMs = Date.now();
+      if (
+        cachedRegistryResult &&
+        cachedRegistryAtMs !== null &&
+        nowMs - cachedRegistryAtMs < REGISTRY_SOURCE_CACHE_TTL_MS
+      ) {
+        markRegistryCacheState('hit');
+        return cachedRegistryResult;
       }
+
+      if (inFlightRegistryLoad) {
+        markRegistryCacheState('coalesced');
+        return inFlightRegistryLoad;
+      }
+      markRegistryCacheState('miss');
+
+      const loadPromise = (async (): Promise<ISourceLoadResult<ILegacyRegistrySourceRow>> => {
+        try {
+          const rows = await graph.listItems(LEGACY_FALLBACK_REGISTRY_LIST_TITLE, {
+            filter: REGISTRY_SOURCE_FILTER,
+            select: [...registrySelectFields],
+            top: MAX_SOURCE_ROWS,
+          });
+
+          const mapped = rows.map((entry): ILegacyRegistrySourceRow => {
+            const row: Record<string, unknown> = { Id: Number(entry.id), ...entry.fields };
+            return {
+              id: Number(row.Id),
+              projectNumber: trimToString(row.ProjectNumber),
+              projectNameRaw: trimToString(row.ProjectNameRaw),
+              legacyYear: readOptionalNumber(row.LegacyYear),
+              isActive: row.IsActive === true || row.IsActive === 1 || row.IsActive === '1',
+              folderWebUrl: readOptionalUrl(row.FolderWebUrl),
+              matchStatus: trimToString(row.MatchStatus),
+              matchConfidence: trimToString(row.MatchConfidence) || undefined,
+              matchMethod: trimToString(row.MatchMethod) || undefined,
+              matchedProjectListItemId: readOptionalNumber(row.MatchedProjectListItemId),
+              procoreProject: trimToString(row.procoreProject) || undefined,
+              roleArrays: buildRoleFieldObjectFromRow(row),
+            };
+          });
+
+          const result: ISourceLoadResult<ILegacyRegistrySourceRow> = {
+            ok: true,
+            rows: mapped,
+            bounded: rows.length >= MAX_SOURCE_ROWS,
+          };
+          cachedRegistryResult = result;
+          cachedRegistryAtMs = Date.now();
+          return result;
+        } catch (error) {
+          return {
+            ok: false,
+            rows: [],
+            bounded: false,
+            failure: 'legacy-registry-source-failed',
+            failureStage: classifyGraphErrorStage(error),
+            failureMessage: sanitizeForTelemetry(error),
+          };
+        } finally {
+          inFlightRegistryLoad = null;
+        }
+      })();
+
+      inFlightRegistryLoad = loadPromise;
+      return loadPromise;
     },
   };
 }
