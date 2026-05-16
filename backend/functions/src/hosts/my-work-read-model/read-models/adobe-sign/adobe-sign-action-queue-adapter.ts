@@ -265,6 +265,16 @@ export function createAdobeSignActionQueueAdapter(
         trackActionQueueResult(result.sourceStatus, 'token-acquisition', result.warnings);
         return result;
       }
+      if (token.status === 'scope-insufficient') {
+        const result = envelope(
+          'authorization-required',
+          [{ code: 'authorization-required' }],
+          emptyReadModel(generatedAtUtc),
+          generatedAtUtc,
+        );
+        trackActionQueueResult(result.sourceStatus, 'token-acquisition', result.warnings);
+        return result;
+      }
 
       // ---------------------------------------------------------------
       // 3. Bounded search request

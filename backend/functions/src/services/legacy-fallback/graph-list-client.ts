@@ -41,7 +41,9 @@ export class GraphListClient {
   private readonly siteUrl: string;
   private readonly graphBase = 'https://graph.microsoft.com/v1.0';
   private cachedSiteId: string | null = null;
+  private inFlightSiteIdResolution: Promise<string> | null = null;
   private readonly listIdByTitle = new Map<string, string>();
+  private inFlightListCatalogResolution: Promise<void> | null = null;
   private readonly columnsByListId = new Map<string, Set<string>>();
 
   constructor(siteUrl: string, tokenProvider?: IGraphAccessTokenProvider) {
@@ -85,30 +87,54 @@ export class GraphListClient {
 
   async resolveSiteId(): Promise<string> {
     if (this.cachedSiteId) return this.cachedSiteId;
+    if (this.inFlightSiteIdResolution) return this.inFlightSiteIdResolution;
     const u = new URL(this.siteUrl);
     const hostname = u.hostname;
     const serverRelative = u.pathname.replace(/\/+$/, '');
-    const res = await this.graphFetch(`/sites/${hostname}:${serverRelative}`);
-    const info = (await res.json()) as ISiteInfo;
-    this.cachedSiteId = info.id;
-    return info.id;
+    const inFlight = (async (): Promise<string> => {
+      const res = await this.graphFetch(`/sites/${hostname}:${serverRelative}`);
+      const info = (await res.json()) as ISiteInfo;
+      this.cachedSiteId = info.id;
+      return info.id;
+    })();
+    this.inFlightSiteIdResolution = inFlight;
+    try {
+      return await inFlight;
+    } finally {
+      this.inFlightSiteIdResolution = null;
+    }
   }
 
   async resolveListId(title: string): Promise<string> {
     const cached = this.listIdByTitle.get(title);
     if (cached) return cached;
+    if (!this.inFlightListCatalogResolution) {
+      const catalogFetch = (async (): Promise<void> => {
+        const siteId = await this.resolveSiteId();
+        const res = await this.graphFetch(
+          `/sites/${siteId}/lists?$select=id,displayName,name&$top=200`,
+        );
+        const body = (await res.json()) as {
+          value: Array<{ id: string; displayName: string; name: string }>;
+        };
+        for (const l of body.value) {
+          this.listIdByTitle.set(l.displayName, l.id);
+          this.listIdByTitle.set(l.name, l.id);
+        }
+      })();
+      this.inFlightListCatalogResolution = catalogFetch;
+    }
+
+    try {
+      await this.inFlightListCatalogResolution;
+    } finally {
+      this.inFlightListCatalogResolution = null;
+    }
+
+    const resolved = this.listIdByTitle.get(title);
+    if (resolved) return resolved;
     const siteId = await this.resolveSiteId();
-    const res = await this.graphFetch(
-      `/sites/${siteId}/lists?$select=id,displayName,name&$top=200`,
-    );
-    const body = (await res.json()) as {
-      value: Array<{ id: string; displayName: string; name: string }>;
-    };
-    for (const l of body.value) this.listIdByTitle.set(l.displayName, l.id);
-    const match = body.value.find((l) => l.displayName === title || l.name === title);
-    if (!match) throw new Error(`graph-list-client: list '${title}' not found on site ${siteId}`);
-    this.listIdByTitle.set(title, match.id);
-    return match.id;
+    throw new Error(`graph-list-client: list '${title}' not found on site ${siteId}`);
   }
 
   async listExists(title: string): Promise<boolean> {

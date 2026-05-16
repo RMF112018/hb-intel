@@ -1,0 +1,27 @@
+{
+  "package": "HB_My_Dashboard_Project_Links_Registry_Performance_Remediation_Package",
+  "created_for": "HB My Dashboard Project Links registry performance remediation",
+  "baseline_commit": "9ee780657249de23bb188e7d2d008b465e46c1bb",
+  "primary_bottleneck": "Legacy Project Fallback Registry source load dominates getMyWorkProjectLinks runtime.",
+  "secondary_observation": "Adobe token-refresh path can materially elevate /home latency but is out of scope for this package.",
+  "files": [
+    "00_Remediation_Basis_And_Closed_Decisions.md",
+    "01_Target_Architecture_Registry_Source_Optimization.md",
+    "02_Implementation_Plan.md",
+    "03_Validation_Matrix_And_Acceptance_Criteria.md",
+    "04_Risk_Exposure_And_Rollback.md",
+    "README.md",
+    "prompts/Prompt_00_Repo_Truth_And_Live_Evidence_Scope_Lock.md",
+    "prompts/Prompt_01_Implement_Registry_Server_Filtering.md",
+    "prompts/Prompt_02_Implement_Registry_Source_Cache_And_Request_Coalescing.md",
+    "prompts/Prompt_03_Promise_Memoize_Graph_Metadata_Resolution.md",
+    "prompts/Prompt_04_Extend_Runtime_Telemetry_And_Correct_KQL_Docs.md",
+    "prompts/Prompt_05_Validation_Deployment_Evidence_And_Closeout.md",
+    "prompts/Prompt_06_Fresh_Reviewer_Audit_And_Adobe_Follow_On_Go_No_Go.md",
+    "supporting/Commit_And_Closeout_Template.md",
+    "supporting/Corrected_Trace_Based_KQL_Queries.md",
+    "supporting/Evidence_Capture_Checklist.md",
+    "supporting/Live_Telemetry_Baseline.md",
+    "supporting/Repo_Truth_Seam_Map.md"
+  ]
+}
