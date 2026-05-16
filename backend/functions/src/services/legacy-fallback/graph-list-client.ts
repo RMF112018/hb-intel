@@ -1,10 +1,18 @@
-import { DefaultAzureCredential } from '@azure/identity';
+import {
+  createDefaultFederatedGraphTokenProvider,
+  type IGraphAccessTokenProvider,
+} from './federated-graph-token-provider.js';
 
 /**
  * Graph-backed SharePoint list client. Replaces the @pnp/sp call path which has
  * a v2/v4 package-version mismatch that prevents fetch registration in this
  * Node 22 ESM worker. Uses native fetch + Graph Sites app-only permissions
  * (already admin-consented on the SharePoint Creator app).
+ *
+ * Token acquisition runs through the federated HB SharePoint Creator path:
+ * the Function App UAMI mints an `api://AzureADTokenExchange` assertion which
+ * is exchanged for an HB SharePoint Creator app token via
+ * `ClientAssertionCredential`. See `federated-graph-token-provider.ts`.
  */
 
 export interface IGraphListItemsQuery {
@@ -19,23 +27,43 @@ export interface IGraphListItem {
   readonly fields: Record<string, unknown>;
 }
 
-interface ISiteInfo { readonly id: string; }
-interface IListInfo { readonly id: string; readonly title: string; }
+interface ISiteInfo {
+  readonly id: string;
+}
+interface IListInfo {
+  readonly id: string;
+  readonly title: string;
+}
 
 export class GraphListClient {
-  private readonly credential = new DefaultAzureCredential();
+  private readonly injectedTokenProvider: IGraphAccessTokenProvider | null;
+  private resolvedTokenProvider: IGraphAccessTokenProvider | null = null;
   private readonly siteUrl: string;
   private readonly graphBase = 'https://graph.microsoft.com/v1.0';
   private cachedSiteId: string | null = null;
   private readonly listIdByTitle = new Map<string, string>();
   private readonly columnsByListId = new Map<string, Set<string>>();
 
-  constructor(siteUrl: string) { this.siteUrl = siteUrl; }
+  constructor(siteUrl: string, tokenProvider?: IGraphAccessTokenProvider) {
+    this.siteUrl = siteUrl;
+    // Defer default-provider construction (which reads hosting config) to the
+    // first Graph call so resolver/composition tests that never reach Graph
+    // are not coupled to the legacy-fallback hosting env contract.
+    this.injectedTokenProvider = tokenProvider ?? null;
+  }
+
+  private getTokenProvider(): IGraphAccessTokenProvider {
+    if (this.injectedTokenProvider) return this.injectedTokenProvider;
+    if (!this.resolvedTokenProvider) {
+      this.resolvedTokenProvider = createDefaultFederatedGraphTokenProvider();
+    }
+    return this.resolvedTokenProvider;
+  }
 
   private async getToken(): Promise<string> {
-    const t = await this.credential.getToken('https://graph.microsoft.com/.default');
-    if (!t?.token) throw new Error('graph-list-client: token acquisition failed');
-    return t.token;
+    const token = await this.getTokenProvider().getGraphAccessToken();
+    if (!token) throw new Error('graph-list-client: token acquisition failed');
+    return token;
   }
 
   private async graphFetch(path: string, init?: RequestInit): Promise<Response> {
@@ -48,7 +76,9 @@ export class GraphListClient {
     const res = await fetch(url, { ...init, headers });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
-      throw new Error(`graph ${init?.method ?? 'GET'} ${path} -> ${res.status}: ${text.slice(0, 500)}`);
+      throw new Error(
+        `graph ${init?.method ?? 'GET'} ${path} -> ${res.status}: ${text.slice(0, 500)}`,
+      );
     }
     return res;
   }
@@ -68,8 +98,12 @@ export class GraphListClient {
     const cached = this.listIdByTitle.get(title);
     if (cached) return cached;
     const siteId = await this.resolveSiteId();
-    const res = await this.graphFetch(`/sites/${siteId}/lists?$select=id,displayName,name&$top=200`);
-    const body = (await res.json()) as { value: Array<{ id: string; displayName: string; name: string }> };
+    const res = await this.graphFetch(
+      `/sites/${siteId}/lists?$select=id,displayName,name&$top=200`,
+    );
+    const body = (await res.json()) as {
+      value: Array<{ id: string; displayName: string; name: string }>;
+    };
     for (const l of body.value) this.listIdByTitle.set(l.displayName, l.id);
     const match = body.value.find((l) => l.displayName === title || l.name === title);
     if (!match) throw new Error(`graph-list-client: list '${title}' not found on site ${siteId}`);
@@ -96,13 +130,14 @@ export class GraphListClient {
     return new Set(names);
   }
 
-  async listItems(listTitle: string, query: IGraphListItemsQuery = {}): Promise<readonly IGraphListItem[]> {
+  async listItems(
+    listTitle: string,
+    query: IGraphListItemsQuery = {},
+  ): Promise<readonly IGraphListItem[]> {
     const siteId = await this.resolveSiteId();
     const listId = await this.resolveListId(listTitle);
     const params = new URLSearchParams();
-    const expand = query.select?.length
-      ? `fields($select=${query.select.join(',')})`
-      : 'fields';
+    const expand = query.select?.length ? `fields($select=${query.select.join(',')})` : 'fields';
     params.set('$expand', expand);
     if (query.filter) params.set('$filter', query.filter);
     if (query.orderby) params.set('$orderby', query.orderby);
@@ -125,14 +160,19 @@ export class GraphListClient {
     const cached = this.columnsByListId.get(listId);
     if (cached) return cached;
     const siteId = await this.resolveSiteId();
-    const res = await this.graphFetch(`/sites/${siteId}/lists/${listId}/columns?$select=name,readOnly&$top=200`);
+    const res = await this.graphFetch(
+      `/sites/${siteId}/lists/${listId}/columns?$select=name,readOnly&$top=200`,
+    );
     const body = (await res.json()) as { value: Array<{ name: string; readOnly?: boolean }> };
     const names = new Set(body.value.filter((c) => !c.readOnly).map((c) => c.name));
     this.columnsByListId.set(listId, names);
     return names;
   }
 
-  private async filterFields(listId: string, fields: Record<string, unknown>): Promise<Record<string, unknown>> {
+  private async filterFields(
+    listId: string,
+    fields: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     const names = await this.getColumnNames(listId);
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(fields)) {
@@ -153,7 +193,11 @@ export class GraphListClient {
     return { id: String(body.id), fields: body.fields ?? {} };
   }
 
-  async updateItem(listTitle: string, itemId: string | number, fields: Record<string, unknown>): Promise<void> {
+  async updateItem(
+    listTitle: string,
+    itemId: string | number,
+    fields: Record<string, unknown>,
+  ): Promise<void> {
     const siteId = await this.resolveSiteId();
     const listId = await this.resolveListId(listTitle);
     const safeFields = await this.filterFields(listId, fields);
