@@ -18,20 +18,32 @@ describe('my projects source-list schema descriptor', () => {
     );
   });
 
-  it('includes exactly 14 Projects role fields derived from canonical model', () => {
+  it('includes 14 role fields plus external launch fields on Projects', () => {
     expect(MY_PROJECTS_SOURCE_LIST_PROJECTS_TARGET.allowCreateList).toBe(false);
-    expect(MY_PROJECTS_SOURCE_LIST_PROJECTS_TARGET.fields).toHaveLength(14);
-    expect(MY_PROJECTS_SOURCE_LIST_PROJECTS_TARGET.fields.map((f) => f.internalName)).toEqual(
-      [...MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS],
+    expect(MY_PROJECTS_SOURCE_LIST_PROJECTS_TARGET.fields).toHaveLength(16);
+    expect(
+      MY_PROJECTS_SOURCE_LIST_PROJECTS_TARGET.fields
+        .slice(0, MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS.length)
+        .map((f) => f.internalName),
+    ).toEqual([...MY_PROJECT_ASSIGNMENT_INTERNAL_FIELDS]);
+    expect(MY_PROJECTS_SOURCE_LIST_PROJECTS_TARGET.fields.map((f) => f.internalName)).toContain(
+      'buildingConnectedUrl',
+    );
+    expect(MY_PROJECTS_SOURCE_LIST_PROJECTS_TARGET.fields.map((f) => f.internalName)).toContain(
+      'documentCrunchUrl',
     );
   });
 
-  it('includes exactly 14 Registry role fields plus procoreProject', () => {
+  it('includes role fields plus registry and launch extras on Registry', () => {
     expect(MY_PROJECTS_SOURCE_LIST_LEGACY_REGISTRY_TARGET.allowCreateList).toBe(false);
-    expect(MY_PROJECTS_SOURCE_LIST_LEGACY_REGISTRY_TARGET.fields).toHaveLength(15);
-    expect(MY_PROJECTS_SOURCE_LIST_LEGACY_REGISTRY_TARGET.fields.at(-1)?.internalName).toBe(
-      'procoreProject',
+    expect(MY_PROJECTS_SOURCE_LIST_LEGACY_REGISTRY_TARGET.fields).toHaveLength(18);
+    const registryFields = MY_PROJECTS_SOURCE_LIST_LEGACY_REGISTRY_TARGET.fields.map(
+      (field) => field.internalName,
     );
+    expect(registryFields).toContain('procoreProject');
+    expect(registryFields).toContain('buildingConnectedUrl');
+    expect(registryFields).toContain('documentCrunchUrl');
+    expect(registryFields).toContain('projectStage');
   });
 
   it('sets role fields to MultiLineText and not required/indexed', () => {
