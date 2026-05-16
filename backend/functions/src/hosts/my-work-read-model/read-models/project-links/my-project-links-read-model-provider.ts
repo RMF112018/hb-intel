@@ -27,6 +27,8 @@ import {
 } from './my-project-links-runtime-diagnostics.js';
 
 const MAX_SOURCE_ROWS = 25000;
+const REGISTRY_SOURCE_FILTER =
+  "IsActive eq 1 and (MatchStatus eq 'matched' or MatchStatus eq 'unmatched' or MatchStatus eq 'review-required')";
 const PROCORE_TOKEN_PATTERN = /^[A-Za-z0-9_-]+$/;
 
 interface IProjectSourceRow {
@@ -730,6 +732,7 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
     async loadRegistryRows(): Promise<ISourceLoadResult<ILegacyRegistrySourceRow>> {
       try {
         const rows = await graph.listItems(LEGACY_FALLBACK_REGISTRY_LIST_TITLE, {
+          filter: REGISTRY_SOURCE_FILTER,
           select: [...registrySelectFields],
           top: MAX_SOURCE_ROWS,
         });

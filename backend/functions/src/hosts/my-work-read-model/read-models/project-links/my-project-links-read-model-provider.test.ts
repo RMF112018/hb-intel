@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { MyWorkReadContext } from '../my-work-read-model-provider.js';
+import { GraphListClient } from '../../../../services/legacy-fallback/graph-list-client.js';
 import {
   MyProjectLinksReadModelProvider,
   reconcileProjectLinks,
@@ -17,6 +18,32 @@ const CONTEXT: MyWorkReadContext = {
 };
 
 describe('MyProjectLinksReadModelProvider', () => {
+  it('passes the launch-eligible registry filter to Graph listItems', async () => {
+    const listItemsSpy = vi
+      .spyOn(GraphListClient.prototype, 'listItems')
+      .mockImplementation(async (listTitle) => {
+        if (listTitle === 'Projects') return [];
+        if (listTitle === 'Legacy Project Fallback Registry') return [];
+        return [];
+      });
+    try {
+      const provider = new MyProjectLinksReadModelProvider();
+      await provider.getMyProjectLinks(CONTEXT);
+
+      const registryCall = listItemsSpy.mock.calls.find(
+        (call) => call[0] === 'Legacy Project Fallback Registry',
+      );
+      expect(registryCall).toBeDefined();
+      expect(registryCall?.[1]).toMatchObject({
+        filter:
+          "IsActive eq 1 and (MatchStatus eq 'matched' or MatchStatus eq 'unmatched' or MatchStatus eq 'review-required')",
+        top: 25000,
+      });
+    } finally {
+      listItemsSpy.mockRestore();
+    }
+  });
+
   it('returns principal-unresolved when actor UPN is unusable', async () => {
     const provider = new MyProjectLinksReadModelProvider({
       now: () => '2026-05-13T00:00:00.000Z',
@@ -753,6 +780,96 @@ describe('MyProjectLinksReadModelProvider — B05.8 Prompt 04 stage-duration eve
 });
 
 describe('reconcileProjectLinks', () => {
+  it('keeps launch-eligible legacy-only statuses including review-required', () => {
+    const items = reconcileProjectLinks(
+      'avery.lead@hb.example.com',
+      [],
+      [
+        {
+          id: 30,
+          projectNumber: '24-501-11',
+          projectNameRaw: 'Legacy Review Project',
+          legacyYear: 2024,
+          isActive: true,
+          folderWebUrl: 'https://example.invalid/folders/review',
+          matchStatus: 'review-required',
+          matchConfidence: 'low',
+          matchMethod: 'manual-override',
+          matchedProjectListItemId: null,
+          procoreProject: 'legacy_review_1',
+          roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+        },
+      ],
+      {
+        projects: { ok: true, rows: [], bounded: false },
+        registry: { ok: true, rows: [], bounded: false },
+      },
+    );
+
+    expect(items).toHaveLength(1);
+    expect(items[0]?.source).toBe('legacy-only');
+    expect(items[0]?.warnings.some((warning) => warning.code === 'legacy-match-state-excluded')).toBe(
+      true,
+    );
+  });
+
+  it('excludes inactive and non-eligible match statuses in legacy-only fallback rows', () => {
+    const items = reconcileProjectLinks(
+      'avery.lead@hb.example.com',
+      [],
+      [
+        {
+          id: 31,
+          projectNumber: '24-501-12',
+          projectNameRaw: 'Inactive Legacy',
+          legacyYear: 2024,
+          isActive: false,
+          folderWebUrl: 'https://example.invalid/folders/inactive',
+          matchStatus: 'matched',
+          matchConfidence: 'high',
+          matchMethod: 'project-number-exact',
+          matchedProjectListItemId: null,
+          procoreProject: 'legacy_inactive',
+          roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+        },
+        {
+          id: 32,
+          projectNumber: '24-501-13',
+          projectNameRaw: 'Ignored Legacy',
+          legacyYear: 2024,
+          isActive: true,
+          folderWebUrl: 'https://example.invalid/folders/ignored',
+          matchStatus: 'ignored',
+          matchConfidence: 'none',
+          matchMethod: 'manual-override',
+          matchedProjectListItemId: null,
+          procoreProject: 'legacy_ignored',
+          roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+        },
+        {
+          id: 33,
+          projectNumber: '24-501-14',
+          projectNameRaw: 'Disabled Legacy',
+          legacyYear: 2024,
+          isActive: true,
+          folderWebUrl: 'https://example.invalid/folders/disabled',
+          matchStatus: 'disabled',
+          matchConfidence: 'none',
+          matchMethod: 'manual-override',
+          matchedProjectListItemId: null,
+          procoreProject: 'legacy_disabled',
+          roleArrays: { projectManagerUpns: '["avery.lead@hb.example.com"]' },
+        },
+      ],
+      {
+        projects: { ok: true, rows: [], bounded: false },
+        registry: { ok: true, rows: [], bounded: false },
+      },
+    );
+
+    expect(items).toHaveLength(0);
+  });
+
   it('suppresses duplicates by preferring strong matched linkage and sorts by launch availability', () => {
     const items = reconcileProjectLinks(
       'avery.lead@hb.example.com',
