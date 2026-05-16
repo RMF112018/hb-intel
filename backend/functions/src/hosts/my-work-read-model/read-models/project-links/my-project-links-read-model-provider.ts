@@ -20,6 +20,11 @@ import {
 } from '../../../../services/legacy-fallback/list-descriptors.js';
 import { GraphListClient } from '../../../../services/legacy-fallback/graph-list-client.js';
 import type { MyWorkReadContext } from '../my-work-read-model-provider.js';
+import {
+  classifyGraphErrorStage,
+  sanitizeForTelemetry,
+  type MyProjectLinksLoaderStage,
+} from './my-project-links-runtime-diagnostics.js';
 
 const MAX_SOURCE_ROWS = 25000;
 const PROCORE_TOKEN_PATTERN = /^[A-Za-z0-9_-]+$/;
@@ -63,6 +68,10 @@ interface ISourceLoadResult<T> {
   rows: readonly T[];
   bounded: boolean;
   failure?: SourceFailure;
+  /** Stage of the underlying GraphListClient throw, when ok is false. */
+  failureStage?: MyProjectLinksLoaderStage;
+  /** Sanitized error message (token/JWT-stripped), when ok is false. */
+  failureMessage?: string;
 }
 
 interface IProjectLinksSourceDeps {
@@ -706,12 +715,14 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
           rows: mapped,
           bounded: rows.length >= MAX_SOURCE_ROWS,
         };
-      } catch {
+      } catch (error) {
         return {
           ok: false,
           rows: [],
           bounded: false,
           failure: 'projects-source-failed',
+          failureStage: classifyGraphErrorStage(error),
+          failureMessage: sanitizeForTelemetry(error),
         };
       }
     },
@@ -746,12 +757,14 @@ function createDefaultSourceDeps(): IProjectLinksSourceDeps {
           rows: mapped,
           bounded: rows.length >= MAX_SOURCE_ROWS,
         };
-      } catch {
+      } catch (error) {
         return {
           ok: false,
           rows: [],
           bounded: false,
           failure: 'legacy-registry-source-failed',
+          failureStage: classifyGraphErrorStage(error),
+          failureMessage: sanitizeForTelemetry(error),
         };
       }
     },
@@ -801,6 +814,27 @@ export class MyProjectLinksReadModelProvider {
       this.deps.loadProjectsRows(),
       this.deps.loadRegistryRows(),
     ]);
+
+    // Tier-1 telemetry: when either source loader caught a GraphListClient
+    // throw, name the failing stage on a customEvent so an operator can
+    // discriminate token vs site vs list vs items from the next hosted
+    // reproduction without redeploying a richer Graph diagnostic.
+    if (context.projectLinksDiagnostics) {
+      if (!projects.ok) {
+        context.projectLinksDiagnostics.trackMyProjectLinksRuntimeEvent('projects-loader.failed', {
+          listName: PROJECTS_LIST_NAME,
+          stage: projects.failureStage ?? 'other',
+          ...(projects.failureMessage ? { sanitizedMessage: projects.failureMessage } : {}),
+        });
+      }
+      if (!registry.ok) {
+        context.projectLinksDiagnostics.trackMyProjectLinksRuntimeEvent('registry-loader.failed', {
+          listName: LEGACY_FALLBACK_REGISTRY_LIST_TITLE,
+          stage: registry.failureStage ?? 'other',
+          ...(registry.failureMessage ? { sanitizedMessage: registry.failureMessage } : {}),
+        });
+      }
+    }
 
     const sourceStatus = selectEnvelopeStatus(projects, registry);
     const warnings = buildEnvelopeWarnings(sourceStatus, projects, registry);

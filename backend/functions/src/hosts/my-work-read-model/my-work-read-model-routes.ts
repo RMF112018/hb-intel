@@ -36,6 +36,7 @@ import type {
   IMyWorkReadModelProvider,
   MyWorkReadContext,
 } from './read-models/my-work-read-model-provider.js';
+import type { MyProjectLinksRuntimeDiagnosticReporter } from './read-models/project-links/my-project-links-runtime-diagnostics.js';
 
 const provider: IMyWorkReadModelProvider = resolveMyWorkReadModelProvider(process.env);
 
@@ -104,6 +105,23 @@ const createAdobeSignRuntimeDiagnosticsReporter = (
       logger.trackEvent(name, {
         domain: 'my-work-read-model',
         runtimeOperation: 'adobe-sign-runtime',
+        correlationId: requestId,
+        ...properties,
+      });
+    },
+  };
+};
+
+const createMyProjectLinksRuntimeDiagnosticsReporter = (
+  context: InvocationContext,
+  requestId: string,
+): MyProjectLinksRuntimeDiagnosticReporter => {
+  const logger = createLogger(context);
+  return {
+    trackMyProjectLinksRuntimeEvent(name, properties) {
+      logger.trackEvent(name, {
+        domain: 'my-work-read-model',
+        runtimeOperation: 'my-project-links-runtime',
         correlationId: requestId,
         ...properties,
       });
@@ -190,6 +208,10 @@ app.http('getMyWorkProjectLinks', {
           const context: MyWorkReadContext = {
             actor: actorFromClaims(auth.claims),
             requestId,
+            projectLinksDiagnostics: createMyProjectLinksRuntimeDiagnosticsReporter(
+              _context,
+              requestId,
+            ),
           };
           const envelope = await provider.getMyProjectLinks(context);
           return successResponse(envelope);

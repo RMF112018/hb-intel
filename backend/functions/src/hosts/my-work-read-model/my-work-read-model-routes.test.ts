@@ -290,7 +290,7 @@ describe('my-work-read-model-routes — getMyWorkProjectLinks handler', () => {
     expect(response.jsonBody).toEqual({ data: MY_PROJECT_LINKS_AVAILABLE });
     expect(provider.getMyProjectLinks).toHaveBeenCalledTimes(1);
     const [context] = provider.getMyProjectLinks.mock.calls[0]!;
-    expect(context).toEqual({
+    expect(context).toMatchObject({
       actor: {
         displayName: 'Avery Lead',
         principalName: 'avery@hbc.test',
@@ -298,6 +298,12 @@ describe('my-work-read-model-routes — getMyWorkProjectLinks handler', () => {
       },
       requestId: 'req-123',
     });
+    // The route also wires a project-links runtime-diagnostics reporter so the
+    // provider can emit per-loader failure events without re-resolving the
+    // logger; assert the seam is wired without coupling to its concrete shape.
+    expect(typeof context.projectLinksDiagnostics?.trackMyProjectLinksRuntimeEvent).toBe(
+      'function',
+    );
   });
 
   it('falls back displayName to UPN consistently for project-links actor context', async () => {

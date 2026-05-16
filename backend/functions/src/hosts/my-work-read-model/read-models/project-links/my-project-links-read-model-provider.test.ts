@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import type { MyWorkReadContext } from '../my-work-read-model-provider.js';
 import {
   MyProjectLinksReadModelProvider,
   reconcileProjectLinks,
 } from './my-project-links-read-model-provider.js';
+import type { MyProjectLinksRuntimeDiagnosticReporter } from './my-project-links-runtime-diagnostics.js';
 
 const CONTEXT: MyWorkReadContext = {
   actor: {
@@ -402,6 +403,167 @@ describe('MyProjectLinksReadModelProvider — diagnostics (Prompt 04)', () => {
         expect(serialized).not.toContain(needle);
       }
     }
+  });
+});
+
+describe('MyProjectLinksReadModelProvider — runtime-diagnostics reporter', () => {
+  function makeReporter(): {
+    reporter: MyProjectLinksRuntimeDiagnosticReporter;
+    track: ReturnType<typeof vi.fn>;
+  } {
+    const track = vi.fn();
+    return {
+      reporter: { trackMyProjectLinksRuntimeEvent: track },
+      track,
+    };
+  }
+
+  it('emits "projects-loader.failed" with stage and sanitizedMessage when only Projects fails', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: false,
+        rows: [],
+        bounded: false,
+        failure: 'projects-source-failed',
+        failureStage: 'site',
+        failureMessage:
+          'graph GET /sites/host:/sites/HBCentral -> 403: Authorization_RequestDenied',
+      }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
+
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith('projects-loader.failed', {
+      listName: 'Projects',
+      stage: 'site',
+      sanitizedMessage:
+        'graph GET /sites/host:/sites/HBCentral -> 403: Authorization_RequestDenied',
+    });
+  });
+
+  it('emits "registry-loader.failed" with stage and sanitizedMessage when only Registry fails', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({ ok: true, rows: [], bounded: false }),
+      loadRegistryRows: async () => ({
+        ok: false,
+        rows: [],
+        bounded: false,
+        failure: 'legacy-registry-source-failed',
+        failureStage: 'list',
+        failureMessage:
+          "graph-list-client: list 'Legacy Project Fallback Registry' not found on site site-id",
+      }),
+    });
+
+    await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
+
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith('registry-loader.failed', {
+      listName: 'Legacy Project Fallback Registry',
+      stage: 'list',
+      sanitizedMessage:
+        "graph-list-client: list 'Legacy Project Fallback Registry' not found on site site-id",
+    });
+  });
+
+  it('emits two events when both loaders fail (preserves the dual-failure cause distinction)', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: false,
+        rows: [],
+        bounded: false,
+        failure: 'projects-source-failed',
+        failureStage: 'token',
+        failureMessage: 'graph-list-client: token acquisition failed',
+      }),
+      loadRegistryRows: async () => ({
+        ok: false,
+        rows: [],
+        bounded: false,
+        failure: 'legacy-registry-source-failed',
+        failureStage: 'token',
+        failureMessage: 'graph-list-client: token acquisition failed',
+      }),
+    });
+
+    await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
+
+    expect(track).toHaveBeenCalledTimes(2);
+    expect(track.mock.calls[0]?.[0]).toBe('projects-loader.failed');
+    expect(track.mock.calls[1]?.[0]).toBe('registry-loader.failed');
+    expect(track.mock.calls[0]?.[1]).toMatchObject({ stage: 'token', listName: 'Projects' });
+    expect(track.mock.calls[1]?.[1]).toMatchObject({
+      stage: 'token',
+      listName: 'Legacy Project Fallback Registry',
+    });
+  });
+
+  it('does not emit when both loaders succeed', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({ ok: true, rows: [], bounded: false }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
+
+    expect(track).not.toHaveBeenCalled();
+  });
+
+  it('falls back to stage="other" when failureStage is absent on the result', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: false,
+        rows: [],
+        bounded: false,
+        failure: 'projects-source-failed',
+      }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
+
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track.mock.calls[0]?.[1]).toMatchObject({ stage: 'other' });
+    expect(track.mock.calls[0]?.[1]).not.toHaveProperty('sanitizedMessage');
+  });
+
+  it('preserves existing behavior (no throw, no event) when no reporter is supplied', async () => {
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: false,
+        rows: [],
+        bounded: false,
+        failure: 'projects-source-failed',
+        failureStage: 'token',
+        failureMessage: 'graph-list-client: token acquisition failed',
+      }),
+      loadRegistryRows: async () => ({
+        ok: false,
+        rows: [],
+        bounded: false,
+        failure: 'legacy-registry-source-failed',
+        failureStage: 'token',
+        failureMessage: 'graph-list-client: token acquisition failed',
+      }),
+    });
+
+    const envelope = await provider.getMyProjectLinks(CONTEXT);
+    // Provider must still resolve cleanly and stamp source-unavailable when no
+    // reporter is wired (e.g., in unit-test contexts that don't pass one).
+    expect(envelope.sourceStatus).toBe('source-unavailable');
   });
 });
 
