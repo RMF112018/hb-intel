@@ -438,12 +438,15 @@ describe('MyProjectLinksReadModelProvider — runtime-diagnostics reporter', () 
 
     const failures = track.mock.calls.filter((call) => String(call[0]).endsWith('.failed'));
     expect(failures).toHaveLength(1);
-    expect(failures[0]).toEqual(['projects-loader.failed', {
-      listName: 'Projects',
-      stage: 'site',
-      sanitizedMessage:
-        'graph GET /sites/host:/sites/HBCentral -> 403: Authorization_RequestDenied',
-    }]);
+    expect(failures[0]).toEqual([
+      'projects-loader.failed',
+      {
+        listName: 'Projects',
+        stage: 'site',
+        sanitizedMessage:
+          'graph GET /sites/host:/sites/HBCentral -> 403: Authorization_RequestDenied',
+      },
+    ]);
   });
 
   it('emits "registry-loader.failed" with stage and sanitizedMessage when only Registry fails', async () => {
@@ -466,12 +469,15 @@ describe('MyProjectLinksReadModelProvider — runtime-diagnostics reporter', () 
 
     const failures = track.mock.calls.filter((call) => String(call[0]).endsWith('.failed'));
     expect(failures).toHaveLength(1);
-    expect(failures[0]).toEqual(['registry-loader.failed', {
-      listName: 'Legacy Project Fallback Registry',
-      stage: 'list',
-      sanitizedMessage:
-        "graph-list-client: list 'Legacy Project Fallback Registry' not found on site site-id",
-    }]);
+    expect(failures[0]).toEqual([
+      'registry-loader.failed',
+      {
+        listName: 'Legacy Project Fallback Registry',
+        stage: 'list',
+        sanitizedMessage:
+          "graph-list-client: list 'Legacy Project Fallback Registry' not found on site site-id",
+      },
+    ]);
   });
 
   it('emits two events when both loaders fail (preserves the dual-failure cause distinction)', async () => {
@@ -569,6 +575,180 @@ describe('MyProjectLinksReadModelProvider — runtime-diagnostics reporter', () 
     // Provider must still resolve cleanly and stamp source-unavailable when no
     // reporter is wired (e.g., in unit-test contexts that don't pass one).
     expect(envelope.sourceStatus).toBe('source-unavailable');
+  });
+});
+
+describe('MyProjectLinksReadModelProvider — B05.8 Prompt 04 stage-duration events', () => {
+  function makeReporter(): {
+    reporter: MyProjectLinksRuntimeDiagnosticReporter;
+    track: ReturnType<typeof vi.fn>;
+  } {
+    const track = vi.fn();
+    return {
+      reporter: { trackMyProjectLinksRuntimeEvent: track },
+      track,
+    };
+  }
+
+  it('emits "myProjectLinks.read.sources.result" once per call with per-source duration, status, row counts, and bounded flags', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({ ok: true, rows: [], bounded: false }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
+
+    const sources = track.mock.calls.filter(
+      (call) => call[0] === 'myProjectLinks.read.sources.result',
+    );
+    expect(sources).toHaveLength(1);
+    const props = sources[0]?.[1];
+    expect(props).toEqual({
+      projectsDurationMs: expect.any(Number),
+      registryDurationMs: expect.any(Number),
+      projectsStatus: 'available',
+      registryStatus: 'available',
+      projectsRowCount: 0,
+      registryRowCount: 0,
+      projectsBounded: false,
+      registryBounded: false,
+    });
+    expect(props.projectsDurationMs).toBeGreaterThanOrEqual(0);
+    expect(props.registryDurationMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it('emits "myProjectLinks.read.reconcile.result" once per call with duration, matchedItemCount, sourceStatus, and safe summary counts', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({ ok: true, rows: [], bounded: false }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
+
+    const reconcile = track.mock.calls.filter(
+      (call) => call[0] === 'myProjectLinks.read.reconcile.result',
+    );
+    expect(reconcile).toHaveLength(1);
+    const props = reconcile[0]?.[1];
+    expect(props).toEqual({
+      durationMs: expect.any(Number),
+      matchedItemCount: 0,
+      sourceStatus: 'available',
+      assignedProjectCount: 0,
+      dualLaunchReadyCount: 0,
+      sharePointReadyCount: 0,
+      procoreReadyCount: 0,
+    });
+    expect(props.durationMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it('reflects bounded + partial source readiness in the sources.result event', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        rows: [],
+        bounded: true,
+      }),
+      loadRegistryRows: async () => ({
+        ok: false,
+        rows: [],
+        bounded: false,
+        failure: 'legacy-registry-source-failed',
+        failureStage: 'list',
+        failureMessage: 'graph-list-client: list not found',
+      }),
+    });
+
+    await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
+
+    const sources = track.mock.calls.find(
+      (call) => call[0] === 'myProjectLinks.read.sources.result',
+    );
+    expect(sources?.[1]).toMatchObject({
+      projectsStatus: 'partial',
+      projectsBounded: true,
+      registryStatus: 'source-unavailable',
+      registryBounded: false,
+      registryRowCount: 0,
+    });
+  });
+
+  it('does NOT emit sources.result or reconcile.result on the principal-unresolved early-return branch', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({ ok: true, rows: [], bounded: false }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    await provider.getMyProjectLinks({
+      ...CONTEXT,
+      actor: { ...CONTEXT.actor, principalName: 'not-an-email-token' },
+      projectLinksDiagnostics: reporter,
+    });
+
+    const sources = track.mock.calls.filter(
+      (call) => call[0] === 'myProjectLinks.read.sources.result',
+    );
+    const reconcile = track.mock.calls.filter(
+      (call) => call[0] === 'myProjectLinks.read.reconcile.result',
+    );
+    expect(sources).toHaveLength(0);
+    expect(reconcile).toHaveLength(0);
+  });
+
+  it('payload contains no actor UPN, displayName, OID, project name, or URL substring', async () => {
+    const { reporter, track } = makeReporter();
+    const provider = new MyProjectLinksReadModelProvider({
+      now: () => '2026-05-13T00:00:00.000Z',
+      loadProjectsRows: async () => ({
+        ok: true,
+        rows: [
+          {
+            id: 11,
+            projectNumber: '24-100-01',
+            projectName: 'Top Secret Project Title',
+            year: 2024,
+            siteUrl: 'https://tenant.sharepoint.com/sites/secret',
+            procoreProject: 'p1',
+            roleArrays: { projectManagerUpns: '["alice@example.com"]' },
+            legacyRoleFallbacks: {},
+          },
+        ],
+        bounded: false,
+      }),
+      loadRegistryRows: async () => ({ ok: true, rows: [], bounded: false }),
+    });
+
+    await provider.getMyProjectLinks({
+      ...CONTEXT,
+      actor: {
+        principalName: 'alice@example.com',
+        displayName: 'Alice Example',
+        hbcUserId: '00000000-aaaa-bbbb-cccc-000000000001',
+      },
+      projectLinksDiagnostics: reporter,
+    });
+
+    const newEventCalls = track.mock.calls.filter(
+      (call) =>
+        call[0] === 'myProjectLinks.read.sources.result' ||
+        call[0] === 'myProjectLinks.read.reconcile.result',
+    );
+    expect(newEventCalls.length).toBe(2);
+    const serialized = JSON.stringify(newEventCalls);
+    expect(serialized).not.toContain('alice@example.com');
+    expect(serialized).not.toContain('Alice Example');
+    expect(serialized).not.toContain('00000000-aaaa-bbbb-cccc-000000000001');
+    expect(serialized).not.toContain('Top Secret Project Title');
+    expect(serialized).not.toContain('tenant.sharepoint.com');
+    expect(serialized).not.toContain('https://');
   });
 });
 
