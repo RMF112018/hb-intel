@@ -6,6 +6,7 @@ import {
   createAdobeSignLiveSearchClient,
 } from './adobe-sign-live-search-client.js';
 import { buildAdobeSignSearchRequest } from './adobe-sign-search-request.js';
+import { buildAdobeSignRecentCompletionsRequest } from './adobe-sign-recent-completions-request.js';
 import type { AdobeSignSearchClientInput } from './adobe-sign-search-client.js';
 
 const ACTOR_KEY = adobeSignActorKey(
@@ -39,10 +40,23 @@ function jsonResponse(body: unknown, status = 200): Response {
 }
 
 function expectedSearchRequestDiagnostics(overrides?: {
+  queryIntent?: 'action-queue' | 'recent-completions';
   bodyTopLevelKeyCount?: number;
   hasCursorField?: boolean;
+  agreementAssetsCriteriaHasStatusField?: boolean;
+  agreementAssetsCriteriaHasTypeField?: boolean;
+  approvedStatusCount?: number | undefined;
+  agreementAssetsCriteriaAgreementTypeCount?: number;
+  agreementAssetsCriteriaSignedStatusCount?: number;
+  agreementAssetsCriteriaHasModifiedDateField?: boolean;
+  agreementAssetsCriteriaModifiedDateHasRangeField?: boolean;
+  agreementAssetsCriteriaModifiedDateRangeHasLowerBoundField?: boolean;
+  agreementAssetsCriteriaModifiedDateRangeHasUpperBoundField?: boolean;
+  agreementAssetsCriteriaHasSortByField?: boolean;
+  agreementAssetsCriteriaHasSortOrderField?: boolean;
 }) {
   return {
+    queryIntent: 'action-queue',
     endpointHost: 'api.na1.adobesign.com',
     endpointPath: '/api/rest/v6/search',
     method: 'POST',
@@ -60,7 +74,15 @@ function expectedSearchRequestDiagnostics(overrides?: {
     hasRecipientStatusFilterField: false,
     hasPageSizeField: false,
     hasCursorField: false,
-    approvedStatusCount: 0,
+    approvedStatusCount: 6,
+    agreementAssetsCriteriaAgreementTypeCount: 0,
+    agreementAssetsCriteriaSignedStatusCount: 0,
+    agreementAssetsCriteriaHasModifiedDateField: false,
+    agreementAssetsCriteriaModifiedDateHasRangeField: false,
+    agreementAssetsCriteriaModifiedDateRangeHasLowerBoundField: false,
+    agreementAssetsCriteriaModifiedDateRangeHasUpperBoundField: false,
+    agreementAssetsCriteriaHasSortByField: false,
+    agreementAssetsCriteriaHasSortOrderField: false,
     ...overrides,
   };
 }
@@ -126,6 +148,38 @@ describe('createAdobeSignLiveSearchClient — request shape', () => {
       }),
     ).toEqual({ status: 'unreachable', reason: 'unknown' });
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('builds recent-completions body with signed agreement filters, modifiedDate range, and descending sort', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ agreements: [] }));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    await client.search({
+      ...VALID_INPUT,
+      request: buildAdobeSignRecentCompletionsRequest({
+        now: new Date('2026-05-15T12:00:00.000Z'),
+        pageSize: 10,
+        cursor: 'adobe-search-start-index:5',
+      }),
+    });
+    const [, init] = fetchSpy.mock.calls[0]!;
+    const bodyJson = JSON.parse((init as RequestInit).body as string);
+    expect(bodyJson).toEqual({
+      scope: ['AGREEMENT_ASSETS'],
+      agreementAssetsCriteria: {
+        type: ['AGREEMENT'],
+        status: ['SIGNED'],
+        modifiedDate: {
+          range: {
+            gt: '2026-04-15T12:00:00.000Z',
+            lt: '2026-05-15T12:00:00.000Z',
+          },
+        },
+        startIndex: 5,
+        pageSize: 10,
+        sortByField: 'CREATED_DATE',
+        sortOrder: 'DESC',
+      },
+    });
   });
 });
 
@@ -297,6 +351,40 @@ describe('createAdobeSignLiveSearchClient — error mappings', () => {
       providerResponseHasErrorField: true,
       providerResponseHasCodeField: false,
       searchRequestDiagnostics: expectedSearchRequestDiagnostics(),
+    });
+  });
+
+  it('recent-completions diagnostics include intent and completed-query shape markers', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ error: 'invalid_request' }, 400));
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search({
+      ...VALID_INPUT,
+      request: buildAdobeSignRecentCompletionsRequest({
+        now: new Date('2026-05-15T12:00:00.000Z'),
+        pageSize: 10,
+      }),
+    });
+    expect(result).toEqual({
+      status: 'unreachable',
+      reason: 'http-4xx',
+      providerStatusCode: 400,
+      providerErrorCode: 'invalid_request',
+      providerResponseHasErrorField: true,
+      providerResponseHasCodeField: false,
+      searchRequestDiagnostics: expectedSearchRequestDiagnostics({
+        queryIntent: 'recent-completions',
+        agreementAssetsCriteriaHasStatusField: true,
+        agreementAssetsCriteriaHasTypeField: true,
+        approvedStatusCount: undefined,
+        agreementAssetsCriteriaAgreementTypeCount: 1,
+        agreementAssetsCriteriaSignedStatusCount: 1,
+        agreementAssetsCriteriaHasModifiedDateField: true,
+        agreementAssetsCriteriaModifiedDateHasRangeField: true,
+        agreementAssetsCriteriaModifiedDateRangeHasLowerBoundField: true,
+        agreementAssetsCriteriaModifiedDateRangeHasUpperBoundField: true,
+        agreementAssetsCriteriaHasSortByField: true,
+        agreementAssetsCriteriaHasSortOrderField: true,
+      }),
     });
   });
 

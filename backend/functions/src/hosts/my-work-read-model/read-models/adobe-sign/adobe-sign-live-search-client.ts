@@ -46,6 +46,7 @@ import type {
   AdobeSignSearchResult,
   IAdobeSignSearchClient,
 } from './adobe-sign-search-client.js';
+import type { AdobeSignSearchRequest } from './adobe-sign-search-request.js';
 
 export const ADOBE_SIGN_AGREEMENT_SEARCH_PATH = '/api/rest/v6/search' as const;
 
@@ -124,7 +125,12 @@ function decodeSearchStartIndex(cursor: string | undefined): number | 'invalid' 
   return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : 'invalid';
 }
 
-function buildSearchRequestDiagnostics(url: string, body: Record<string, unknown>, method: string) {
+function buildSearchRequestDiagnostics(
+  url: string,
+  body: Record<string, unknown>,
+  method: string,
+  request: AdobeSignSearchRequest,
+) {
   const parsed = new URL(url);
   const scope = body.scope;
   const scopeValues = Array.isArray(scope) ? scope.filter((s) => s === 'AGREEMENT_ASSETS') : [];
@@ -133,7 +139,32 @@ function buildSearchRequestDiagnostics(url: string, body: Record<string, unknown
     criteria !== null && typeof criteria === 'object'
       ? (criteria as Record<string, unknown>)
       : undefined;
+  const criteriaStatusValues = Array.isArray(criteriaObj?.status)
+    ? criteriaObj.status.filter((s) => s === 'SIGNED')
+    : [];
+  const criteriaTypeValues = Array.isArray(criteriaObj?.type)
+    ? criteriaObj.type.filter((s) => s === 'AGREEMENT')
+    : [];
+  const modifiedDateObj =
+    criteriaObj?.modifiedDate !== null && typeof criteriaObj?.modifiedDate === 'object'
+      ? (criteriaObj.modifiedDate as Record<string, unknown>)
+      : undefined;
+  const modifiedDateRangeObj =
+    modifiedDateObj?.range !== null && typeof modifiedDateObj?.range === 'object'
+      ? (modifiedDateObj.range as Record<string, unknown>)
+      : undefined;
+
+  const hasLowerBound =
+    modifiedDateRangeObj !== undefined &&
+    (Object.prototype.hasOwnProperty.call(modifiedDateRangeObj, 'gt') ||
+      Object.prototype.hasOwnProperty.call(modifiedDateRangeObj, 'min'));
+  const hasUpperBound =
+    modifiedDateRangeObj !== undefined &&
+    (Object.prototype.hasOwnProperty.call(modifiedDateRangeObj, 'lt') ||
+      Object.prototype.hasOwnProperty.call(modifiedDateRangeObj, 'max'));
+
   return {
+    queryIntent: request.intent,
     endpointHost: parsed.hostname,
     endpointPath: parsed.pathname,
     method,
@@ -159,7 +190,20 @@ function buildSearchRequestDiagnostics(url: string, body: Record<string, unknown
     hasRecipientStatusFilterField: false,
     hasPageSizeField: Object.prototype.hasOwnProperty.call(body, 'pageSize'),
     hasCursorField: Object.prototype.hasOwnProperty.call(body, 'cursor'),
-    approvedStatusCount: 0,
+    approvedStatusCount:
+      request.intent === 'action-queue' ? request.approvedStatuses.length : undefined,
+    agreementAssetsCriteriaAgreementTypeCount: criteriaTypeValues.length,
+    agreementAssetsCriteriaSignedStatusCount: criteriaStatusValues.length,
+    agreementAssetsCriteriaHasModifiedDateField:
+      criteriaObj !== undefined && Object.prototype.hasOwnProperty.call(criteriaObj, 'modifiedDate'),
+    agreementAssetsCriteriaModifiedDateHasRangeField:
+      modifiedDateObj !== undefined && Object.prototype.hasOwnProperty.call(modifiedDateObj, 'range'),
+    agreementAssetsCriteriaModifiedDateRangeHasLowerBoundField: hasLowerBound,
+    agreementAssetsCriteriaModifiedDateRangeHasUpperBoundField: hasUpperBound,
+    agreementAssetsCriteriaHasSortByField:
+      criteriaObj !== undefined && Object.prototype.hasOwnProperty.call(criteriaObj, 'sortByField'),
+    agreementAssetsCriteriaHasSortOrderField:
+      criteriaObj !== undefined && Object.prototype.hasOwnProperty.call(criteriaObj, 'sortOrder'),
   };
 }
 
@@ -436,14 +480,33 @@ export function createAdobeSignLiveSearchClient(
 
       const url = `${trimTrailingSlash(input.apiAccessPoint)}${ADOBE_SIGN_AGREEMENT_SEARCH_PATH}`;
       const method = 'POST' as const;
-      const body = {
-        scope: ['AGREEMENT_ASSETS'],
-        agreementAssetsCriteria: {
-          pageSize: input.request.pageSize,
-          startIndex,
-        },
-      };
-      const searchRequestDiagnostics = buildSearchRequestDiagnostics(url, body, method);
+      const body =
+        input.request.intent === 'recent-completions'
+          ? {
+              scope: ['AGREEMENT_ASSETS'],
+              agreementAssetsCriteria: {
+                type: ['AGREEMENT'],
+                status: ['SIGNED'],
+                modifiedDate: {
+                  range: {
+                    gt: input.request.modifiedWindowStartAtUtc,
+                    lt: input.request.modifiedWindowEndAtUtc,
+                  },
+                },
+                startIndex,
+                pageSize: input.request.pageSize,
+                sortByField: 'CREATED_DATE',
+                sortOrder: 'DESC',
+              },
+            }
+          : {
+              scope: ['AGREEMENT_ASSETS'],
+              agreementAssetsCriteria: {
+                pageSize: input.request.pageSize,
+                startIndex,
+              },
+            };
+      const searchRequestDiagnostics = buildSearchRequestDiagnostics(url, body, method, input.request);
 
       const controller = new AbortController();
       const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);

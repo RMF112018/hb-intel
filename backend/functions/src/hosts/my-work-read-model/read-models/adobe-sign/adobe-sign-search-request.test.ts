@@ -13,6 +13,7 @@ describe('buildAdobeSignSearchRequest', () => {
   describe('approved status list', () => {
     it('locks the recipient-status filter to the six MVP user-action statuses', () => {
       const request = buildAdobeSignSearchRequest();
+      expect(request.intent).toBe('action-queue');
       expect(request.approvedStatuses).toEqual(ADOBE_SIGN_ACTIONABLE_RECIPIENT_STATUSES);
       expect(request.approvedStatuses).toHaveLength(6);
     });

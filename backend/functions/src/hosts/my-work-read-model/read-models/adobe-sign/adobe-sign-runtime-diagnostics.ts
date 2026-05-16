@@ -4,6 +4,7 @@
  * These types are for operator diagnostics only and must never carry
  * secrets, actor identifiers, tokens, or OAuth artifacts.
  */
+import type { AdobeSignSearchIntent } from './adobe-sign-search-request.js';
 
 export type AdobeSignRuntimeDiagnosticEventName =
   | 'adobe-sign-runtime-failure'
@@ -69,6 +70,7 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly searchEndpointPath?: string;
   readonly searchMethod?: string;
   readonly searchBodyTopLevelKeyCount?: number;
+  readonly searchQueryIntent?: AdobeSignSearchIntent;
   readonly searchHasScopeField?: boolean;
   readonly searchScopeAgreementAssetsCount?: number;
   readonly searchHasAgreementAssetsCriteriaField?: boolean;
@@ -83,6 +85,14 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly searchHasPageSizeField?: boolean;
   readonly searchHasCursorField?: boolean;
   readonly searchApprovedStatusCount?: number;
+  readonly searchAgreementAssetsCriteriaAgreementTypeCount?: number;
+  readonly searchAgreementAssetsCriteriaSignedStatusCount?: number;
+  readonly searchAgreementAssetsCriteriaHasModifiedDateField?: boolean;
+  readonly searchAgreementAssetsCriteriaModifiedDateHasRangeField?: boolean;
+  readonly searchAgreementAssetsCriteriaModifiedDateRangeHasLowerBoundField?: boolean;
+  readonly searchAgreementAssetsCriteriaModifiedDateRangeHasUpperBoundField?: boolean;
+  readonly searchAgreementAssetsCriteriaHasSortByField?: boolean;
+  readonly searchAgreementAssetsCriteriaHasSortOrderField?: boolean;
   readonly searchMalformedBodyWasJsonObject?: boolean;
   readonly searchMalformedTopLevelKeyCount?: number;
   readonly searchMalformedHasTopLevelAgreementsArray?: boolean;

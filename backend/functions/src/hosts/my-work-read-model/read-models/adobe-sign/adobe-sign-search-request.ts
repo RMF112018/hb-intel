@@ -30,12 +30,28 @@ export interface AdobeSignSearchRequestInput {
   readonly cursor?: string;
 }
 
-export interface AdobeSignSearchRequest {
+export type AdobeSignSearchIntent = 'action-queue' | 'recent-completions';
+
+export interface AdobeSignActionQueueSearchRequest {
+  readonly intent: 'action-queue';
   /** Frozen at the builder boundary — always the six MVP user-action statuses. */
   readonly approvedStatuses: readonly AdobeSignActionableRecipientStatus[];
   readonly pageSize: number;
   readonly cursor?: string;
 }
+
+export interface AdobeSignRecentCompletionsSearchRequest {
+  readonly intent: 'recent-completions';
+  readonly pageSize: number;
+  readonly cursor?: string;
+  readonly windowDays: 30;
+  readonly modifiedWindowStartAtUtc: string;
+  readonly modifiedWindowEndAtUtc: string;
+}
+
+export type AdobeSignSearchRequest =
+  | AdobeSignActionQueueSearchRequest
+  | AdobeSignRecentCompletionsSearchRequest;
 
 function clampPageSize(input: number | undefined): number {
   if (input === undefined || !Number.isFinite(input)) {
@@ -49,12 +65,17 @@ function clampPageSize(input: number | undefined): number {
 
 export function buildAdobeSignSearchRequest(
   input: AdobeSignSearchRequestInput = {},
-): AdobeSignSearchRequest {
+): AdobeSignActionQueueSearchRequest {
   const pageSize = clampPageSize(input.pageSize);
-  const request: AdobeSignSearchRequest = {
+  const request: AdobeSignActionQueueSearchRequest = {
+    intent: 'action-queue',
     approvedStatuses: ADOBE_SIGN_ACTIONABLE_RECIPIENT_STATUSES,
     pageSize,
     ...(input.cursor !== undefined ? { cursor: input.cursor } : {}),
   };
   return request;
+}
+
+export function clampAdobeSignSearchPageSize(input: number | undefined): number {
+  return clampPageSize(input);
 }

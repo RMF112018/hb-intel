@@ -24,7 +24,7 @@
  */
 
 import type { AdobeSignActorKey } from './adobe-sign-actor-normalizer.js';
-import type { AdobeSignSearchRequest } from './adobe-sign-search-request.js';
+import type { AdobeSignSearchIntent, AdobeSignSearchRequest } from './adobe-sign-search-request.js';
 
 export interface AdobeSignSearchClientInput {
   readonly actorKey: AdobeSignActorKey;
@@ -97,6 +97,7 @@ export type AdobeSignSearchResult =
       readonly providerResponseHasErrorField?: boolean;
       readonly providerResponseHasCodeField?: boolean;
       readonly searchRequestDiagnostics?: {
+        readonly queryIntent?: AdobeSignSearchIntent;
         readonly endpointHost?: string;
         readonly endpointPath?: string;
         readonly method?: string;
@@ -115,6 +116,14 @@ export type AdobeSignSearchResult =
         readonly hasPageSizeField?: boolean;
         readonly hasCursorField?: boolean;
         readonly approvedStatusCount?: number;
+        readonly agreementAssetsCriteriaAgreementTypeCount?: number;
+        readonly agreementAssetsCriteriaSignedStatusCount?: number;
+        readonly agreementAssetsCriteriaHasModifiedDateField?: boolean;
+        readonly agreementAssetsCriteriaModifiedDateHasRangeField?: boolean;
+        readonly agreementAssetsCriteriaModifiedDateRangeHasLowerBoundField?: boolean;
+        readonly agreementAssetsCriteriaModifiedDateRangeHasUpperBoundField?: boolean;
+        readonly agreementAssetsCriteriaHasSortByField?: boolean;
+        readonly agreementAssetsCriteriaHasSortOrderField?: boolean;
       };
       readonly malformedSearchResponseDiagnostics?: {
         readonly hasTopLevelAgreementsArray?: boolean;
