@@ -1,0 +1,49 @@
+{
+  "package": "My Dashboard \u2014 My Projects Flagship UI/UX Implementation Package",
+  "generated": "2026-05-16",
+  "target_repo": "RMF112018/hb-intel",
+  "target_app": "apps/my-dashboard",
+  "prompt_sequence": [
+    "Prompt_01_Repo_Truth_Revalidation_and_Worktree_Scope_Lock.md",
+    "Prompt_02_Card_Shell_Copy_Metrics_and_Composition_Reset.md",
+    "Prompt_03_Project_Tile_Primitives_and_Identity_Block_Rebuild.md",
+    "Prompt_04_Project_Launch_Menu_and_Action_Affordance_Implementation.md",
+    "Prompt_05_Full_Portfolio_Browser_Search_and_Overflow_Surface.md",
+    "Prompt_06_Premium_Visual_System_Motion_and_Responsive_Mode_Closure.md",
+    "Prompt_07_Test_Suite_DOM_Contracts_and_A11y_Hardening.md",
+    "Prompt_08_Final_Build_Package_Hosted_Validation_and_Closeout.md"
+  ],
+  "locked_decisions": [
+    "Keep My Projects + Adobe Sign two-card home composition",
+    "Keep existing 7+5 desktop and 6+4 standardLaptop surface spans",
+    "Remove KPI strip",
+    "Change eyebrow My Work -> My Portfolio",
+    "Remove Launch List heading",
+    "Remove visible source/provenance pills",
+    "Project name + project number become primary recognition block",
+    "Use compact responsive tiles",
+    "Use per-project Open menu, not persistent dual buttons",
+    "Replace inline full-list expansion with responsive portfolio browser overlay",
+    "Add search by project name and number",
+    "UI display sort: project name -> project number -> record key",
+    "Do not modify backend provider ordering during this UI effort"
+  ],
+  "package_files": [
+    "README.md",
+    "PACKAGE_MANIFEST.md",
+    "manifest.json",
+    "00_FULL_IMPLEMENTATION_PLAN.md",
+    "01_TARGET_STATE_DECISION_LOCK.md",
+    "02_REPO_TRUTH_BASELINE.md",
+    "03_PROJECT_ITEM_COMPOSITION_SPEC.md",
+    "04_BREAKPOINT_SHELL_FIT_CONTRACT.md",
+    "05_ACCESSIBILITY_AND_INTERACTION_SPEC.md",
+    "06_TEST_VALIDATION_AND_EVIDENCE_MATRIX.md",
+    "07_DEPENDENCY_AND_FILE_OWNERSHIP_MAP.md",
+    "supporting/Agent_Closeout_Report_Template.md",
+    "supporting/Acceptance_Scorecard_Worksheet.md",
+    "supporting/Hosted_Evidence_Capture_Checklist.md",
+    "supporting/Commit_Message_Template.md",
+    "supporting/Package_Execution_Checklist.md"
+  ]
+}
