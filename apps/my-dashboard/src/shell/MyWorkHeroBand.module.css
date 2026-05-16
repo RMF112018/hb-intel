@@ -1,40 +1,117 @@
 .pageHeader {
+  /* Local warm-derivative tokens retained for support-text accent blend
+     (the typography warmth pairs with the orange end of the band gradient). */
+  --hero-warm-ink: #3a2820;
+  --hero-warm-accent: #c26434;
+  --hero-warm-rail: rgba(194, 100, 52, 0.4);
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--my-work-space-xs);
-  padding: var(--my-work-space-md) var(--my-work-space-xl);
-  border-inline-start: 3px solid var(--my-work-color-rail-accent);
+  gap: 7px;
+  padding: 13px 24px 14px;
+  /* HB brand horizontal blend: cool HB-blue (left) -> warm HB-orange (right).
+     Two-end radial highlights add depth at the brand-anchor corners; the
+     center linear gradient provides smooth color transition through a near-
+     white middle so dark hero typography stays legible. Slightly stronger
+     saturation than the My Projects card (10%/16% vs 8%/14%) because the
+     hero band is a narrower header element meant to read as a distinctive
+     brand band. */
+  background:
+    radial-gradient(
+      circle at 0% 50%,
+      color-mix(in srgb, var(--my-work-brand-hb-blue) 16%, transparent),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 100% 50%,
+      color-mix(in srgb, var(--my-work-brand-hb-orange) 16%, transparent),
+      transparent 36%
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--my-work-brand-hb-blue) 10%, #ffffff) 0%,
+      color-mix(in srgb, var(--my-work-brand-hb-blue) 4%, #ffffff) 32%,
+      #ffffff 50%,
+      color-mix(in srgb, var(--my-work-brand-hb-orange) 4%, #ffffff) 68%,
+      color-mix(in srgb, var(--my-work-brand-hb-orange) 10%, #ffffff) 100%
+    );
+  /* Removed the prior 4px solid warm left rail — the gradient already starts
+     blue on the left edge and a hard left border would clash with the brand
+     blend. Top/bottom hairline borders retained (now token-neutral) for
+     subtle band delineation against the page canvas. */
+  border-top: 1px solid color-mix(in srgb, var(--my-work-color-border) 60%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--my-work-color-border) 60%, transparent);
-  background: var(--my-work-color-card);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 2px rgba(58, 40, 32, 0.03);
+}
+
+.pageHeader::before {
+  /* Dual-stop accent bar: HB-blue -> HB-orange across the band, bridging
+     the two brand colors and echoing the gradient direction below. */
+  content: '';
+  display: block;
+  width: 64px;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--my-work-brand-hb-blue) 0%,
+    color-mix(in srgb, var(--my-work-brand-hb-blue) 60%, var(--my-work-brand-hb-orange)) 50%,
+    var(--my-work-brand-hb-orange) 100%
+  );
 }
 
 .pageHeader[data-my-work-page-header-density='compact'] {
-  padding: var(--my-work-space-sm) var(--my-work-space-lg);
+  padding: 11px 18px 12px;
+  gap: 6px;
 }
 
 .identity {
   display: flex;
   flex-direction: column;
-  gap: var(--my-work-space-xs);
+  gap: 4px;
   min-width: 0;
 }
 
 .title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: clamp(26px, 3.15vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--my-work-color-text-primary);
-  line-height: 1.2;
+  line-height: 1.04;
+  text-wrap: balance;
 }
 
 .pageHeader[data-my-work-page-header-density='compact'] .title {
-  font-size: 17px;
+  font-size: clamp(22px, 5.2vw, 26px);
+  line-height: 1.1;
 }
 
 .support {
   margin: 0;
+  max-width: 64ch;
+  font-size: clamp(13px, 1.2vw, 14px);
+  font-weight: 600;
+  color: color-mix(in srgb, var(--my-work-color-text-muted) 90%, var(--hero-warm-ink));
+  line-height: 1.34;
+  text-wrap: pretty;
+}
+
+.pageHeader[data-my-work-page-header-density='compact'] .support {
   font-size: 13px;
-  font-weight: 500;
-  color: var(--my-work-color-text-muted);
-  line-height: 1.4;
+  line-height: 1.34;
+}
+
+@media (max-width: 1100px) {
+  .title {
+    line-height: 1.06;
+  }
+}
+
+@media (max-width: 860px) {
+  .support {
+    max-width: 50ch;
+  }
 }

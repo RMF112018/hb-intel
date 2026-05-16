@@ -1,119 +1,210 @@
+/* Full-card HB-orange tonal wash. Applied via :global selector targeting the
+   existing data-my-work-card-role marker emitted by the MyWorkCard primitive;
+   no primitive modification required. Mirrors the My Projects HB-blue recipe
+   (same 8% / 3% / 14% radial opacity) so the two cards read with equivalent
+   saturation but distinct hues — coherent HB brand system across surfaces. */
+:global([data-my-work-card-role='adobe-sign-action-queue']) {
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      color-mix(in srgb, var(--my-work-brand-hb-orange) 14%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--my-work-brand-hb-orange) 8%, #ffffff) 0%,
+      color-mix(in srgb, var(--my-work-brand-hb-orange) 3%, #ffffff) 60%,
+      #ffffff 100%
+    );
+}
+
 .upperLayout {
+  /* Local warm-derivative tokens for INNER accent surfaces (status chips,
+     completion summary rail, view toggle). The outer card gradient above is
+     full-saturation #E57E46; these inner accents use the #c26434 derivative
+     for material depth on the gradient. */
+  --adobe-warm-ink: #3a2820;
+  --adobe-warm-accent: #c26434;
+  --adobe-warm-accent-soft: rgba(194, 100, 52, 0.14);
+  --adobe-warm-rail: rgba(194, 100, 52, 0.36);
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 11px;
+  /* Transparent wrapper — the HB-orange card gradient reads continuously
+     through this region (mirrors My Projects .portfolioRegion treatment).
+     Padding retained for breathing room; ::after seam line below still gives
+     visual section delineation. */
+  margin: 0 0 12px;
+  padding: 8px 0 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.upperLayout::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--adobe-warm-accent) 0%,
+    var(--adobe-warm-accent) 44px,
+    rgba(194, 100, 52, 0.28) 44px,
+    rgba(194, 100, 52, 0.08) 40%,
+    transparent 100%
+  );
 }
 
 .statusRail {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   flex-wrap: wrap;
 }
 
 .statusChip {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
-  padding: 0 10px;
+  min-height: 27px;
+  padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid var(--my-work-color-border);
-  background: color-mix(in srgb, var(--my-work-color-rail-hover) 55%, white);
-  color: var(--my-work-color-text-primary);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  border: 1px solid var(--adobe-warm-rail);
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 56%, white);
+  color: var(--adobe-warm-ink);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   line-height: 1;
 }
 
 .freshness {
   margin: 0;
+  max-width: 34ch;
   font-size: 12px;
-  color: var(--my-work-color-text-muted);
+  color: color-mix(in srgb, var(--my-work-color-text-muted) 88%, var(--adobe-warm-ink));
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: balance;
 }
 
 .activityList {
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid var(--my-work-color-border);
+  border-top: 1px solid
+    color-mix(in srgb, var(--my-work-color-border) 80%, var(--adobe-warm-accent-soft));
 }
 
 .activityRow {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--my-work-color-border);
+  padding: 11px 0 12px;
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--my-work-color-border) 80%, var(--adobe-warm-accent-soft));
 }
 
 .activityTitle {
   margin: 0;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: clamp(14px, 1.05vw, 15px);
+  font-weight: 700;
   color: var(--my-work-color-text-primary);
-  line-height: 1.35;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .activityMetaRow {
-  margin-top: 4px;
+  margin-top: 6px;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 }
 
 .activityMetadata {
   margin: 0;
   font-size: 12px;
   color: var(--my-work-color-text-muted);
-  line-height: 1.35;
+  line-height: 1.4;
+  text-wrap: pretty;
 }
 
 .activityOpenAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, var(--my-work-color-rail-accent) 65%, white);
+  border-radius: 8px;
+  background: white;
   font-size: 12px;
-  font-weight: 600;
-  color: var(--my-work-color-rail-accent);
+  font-weight: 700;
+  color: var(--my-work-color-text-primary);
   text-decoration: none;
   white-space: nowrap;
+  transition: background-color 140ms ease-out;
+}
+
+.activityOpenAction:hover {
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 25%, white);
 }
 
 .activityOpenAction:focus-visible {
   outline: 2px solid var(--my-work-color-rail-accent);
-  outline-offset: 2px;
-  border-radius: 2px;
+  outline-offset: 1px;
+  border-radius: 8px;
 }
 
 .previewContext {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed
+    color-mix(in srgb, var(--my-work-color-border) 70%, var(--adobe-warm-accent-soft));
   font-size: 12px;
   color: var(--my-work-color-text-muted);
+  line-height: 1.38;
+  text-wrap: balance;
 }
 
 .completedSummaryRail {
-  margin: 0;
+  margin: 0 0 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid
+    color-mix(in srgb, var(--my-work-color-border) 78%, var(--adobe-warm-accent-soft));
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 32%, white);
   font-size: 13px;
-  font-weight: 600;
-  color: var(--my-work-color-text-primary);
+  font-weight: 700;
+  color: var(--adobe-warm-ink);
+  letter-spacing: -0.01em;
 }
 
 .statePanel {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
+  padding: 2px 0;
 }
 
 .statePanelTitle {
   margin: 0;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: clamp(14px, 1.1vw, 15px);
+  font-weight: 800;
   color: var(--my-work-color-text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
 }
 
 .statePanelActions {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 .adobeSignViewToggle {
@@ -122,9 +213,11 @@
   gap: 4px;
   width: fit-content;
   padding: 4px;
-  border: 1px solid var(--my-work-color-border);
+  border: 1px solid
+    color-mix(in srgb, var(--my-work-color-border) 75%, var(--adobe-warm-accent-soft));
   border-radius: var(--my-work-radius-md);
-  background: color-mix(in srgb, var(--my-work-color-border) 20%, white);
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 38%, white);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .adobeSignViewButton {
@@ -133,20 +226,30 @@
   border-radius: calc(var(--my-work-radius-md) - 2px);
   background: transparent;
   margin: 0;
-  padding: 6px 10px;
+  padding: 7px 13px;
   color: var(--my-work-color-text-muted);
   font: inherit;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.1;
   cursor: pointer;
-  transition: background-color 140ms ease-out;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out;
 }
 
 .adobeSignViewButton[data-adobe-sign-card-view-selected='true'] {
-  background: var(--my-work-color-card);
-  color: var(--my-work-color-text-primary);
+  background: white;
+  color: var(--adobe-warm-ink);
   font-weight: 700;
+  box-shadow:
+    0 1px 1px rgba(58, 40, 32, 0.08),
+    0 5px 12px rgba(58, 40, 32, 0.06);
+}
+
+.adobeSignViewButton:hover {
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 20%, white);
+  color: var(--adobe-warm-ink);
 }
 
 .adobeSignViewButton:focus-visible {
@@ -154,10 +257,33 @@
   outline-offset: 1px;
 }
 
+[data-my-work-card-role='adobe-sign-action-queue'] [data-adobe-sign-action-queue-metrics] {
+  margin-bottom: 4px;
+  padding: 2px 0 0;
+}
+
+[data-my-work-card-role='adobe-sign-action-queue'] [data-adobe-sign-action-queue-metrics] > div {
+  border-top-color: color-mix(
+    in srgb,
+    var(--my-work-color-border) 80%,
+    var(--adobe-warm-accent-soft)
+  );
+}
+
+[data-my-work-card-role='adobe-sign-action-queue'] [data-adobe-sign-action-queue-metrics] dt {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-my-work-card-role='adobe-sign-action-queue'] [data-adobe-sign-action-queue-metrics] dd {
+  font-weight: 800;
+}
+
 [data-adobe-sign-layout-mode='largeLaptop'] .upperLayout,
 [data-adobe-sign-layout-mode='desktop'] .upperLayout,
 [data-adobe-sign-layout-mode='ultrawide'] .upperLayout {
-  gap: 12px;
+  gap: 13px;
 }
 
 [data-adobe-sign-layout-mode='largeLaptop'] .activityMetaRow,
@@ -189,6 +315,7 @@
 [data-adobe-sign-layout-mode='phone'] .statusRail {
   flex-direction: column;
   align-items: flex-start;
+  gap: 7px;
 }
 
 [data-adobe-sign-layout-mode='tabletPortrait'] .adobeSignViewToggle,
@@ -199,7 +326,8 @@
 [data-adobe-sign-layout-mode='tabletPortrait'] .adobeSignViewButton,
 [data-adobe-sign-layout-mode='phone'] .adobeSignViewButton {
   flex: 1 1 0;
-  min-height: 36px;
+  min-height: 38px;
+  justify-content: center;
 }
 
 [data-adobe-sign-layout-mode='tabletPortrait'] .activityMetaRow,
@@ -217,4 +345,14 @@
 [data-adobe-sign-layout-mode='tabletPortrait'] .completedSummaryRail,
 [data-adobe-sign-layout-mode='phone'] .completedSummaryRail {
   line-height: 1.35;
+}
+
+[data-adobe-sign-layout-mode='phone'] .upperLayout {
+  margin: -1px 0 10px;
+  padding: 10px;
+}
+
+[data-adobe-sign-layout-mode='phone'] .freshness,
+[data-adobe-sign-layout-mode='tabletPortrait'] .freshness {
+  max-width: none;
 }
