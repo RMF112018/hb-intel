@@ -101,12 +101,48 @@ describe('AdobeSignActionQueueCard — card identity', () => {
     const card = container.querySelector('[data-my-work-card-role="adobe-sign-action-queue"]');
     expect(card).not.toBeNull();
     expect(card?.textContent).toContain('Adobe Sign');
-    expect(card?.textContent).toContain('Action Queue');
+    expect(card?.textContent).toContain('Agreement Activity');
     expect(card?.getAttribute('data-my-work-module')).toBe('adobe-sign-action-queue');
+  });
+
+  it('keeps a stable noninteractive heading and does not embed the view switch in it', () => {
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+    });
+    const heading = container.querySelector('h3');
+    expect(heading?.textContent).toBe('Agreement Activity');
+    expect(heading?.querySelector('[role="tablist"]')).toBeNull();
+    expect(container.querySelector('[data-adobe-sign-view-switch]')).not.toBeNull();
   });
 });
 
 describe('AdobeSignActionQueueCard — header toggle', () => {
+  it('renders semantic tablist/tab wiring and panel relationships', () => {
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+    });
+    const tabList = container.querySelector('[role="tablist"]');
+    expect(tabList).not.toBeNull();
+    const queueTab = container.querySelector(
+      '[data-adobe-sign-card-view="action-queue"]',
+    ) as HTMLButtonElement;
+    const completedTab = container.querySelector(
+      '[data-adobe-sign-card-view="completed"]',
+    ) as HTMLButtonElement;
+    expect(queueTab.getAttribute('role')).toBe('tab');
+    expect(completedTab.getAttribute('role')).toBe('tab');
+    expect(queueTab.getAttribute('aria-controls')).toBe('adobe-sign-panel-action-queue');
+    expect(completedTab.getAttribute('aria-controls')).toBe('adobe-sign-panel-completed');
+    expect(container.querySelector('#adobe-sign-panel-action-queue')?.getAttribute('role')).toBe(
+      'tabpanel',
+    );
+    expect(container.querySelector('#adobe-sign-panel-completed')?.getAttribute('role')).toBe(
+      'tabpanel',
+    );
+  });
+
   it('defaults to Action Queue selected and swaps selected markers on click', async () => {
     const { container } = renderCard({
       readinessVariant: 'ready',
@@ -148,6 +184,34 @@ describe('AdobeSignActionQueueCard — header toggle', () => {
         .querySelector('[data-adobe-sign-card-view="completed"]')
         ?.getAttribute('data-adobe-sign-card-view-selected'),
     ).toBe('true');
+  });
+
+  it('uses manual activation: arrow keys move focus but do not activate', async () => {
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+    });
+    const queueTab = container.querySelector(
+      '[data-adobe-sign-card-view="action-queue"]',
+    ) as HTMLButtonElement;
+    queueTab.focus();
+    fireEvent.keyDown(queueTab, { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(
+      container.querySelector('[data-adobe-sign-card-view="completed"]'),
+    );
+    expect(
+      container
+        .querySelector('[data-my-work-card-role="adobe-sign-action-queue"]')
+        ?.getAttribute('data-adobe-sign-active-view'),
+    ).toBe('action-queue');
+    fireEvent.keyDown(document.activeElement as Element, { key: 'Enter' });
+    await waitFor(() => {
+      expect(
+        container
+          .querySelector('[data-my-work-card-role="adobe-sign-action-queue"]')
+          ?.getAttribute('data-adobe-sign-active-view'),
+      ).toBe('completed');
+    });
   });
 
   it('supports keyboard activation with Enter and Space', async () => {
@@ -204,6 +268,7 @@ describe('AdobeSignActionQueueCard — loading state', () => {
     const card = container.querySelector('[data-my-work-card-role="adobe-sign-action-queue"]')!;
     expect(card.getAttribute('data-adobe-sign-action-queue-state')).toBe('loading');
     expect(card.getAttribute('data-adobe-sign-action-queue-badge')).toBe('Loading');
+    expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe('Loading');
     expect(card.textContent).toContain('Loading your Adobe Sign queue…');
     expect(container.querySelector('[data-adobe-sign-action-queue-skeleton]')).not.toBeNull();
     expect(container.querySelector('[data-adobe-sign-action-queue-metrics]')).toBeNull();
@@ -386,6 +451,7 @@ describe('AdobeSignActionQueueCard — partial', () => {
     const card = container.querySelector('[data-my-work-card-role="adobe-sign-action-queue"]')!;
     expect(card.getAttribute('data-adobe-sign-action-queue-state')).toBe('partial');
     expect(card.getAttribute('data-adobe-sign-action-queue-badge')).toBe('Partial data');
+    expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe('Partial data');
     expect(card.textContent).toContain(
       'Some queue details may be incomplete. Showing the latest available Adobe Sign results.',
     );
@@ -423,6 +489,10 @@ describe('AdobeSignActionQueueCard — available + items', () => {
     const card = container.querySelector('[data-my-work-card-role="adobe-sign-action-queue"]')!;
     expect(card.getAttribute('data-adobe-sign-action-queue-state')).toBe('available-items');
     expect(card.getAttribute('data-adobe-sign-action-queue-badge')).toBe('Ready');
+    expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe('Ready');
+    expect(container.querySelector('[data-adobe-sign-freshness]')?.textContent).toContain(
+      'Last refreshed',
+    );
     expect(container.querySelector('[data-adobe-queue-summary-pending]')?.textContent).toBe('6');
     // The available fixture has 6 total items — preview limit is 5.
     expect(container.querySelectorAll('[data-my-work-agreement-item]').length).toBeLessThanOrEqual(
@@ -432,6 +502,28 @@ describe('AdobeSignActionQueueCard — available + items', () => {
 });
 
 describe('AdobeSignActionQueueCard — completed panel', () => {
+  it('shows Loading history status chip while completed fetch is in progress', async () => {
+    let resolve!: (value: unknown) => void;
+    const fetchCompleted = vi.fn(
+      () =>
+        new Promise((res) => {
+          resolve = res;
+        }),
+    );
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      getAdobeSignRecentCompletions: fetchCompleted,
+    });
+    fireEvent.click(container.querySelector('[data-adobe-sign-card-view="completed"]')!);
+    await waitFor(() => {
+      expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe(
+        'Loading history',
+      );
+    });
+    resolve(ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE);
+  });
+
   it('does not fetch completed before selecting Completed; first select fetches once; second select reuses cache', async () => {
     const fetchCompleted = vi.fn(async () => ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE);
     const { container } = renderCard({
@@ -452,6 +544,7 @@ describe('AdobeSignActionQueueCard — completed panel', () => {
           ?.getAttribute('data-adobe-sign-completed-panel-state'),
       ).toBe('available-items');
     });
+    expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe('Ready');
 
     fireEvent.click(container.querySelector('[data-adobe-sign-card-view="action-queue"]')!);
     expect(container.querySelector('[data-adobe-sign-action-queue-metrics]')).not.toBeNull();
@@ -459,6 +552,18 @@ describe('AdobeSignActionQueueCard — completed panel', () => {
     await waitFor(() => {
       expect(fetchCompleted).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('suppresses freshness when active view has no valid generated timestamp', () => {
+    const noGeneratedEnvelope: MyWorkReadModelEnvelope<MyWorkHomeReadModel> = {
+      ...MY_WORK_HOME_AVAILABLE,
+      generatedAtUtc: '',
+    };
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: noGeneratedEnvelope,
+    });
+    expect(container.querySelector('[data-adobe-sign-freshness]')).toBeNull();
   });
 
   it('renders exact empty copy for available-empty state', async () => {
@@ -643,7 +748,7 @@ describe('AdobeSignActionQueueCard — no retired copy', () => {
 });
 
 describe('AdobeSignActionQueueCard — accessibility', () => {
-  it('emits MyWorkCard article semantics with aria-labelledby pointing at the visible Action Queue heading', () => {
+  it('emits MyWorkCard article semantics with aria-labelledby pointing at the visible Agreement Activity heading', () => {
     const { container } = renderCard({
       readinessVariant: 'ready',
       homeEnvelope: MY_WORK_HOME_AVAILABLE,
@@ -655,7 +760,7 @@ describe('AdobeSignActionQueueCard — accessibility', () => {
     const labelledBy = card.getAttribute('aria-labelledby');
     expect(labelledBy).not.toBeNull();
     const heading = labelledBy ? document.getElementById(labelledBy) : null;
-    expect(heading?.textContent).toContain('Action Queue');
+    expect(heading?.textContent).toContain('Agreement Activity');
     // No default aria-label injected (MyWorkCard's ariaLabel prop is optional).
     expect(card.hasAttribute('aria-label')).toBe(false);
   });

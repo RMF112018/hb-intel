@@ -12,6 +12,7 @@ import type { MyWorkSurfaceReadinessVariant } from '../../state/myWorkSurfaceRea
 import {
   ADOBE_SIGN_ACTION_QUEUE_LOADING_BODY,
   ADOBE_SIGN_ACTION_QUEUE_READY_EMPTY_BODY,
+  formatGeneratedAtUtc,
   selectAdobeAgreementListVmFromItems,
   selectAdobeRecentCompletionsListVmFromItems,
   selectAdobeRecentCompletionsSummaryVmFromSummary,
@@ -21,13 +22,14 @@ import {
   selectAdobeSignSourceStatus,
 } from '../../state/myWorkCardViewModel.js';
 import { useMyWorkReadModelClient } from '../../runtime/MyWorkReadModelClientProvider.js';
+import { AdobeSignStatusRail } from './AdobeSignStatusRail.js';
+import { AdobeSignViewSwitch } from './AdobeSignViewSwitch.js';
 import { useAdobeSignRecentCompletionsReadModel } from './useAdobeSignRecentCompletionsReadModel.js';
 
 const CARD_ROLE = 'adobe-sign-action-queue';
 const MODULE_ID = 'adobe-sign-action-queue' as const;
 const CARD_EYEBROW = 'Adobe Sign';
-const CARD_TITLE = 'Action Queue';
-const COMPLETED_TITLE = 'Completed';
+const CARD_TITLE = 'Agreement Activity';
 
 const PREVIEW_ITEM_LIMIT = 5;
 
@@ -233,33 +235,6 @@ export function AdobeSignActionQueueCard({
       ? 'Loading completed Adobe Sign agreements…'
       : completedCopyVm.body;
 
-  const viewToggle = toggleVisible ? (
-    <span data-adobe-sign-card-view-toggle="" className={localStyles.adobeSignViewToggle}>
-      <button
-        type="button"
-        className={localStyles.adobeSignViewButton}
-        data-adobe-sign-card-view="action-queue"
-        data-adobe-sign-card-view-selected={
-          effectiveActiveView === 'action-queue' ? 'true' : 'false'
-        }
-        aria-pressed={effectiveActiveView === 'action-queue'}
-        onClick={() => setActiveView('action-queue')}
-      >
-        {CARD_TITLE}
-      </button>
-      <button
-        type="button"
-        className={localStyles.adobeSignViewButton}
-        data-adobe-sign-card-view="completed"
-        data-adobe-sign-card-view-selected={effectiveActiveView === 'completed' ? 'true' : 'false'}
-        aria-pressed={effectiveActiveView === 'completed'}
-        onClick={() => setActiveView('completed')}
-      >
-        {COMPLETED_TITLE}
-      </button>
-    </span>
-  ) : undefined;
-
   return (
     <MyWorkCard
       role={CARD_ROLE}
@@ -275,151 +250,180 @@ export function AdobeSignActionQueueCard({
         'data-adobe-sign-active-view': effectiveActiveView,
       }}
     >
-      {viewToggle}
-      {effectiveActiveView === 'action-queue' && showBodyCopy ? (
-        <p
-          className={styles.bodyText}
-          data-my-work-empty-queue={stateMarker === 'available-empty' ? '' : undefined}
-        >
-          {bodyCopy}
-        </p>
-      ) : null}
-      {effectiveActiveView === 'action-queue' && stateCopy.secondaryBody ? (
-        <p className={styles.bodyText} data-adobe-sign-action-queue-secondary="">
-          {stateCopy.secondaryBody}
-        </p>
-      ) : null}
-      {effectiveActiveView === 'action-queue' && stateMarker === 'loading' ? (
-        <ul className={styles.content} aria-hidden="true" data-adobe-sign-action-queue-skeleton="">
-          {Array.from({ length: MAX_SKELETON_ROWS }, (_, idx) => (
-            <li key={idx} className={styles.row}>
-              <span className={styles.rowLabel}>·</span>
-              <span className={styles.rowValue}>·</span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {effectiveActiveView === 'action-queue' && showMetrics ? (
-        <dl className={styles.content} data-adobe-sign-action-queue-metrics="">
-          <div className={styles.row}>
-            <dt className={styles.rowLabel}>Pending agreements</dt>
-            <dd className={styles.rowValue} data-adobe-queue-summary-pending="">
-              {summaryVm.pendingAgreementsCount ?? '—'}
-            </dd>
-          </div>
-          <div className={styles.row}>
-            <dt className={styles.rowLabel}>Signature actions</dt>
-            <dd className={styles.rowValue} data-adobe-queue-summary-signature="">
-              {summaryVm.signatureActionsCount ?? '—'}
-            </dd>
-          </div>
-          <div className={styles.row}>
-            <dt className={styles.rowLabel}>Review actions</dt>
-            <dd className={styles.rowValue} data-adobe-queue-summary-review="">
-              {summaryVm.reviewActionsCount ?? '—'}
-            </dd>
-          </div>
-        </dl>
-      ) : null}
-      {effectiveActiveView === 'action-queue' && showItemList && !agreementListVm.isEmpty ? (
-        <ul className={styles.content} data-my-work-agreement-list="">
-          {agreementListVm.items.map((item) => (
-            <li
-              key={item.itemId}
-              className={styles.row}
-              data-my-work-agreement-item={item.itemId}
-              data-my-work-agreement-required-action={item.requiredAction}
-            >
-              <span className={styles.rowLabel}>{item.agreementName}</span>
-              <span className={styles.rowValue}>
-                {item.requiredActionLabel}
-                {item.senderLabel ? ` · From ${item.senderLabel}` : ''}
-                {item.expiresLabel ? ` · Expires ${item.expiresLabel}` : ''}
-                {item.sourceOpenUrl ? (
-                  <>
-                    {' · '}
-                    <a
-                      href={item.sourceOpenUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      data-adobe-sign-item-open-action="start"
-                    >
-                      Open in Adobe Sign
-                    </a>
-                  </>
-                ) : null}
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {effectiveActiveView === 'action-queue' && stateCopy.ctaVisible ? (
-        <>
-          <button
-            type="button"
-            className={styles.cta}
-            data-adobe-sign-connect-action="start"
-            data-adobe-sign-connect-state={connectState}
-            disabled={isConnecting}
-            aria-disabled={isConnecting ? 'true' : undefined}
-            onClick={() => {
-              void handleConnectClick();
-            }}
+      <div className={localStyles.upperLayout}>
+        <AdobeSignStatusRail
+          activeView={effectiveActiveView}
+          queueState={stateMarker}
+          completedState={completedPanelState}
+          queueGeneratedAtUtc={homeEnvelope?.generatedAtUtc}
+          completedGeneratedAtUtc={completedEnvelope?.generatedAtUtc}
+          formatTimestamp={formatGeneratedAtUtc}
+          className={localStyles.statusRail}
+          chipClassName={localStyles.statusChip}
+          freshnessClassName={localStyles.freshness}
+        />
+        {toggleVisible ? (
+          <AdobeSignViewSwitch
+            activeView={effectiveActiveView}
+            onActivate={setActiveView}
+            className={localStyles.adobeSignViewToggle}
+            tabClassName={localStyles.adobeSignViewButton}
+          />
+        ) : null}
+      </div>
+      <section
+        role="tabpanel"
+        id="adobe-sign-panel-action-queue"
+        aria-labelledby="adobe-sign-tab-action-queue"
+        hidden={effectiveActiveView !== 'action-queue'}
+      >
+        {effectiveActiveView === 'action-queue' && showBodyCopy ? (
+          <p
+            className={styles.bodyText}
+            data-my-work-empty-queue={stateMarker === 'available-empty' ? '' : undefined}
           >
-            {ctaLabel}
-          </button>
-          {connectState === 'error' ? (
-            <p className={styles.bodyText} role="alert">
-              Unable to start the Adobe Sign connection. Please try again.
-            </p>
-          ) : null}
-        </>
-      ) : null}
-      {effectiveActiveView === 'completed' ? (
-        <section data-adobe-sign-completed-panel-state={completedPanelState}>
-          {showCompletedBody ? <p className={styles.bodyText}>{completedBody}</p> : null}
-          {showCompletedMetric ? (
-            <dl className={styles.content} data-adobe-sign-completed-metrics="">
-              <div className={styles.row}>
-                <dt className={styles.rowLabel}>Completed in last 30 days</dt>
-                <dd className={styles.rowValue} data-adobe-completed-summary-count="">
-                  {completedSummaryVm.completedAgreementCount ?? '—'}
-                </dd>
-              </div>
-            </dl>
-          ) : null}
-          {showCompletedList ? (
-            <ul className={styles.content} data-adobe-sign-completed-list="">
-              {completedListVm.items.map((item) => (
-                <li
-                  key={item.itemId}
-                  className={styles.row}
-                  data-adobe-sign-completed-item={item.itemId}
-                >
-                  <span className={styles.rowLabel}>{item.agreementName}</span>
-                  <span className={styles.rowValue}>
-                    {item.dateLabel ?? 'Updated date unavailable'}
-                    {item.senderLabel ? ` · From ${item.senderLabel}` : ''}
-                    {item.sourceOpenUrl ? (
-                      <>
-                        {' · '}
-                        <a
-                          href={item.sourceOpenUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          data-adobe-sign-completed-item-open-action="start"
-                        >
-                          Open in Adobe Sign
-                        </a>
-                      </>
-                    ) : null}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
-      ) : null}
+            {bodyCopy}
+          </p>
+        ) : null}
+        {effectiveActiveView === 'action-queue' && stateCopy.secondaryBody ? (
+          <p className={styles.bodyText} data-adobe-sign-action-queue-secondary="">
+            {stateCopy.secondaryBody}
+          </p>
+        ) : null}
+        {effectiveActiveView === 'action-queue' && stateMarker === 'loading' ? (
+          <ul className={styles.content} aria-hidden="true" data-adobe-sign-action-queue-skeleton="">
+            {Array.from({ length: MAX_SKELETON_ROWS }, (_, idx) => (
+              <li key={idx} className={styles.row}>
+                <span className={styles.rowLabel}>·</span>
+                <span className={styles.rowValue}>·</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {effectiveActiveView === 'action-queue' && showMetrics ? (
+          <dl className={styles.content} data-adobe-sign-action-queue-metrics="">
+            <div className={styles.row}>
+              <dt className={styles.rowLabel}>Pending agreements</dt>
+              <dd className={styles.rowValue} data-adobe-queue-summary-pending="">
+                {summaryVm.pendingAgreementsCount ?? '—'}
+              </dd>
+            </div>
+            <div className={styles.row}>
+              <dt className={styles.rowLabel}>Signature actions</dt>
+              <dd className={styles.rowValue} data-adobe-queue-summary-signature="">
+                {summaryVm.signatureActionsCount ?? '—'}
+              </dd>
+            </div>
+            <div className={styles.row}>
+              <dt className={styles.rowLabel}>Review actions</dt>
+              <dd className={styles.rowValue} data-adobe-queue-summary-review="">
+                {summaryVm.reviewActionsCount ?? '—'}
+              </dd>
+            </div>
+          </dl>
+        ) : null}
+        {effectiveActiveView === 'action-queue' && showItemList && !agreementListVm.isEmpty ? (
+          <ul className={styles.content} data-my-work-agreement-list="">
+            {agreementListVm.items.map((item) => (
+              <li
+                key={item.itemId}
+                className={styles.row}
+                data-my-work-agreement-item={item.itemId}
+                data-my-work-agreement-required-action={item.requiredAction}
+              >
+                <span className={styles.rowLabel}>{item.agreementName}</span>
+                <span className={styles.rowValue}>
+                  {item.requiredActionLabel}
+                  {item.senderLabel ? ` · From ${item.senderLabel}` : ''}
+                  {item.expiresLabel ? ` · Expires ${item.expiresLabel}` : ''}
+                  {item.sourceOpenUrl ? (
+                    <>
+                      {' · '}
+                      <a
+                        href={item.sourceOpenUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-adobe-sign-item-open-action="start"
+                      >
+                        Open in Adobe Sign
+                      </a>
+                    </>
+                  ) : null}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {effectiveActiveView === 'action-queue' && stateCopy.ctaVisible ? (
+          <>
+            <button
+              type="button"
+              className={styles.cta}
+              data-adobe-sign-connect-action="start"
+              data-adobe-sign-connect-state={connectState}
+              disabled={isConnecting}
+              aria-disabled={isConnecting ? 'true' : undefined}
+              onClick={() => {
+                void handleConnectClick();
+              }}
+            >
+              {ctaLabel}
+            </button>
+            {connectState === 'error' ? (
+              <p className={styles.bodyText} role="alert">
+                Unable to start the Adobe Sign connection. Please try again.
+              </p>
+            ) : null}
+          </>
+        ) : null}
+      </section>
+      <section
+        role="tabpanel"
+        id="adobe-sign-panel-completed"
+        aria-labelledby="adobe-sign-tab-completed"
+        hidden={effectiveActiveView !== 'completed'}
+        data-adobe-sign-completed-panel-state={completedPanelState}
+      >
+        {effectiveActiveView === 'completed' && showCompletedBody ? (
+          <p className={styles.bodyText}>{completedBody}</p>
+        ) : null}
+        {effectiveActiveView === 'completed' && showCompletedMetric ? (
+          <dl className={styles.content} data-adobe-sign-completed-metrics="">
+            <div className={styles.row}>
+              <dt className={styles.rowLabel}>Completed in last 30 days</dt>
+              <dd className={styles.rowValue} data-adobe-completed-summary-count="">
+                {completedSummaryVm.completedAgreementCount ?? '—'}
+              </dd>
+            </div>
+          </dl>
+        ) : null}
+        {effectiveActiveView === 'completed' && showCompletedList ? (
+          <ul className={styles.content} data-adobe-sign-completed-list="">
+            {completedListVm.items.map((item) => (
+              <li key={item.itemId} className={styles.row} data-adobe-sign-completed-item={item.itemId}>
+                <span className={styles.rowLabel}>{item.agreementName}</span>
+                <span className={styles.rowValue}>
+                  {item.dateLabel ?? 'Updated date unavailable'}
+                  {item.senderLabel ? ` · From ${item.senderLabel}` : ''}
+                  {item.sourceOpenUrl ? (
+                    <>
+                      {' · '}
+                      <a
+                        href={item.sourceOpenUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-adobe-sign-completed-item-open-action="start"
+                      >
+                        Open in Adobe Sign
+                      </a>
+                    </>
+                  ) : null}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
     </MyWorkCard>
   );
 }
