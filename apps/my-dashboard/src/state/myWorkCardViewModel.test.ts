@@ -198,6 +198,7 @@ describe('selectAdobeAgreementListVmFromItems', () => {
         agreementId: 'agreement-1',
         agreementName: 'Test Agreement',
         requiredAction: 'signature',
+        actionHandoff: { posture: 'resolve-on-click', reason: 'eligible' },
         adobeRecipientStatus: 'WAITING_FOR_MY_SIGNATURE',
         sourceOpenUrl: 'https://secure.adobesign.com/public/agreement/agreement-1',
       },
@@ -217,6 +218,7 @@ describe('selectAdobeAgreementListVmFromItems', () => {
         agreementId: 'agreement-2',
         agreementName: 'Test Agreement 2',
         requiredAction: 'approval',
+        actionHandoff: { posture: 'resolve-on-click', reason: 'eligible' },
         adobeRecipientStatus: 'WAITING_FOR_MY_APPROVAL',
       },
     ];
@@ -244,6 +246,7 @@ describe('selectAdobeAgreementListVmFromItems', () => {
         agreementId: 'a',
         agreementName: 'Agreement',
         requiredAction: 'signature',
+        actionHandoff: { posture: 'resolve-on-click', reason: 'eligible' },
         adobeRecipientStatus: 'WAITING_FOR_MY_SIGNATURE',
         sender: { displayName: 'Alex Vendor' },
       },
@@ -260,6 +263,7 @@ describe('selectAdobeAgreementListVmFromItems', () => {
         agreementId: 'a',
         agreementName: 'Agreement',
         requiredAction: 'signature',
+        actionHandoff: { posture: 'resolve-on-click', reason: 'eligible' },
         adobeRecipientStatus: 'WAITING_FOR_MY_SIGNATURE',
         expirationAtUtc: '2026-12-31T23:59:59Z',
       },
@@ -267,6 +271,25 @@ describe('selectAdobeAgreementListVmFromItems', () => {
     const vm = selectAdobeAgreementListVmFromItems(items);
     expect(vm.items[0].expiresLabel).not.toBeNull();
     expect(vm.items[0].expiresLabel).toMatch(/2026/);
+  });
+
+  it('passes actionHandoff through from the read-model item', () => {
+    const items: readonly MyWorkAdobeSignActionQueueItem[] = [
+      {
+        itemId: 'handoff-1',
+        sourceSystem: 'adobe-sign',
+        agreementId: 'agreement-3',
+        agreementName: 'Agreement 3',
+        requiredAction: 'delegation',
+        actionHandoff: { posture: 'view-only', reason: 'unsupported-required-action' },
+        adobeRecipientStatus: 'WAITING_FOR_MY_DELEGATION',
+      },
+    ];
+    const vm = selectAdobeAgreementListVmFromItems(items);
+    expect(vm.items[0]?.actionHandoff).toEqual({
+      posture: 'view-only',
+      reason: 'unsupported-required-action',
+    });
   });
 });
 

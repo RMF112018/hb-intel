@@ -143,6 +143,19 @@ function buildItemId(agreementId: string): string {
   return `adobe-sign:agreement-${agreementId}`;
 }
 
+function inferActionHandoffCapability(
+  agreementId: string,
+  requiredAction: MyWorkAdobeSignActionQueueItem['requiredAction'],
+): MyWorkAdobeSignActionQueueItem['actionHandoff'] {
+  if (!agreementId.trim()) {
+    return { posture: 'view-only', reason: 'missing-agreement-id' };
+  }
+  if (requiredAction === 'delegation') {
+    return { posture: 'view-only', reason: 'unsupported-required-action' };
+  }
+  return { posture: 'resolve-on-click', reason: 'eligible' };
+}
+
 function isExpiringSoon(expirationAtUtc: string | undefined, nowMs: number): boolean {
   if (!expirationAtUtc) return false;
   const expiresMs = Date.parse(expirationAtUtc);
@@ -512,6 +525,7 @@ export function createAdobeSignActionQueueAdapter(
           agreementId: row.agreementId,
           agreementName: row.agreementName,
           requiredAction,
+          actionHandoff: inferActionHandoffCapability(row.agreementId, requiredAction),
           adobeRecipientStatus: row.recipientStatus,
           ...(row.senderDisplayName !== undefined || row.senderEmail !== undefined
             ? {

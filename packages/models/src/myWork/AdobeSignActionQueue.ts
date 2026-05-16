@@ -53,12 +53,51 @@ export interface MyWorkAdobeSignSenderSummary {
   readonly emailAddress?: string;
 }
 
+export const ADOBE_SIGN_ACTION_HANDOFF_POSTURES = [
+  'resolve-on-click',
+  'view-only',
+  'unavailable',
+] as const;
+
+export type AdobeSignActionHandoffPosture = (typeof ADOBE_SIGN_ACTION_HANDOFF_POSTURES)[number];
+
+export const ADOBE_SIGN_ACTION_HANDOFF_REASONS = [
+  'eligible',
+  'missing-agreement-id',
+  'unsupported-required-action',
+  'source-authorization-required',
+  'source-unavailable',
+  'principal-unresolved',
+  'configuration-required',
+] as const;
+
+export type AdobeSignActionHandoffReason = (typeof ADOBE_SIGN_ACTION_HANDOFF_REASONS)[number];
+
+export type MyWorkAdobeSignActionHandoffCapability =
+  | {
+      readonly posture: 'resolve-on-click';
+      readonly reason: 'eligible';
+    }
+  | {
+      readonly posture: 'view-only';
+      readonly reason: 'missing-agreement-id' | 'unsupported-required-action';
+    }
+  | {
+      readonly posture: 'unavailable';
+      readonly reason:
+        | 'source-authorization-required'
+        | 'source-unavailable'
+        | 'principal-unresolved'
+        | 'configuration-required';
+    };
+
 export interface MyWorkAdobeSignActionQueueItem {
   readonly itemId: string;
   readonly sourceSystem: 'adobe-sign';
   readonly agreementId: string;
   readonly agreementName: string;
   readonly requiredAction: MyWorkAdobeSignRequiredAction;
+  readonly actionHandoff: MyWorkAdobeSignActionHandoffCapability;
   readonly adobeRecipientStatus: AdobeSignActionableRecipientStatus;
   readonly sender?: MyWorkAdobeSignSenderSummary;
   readonly createdAtUtc?: string;

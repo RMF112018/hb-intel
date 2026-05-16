@@ -202,6 +202,7 @@ export interface AdobeAgreementListItem {
   readonly agreementName: string;
   readonly requiredAction: MyWorkAdobeSignRequiredAction;
   readonly requiredActionLabel: string;
+  readonly actionHandoff: MyWorkAdobeSignActionQueueItem['actionHandoff'];
   readonly senderLabel: string | null;
   readonly expiresLabel: string | null;
   /**
@@ -353,6 +354,7 @@ export function selectAdobeAgreementListVmFromItems(
     agreementName: it.agreementName,
     requiredAction: it.requiredAction,
     requiredActionLabel: requiredActionLabel(it.requiredAction),
+    actionHandoff: it.actionHandoff,
     senderLabel: it.sender?.displayName ?? null,
     expiresLabel: it.expirationAtUtc ? formatGeneratedAtUtc(it.expirationAtUtc) : null,
     sourceOpenUrl: it.sourceOpenUrl,

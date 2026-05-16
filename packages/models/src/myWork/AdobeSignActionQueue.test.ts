@@ -4,6 +4,8 @@ import { dirname, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import {
+  ADOBE_SIGN_ACTION_HANDOFF_POSTURES,
+  ADOBE_SIGN_ACTION_HANDOFF_REASONS,
   ADOBE_SIGN_ACTIONABLE_RECIPIENT_STATUSES,
   ADOBE_SIGN_STATUS_TO_REQUIRED_ACTION,
   MY_WORK_ADOBE_SIGN_REQUIRED_ACTIONS,
@@ -58,6 +60,28 @@ describe('Adobe Sign Action Queue — normalized required actions', () => {
   });
 });
 
+describe('Adobe Sign Action Queue — handoff capability vocabulary', () => {
+  it('exposes the closed action-handoff posture set in order', () => {
+    expect(ADOBE_SIGN_ACTION_HANDOFF_POSTURES).toEqual([
+      'resolve-on-click',
+      'view-only',
+      'unavailable',
+    ]);
+  });
+
+  it('exposes closed action-handoff reason codes', () => {
+    expect(ADOBE_SIGN_ACTION_HANDOFF_REASONS).toEqual([
+      'eligible',
+      'missing-agreement-id',
+      'unsupported-required-action',
+      'source-authorization-required',
+      'source-unavailable',
+      'principal-unresolved',
+      'configuration-required',
+    ]);
+  });
+});
+
 describe('Adobe Sign Action Queue — status-to-action mapping', () => {
   it('maps each actionable Adobe status to its B04 normalized action', () => {
     expect(ADOBE_SIGN_STATUS_TO_REQUIRED_ACTION).toEqual({
@@ -90,6 +114,7 @@ describe('Adobe Sign Action Queue — DTO shapes', () => {
       agreementId: 'agreement-1',
       agreementName: 'Master Services Agreement',
       requiredAction: ADOBE_SIGN_STATUS_TO_REQUIRED_ACTION[status],
+      actionHandoff: { posture: 'resolve-on-click', reason: 'eligible' },
       adobeRecipientStatus: status,
       sender: {
         displayName: 'Jane Sender',
@@ -111,6 +136,7 @@ describe('Adobe Sign Action Queue — DTO shapes', () => {
       agreementId: 'agreement-2',
       agreementName: 'Subcontract Amendment',
       requiredAction: 'approval',
+      actionHandoff: { posture: 'resolve-on-click', reason: 'eligible' },
       adobeRecipientStatus: 'WAITING_FOR_MY_APPROVAL',
     };
     expect(item.sender).toBeUndefined();

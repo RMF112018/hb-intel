@@ -104,6 +104,13 @@ describe('Adobe Sign queue AVAILABLE fixture — six-status coverage', () => {
     }
   });
 
+  it('includes resolver-capable, view-only, and unavailable handoff postures', () => {
+    const postures = ADOBE_SIGN_QUEUE_AVAILABLE.data.items.map((item) => item.actionHandoff.posture);
+    expect(postures).toContain('resolve-on-click');
+    expect(postures).toContain('view-only');
+    expect(postures).toContain('unavailable');
+  });
+
   it('locks the AVAILABLE summary to the six-row breakdown with two expiring soon', () => {
     expect(ADOBE_SIGN_QUEUE_AVAILABLE.data.summary).toEqual({
       countBasis: 'returned-items',

@@ -42,6 +42,7 @@ const QUEUE_ITEM_SIGNATURE: MyWorkAdobeSignActionQueueItem = {
   agreementId: 'agreement-signature-1',
   agreementName: 'Master Services Agreement',
   requiredAction: 'signature',
+  actionHandoff: { posture: 'resolve-on-click', reason: 'eligible' },
   adobeRecipientStatus: 'WAITING_FOR_MY_SIGNATURE',
   sender: {
     displayName: 'Pat Sender',
@@ -59,6 +60,7 @@ const QUEUE_ITEM_APPROVAL: MyWorkAdobeSignActionQueueItem = {
   agreementId: 'agreement-approval-1',
   agreementName: 'Subcontract Approval Packet',
   requiredAction: 'approval',
+  actionHandoff: { posture: 'resolve-on-click', reason: 'eligible' },
   adobeRecipientStatus: 'WAITING_FOR_MY_APPROVAL',
   sender: {
     displayName: 'Robin Sender',
@@ -76,6 +78,7 @@ const QUEUE_ITEM_ACCEPTANCE: MyWorkAdobeSignActionQueueItem = {
   agreementId: 'agreement-acceptance-1',
   agreementName: 'Vendor Terms Acceptance',
   requiredAction: 'acceptance',
+  actionHandoff: { posture: 'resolve-on-click', reason: 'eligible' },
   adobeRecipientStatus: 'WAITING_FOR_MY_ACCEPTANCE',
   sender: {
     displayName: 'Sam Sender',
@@ -93,6 +96,7 @@ const QUEUE_ITEM_ACKNOWLEDGEMENT: MyWorkAdobeSignActionQueueItem = {
   agreementId: 'agreement-acknowledgement-1',
   agreementName: 'Site Safety Acknowledgement',
   requiredAction: 'acknowledgement',
+  actionHandoff: { posture: 'unavailable', reason: 'source-unavailable' },
   adobeRecipientStatus: 'WAITING_FOR_MY_ACKNOWLEDGEMENT',
   sender: {
     displayName: 'Casey Sender',
@@ -109,6 +113,7 @@ const QUEUE_ITEM_FORM_FILLING: MyWorkAdobeSignActionQueueItem = {
   agreementId: 'agreement-form-filling-1',
   agreementName: 'Insurance Disclosure Form',
   requiredAction: 'form-filling',
+  actionHandoff: { posture: 'resolve-on-click', reason: 'eligible' },
   adobeRecipientStatus: 'WAITING_FOR_MY_FORM_FILLING',
   sender: {
     displayName: 'Drew Sender',
@@ -126,6 +131,7 @@ const QUEUE_ITEM_DELEGATION: MyWorkAdobeSignActionQueueItem = {
   agreementId: 'agreement-delegation-1',
   agreementName: 'Signature Delegation Request',
   requiredAction: 'delegation',
+  actionHandoff: { posture: 'view-only', reason: 'unsupported-required-action' },
   adobeRecipientStatus: 'WAITING_FOR_MY_DELEGATION',
   sender: {
     displayName: 'Erin Sender',

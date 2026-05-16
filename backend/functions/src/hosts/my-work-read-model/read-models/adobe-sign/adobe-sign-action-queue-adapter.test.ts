@@ -46,6 +46,7 @@ const ALLOWED_ITEM_KEYS = new Set<keyof MyWorkAdobeSignActionQueueItem>([
   'agreementId',
   'agreementName',
   'requiredAction',
+  'actionHandoff',
   'adobeRecipientStatus',
   'sender',
   'createdAtUtc',
