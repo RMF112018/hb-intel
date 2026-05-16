@@ -1,0 +1,25 @@
+{
+  "package": "My Dashboard Load-Time Audit Validation & Remediation Package",
+  "created_on": "2026-05-16T16:07:20.463723",
+  "file_count": 18,
+  "files": [
+    "00_Comprehensive_Audit_Assessment.md",
+    "01_Proposed_Implementation_Plan.md",
+    "02_Target_Architecture_And_Closed_Decisions.md",
+    "03_Validation_Matrix_And_Acceptance_Criteria.md",
+    "04_Observability_And_Telemetry_Plan.md",
+    "05_Risk_Register_And_Rollback_Guide.md",
+    "06_Exact_File_Level_Targets.md",
+    "README.md",
+    "prompts/Prompt_00_Audit_Validation_And_Repo_Drift_Lock.md",
+    "prompts/Prompt_01_Render_Both_Primary_Cards_During_Load_And_Error.md",
+    "prompts/Prompt_02_Unify_My_Projects_Client_Ownership_And_Remove_Local_Factory_Use.md",
+    "prompts/Prompt_03_Add_Frontend_Load_Performance_Marks_And_Useful_State_Measures.md",
+    "prompts/Prompt_04_Add_Backend_Stage_Duration_Telemetry_For_Home_And_Project_Links.md",
+    "prompts/Prompt_05_End_To_End_Validation_And_Performance_Evidence_Closeout.md",
+    "prompts/Prompt_06_Evidence_Based_Follow_On_Backend_Optimization_Decision.md",
+    "supporting/Application_Insights_Validation_Queries.md",
+    "supporting/HAR_Capture_And_Browser_Waterfall_Checklist.md",
+    "supporting/Performance_Evidence_Closeout_Template.md"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "acceptance_criteria": [
+    "Action Queue rows render Act now when resolver capability is present.",
+    "Clicking Act now invokes a protected backend resolver route.",
+    "Resolver handles signing URL success, insufficient scope, not-ready, no-url, rate-limited, malformed, and source-unavailable states.",
+    "Completed rows continue to expose View only when durable sourceOpenUrl exists.",
+    "No direct Adobe action URL is persisted in read models, fixtures, logs, or telemetry.",
+    "OAuth scope insufficiency produces explicit reconnect behavior.",
+    "Required tests and validations pass with lockfile md5 unchanged.",
+    "Final closeout includes changed files, validation outputs, exclusions, residual risks, and recommended next action."
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "architecture": "hybrid-click-time-action-link-resolver",
+  "queue_behavior": "resolve-on-click-direct-action-handoff",
+  "completed_behavior": "durable-view-link-when-policy-approved",
+  "persist_direct_action_urls": false,
+  "primary_provider_endpoint": "GET /agreements/{agreementId}/signingUrls",
+  "scope_check": "verify governed ADOBE_SIGN_OAUTH_SCOPES; detect insufficiency and reconnect",
+  "transient_url_policy": "separate from durable sourceOpenUrl policy",
+  "telemetry_url_logging": "forbidden"
+}

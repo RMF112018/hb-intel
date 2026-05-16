@@ -1,0 +1,25 @@
+{
+  "local": {
+    "required": [
+      "git status --short",
+      "git branch --show-current",
+      "git rev-parse HEAD",
+      "git log --oneline -20",
+      "md5 pnpm-lock.yaml",
+      "git diff --check"
+    ],
+    "package_validation": [
+      "pnpm --filter @hbc/spfx-my-dashboard check-types",
+      "pnpm --filter @hbc/spfx-my-dashboard test"
+    ],
+    "backend_validation": "Use the authoritative backend package scripts discovered from current repo truth and record exact commands."
+  },
+  "hosted": [
+    "pending signature direct handoff",
+    "pending non-signature direct handoff attempt or truthful fallback",
+    "completed row View behavior",
+    "scope insufficiency reconnect behavior",
+    "not-ready / no-url safe failure",
+    "telemetry redaction verification"
+  ]
+}

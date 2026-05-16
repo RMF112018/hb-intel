@@ -1,0 +1,44 @@
+{
+  "prompts": [
+    {
+      "order": 1,
+      "file": "Prompt-01-Revalidate-Repo-Truth-and-Freeze-Implementation-Boundaries.md",
+      "mode": "read-only verification"
+    },
+    {
+      "order": 2,
+      "file": "Prompt-02-Add-Action-Handoff-Contracts-and-Resolver-Route-Skeleton.md",
+      "mode": "implementation"
+    },
+    {
+      "order": 3,
+      "file": "Prompt-03-Implement-Adobe-Signing-URL-Resolver-Client-and-Provider-Normalization.md",
+      "mode": "implementation"
+    },
+    {
+      "order": 4,
+      "file": "Prompt-04-Implement-Transient-Action-Handoff-Policy-Redirect-Safety-and-Telemetry.md",
+      "mode": "implementation"
+    },
+    {
+      "order": 5,
+      "file": "Prompt-05-Expose-Non-Sensitive-Resolver-Capability-in-Read-Models-and-Fixtures.md",
+      "mode": "implementation"
+    },
+    {
+      "order": 6,
+      "file": "Prompt-06-Implement-Frontend-Act-Now-CTA-Resolve-State-and-Fallback-UX.md",
+      "mode": "implementation"
+    },
+    {
+      "order": 7,
+      "file": "Prompt-07-Harden-OAuth-Scope-Reconsent-and-Unsupported-Action-Type-Handling.md",
+      "mode": "implementation"
+    },
+    {
+      "order": 8,
+      "file": "Prompt-08-Complete-Test-Coverage-Validation-Gates-and-Release-Proof.md",
+      "mode": "validation / closeout"
+    }
+  ]
+}
