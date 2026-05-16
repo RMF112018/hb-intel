@@ -124,7 +124,7 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
     expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
   });
 
-  it('renders both primary cards plus the loading marker while getMyWorkHome has not resolved (no false ready flash)', () => {
+  it('renders both primary cards plus the loading marker while getMyWorkHome has not resolved (no false ready flash) and starts the project-links fetch in parallel', async () => {
     const stub = makeStubClient({
       getMyWorkHome: vi.fn<IMyWorkReadModelClient['getMyWorkHome']>(() => new Promise(() => {})),
     });
@@ -144,6 +144,9 @@ describe('MyWorkSurfaceRouter — home route readiness wiring', () => {
       container.querySelector('[data-my-work-card-role="adobe-sign-action-queue-home"]'),
     ).toBeNull();
     expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
+    // The provider-stub spy proves My Projects starts its /project-links
+    // fetch while /home is still unresolved (parallel-fetch contract).
+    await waitFor(() => expect(stub.getMyProjectLinks).toHaveBeenCalled());
   });
 });
 

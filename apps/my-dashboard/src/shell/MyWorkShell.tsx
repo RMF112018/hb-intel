@@ -144,7 +144,6 @@ export function MyWorkShell({
             <MyWorkBentoGrid mode={mode}>
               <MyWorkSurfaceRouter
                 activePrimarySurfaceId={activePrimarySurfaceId}
-                getApiToken={getApiToken}
                 onConnectAdobeSign={handleConnectAdobeSign}
               />
               {children}

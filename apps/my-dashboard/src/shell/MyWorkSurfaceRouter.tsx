@@ -5,7 +5,6 @@ import { useMyWorkHomeEnvelopeContext } from './MyWorkActiveEnvelopeContext.js';
 
 export interface MyWorkSurfaceRouterProps {
   readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
-  readonly getApiToken?: () => Promise<string>;
   /** Shell-wired Adobe Sign OAuth start callback. Forwarded transparently to the home surface. */
   readonly onConnectAdobeSign?: () => Promise<void>;
 }
@@ -22,10 +21,7 @@ export interface MyWorkSurfaceRouterProps {
  * `MyWorkActiveEnvelopeProvider` (mounted by the shell), so the hero band
  * shares the same fetch.
  */
-export function MyWorkSurfaceRouter({
-  getApiToken,
-  onConnectAdobeSign,
-}: MyWorkSurfaceRouterProps) {
+export function MyWorkSurfaceRouter({ onConnectAdobeSign }: MyWorkSurfaceRouterProps) {
   const state = useMyWorkHomeEnvelopeContext();
   const readiness = selectSurfaceReadiness(state);
   return (
@@ -33,7 +29,6 @@ export function MyWorkSurfaceRouter({
       readinessVariant={readiness.variant}
       sourceStatus={readiness.sourceStatus}
       homeEnvelope={readiness.envelope}
-      getApiToken={getApiToken}
       onConnectAdobeSign={onConnectAdobeSign}
     />
   );

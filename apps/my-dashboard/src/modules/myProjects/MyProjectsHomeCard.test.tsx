@@ -11,17 +11,22 @@ import {
   MY_PROJECT_LINKS_PRINCIPAL_UNRESOLVED,
   MY_PROJECT_LINKS_SOURCE_UNAVAILABLE,
 } from '@hbc/models/myWork/fixtures';
+import type { IMyWorkReadModelClient } from '../../api/myWorkReadModelClient.js';
 import { MyWorkBentoGrid } from '../../layout/MyWorkBentoGrid.js';
 import type { MyWorkResponsiveMode } from '../../layout/useMyWorkContainerBreakpoint.js';
+import { MyWorkReadModelClientProvider } from '../../runtime/MyWorkReadModelClientProvider.js';
 import { MyProjectsHomeCard } from './MyProjectsHomeCard.js';
 
 const getMyProjectLinksMock = vi.fn();
 
-vi.mock('../../api/myWorkReadModelClientFactory.js', () => ({
-  createMyWorkReadModelClient: () => ({
+function makeStubClient(): IMyWorkReadModelClient {
+  return {
+    getMyWorkHome: vi.fn().mockRejectedValue(new Error('unused')),
+    getAdobeSignActionQueue: vi.fn().mockRejectedValue(new Error('unused')),
     getMyProjectLinks: getMyProjectLinksMock,
-  }),
-}));
+    startAdobeSignOAuth: vi.fn().mockRejectedValue(new Error('unused')),
+  };
+}
 
 afterEach(() => {
   cleanup();
@@ -30,9 +35,11 @@ afterEach(() => {
 
 function renderCard(mode: MyWorkResponsiveMode = 'desktop') {
   return render(
-    <MyWorkBentoGrid mode={mode}>
-      <MyProjectsHomeCard />
-    </MyWorkBentoGrid>,
+    <MyWorkReadModelClientProvider client={makeStubClient()}>
+      <MyWorkBentoGrid mode={mode}>
+        <MyProjectsHomeCard />
+      </MyWorkBentoGrid>
+    </MyWorkReadModelClientProvider>,
   );
 }
 
@@ -119,11 +126,10 @@ describe('MyProjectsHomeCard', () => {
 
     // The fully-ready row (Harbor Office Renovation) has both destinations
     // available; find that tile so anchor assertions are deterministic.
-    const tiles = Array.from(
-      container.querySelectorAll<HTMLElement>('[data-my-projects-tile]'),
-    );
+    const tiles = Array.from(container.querySelectorAll<HTMLElement>('[data-my-projects-tile]'));
     const harborTile = tiles.find(
-      (tile) => tile.querySelector('[data-my-projects-project-number]')?.textContent === '24-100-01',
+      (tile) =>
+        tile.querySelector('[data-my-projects-project-number]')?.textContent === '24-100-01',
     );
     expect(harborTile).toBeTruthy();
 
@@ -234,9 +240,7 @@ describe('MyProjectsHomeCard', () => {
       expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
-    const tiles = Array.from(
-      container.querySelectorAll<HTMLElement>('[data-my-projects-tile]'),
-    );
+    const tiles = Array.from(container.querySelectorAll<HTMLElement>('[data-my-projects-tile]'));
     tiles.forEach((tile) => {
       expect(tile.querySelector('[data-my-projects-primary-role]')).not.toBeNull();
     });
@@ -295,9 +299,9 @@ describe('MyProjectsHomeCard', () => {
     await waitFor(() =>
       expect(container.querySelector('[data-my-projects-compact-state="empty"]')).not.toBeNull(),
     );
-    expect(container.querySelector('[data-my-projects-compact-state="empty"]')?.textContent).toContain(
-      EMPTY_COPY,
-    );
+    expect(
+      container.querySelector('[data-my-projects-compact-state="empty"]')?.textContent,
+    ).toContain(EMPTY_COPY);
     expect(container.querySelector('[data-my-projects-portfolio-region]')).toBeNull();
     expect(container.querySelector('[data-my-projects-grid]')).toBeNull();
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();

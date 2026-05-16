@@ -5,7 +5,7 @@ import type {
   MyWorkReadModelEnvelope,
   MyWorkReadModelSourceStatus,
 } from '@hbc/models/myWork';
-import { createMyWorkReadModelClient } from '../../api/myWorkReadModelClientFactory.js';
+import { useMyWorkReadModelClient } from '../../runtime/MyWorkReadModelClientProvider.js';
 import { MyWorkCard } from '../../layout/MyWorkCard.js';
 import { useMyWorkBentoContext } from '../../layout/MyWorkBentoGrid.js';
 import type {
@@ -22,7 +22,6 @@ import {
 import styles from './MyProjectsHomeCard.module.css';
 
 export interface MyProjectsHomeCardProps {
-  readonly getApiToken?: () => Promise<string>;
   readonly footprint?: MyWorkCardFootprint;
   readonly spanOverrides?: MyWorkCardSpanOverrides;
 }
@@ -87,13 +86,9 @@ function hasAnyUnavailableProcore(items: readonly MyProjectLinkItem[]): boolean 
   return items.some((item) => item.procoreAction.state === 'unavailable');
 }
 
-export function MyProjectsHomeCard({
-  getApiToken,
-  footprint = 'full',
-  spanOverrides,
-}: MyProjectsHomeCardProps) {
+export function MyProjectsHomeCard({ footprint = 'full', spanOverrides }: MyProjectsHomeCardProps) {
   const { mode } = useMyWorkBentoContext();
-  const client = useMemo(() => createMyWorkReadModelClient({ getApiToken }), [getApiToken]);
+  const client = useMyWorkReadModelClient();
   const [isLoading, setIsLoading] = useState(true);
   const [envelope, setEnvelope] = useState<MyWorkReadModelEnvelope<MyProjectLinksReadModel> | null>(
     null,

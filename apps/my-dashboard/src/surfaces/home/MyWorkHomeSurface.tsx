@@ -27,7 +27,6 @@ export interface MyWorkHomeSurfaceProps {
    * contexts that do not supply data).
    */
   readonly homeEnvelope?: MyWorkReadModelEnvelope<MyWorkHomeReadModel>;
-  readonly getApiToken?: () => Promise<string>;
   /**
    * Shell-wired Adobe Sign OAuth start callback. Threaded down to
    * `AdobeSignActionQueueCard`, which renders the Connect CTA only when
@@ -62,7 +61,6 @@ export function MyWorkHomeSurface({
   readinessVariant = 'non-ready',
   sourceStatus,
   homeEnvelope,
-  getApiToken,
   onConnectAdobeSign,
 }: MyWorkHomeSurfaceProps) {
   const statusMarker = sourceStatus ? (
@@ -80,11 +78,7 @@ export function MyWorkHomeSurface({
   );
 
   const myProjectsCard = (
-    <MyProjectsHomeCard
-      getApiToken={getApiToken}
-      footprint="full"
-      spanOverrides={MY_PROJECTS_HOME_SPAN_OVERRIDES}
-    />
+    <MyProjectsHomeCard footprint="full" spanOverrides={MY_PROJECTS_HOME_SPAN_OVERRIDES} />
   );
 
   if (readinessVariant === 'loading') {

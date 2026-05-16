@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render } from '@testing-library/react';
-import { MY_WORK_HOME_AVAILABLE } from '@hbc/models/myWork/fixtures';
+import { MY_PROJECT_LINKS_AVAILABLE, MY_WORK_HOME_AVAILABLE } from '@hbc/models/myWork/fixtures';
 import { MyWorkBentoGrid } from '../../layout/MyWorkBentoGrid.js';
 import { MyWorkReadModelClientProvider } from '../../runtime/MyWorkReadModelClientProvider.js';
 import { MyWorkHomeSurface } from './MyWorkHomeSurface.js';
@@ -22,9 +22,7 @@ function renderHome(
     getAdobeSignRecentCompletions: async () => {
       throw new Error('unused');
     },
-    getMyProjectLinks: async () => {
-      throw new Error('unused');
-    },
+    getMyProjectLinks: async () => MY_PROJECT_LINKS_AVAILABLE,
     startAdobeSignOAuth: async () => {
       throw new Error('unused');
     },
