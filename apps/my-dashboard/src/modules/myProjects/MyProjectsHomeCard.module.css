@@ -7,9 +7,13 @@
 }
 
 .banner {
-  border: 1px solid color-mix(in srgb, var(--my-work-color-border) 70%, var(--my-work-color-rail-accent) 30%);
+  border: 1px solid
+    color-mix(in srgb, var(--my-work-color-border) 70%, var(--my-work-color-rail-accent) 30%);
+  /* Strong left rail communicates degraded/notice posture without adding a new
+     iconography dependency; padding-left offsets the thicker rail. */
+  border-left: 3px solid var(--my-work-color-rail-accent);
   border-radius: var(--my-work-radius-md);
-  padding: 10px;
+  padding: 10px 10px 10px 8px;
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--my-work-color-rail) 72%, #ffffff 28%),
@@ -59,13 +63,20 @@
   font: inherit;
   font-size: 12px;
   font-weight: 700;
-  padding: 0 12px;
+  padding: 0 14px;
   cursor: pointer;
-  transition: background-color 160ms ease-out;
+  transition:
+    background-color 160ms ease-out,
+    border-color 160ms ease-out;
 }
 
 .disclosure:hover {
   background: var(--my-work-color-rail);
+  border-color: color-mix(
+    in srgb,
+    var(--my-work-color-border) 60%,
+    var(--my-work-color-rail-accent) 40%
+  );
 }
 
 .disclosure:focus-visible {
@@ -96,8 +107,25 @@
   overflow-wrap: anywhere;
 }
 
+.compactBlock[data-my-projects-compact-state='loading'] .compactBlockText {
+  animation: myProjectsLoadingPulse 1400ms ease-in-out infinite;
+}
+
+@keyframes myProjectsLoadingPulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .disclosure {
     transition: none;
+  }
+  .compactBlock[data-my-projects-compact-state='loading'] .compactBlockText {
+    animation: none;
   }
 }

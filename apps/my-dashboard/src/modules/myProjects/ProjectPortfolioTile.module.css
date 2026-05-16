@@ -9,8 +9,40 @@
     color-mix(in srgb, #ffffff 97%, var(--my-work-color-rail) 3%),
     color-mix(in srgb, #ffffff 92%, var(--my-work-color-rail) 8%)
   );
+  /* Resting micro-elevation; matches the inline-rgba pattern used elsewhere
+     in this module (ProjectLaunchMenu .menu, ProjectPortfolioBrowser .panel). */
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   padding: 10px 12px;
   min-width: 0;
+  transition:
+    transform 140ms ease-out,
+    box-shadow 160ms ease-out,
+    border-color 160ms ease-out;
+}
+
+.tile:hover {
+  transform: translateY(-1px);
+  /* Hover lift additively raises elevation — base resting shadow stays present
+     in the same declaration (dual-shadow stack, never inset-replacement). */
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 6px 16px rgba(15, 23, 42, 0.1);
+  border-color: color-mix(
+    in srgb,
+    var(--my-work-color-border) 60%,
+    var(--my-work-color-rail-accent) 40%
+  );
+}
+
+.tile:focus-within {
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 6px 16px rgba(15, 23, 42, 0.1);
+  border-color: color-mix(
+    in srgb,
+    var(--my-work-color-border) 50%,
+    var(--my-work-color-rail-accent) 50%
+  );
 }
 
 .identity {
@@ -89,6 +121,22 @@
   font-weight: 700;
   padding: 0 8px;
   cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    border-color 140ms ease-out;
+}
+
+.roleOverflow:hover {
+  background: color-mix(
+    in srgb,
+    var(--my-work-color-rail) 60%,
+    var(--my-work-color-rail-accent) 12%
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--my-work-color-border) 60%,
+    var(--my-work-color-rail-accent) 40%
+  );
 }
 
 .roleOverflow:focus-visible {
@@ -107,4 +155,15 @@
 :global([data-my-work-mode='tabletPortrait']) .meta {
   flex-direction: column;
   align-items: stretch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .roleOverflow {
+    transition: none;
+  }
+  .tile:hover,
+  .tile:focus-within {
+    transform: none;
+  }
 }

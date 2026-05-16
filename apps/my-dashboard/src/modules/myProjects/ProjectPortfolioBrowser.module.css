@@ -6,6 +6,7 @@
   display: flex;
   align-items: stretch;
   justify-content: flex-end;
+  animation: browserOverlayIn 140ms ease-out;
 }
 
 .panel {
@@ -18,6 +19,7 @@
   height: 100vh;
   box-shadow: -16px 0 32px rgba(15, 23, 42, 0.18);
   z-index: 1;
+  animation: browserDrawerIn 180ms ease-out;
 }
 
 .panel[data-my-projects-browser-posture='sheet'] {
@@ -25,6 +27,58 @@
   height: 100%;
   border-left: 0;
   box-shadow: none;
+  animation: browserSheetIn 200ms ease-out;
+}
+
+/* Sheet-posture top-edge handle indicator — recognizable sheet affordance,
+   token-only color (no new rgba), pointer-events disabled so it never traps. */
+.panel[data-my-projects-browser-posture='sheet']::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  border-radius: var(--my-work-radius-full);
+  background: color-mix(
+    in srgb,
+    var(--my-work-color-border) 70%,
+    var(--my-work-color-text-muted) 30%
+  );
+  pointer-events: none;
+}
+
+@keyframes browserOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes browserDrawerIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes browserSheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header {
@@ -50,7 +104,8 @@
   grid-column: 2;
   grid-row: 1;
   justify-self: end;
-  min-height: 32px;
+  min-height: 36px;
+  min-width: 36px;
   border-radius: var(--my-work-radius-md);
   border: 1px solid var(--my-work-color-border);
   background: #fff;
@@ -58,12 +113,20 @@
   font: inherit;
   font-size: 12px;
   font-weight: 700;
-  padding: 0 12px;
+  padding: 0 14px;
   cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    border-color 140ms ease-out;
 }
 
 .close:hover {
   background: var(--my-work-color-rail);
+  border-color: color-mix(
+    in srgb,
+    var(--my-work-color-border) 60%,
+    var(--my-work-color-rail-accent) 40%
+  );
 }
 
 .close:focus-visible {
@@ -82,10 +145,15 @@
   font-size: 13px;
   color: var(--my-work-color-text-primary);
   background: #fff;
+  transition: border-color 160ms ease-out;
 }
 
 .search::placeholder {
   color: var(--my-work-color-text-muted);
+}
+
+.search:focus {
+  border-color: var(--my-work-color-rail-accent);
 }
 
 .search:focus-visible {
@@ -113,6 +181,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .panel,
+  .panel[data-my-projects-browser-posture='sheet'] {
+    animation: none;
+  }
   .close,
   .search {
     transition: none;
