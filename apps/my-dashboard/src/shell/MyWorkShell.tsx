@@ -68,6 +68,8 @@ const MY_WORK_THEME_VARS: CSSProperties = Object.freeze({
   '--my-work-executive-ink': '#24364d',
   '--my-work-executive-ink-soft': 'rgba(36, 54, 77, 0.62)',
   '--my-work-executive-rail-tint': 'rgba(36, 54, 77, 0.14)',
+  '--my-work-brand-hb-blue': '#225391',
+  '--my-work-brand-hb-orange': '#E57E46',
 } as CSSProperties);
 
 export function MyWorkShell({

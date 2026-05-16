@@ -80,23 +80,35 @@
 .meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* Tail-anchor the Open trigger so it sits at the same X-position in every
+     tile regardless of whether projectStage is present. Stage takes its own
+     space at the start; .trigger uses margin-left: auto for the gap. */
+  justify-content: flex-end;
   gap: 10px;
   min-width: 0;
 }
 
 .projectStage {
+  /* Compact uppercase pill matching the .primaryRole register — replaces the
+     prior serif-italic treatment that read off-family from the rest of the UI. */
   margin: 0;
-  /* Inline serif stack matches editorial-surface .featuredExcerpt and Foleon
-     .executivePullQuote register — formal italic for supporting context. */
-  font-family: Georgia, 'Times New Roman', 'Iowan Old Style', serif;
-  font-style: italic;
-  font-size: 12.5px;
-  line-height: 1.45;
-  color: var(--my-work-color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--my-work-radius-full);
+  border: 1px solid var(--my-work-executive-rail-tint);
+  background: color-mix(in srgb, var(--my-work-color-rail) 50%, #ffffff);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--my-work-executive-ink);
+  flex: 0 1 auto;
   min-width: 0;
-  overflow-wrap: anywhere;
-  flex: 1 1 auto;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .roleRow {

@@ -1,7 +1,26 @@
+/* Full-card HB-blue tonal wash. Applied via :global selector targeting the
+   existing data-my-work-card-role marker emitted by the MyWorkCard primitive;
+   no primitive modification required. Radial top-left highlight + linear top-
+   to-bottom fade preserves white-tile contrast in the lower content region. */
+:global([data-my-work-card-role='my-projects-home']) {
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      color-mix(in srgb, var(--my-work-brand-hb-blue) 14%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--my-work-brand-hb-blue) 8%, #ffffff) 0%,
+      color-mix(in srgb, var(--my-work-brand-hb-blue) 3%, #ffffff) 60%,
+      #ffffff 100%
+    );
+}
+
 .masthead {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   padding-bottom: 4px;
 }
 
@@ -10,15 +29,7 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
-}
-
-.mastheadEyebrow {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--my-work-executive-ink);
-  white-space: nowrap;
+  padding-top: 2px;
 }
 
 .mastheadRule {
@@ -27,8 +38,8 @@
   min-width: 0;
   background: linear-gradient(
     90deg,
-    var(--my-work-executive-rail-tint) 0%,
-    rgba(36, 54, 77, 0.04) 60%,
+    color-mix(in srgb, var(--my-work-brand-hb-blue) 24%, transparent) 0%,
+    color-mix(in srgb, var(--my-work-brand-hb-blue) 6%, transparent) 60%,
     transparent 100%
   );
 }
@@ -36,12 +47,12 @@
 .mastheadCadence {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: var(--my-work-radius-full);
-  background: color-mix(in srgb, var(--my-work-color-rail) 80%, #ffffff);
-  border: 1px solid var(--my-work-executive-rail-tint);
-  color: var(--my-work-executive-ink);
-  font-size: 11px;
+  background: color-mix(in srgb, var(--my-work-brand-hb-blue) 6%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--my-work-brand-hb-blue) 25%, transparent);
+  color: var(--my-work-brand-hb-blue);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.05em;
   white-space: nowrap;
@@ -69,8 +80,8 @@
   padding: 10px 10px 10px 8px;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--my-work-color-rail) 72%, #ffffff 28%),
-    color-mix(in srgb, var(--my-work-color-rail) 82%, #ffffff 18%)
+    color-mix(in srgb, #ffffff 78%, var(--my-work-color-rail) 22%),
+    color-mix(in srgb, #ffffff 88%, var(--my-work-color-rail) 12%)
   );
 }
 
@@ -83,10 +94,12 @@
 }
 
 .portfolioRegion {
-  border: 1px solid var(--my-work-color-border);
+  /* Semi-transparent white panel so the HB-blue card tint reads through subtly
+     while the tile content remains on a near-white surface. */
+  background: color-mix(in srgb, #ffffff 86%, transparent);
+  border: 1px solid color-mix(in srgb, var(--my-work-brand-hb-blue) 12%, transparent);
   border-radius: var(--my-work-radius-md);
-  padding: 12px;
-  background: var(--my-work-color-card);
+  padding: 14px;
   min-width: 0;
   container-type: inline-size;
   container-name: my-projects-region;
@@ -142,10 +155,27 @@
     filter 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Decorative chevron — content not visible to textContent, preserves the
+   `getByText('View all projects')` test contract. */
+.disclosure::after {
+  content: '\203A';
+  display: inline-block;
+  margin-left: 0.15em;
+  font-size: 1.15em;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-0.05em);
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .disclosure:hover {
   transform: translateY(-1px);
   filter: brightness(1.04);
   box-shadow: 0 4px 18px color-mix(in srgb, var(--my-work-executive-ink) 30%, transparent);
+}
+
+.disclosure:hover::after {
+  transform: translate(2px, -0.05em);
 }
 
 .disclosure:focus-visible {
@@ -161,10 +191,12 @@
 }
 
 .compactBlock {
-  border: 1px dashed var(--my-work-color-border);
+  /* Same semi-transparent white panel treatment as .portfolioRegion so the
+     HB-blue card tint reads through cohesively across all branches. */
+  background: color-mix(in srgb, #ffffff 86%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--my-work-brand-hb-blue) 18%, transparent);
   border-radius: var(--my-work-radius-md);
-  padding: 10px 12px;
-  background: var(--my-work-color-card);
+  padding: 12px 14px;
   min-width: 0;
 }
 
@@ -197,6 +229,12 @@
   }
   .disclosure:hover {
     transform: none;
+  }
+  .disclosure::after {
+    transition: none;
+  }
+  .disclosure:hover::after {
+    transform: translateY(-0.05em);
   }
   .compactBlock[data-my-projects-compact-state='loading'] .compactBlockText {
     animation: none;

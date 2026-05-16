@@ -166,7 +166,6 @@ export function MyProjectsHomeCard({
     >
       <div className={styles.masthead} data-my-projects-masthead="">
         <div className={styles.mastheadEyebrowRow}>
-          <span className={styles.mastheadEyebrow}>Assigned Portfolio</span>
           <span className={styles.mastheadRule} aria-hidden="true" />
           {!isLoading && sortedItems.length > 0 ? (
             <span className={styles.mastheadCadence}>{sortedItems.length} active</span>
