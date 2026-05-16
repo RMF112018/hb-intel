@@ -2,6 +2,7 @@
   display: grid;
   grid-template-columns: repeat(var(--my-work-grid-columns), minmax(0, 1fr));
   grid-auto-rows: minmax(var(--my-work-grid-row-unit), auto);
+  align-items: start;
   gap: var(--my-work-grid-gap);
   width: 100%;
   min-width: 0;

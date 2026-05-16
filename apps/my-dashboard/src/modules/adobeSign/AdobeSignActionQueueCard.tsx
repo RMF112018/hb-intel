@@ -7,6 +7,7 @@ import type {
 import { MyWorkCard } from '../../layout/MyWorkCard.js';
 import type { MyWorkCardSpanOverrides } from '../../layout/myWorkFootprints.js';
 import styles from '../../layout/MyWorkCard.module.css';
+import localStyles from './AdobeSignActionQueueCard.module.css';
 import type { MyWorkSurfaceReadinessVariant } from '../../state/myWorkSurfaceReadiness.js';
 import {
   ADOBE_SIGN_ACTION_QUEUE_LOADING_BODY,
@@ -232,11 +233,11 @@ export function AdobeSignActionQueueCard({
       ? 'Loading completed Adobe Sign agreements…'
       : completedCopyVm.body;
 
-  const titleContent = toggleVisible ? (
-    <span data-adobe-sign-card-view-toggle="" className={styles.adobeSignViewToggle}>
+  const viewToggle = toggleVisible ? (
+    <span data-adobe-sign-card-view-toggle="" className={localStyles.adobeSignViewToggle}>
       <button
         type="button"
-        className={styles.adobeSignViewButton}
+        className={localStyles.adobeSignViewButton}
         data-adobe-sign-card-view="action-queue"
         data-adobe-sign-card-view-selected={
           effectiveActiveView === 'action-queue' ? 'true' : 'false'
@@ -248,7 +249,7 @@ export function AdobeSignActionQueueCard({
       </button>
       <button
         type="button"
-        className={styles.adobeSignViewButton}
+        className={localStyles.adobeSignViewButton}
         data-adobe-sign-card-view="completed"
         data-adobe-sign-card-view-selected={effectiveActiveView === 'completed' ? 'true' : 'false'}
         aria-pressed={effectiveActiveView === 'completed'}
@@ -266,7 +267,6 @@ export function AdobeSignActionQueueCard({
       spanOverrides={spanOverrides}
       eyebrow={CARD_EYEBROW}
       title={CARD_TITLE}
-      titleContent={titleContent}
       module={MODULE_ID}
       ariaLabel={ariaLabel}
       extraDataAttributes={{
@@ -275,6 +275,7 @@ export function AdobeSignActionQueueCard({
         'data-adobe-sign-active-view': effectiveActiveView,
       }}
     >
+      {viewToggle}
       {effectiveActiveView === 'action-queue' && showBodyCopy ? (
         <p
           className={styles.bodyText}

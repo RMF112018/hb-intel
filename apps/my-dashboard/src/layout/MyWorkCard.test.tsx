@@ -111,24 +111,6 @@ describe('MyWorkCard — heading semantics', () => {
     expect(document.getElementById(labelledBy)?.tagName).toBe('H2');
   });
 
-  it('renders titleContent inside heading when provided and preserves aria-labelledby', () => {
-    const { container } = renderInGrid(
-      <MyWorkCard
-        role="x"
-        footprint="standard"
-        title="Fallback Title"
-        titleContent={<span data-test-title-content="">Custom Title Content</span>}
-      >
-        body
-      </MyWorkCard>,
-    );
-    const card = getCard(container);
-    const labelledBy = card.getAttribute('aria-labelledby');
-    expect(labelledBy).toBeTruthy();
-    const heading = document.getElementById(labelledBy!);
-    expect(heading?.textContent).toContain('Custom Title Content');
-    expect(heading?.querySelector('[data-test-title-content]')).not.toBeNull();
-  });
 });
 
 describe('MyWorkCard — phone clamping via the footprint table', () => {

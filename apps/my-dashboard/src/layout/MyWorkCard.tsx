@@ -14,7 +14,6 @@ export interface MyWorkCardProps {
   readonly footprint: MyWorkCardFootprint;
   readonly spanOverrides?: MyWorkCardSpanOverrides;
   readonly title: string;
-  readonly titleContent?: ReactNode;
   readonly eyebrow?: string;
   /** Header-right slot, typically a CTA button. */
   readonly action?: ReactNode;
@@ -36,7 +35,6 @@ export function MyWorkCard({
   footprint,
   spanOverrides,
   title,
-  titleContent,
   eyebrow,
   action,
   module,
@@ -80,7 +78,7 @@ export function MyWorkCard({
           <div className={styles.titleStack}>
             {eyebrow ? <span className={styles.eyebrow}>{eyebrow}</span> : null}
             <HeadingTag id={headingId} className={styles.title}>
-              {titleContent ?? title}
+              {title}
             </HeadingTag>
           </div>
           {action ? <div className={styles.action}>{action}</div> : null}
