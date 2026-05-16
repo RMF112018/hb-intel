@@ -25,7 +25,7 @@
   overflow-wrap: anywhere;
 }
 
-.launchRegion {
+.portfolioRegion {
   border: 1px dashed var(--my-work-color-border);
   border-radius: var(--my-work-radius-md);
   padding: 10px;
@@ -33,168 +33,20 @@
   min-width: 0;
 }
 
-.rows {
-  margin: 10px 0 0 0;
-  padding: 0;
-  list-style: none;
+.grid {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
-}
-
-.row {
-  border: 1px solid var(--my-work-color-border);
-  border-radius: calc(var(--my-work-radius-md) + 1px);
-  padding: 10px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, #ffffff 97%, var(--my-work-color-rail) 3%),
-    color-mix(in srgb, #ffffff 92%, var(--my-work-color-rail) 8%)
-  );
-  min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: 12px;
-  row-gap: 4px;
-  align-items: start;
-}
-
-.rowTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  grid-column: 1;
-  min-width: 0;
-}
-
-.sourceBadge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: var(--my-work-radius-full);
-  background: color-mix(in srgb, var(--my-work-color-rail) 70%, #ffffff 30%);
-  color: var(--my-work-color-text-primary);
-  border: 1px solid var(--my-work-color-border);
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.projectNumber {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--my-work-color-text-muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.projectName {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--my-work-color-text-primary);
-  grid-column: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.projectStage {
-  margin: 0;
-  font-size: 12px;
-  color: var(--my-work-color-text-muted);
-  grid-column: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.roleZone {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-top: 4px;
-  grid-column: 1;
-  min-width: 0;
-}
-
-.roleChip {
-  display: inline-flex;
-  align-items: center;
-  border-radius: var(--my-work-radius-full);
-  border: 1px solid var(--my-work-color-border);
-  background: #fff;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--my-work-color-text-primary);
-  max-width: 100%;
-  overflow-wrap: anywhere;
-}
-
-.roleOverflowButton {
-  min-height: 32px;
-  border-radius: var(--my-work-radius-full);
-  border: 1px solid var(--my-work-color-border);
-  background: var(--my-work-color-rail);
-  color: var(--my-work-color-text-primary);
-  font: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 0 10px;
-  cursor: pointer;
-}
-
-.roleOverflowDetails {
-  width: 100%;
-  font-size: 12px;
-  color: var(--my-work-color-text-muted);
-  overflow-wrap: anywhere;
-}
-
-.actionRail {
-  grid-column: 2;
-  grid-row: 1 / span 4;
-  display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
-  align-content: center;
-  min-width: 180px;
-  max-width: 220px;
 }
 
-.actionLink,
-.actionUnavailable {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40px;
-  border-radius: var(--my-work-radius-md);
-  border: 1px solid var(--my-work-color-border);
-  font-size: 12px;
-  font-weight: 700;
-  padding: 0 10px;
-  text-align: center;
-  overflow-wrap: anywhere;
-}
-
-.actionLink {
-  text-decoration: none;
-  background: var(--my-work-color-rail-accent);
-  border-color: var(--my-work-color-rail-accent);
-  color: #fff;
-}
-
-.actionLink:hover {
-  filter: brightness(1.03);
-}
-
-.actionUnavailable {
-  background: color-mix(in srgb, var(--my-work-color-rail) 74%, #ffffff 26%);
-  color: var(--my-work-color-text-muted);
+:global([data-my-work-mode='tabletLandscape']) .grid,
+:global([data-my-work-mode='smallLaptop']) .grid,
+:global([data-my-work-mode='standardLaptop']) .grid,
+:global([data-my-work-mode='largeLaptop']) .grid,
+:global([data-my-work-mode='desktop']) .grid,
+:global([data-my-work-mode='ultrawide']) .grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .disclosure {
@@ -216,8 +68,6 @@
   background: var(--my-work-color-rail);
 }
 
-.actionLink:focus-visible,
-.roleOverflowButton:focus-visible,
 .disclosure:focus-visible {
   outline: 2px solid var(--my-work-color-rail-accent);
   outline-offset: 2px;
@@ -246,36 +96,7 @@
   overflow-wrap: anywhere;
 }
 
-:global([data-my-work-mode='smallLaptop']) .actionRail,
-:global([data-my-work-mode='tabletLandscape']) .actionRail {
-  min-width: 160px;
-  max-width: 190px;
-}
-
-:global([data-my-work-mode='tabletPortrait']) .row,
-:global([data-my-work-mode='phone']) .row {
-  grid-template-columns: 1fr;
-  column-gap: 0;
-}
-
-:global([data-my-work-mode='tabletPortrait']) .actionRail,
-:global([data-my-work-mode='phone']) .actionRail {
-  grid-column: 1;
-  grid-row: auto;
-  margin-top: 6px;
-  min-width: 0;
-  max-width: none;
-  grid-template-columns: 1fr;
-}
-
-@media (max-width: 639px) {
-  .sourceBadge {
-    white-space: normal;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .actionLink,
   .disclosure {
     transition: none;
   }

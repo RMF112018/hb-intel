@@ -88,36 +88,51 @@ function makePartialZeroRowsEnvelope(): MyWorkReadModelEnvelope<MyProjectLinksRe
 const EMPTY_COPY = 'No assigned projects were found for your current project-role assignments.';
 
 describe('MyProjectsHomeCard', () => {
-  it('renders locked support copy', async () => {
+  it('renders locked support copy and eyebrow', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
     expect(container.textContent).toContain('Open assigned projects in SharePoint or Procore.');
     expect(container.textContent).toContain('My Portfolio');
   });
 
-  it('shows compact loading block with verbatim copy and no metrics or launch region', () => {
+  it('shows compact loading block with verbatim copy and no metrics, no portfolio region, no tile grid', () => {
     getMyProjectLinksMock.mockImplementation(() => new Promise(() => {}));
     const { container } = renderCard();
     const loadingBlock = container.querySelector('[data-my-projects-compact-state="loading"]');
     expect(loadingBlock).not.toBeNull();
     expect(loadingBlock?.textContent).toContain('Loading your project links…');
-    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-portfolio-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-grid]')).toBeNull();
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
-  it('renders one row with both action slots and available links with correct target/rel', async () => {
+  it('renders a tile with both action slots reachable inside the launch group (open by click)', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
-    const firstRow = container.querySelector('[data-my-projects-row]') as HTMLElement;
-    const sharePointLink = firstRow.querySelector(
+    // The fully-ready row (Harbor Office Renovation) has both action slots
+    // available; find that tile so anchor assertions are deterministic.
+    const tiles = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-my-projects-tile]'),
+    );
+    const harborTile = tiles.find(
+      (tile) => tile.querySelector('[data-my-projects-project-number]')?.textContent === '24-100-01',
+    );
+    expect(harborTile).toBeTruthy();
+
+    const trigger = harborTile!.querySelector('[data-my-projects-launch-trigger]') as HTMLButtonElement;
+    expect(trigger).not.toBeNull();
+    fireEvent.click(trigger);
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+    const sharePointLink = harborTile!.querySelector(
       '[data-my-projects-action-slot="sharepoint"][data-my-projects-action-state="available"]',
     ) as HTMLAnchorElement;
     expect(sharePointLink.textContent).toBe('Open SharePoint Site');
@@ -125,7 +140,7 @@ describe('MyProjectsHomeCard', () => {
     expect(sharePointLink.getAttribute('target')).toBe('_blank');
     expect(sharePointLink.getAttribute('rel')).toBe('noopener noreferrer');
 
-    const procoreLink = firstRow.querySelector(
+    const procoreLink = harborTile!.querySelector(
       '[data-my-projects-action-slot="procore"][data-my-projects-action-state="available"]',
     ) as HTMLAnchorElement;
     expect(procoreLink.textContent).toBe('Open Procore');
@@ -134,13 +149,17 @@ describe('MyProjectsHomeCard', () => {
     expect(procoreLink.getAttribute('rel')).toBe('noopener noreferrer');
   });
 
-  it('renders unavailable actions without fake links for mixed availability rows', async () => {
+  it('renders unavailable actions without fake links once launch groups are opened', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
+
+    container
+      .querySelectorAll<HTMLButtonElement>('[data-my-projects-launch-trigger]')
+      .forEach((trigger) => fireEvent.click(trigger));
 
     const unavailable = container.querySelectorAll('[data-my-projects-action-state="unavailable"]');
     expect(unavailable.length).toBeGreaterThan(0);
@@ -150,77 +169,86 @@ describe('MyProjectsHomeCard', () => {
     });
   });
 
-  it('maps source badges to Project Site, Site + Legacy, and Legacy Folder', async () => {
+  it('does not render source/provenance pills on any tile', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-source-badge]').length).toBe(3),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
-    expect(
-      container.querySelector('[data-my-projects-source-badge="projects-only"]')?.textContent,
-    ).toBe('Project Site');
-    expect(container.querySelector('[data-my-projects-source-badge="merged"]')?.textContent).toBe(
-      'Site + Legacy',
-    );
-    expect(
-      container.querySelector('[data-my-projects-source-badge="legacy-only"]')?.textContent,
-    ).toBe('Legacy Folder');
+    expect(container.querySelectorAll('[data-my-projects-source-badge]').length).toBe(0);
+    const text = container.textContent ?? '';
+    expect(text).not.toContain('Project Site');
+    expect(text).not.toContain('Site + Legacy');
+    expect(text).not.toContain('Legacy Folder');
   });
 
-  it('renders role chips with +N overflow and accessible expanded details', async () => {
-    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS);
+  it('renders a primary role chip on every tile and a +N overflow trigger when multiple roles exist', async () => {
+    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
-    const withOverflow = Array.from(container.querySelectorAll('[data-my-projects-row]')).find((row) => {
-      return row.querySelector('[data-my-projects-role-overflow-button]');
+    const tiles = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-my-projects-tile]'),
+    );
+    tiles.forEach((tile) => {
+      expect(tile.querySelector('[data-my-projects-primary-role]')).not.toBeNull();
     });
 
-    // Fixture rows may not all have >2 roles; assert control exists when available by forcing a row in future prompts.
-    // Here we at least assert base chip region renders deterministically.
-    expect(container.querySelectorAll('[data-my-projects-role-chip]').length).toBeGreaterThan(0);
-
-    if (withOverflow) {
-      const button = withOverflow.querySelector(
-        '[data-my-projects-role-overflow-button]',
-      ) as HTMLButtonElement;
-      expect(button.getAttribute('aria-expanded')).toBe('false');
-      fireEvent.click(button);
-      expect(button.getAttribute('aria-expanded')).toBe('true');
-    }
+    // ITEM_PROJECTS_ONLY_READY has two assignment roles → one tile must
+    // expose an overflow trigger; clicking it toggles aria-expanded.
+    const overflowTile = tiles.find((tile) =>
+      tile.querySelector('[data-my-projects-role-overflow]'),
+    );
+    expect(overflowTile).toBeTruthy();
+    const overflowButton = overflowTile!.querySelector(
+      '[data-my-projects-role-overflow]',
+    ) as HTMLButtonElement;
+    expect(overflowButton.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(overflowButton);
+    expect(overflowButton.getAttribute('aria-expanded')).toBe('true');
   });
 
-  it('shows five rows initially and supports expand/collapse disclosure', async () => {
+  it('shows mode-aware visible count (6 on desktop) and supports expand/collapse disclosure', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS);
-    const { container, getByText } = renderCard();
+    const { container, getByText } = renderCard('desktop');
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBe(5),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(6),
     );
 
     const expand = getByText('View all My Projects') as HTMLButtonElement;
-    expect(expand.getAttribute('aria-controls')).toBe('my-projects-row-list');
+    expect(expand.getAttribute('aria-controls')).toBe('my-projects-tile-grid');
     expect(expand.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(expand);
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBe(
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(
         MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS.data.items.length,
       ),
     );
 
     const collapse = getByText('Show fewer') as HTMLButtonElement;
     fireEvent.click(collapse);
-    await waitFor(() => expect(container.querySelectorAll('[data-my-projects-row]').length).toBe(5));
+    await waitFor(() =>
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(6),
+    );
     expect(document.activeElement).toBe(collapse);
   });
 
-  it('renders compact empty block with verbatim copy and no metrics, no launch region, no banner', async () => {
+  it('applies the locked phone visible count of 3', async () => {
+    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS);
+    const { container } = renderCard('phone');
+    await waitFor(() =>
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(3),
+    );
+  });
+
+  it('renders compact empty block with verbatim copy and no metrics, no portfolio region, no banner', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_NO_ASSIGNED_PROJECTS);
     const { container } = renderCard();
 
@@ -230,17 +258,18 @@ describe('MyProjectsHomeCard', () => {
     expect(container.querySelector('[data-my-projects-compact-state="empty"]')?.textContent).toContain(
       EMPTY_COPY,
     );
-    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-portfolio-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-grid]')).toBeNull();
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
     expect(container.querySelector('[data-my-projects-readiness-banner]')).toBeNull();
   });
 
-  it('renders partial-with-rows as populated body with verbatim partial banner copy and metrics visible', async () => {
+  it('renders partial-with-rows as populated body with verbatim partial banner copy and tile grid visible', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_PARTIAL_SOURCE_READINESS);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
     const banner = container.querySelector('[data-my-projects-readiness-banner="partial"]');
@@ -249,11 +278,12 @@ describe('MyProjectsHomeCard', () => {
       'Some launch destinations could not be fully verified. Available project links are shown below.',
     );
     expect(banner?.getAttribute('data-my-projects-compact-state')).toBeNull();
-    expect(container.querySelector('[data-my-projects-launch-region]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-portfolio-region]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-grid]')).not.toBeNull();
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
-  it('renders principal-unresolved with banner only — no empty copy, no launch region, no metrics', async () => {
+  it('renders principal-unresolved with banner only — no empty copy, no portfolio region, no metrics', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_PRINCIPAL_UNRESOLVED);
     const { container } = renderCard();
 
@@ -268,11 +298,12 @@ describe('MyProjectsHomeCard', () => {
       'We could not confirm your project assignment identity for this view.',
     );
     expect(container.textContent).not.toContain(EMPTY_COPY);
-    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-portfolio-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-grid]')).toBeNull();
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
-  it('renders source-unavailable with banner only — no empty copy, no launch region, no metrics', async () => {
+  it('renders source-unavailable with banner only — no empty copy, no portfolio region, no metrics', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_SOURCE_UNAVAILABLE);
     const { container } = renderCard();
 
@@ -287,11 +318,12 @@ describe('MyProjectsHomeCard', () => {
       'Project launch sources are temporarily unavailable. Try again shortly.',
     );
     expect(container.textContent).not.toContain(EMPTY_COPY);
-    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-portfolio-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-grid]')).toBeNull();
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
-  it('renders backend-unavailable with banner only — no empty copy, no launch region, no metrics', async () => {
+  it('renders backend-unavailable with banner only — no empty copy, no portfolio region, no metrics', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_BACKEND_UNAVAILABLE);
     const { container } = renderCard();
 
@@ -306,11 +338,12 @@ describe('MyProjectsHomeCard', () => {
       'Project links are temporarily unavailable while the My Dashboard service is unreachable.',
     );
     expect(container.textContent).not.toContain(EMPTY_COPY);
-    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-portfolio-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-grid]')).toBeNull();
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
-  it('renders partial-with-zero-rows with banner only — no empty copy, no launch region, no metrics', async () => {
+  it('renders partial-with-zero-rows with banner only — no empty copy, no portfolio region, no metrics', async () => {
     getMyProjectLinksMock.mockResolvedValue(makePartialZeroRowsEnvelope());
     const { container } = renderCard();
 
@@ -325,7 +358,8 @@ describe('MyProjectsHomeCard', () => {
       'Some launch destinations could not be fully verified. Available project links are shown below.',
     );
     expect(container.textContent).not.toContain(EMPTY_COPY);
-    expect(container.querySelector('[data-my-projects-launch-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-portfolio-region]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-grid]')).toBeNull();
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
@@ -334,36 +368,43 @@ describe('MyProjectsHomeCard', () => {
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
     expect(container.textContent).toContain(
       'Your project list is available, but the source inventory exceeded the current review limit. Some assignments may not yet be shown.',
     );
-    expect(container.querySelector('[data-my-projects-launch-region]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-portfolio-region]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-grid]')).not.toBeNull();
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
     expect(container.textContent ?? '').not.toContain('Launch List');
   });
 
-  it('populated state renders launch region without metrics strip and without Launch List label', async () => {
+  it('populated state renders portfolio grid without metrics strip and without Launch List label', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
-    expect(container.querySelector('[data-my-projects-launch-region]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-portfolio-region]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-grid]')).not.toBeNull();
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
     expect(container.querySelector('[data-my-projects-compact-state]')).toBeNull();
     expect(container.textContent ?? '').not.toContain('Launch List');
   });
 
-  it('maps procore-project-invalid warning to an unavailable row action with accessible explanation', async () => {
+  it('maps procore-project-invalid warning to an unavailable tile action with accessible explanation', async () => {
     getMyProjectLinksMock.mockResolvedValue(makeInvalidProcoreEnvelope());
     const { container } = renderCard();
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBe(1),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(1),
     );
+
+    const trigger = container.querySelector(
+      '[data-my-projects-launch-trigger]',
+    ) as HTMLButtonElement;
+    fireEvent.click(trigger);
 
     const unavailable = container.querySelector(
       '[data-my-projects-action-slot="procore"][data-my-projects-action-state="unavailable"]',
@@ -374,20 +415,26 @@ describe('MyProjectsHomeCard', () => {
     );
   });
 
-  it('keeps dual action structure and explicit action slots in compact mode', async () => {
+  it('keeps both action slots reachable in compact mode after opening the launch trigger', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard('phone');
 
     await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
     const card = container.querySelector('[data-my-work-card-role="my-projects-home"]');
     expect(card?.getAttribute('data-my-work-mode')).toBe('phone');
-    const firstRow = container.querySelector('[data-my-projects-row]') as HTMLElement;
+
+    const firstTile = container.querySelector('[data-my-projects-tile]') as HTMLElement;
+    const trigger = firstTile.querySelector(
+      '[data-my-projects-launch-trigger]',
+    ) as HTMLButtonElement;
+    fireEvent.click(trigger);
+
     expect(
-      firstRow.querySelector('[data-my-projects-action-slot="sharepoint"]')?.textContent,
+      firstTile.querySelector('[data-my-projects-action-slot="sharepoint"]')?.textContent,
     ).toBeTruthy();
-    expect(firstRow.querySelector('[data-my-projects-action-slot="procore"]')?.textContent).toBeTruthy();
+    expect(firstTile.querySelector('[data-my-projects-action-slot="procore"]')?.textContent).toBeTruthy();
   });
 });
