@@ -30,8 +30,7 @@ export interface MyProjectsHomeCardProps {
 const EMPTY_ITEMS: readonly MyProjectLinkItem[] = Object.freeze([]);
 
 const LOADING_COPY = 'Loading your project links…';
-const EMPTY_COPY =
-  'No assigned projects were found for your current project-role assignments.';
+const EMPTY_COPY = 'No assigned projects were found for your current project-role assignments.';
 const PARTIAL_COPY =
   'Some launch destinations could not be fully verified. Available project links are shown below.';
 const PRINCIPAL_UNRESOLVED_COPY =
@@ -127,9 +126,7 @@ export function MyProjectsHomeCard({
   const sourceStatus: MyWorkReadModelSourceStatus = envelope?.sourceStatus ?? 'backend-unavailable';
   const items = envelope?.data.items ?? EMPTY_ITEMS;
   const sourceReadiness = envelope?.data.sourceReadiness ?? null;
-  const bannerText = isLoading
-    ? null
-    : selectBannerText({ sourceStatus, sourceReadiness, items });
+  const bannerText = isLoading ? null : selectBannerText({ sourceStatus, sourceReadiness, items });
 
   const sortedItems = useMemo(() => sortMyProjectsForDisplay(items), [items]);
   const visibleCount = resolveMyProjectsVisibleCount(mode);
@@ -167,13 +164,24 @@ export function MyProjectsHomeCard({
         'data-my-projects-visible-count': String(displayedItems.length),
       }}
     >
-      <p className={styles.purpose}>Open assigned projects in SharePoint or Procore.</p>
+      <div className={styles.masthead} data-my-projects-masthead="">
+        <div className={styles.mastheadEyebrowRow}>
+          <span className={styles.mastheadEyebrow}>Assigned Portfolio</span>
+          <span className={styles.mastheadRule} aria-hidden="true" />
+          {!isLoading && sortedItems.length > 0 ? (
+            <span className={styles.mastheadCadence}>{sortedItems.length} active</span>
+          ) : null}
+        </div>
+        <p className={styles.lead}>Open assigned projects in SharePoint or Procore.</p>
+      </div>
 
       {bannerText ? (
         <div
           className={styles.banner}
           data-my-projects-readiness-banner={sourceStatus}
-          data-my-projects-compact-state={compactState === 'banner-only' ? 'banner-only' : undefined}
+          data-my-projects-compact-state={
+            compactState === 'banner-only' ? 'banner-only' : undefined
+          }
         >
           <p className={styles.bannerText}>{bannerText}</p>
         </div>
@@ -198,10 +206,7 @@ export function MyProjectsHomeCard({
 
       {isPopulated ? (
         <div className={styles.portfolioRegion} data-my-projects-portfolio-region="">
-          <div
-            hidden
-            data-my-projects-has-disclosure={showRowDisclosure ? 'true' : 'false'}
-          />
+          <div hidden data-my-projects-has-disclosure={showRowDisclosure ? 'true' : 'false'} />
           <div
             className={styles.grid}
             id="my-projects-tile-grid"

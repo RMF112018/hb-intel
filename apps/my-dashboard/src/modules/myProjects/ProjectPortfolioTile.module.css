@@ -1,73 +1,79 @@
 .tile {
   display: grid;
   grid-template-rows: auto auto auto;
-  gap: 8px;
+  gap: 10px;
   border: 1px solid var(--my-work-color-border);
-  border-radius: calc(var(--my-work-radius-md) + 1px);
+  border-radius: calc(var(--my-work-radius-md) + 2px);
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, #ffffff 97%, var(--my-work-color-rail) 3%),
-    color-mix(in srgb, #ffffff 92%, var(--my-work-color-rail) 8%)
+    color-mix(in srgb, #ffffff 98%, var(--my-work-color-rail) 2%),
+    color-mix(in srgb, #ffffff 93%, var(--my-work-color-rail) 7%)
   );
-  /* Resting micro-elevation; matches the inline-rgba pattern used elsewhere
-     in this module (ProjectLaunchMenu .menu, ProjectPortfolioBrowser .panel). */
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  padding: 10px 12px;
+  /* Resting micro-elevation — two-layer subtle shadow stack for premium
+     depth at idle (matches Foleon .executiveSurface vocabulary). */
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 18px rgba(15, 23, 42, 0.04);
+  padding: 12px 14px;
   min-width: 0;
   transition:
-    transform 140ms ease-out,
-    box-shadow 160ms ease-out,
-    border-color 160ms ease-out;
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .tile:hover {
-  transform: translateY(-1px);
-  /* Hover lift additively raises elevation — base resting shadow stays present
-     in the same declaration (dual-shadow stack, never inset-replacement). */
+  transform: translateY(-2px);
+  /* Three-layer hover lift; base shadow stays present (additive stack,
+     never inset-replacement). */
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.06),
-    0 6px 16px rgba(15, 23, 42, 0.1);
+    0 8px 20px rgba(15, 23, 42, 0.1),
+    0 22px 48px rgba(10, 8, 6, 0.05);
   border-color: color-mix(
     in srgb,
-    var(--my-work-color-border) 60%,
-    var(--my-work-color-rail-accent) 40%
+    var(--my-work-color-border) 55%,
+    var(--my-work-executive-ink) 45%
   );
 }
 
 .tile:focus-within {
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.06),
-    0 6px 16px rgba(15, 23, 42, 0.1);
+    0 8px 20px rgba(15, 23, 42, 0.1),
+    0 22px 48px rgba(10, 8, 6, 0.05);
   border-color: color-mix(
     in srgb,
-    var(--my-work-color-border) 50%,
-    var(--my-work-color-rail-accent) 50%
+    var(--my-work-color-border) 45%,
+    var(--my-work-executive-ink) 55%
   );
 }
 
 .identity {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
 }
 
 .projectName {
   margin: 0;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.25;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.22;
   color: var(--my-work-color-text-primary);
   overflow-wrap: anywhere;
 }
 
 .projectNumber {
   margin: 0;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   line-height: 1.2;
-  color: var(--my-work-color-text-muted);
-  letter-spacing: 0.01em;
+  color: var(--my-work-executive-ink-soft);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
 
@@ -81,7 +87,12 @@
 
 .projectStage {
   margin: 0;
-  font-size: 12px;
+  /* Inline serif stack matches editorial-surface .featuredExcerpt and Foleon
+     .executivePullQuote register — formal italic for supporting context. */
+  font-family: Georgia, 'Times New Roman', 'Iowan Old Style', serif;
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.45;
   color: var(--my-work-color-text-muted);
   min-width: 0;
   overflow-wrap: anywhere;
@@ -100,12 +111,14 @@
   display: inline-flex;
   align-items: center;
   border-radius: var(--my-work-radius-full);
-  border: 1px solid var(--my-work-color-border);
-  background: #fff;
-  padding: 2px 8px;
+  border: 1px solid var(--my-work-executive-rail-tint);
+  background: color-mix(in srgb, var(--my-work-color-rail) 50%, #ffffff);
+  padding: 2px 10px;
   font-size: 11px;
-  font-weight: 600;
-  color: var(--my-work-color-text-primary);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--my-work-executive-ink);
+  text-transform: uppercase;
   max-width: 100%;
   overflow-wrap: anywhere;
 }
@@ -113,29 +126,26 @@
 .roleOverflow {
   min-height: 24px;
   border-radius: var(--my-work-radius-full);
-  border: 1px solid var(--my-work-color-border);
-  background: var(--my-work-color-rail);
-  color: var(--my-work-color-text-primary);
+  border: 1px solid var(--my-work-executive-rail-tint);
+  background: color-mix(in srgb, var(--my-work-color-rail) 60%, #ffffff);
+  color: var(--my-work-executive-ink);
   font: inherit;
   font-size: 11px;
   font-weight: 700;
-  padding: 0 8px;
+  letter-spacing: 0.04em;
+  padding: 0 10px;
   cursor: pointer;
   transition:
-    background-color 140ms ease-out,
-    border-color 140ms ease-out;
+    background-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 140ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .roleOverflow:hover {
-  background: color-mix(
-    in srgb,
-    var(--my-work-color-rail) 60%,
-    var(--my-work-color-rail-accent) 12%
-  );
+  background: color-mix(in srgb, var(--my-work-color-rail) 40%, #ffffff);
   border-color: color-mix(
     in srgb,
-    var(--my-work-color-border) 60%,
-    var(--my-work-color-rail-accent) 40%
+    var(--my-work-executive-rail-tint) 50%,
+    var(--my-work-executive-ink) 50%
   );
 }
 

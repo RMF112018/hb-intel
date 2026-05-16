@@ -63,6 +63,11 @@ const MY_WORK_THEME_VARS: CSSProperties = Object.freeze({
   '--my-work-space-lg': '20px',
   '--my-work-space-xl': '32px',
   '--my-work-elevation-card': '0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.08)',
+  '--my-work-elevation-card-hover':
+    '0 1px 2px rgba(15, 23, 42, 0.06), 0 6px 16px rgba(15, 23, 42, 0.10), 0 22px 48px rgba(10, 8, 6, 0.05)',
+  '--my-work-executive-ink': '#24364d',
+  '--my-work-executive-ink-soft': 'rgba(36, 54, 77, 0.62)',
+  '--my-work-executive-rail-tint': 'rgba(36, 54, 77, 0.14)',
 } as CSSProperties);
 
 export function MyWorkShell({

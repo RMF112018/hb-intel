@@ -85,11 +85,7 @@ export function ProjectPortfolioBrowser({
 
   return (
     <FloatingPortal>
-      <FloatingOverlay
-        className={styles.overlay}
-        lockScroll
-        data-my-projects-browser-overlay=""
-      >
+      <FloatingOverlay className={styles.overlay} lockScroll data-my-projects-browser-overlay="">
         <FloatingFocusManager context={context} modal initialFocus={0}>
           <div
             ref={refs.setFloating}
@@ -102,6 +98,13 @@ export function ProjectPortfolioBrowser({
             {...getFloatingProps()}
           >
             <header className={styles.header}>
+              <div className={styles.headerEyebrowRow}>
+                <span className={styles.headerEyebrow}>Portfolio Browser</span>
+                <span className={styles.headerRule} aria-hidden="true" />
+                <span className={styles.headerCadence}>
+                  {results.length} {results.length === 1 ? 'result' : 'results'}
+                </span>
+              </div>
               <h2 id={titleId} className={styles.title}>
                 All My Projects
               </h2>
@@ -115,6 +118,11 @@ export function ProjectPortfolioBrowser({
                 aria-label="Search by project name or number"
                 data-my-projects-portfolio-search=""
               />
+              {/* Close button rendered LAST in header DOM order so the search input
+                  remains the first focusable element inside the dialog (test
+                  contract: ProjectPortfolioBrowser.test.tsx surfaces-the-search
+                  -input-as-the-first-focusable-element). Positioned visually at
+                  the top-right of the header via absolute positioning in CSS. */}
               <button
                 type="button"
                 className={styles.close}
@@ -133,18 +141,12 @@ export function ProjectPortfolioBrowser({
                       key={row.recordKey}
                       row={row}
                       isOpen={openTileKey === row.recordKey}
-                      onOpenChange={(open) =>
-                        setOpenTileKey(open ? row.recordKey : null)
-                      }
+                      onOpenChange={(open) => setOpenTileKey(open ? row.recordKey : null)}
                     />
                   ))}
                 </div>
               ) : (
-                <p
-                  className={styles.empty}
-                  data-my-projects-search-empty=""
-                  role="status"
-                >
+                <p className={styles.empty} data-my-projects-search-empty="" role="status">
                   No projects match your search.
                 </p>
               )}
