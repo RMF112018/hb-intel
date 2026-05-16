@@ -128,6 +128,53 @@ const ITEM_LEGACY_ONLY_PROCORE: MyProjectLinkItem = {
   ],
 };
 
+/**
+ * Projects-only item where both external-launch URL columns are populated
+ * with non-http(s) values that the my-project-links provider classifies as
+ * invalid. SharePoint and Procore launches remain available so the row
+ * isolates the BuildingConnected and Document Crunch invalid-URL paths.
+ * Warning shape mirrors the provider's emission order — `*-url-invalid`
+ * first, then `*-launch-unavailable` — so fixture-driven consumers see the
+ * exact two-warning sequence `mergeWarnings` produces at runtime.
+ */
+const ITEM_PROJECTS_ONLY_INVALID_URLS: MyProjectLinkItem = {
+  recordKey: 'projects:990',
+  source: 'projects-only',
+  projectName: 'Invalid Launch URLs',
+  projectNumber: '24-100-99',
+  projectStage: 'Construction',
+  assignmentRoles: ['project-manager'],
+  sharePointAction: {
+    state: 'available',
+    kind: 'project-site',
+    label: 'Open SharePoint Site',
+    href: 'https://example.invalid/sites/24-100-99',
+  },
+  procoreAction: {
+    state: 'available',
+    label: 'Open Procore',
+    procoreProject: '9876543',
+    href: 'https://app.procore.com/9876543/project/home',
+  },
+  buildingConnectedAction: {
+    state: 'unavailable',
+    label: 'BuildingConnected unavailable',
+  },
+  documentCrunchAction: {
+    state: 'unavailable',
+    label: 'Document Crunch unavailable',
+  },
+  provenance: {
+    projectsListItemId: 990,
+  },
+  warnings: [
+    { code: 'building-connected-url-invalid' },
+    { code: 'building-connected-launch-unavailable' },
+    { code: 'document-crunch-url-invalid' },
+    { code: 'document-crunch-launch-unavailable' },
+  ],
+};
+
 const ITEM_MORE_1: MyProjectLinkItem = {
   ...ITEM_PROJECTS_ONLY_READY,
   recordKey: 'projects:103',
@@ -323,6 +370,16 @@ export const MY_PROJECT_LINKS_BOUNDED_SOURCE_PARTIAL_WARNING = buildProjectLinks
   items: [ITEM_LEGACY_ONLY_PROCORE],
   sourceReadiness: {
     projects: 'partial',
+    legacyFallbackRegistry: 'available',
+  },
+});
+
+export const MY_PROJECT_LINKS_INVALID_LAUNCH_URLS = buildProjectLinksEnvelope({
+  sourceStatus: 'available',
+  warnings: [],
+  items: [ITEM_PROJECTS_ONLY_INVALID_URLS],
+  sourceReadiness: {
+    projects: 'available',
     legacyFallbackRegistry: 'available',
   },
 });

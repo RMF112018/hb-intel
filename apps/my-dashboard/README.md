@@ -10,8 +10,8 @@ A single-page personal launch pad. The app renders one primary surface —
 **My Work** — composed of a compact personalized greeting header and a
 two-card bento grid:
 
-1. **My Projects** — assigned projects with dual SharePoint + Procore
-   launch handoffs.
+1. **My Projects** — assigned projects with multi-platform launch access
+   (SharePoint, Procore, BuildingConnected, Document Crunch).
 2. **Adobe Sign** — a single card with two in-header views:
    - `Action Queue` for pending agreements that need user action;
    - `Completed` for recent completed agreements (last 30 days,

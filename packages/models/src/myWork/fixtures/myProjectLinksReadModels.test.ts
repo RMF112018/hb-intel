@@ -11,6 +11,7 @@ import {
   MY_PROJECT_LINKS_AVAILABLE,
   MY_PROJECT_LINKS_BACKEND_UNAVAILABLE,
   MY_PROJECT_LINKS_BOUNDED_SOURCE_PARTIAL_WARNING,
+  MY_PROJECT_LINKS_INVALID_LAUNCH_URLS,
   MY_PROJECT_LINKS_MIXED_ACTION_AVAILABILITY,
   MY_PROJECT_LINKS_MORE_THAN_SIX_ITEMS,
   MY_PROJECT_LINKS_NO_ASSIGNED_PROJECTS,
@@ -29,6 +30,7 @@ const ALL: ReadonlyArray<readonly [string, MyWorkReadModelEnvelope<MyProjectLink
   ['principal-unresolved', MY_PROJECT_LINKS_PRINCIPAL_UNRESOLVED],
   ['backend-unavailable', MY_PROJECT_LINKS_BACKEND_UNAVAILABLE],
   ['bounded-source-partial-warning', MY_PROJECT_LINKS_BOUNDED_SOURCE_PARTIAL_WARNING],
+  ['invalid-launch-urls', MY_PROJECT_LINKS_INVALID_LAUNCH_URLS],
 ];
 
 describe('project-links fixtures', () => {
@@ -43,6 +45,7 @@ describe('project-links fixtures', () => {
       'principal-unresolved',
       'backend-unavailable',
       'bounded-source-partial-warning',
+      'invalid-launch-urls',
     ]);
   });
 
@@ -121,6 +124,31 @@ describe('project-links fixtures', () => {
           item.sharePointAction.state === 'unavailable' && item.procoreAction.state === 'available',
       ),
     ).toBe(true);
+  });
+
+  it('invalid-launch-urls fixture surfaces both BC and DC invalid-URL warnings in provider emission order', () => {
+    const items = MY_PROJECT_LINKS_INVALID_LAUNCH_URLS.data.items;
+    expect(items).toHaveLength(1);
+    const item = items[0]!;
+    expect(item.buildingConnectedAction.state).toBe('unavailable');
+    expect(item.documentCrunchAction.state).toBe('unavailable');
+    // SharePoint and Procore stay available — this fixture isolates the
+    // BuildingConnected and Document Crunch invalid-URL paths.
+    expect(item.sharePointAction.state).toBe('available');
+    expect(item.procoreAction.state).toBe('available');
+    const codes = item.warnings.map((warning) => warning.code);
+    // Provider-side emission order: *-url-invalid first, *-launch-unavailable
+    // second. The fixture mirrors that order so consumers see the exact
+    // two-warning sequence mergeWarnings produces at runtime.
+    expect(codes).toEqual([
+      'building-connected-url-invalid',
+      'building-connected-launch-unavailable',
+      'document-crunch-url-invalid',
+      'document-crunch-launch-unavailable',
+    ]);
+    expect(MY_PROJECT_LINKS_INVALID_LAUNCH_URLS.data.summary.multiPlatformReadyCount).toBe(0);
+    expect(MY_PROJECT_LINKS_INVALID_LAUNCH_URLS.data.summary.buildingConnectedReadyCount).toBe(0);
+    expect(MY_PROJECT_LINKS_INVALID_LAUNCH_URLS.data.summary.documentCrunchReadyCount).toBe(0);
   });
 
   it('bounded-source partial fixture includes bounded warning vocabulary', () => {

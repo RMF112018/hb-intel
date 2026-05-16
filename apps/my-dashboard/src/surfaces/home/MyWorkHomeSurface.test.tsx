@@ -183,7 +183,9 @@ describe('MyWorkHomeSurface — copy posture', () => {
     const myProjects = container.querySelector('[data-my-work-card-role="my-projects-home"]');
     expect(myProjects?.textContent).toContain('My Projects');
     expect(myProjects?.textContent).toContain('My Portfolio');
-    expect(myProjects?.textContent).toContain('Open assigned projects in SharePoint or Procore.');
+    expect(myProjects?.textContent).toContain(
+      'Open assigned projects across SharePoint, Procore, BuildingConnected, and Document Crunch.',
+    );
   });
 });
 
