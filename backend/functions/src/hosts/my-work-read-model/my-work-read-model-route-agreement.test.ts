@@ -12,7 +12,7 @@ import { MY_WORK_READ_MODEL_ROUTE_PATHS } from '@hbc/models/myWork';
  */
 const MODEL_ROUTE_KEYS_PENDING_REGISTRATION: ReadonlyArray<
   keyof typeof MY_WORK_READ_MODEL_ROUTE_PATHS
-> = ['adobe-sign-recent-completions'];
+> = [];
 
 const registrations: Array<{ name: string; config: any }> = [];
 
@@ -69,6 +69,11 @@ describe('my-work-read-model route ↔ model agreement', () => {
   it('binds getMyWorkProjectLinks to the canonical model route path', () => {
     const reg = registrations.find((r) => r.name === 'getMyWorkProjectLinks');
     expect(reg?.config.route).toBe(MY_WORK_READ_MODEL_ROUTE_PATHS['project-links']);
+  });
+
+  it('binds getMyWorkAdobeSignRecentCompletions to the canonical model route path', () => {
+    const reg = registrations.find((r) => r.name === 'getMyWorkAdobeSignRecentCompletions');
+    expect(reg?.config.route).toBe(MY_WORK_READ_MODEL_ROUTE_PATHS['adobe-sign-recent-completions']);
   });
 
   it('registers exactly one route per registered model route key — no duplicates and no alternate slugs', () => {
