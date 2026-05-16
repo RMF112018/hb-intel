@@ -7,7 +7,10 @@ afterEach(() => {
   cleanup();
 });
 
-function renderInGrid(card: React.ReactElement, mode: Parameters<typeof MyWorkBentoGrid>[0]['mode'] = 'desktop') {
+function renderInGrid(
+  card: React.ReactElement,
+  mode: Parameters<typeof MyWorkBentoGrid>[0]['mode'] = 'desktop',
+) {
   return render(<MyWorkBentoGrid mode={mode}>{card}</MyWorkBentoGrid>);
 }
 
@@ -33,12 +36,7 @@ describe('MyWorkCard — data attributes', () => {
 
   it('marks span source as override and includes the override mode when applicable', () => {
     const { container } = renderInGrid(
-      <MyWorkCard
-        role="x"
-        footprint="standard"
-        title="Override"
-        spanOverrides={{ desktop: 6 }}
-      >
+      <MyWorkCard role="x" footprint="standard" title="Override" spanOverrides={{ desktop: 6 }}>
         body
       </MyWorkCard>,
     );
@@ -60,12 +58,7 @@ describe('MyWorkCard — data attributes', () => {
 
   it('applies the module marker when provided', () => {
     const { container } = renderInGrid(
-      <MyWorkCard
-        role="x"
-        footprint="standard"
-        title="Module"
-        module="adobe-sign-action-queue"
-      >
+      <MyWorkCard role="x" footprint="standard" title="Module" module="adobe-sign-action-queue">
         body
       </MyWorkCard>,
     );
@@ -116,6 +109,25 @@ describe('MyWorkCard — heading semantics', () => {
     const card = getCard(container);
     const labelledBy = card.getAttribute('aria-labelledby')!;
     expect(document.getElementById(labelledBy)?.tagName).toBe('H2');
+  });
+
+  it('renders titleContent inside heading when provided and preserves aria-labelledby', () => {
+    const { container } = renderInGrid(
+      <MyWorkCard
+        role="x"
+        footprint="standard"
+        title="Fallback Title"
+        titleContent={<span data-test-title-content="">Custom Title Content</span>}
+      >
+        body
+      </MyWorkCard>,
+    );
+    const card = getCard(container);
+    const labelledBy = card.getAttribute('aria-labelledby');
+    expect(labelledBy).toBeTruthy();
+    const heading = document.getElementById(labelledBy!);
+    expect(heading?.textContent).toContain('Custom Title Content');
+    expect(heading?.querySelector('[data-test-title-content]')).not.toBeNull();
   });
 });
 

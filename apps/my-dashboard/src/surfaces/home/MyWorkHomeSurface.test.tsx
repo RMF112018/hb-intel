@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render } from '@testing-library/react';
+import { MY_WORK_HOME_AVAILABLE } from '@hbc/models/myWork/fixtures';
 import { MyWorkBentoGrid } from '../../layout/MyWorkBentoGrid.js';
+import { MyWorkReadModelClientProvider } from '../../runtime/MyWorkReadModelClientProvider.js';
 import { MyWorkHomeSurface } from './MyWorkHomeSurface.js';
 import type { MyWorkResponsiveMode } from '../../layout/useMyWorkContainerBreakpoint.js';
 
@@ -12,10 +14,27 @@ function renderHome(
   props: React.ComponentProps<typeof MyWorkHomeSurface> = {},
   mode: MyWorkResponsiveMode = 'desktop',
 ) {
+  const client: any = {
+    getMyWorkHome: async () => MY_WORK_HOME_AVAILABLE,
+    getAdobeSignActionQueue: async () => {
+      throw new Error('unused');
+    },
+    getAdobeSignRecentCompletions: async () => {
+      throw new Error('unused');
+    },
+    getMyProjectLinks: async () => {
+      throw new Error('unused');
+    },
+    startAdobeSignOAuth: async () => {
+      throw new Error('unused');
+    },
+  };
   return render(
-    <MyWorkBentoGrid mode={mode}>
-      <MyWorkHomeSurface {...props} />
-    </MyWorkBentoGrid>,
+    <MyWorkReadModelClientProvider client={client}>
+      <MyWorkBentoGrid mode={mode}>
+        <MyWorkHomeSurface {...props} />
+      </MyWorkBentoGrid>
+    </MyWorkReadModelClientProvider>,
   );
 }
 
@@ -44,10 +63,7 @@ function spanSourceOf(container: HTMLElement, role: string): string | null {
 describe('MyWorkHomeSurface — default (non-ready) variant', () => {
   it('emits exactly two cards in order on the non-ready variant: My Projects then Adobe Sign', () => {
     const { container } = renderHome();
-    expect(getCardRoles(container)).toEqual([
-      'my-projects-home',
-      'adobe-sign-action-queue',
-    ]);
+    expect(getCardRoles(container)).toEqual(['my-projects-home', 'adobe-sign-action-queue']);
     // Retired surface cards must not appear.
     expect(container.querySelector('[data-my-work-card-role="work-summary"]')).toBeNull();
     expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
@@ -69,10 +85,7 @@ describe('MyWorkHomeSurface — default (non-ready) variant', () => {
 describe('MyWorkHomeSurface — ready variant', () => {
   it('emits exactly two cards in order on the ready variant: My Projects then Adobe Sign', () => {
     const { container } = renderHome({ readinessVariant: 'ready' });
-    expect(getCardRoles(container)).toEqual([
-      'my-projects-home',
-      'adobe-sign-action-queue',
-    ]);
+    expect(getCardRoles(container)).toEqual(['my-projects-home', 'adobe-sign-action-queue']);
     expect(container.querySelector('[data-my-work-card-role="work-summary"]')).toBeNull();
     expect(container.querySelector('[data-my-work-card-role="source-readiness"]')).toBeNull();
     expect(
@@ -146,6 +159,15 @@ describe('MyWorkHomeSurface — Adobe consolidation', () => {
     });
     expect(container.querySelector('[data-adobe-sign-connect-action="start"]')).toBeNull();
   });
+
+  it('keeps My Projects + Adobe composition intact when Adobe header toggle is visible', () => {
+    const { container } = renderHome({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+    });
+    expect(getCardRoles(container)).toEqual(['my-projects-home', 'adobe-sign-action-queue']);
+    expect(container.querySelector('[data-adobe-sign-card-view-toggle]')).not.toBeNull();
+  });
 });
 
 describe('MyWorkHomeSurface — copy posture', () => {
@@ -201,10 +223,7 @@ describe('MyWorkHomeSurface — envelope-state variants', () => {
       readinessVariant: 'ready',
       sourceStatus: 'partial',
     });
-    expect(getCardRoles(container)).toEqual([
-      'my-projects-home',
-      'adobe-sign-action-queue',
-    ]);
+    expect(getCardRoles(container)).toEqual(['my-projects-home', 'adobe-sign-action-queue']);
     expect(container.querySelector('[data-my-work-source-status="partial"]')).not.toBeNull();
   });
 });
