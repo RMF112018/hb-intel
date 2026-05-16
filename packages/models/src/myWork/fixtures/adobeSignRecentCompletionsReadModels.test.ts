@@ -37,8 +37,14 @@ const ALL_FIXTURES: ReadonlyArray<
     'ADOBE_SIGN_RECENT_COMPLETIONS_PRINCIPAL_UNRESOLVED',
     ADOBE_SIGN_RECENT_COMPLETIONS_PRINCIPAL_UNRESOLVED,
   ],
-  ['ADOBE_SIGN_RECENT_COMPLETIONS_SOURCE_UNAVAILABLE', ADOBE_SIGN_RECENT_COMPLETIONS_SOURCE_UNAVAILABLE],
-  ['ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE', ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE],
+  [
+    'ADOBE_SIGN_RECENT_COMPLETIONS_SOURCE_UNAVAILABLE',
+    ADOBE_SIGN_RECENT_COMPLETIONS_SOURCE_UNAVAILABLE,
+  ],
+  [
+    'ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE',
+    ADOBE_SIGN_RECENT_COMPLETIONS_BACKEND_UNAVAILABLE,
+  ],
 ];
 
 describe('Adobe Sign recent completions fixtures', () => {
@@ -72,12 +78,19 @@ describe('Adobe Sign recent completions fixtures', () => {
     });
   });
 
-  it('uses modifiedAtUtc and does not expose completedAtUtc', () => {
+  it('uses agreementStatus and supports optional completedAtUtc alongside modifiedAtUtc', () => {
     for (const item of ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE.data.items) {
-      expect(item.completionState).toBe('completed');
+      expect(item.agreementStatus).toBe('COMPLETED');
       expect(item.modifiedAtUtc).toBeDefined();
-      expect('completedAtUtc' in (item as Record<string, unknown>)).toBe(false);
     }
+    const withCompletedAt = ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE.data.items.filter(
+      (item) => item.completedAtUtc !== undefined,
+    );
+    const withoutCompletedAt = ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE.data.items.filter(
+      (item) => item.completedAtUtc === undefined,
+    );
+    expect(withCompletedAt.length).toBeGreaterThan(0);
+    expect(withoutCompletedAt.length).toBeGreaterThan(0);
     const withSender = ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE.data.items.filter(
       (item) => item.sender !== undefined,
     );
@@ -98,7 +111,9 @@ describe('Adobe Sign recent completions fixtures', () => {
 
   it('locks degraded and partial state posture', () => {
     expect(ADOBE_SIGN_RECENT_COMPLETIONS_PARTIAL.sourceStatus).toBe('partial');
-    expect(ADOBE_SIGN_RECENT_COMPLETIONS_PARTIAL.warnings).toEqual([{ code: 'partial-source-data' }]);
+    expect(ADOBE_SIGN_RECENT_COMPLETIONS_PARTIAL.warnings).toEqual([
+      { code: 'partial-source-data' },
+    ]);
 
     const degraded = [
       ADOBE_SIGN_RECENT_COMPLETIONS_CONFIGURATION_REQUIRED,

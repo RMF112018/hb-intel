@@ -26,22 +26,23 @@ describe('AdobeSignRecentCompletions contract', () => {
     expect(model.summary.windowDays).toBe(30);
   });
 
-  it('locks completionState literal and optional fields posture', () => {
+  it('locks agreementStatus literal and optional fields posture', () => {
     const item: MyWorkAdobeSignRecentCompletionsItem = {
       itemId: 'adobe-sign:completed-1',
       sourceSystem: 'adobe-sign',
       agreementId: 'completed-1',
       agreementName: 'Completed agreement',
-      completionState: 'completed',
+      agreementStatus: 'COMPLETED',
+      completedAtUtc: '2026-05-11T17:50:00.000Z',
       modifiedAtUtc: '2026-05-11T18:00:00.000Z',
       sourceOpenUrl: 'https://adobesign.example.com/agreements/completed-1',
     };
 
-    expect(item.completionState).toBe('completed');
+    expect(item.agreementStatus).toBe('COMPLETED');
+    expect(item.completedAtUtc).toBe('2026-05-11T17:50:00.000Z');
     expect(item.modifiedAtUtc).toBe('2026-05-11T18:00:00.000Z');
     expect(item.sourceOpenUrl).toContain('adobesign');
     expect('sender' in item).toBe(false);
-    expect('completedAtUtc' in (item as Record<string, unknown>)).toBe(false);
     expect('requiredAction' in (item as Record<string, unknown>)).toBe(false);
     expect('adobeRecipientStatus' in (item as Record<string, unknown>)).toBe(false);
   });

@@ -21,8 +21,9 @@ export interface MyWorkAdobeSignRecentCompletionsItem {
   readonly sourceSystem: 'adobe-sign';
   readonly agreementId: string;
   readonly agreementName: string;
-  readonly completionState: 'completed';
+  readonly agreementStatus: 'COMPLETED';
   readonly sender?: MyWorkAdobeSignSenderSummary;
+  readonly completedAtUtc?: string;
   readonly modifiedAtUtc?: string;
   readonly sourceOpenUrl?: string;
 }

@@ -29,11 +29,12 @@ const COMPLETED_ITEM_1: MyWorkAdobeSignRecentCompletionsItem = {
   sourceSystem: 'adobe-sign',
   agreementId: 'completed-agreement-1',
   agreementName: 'Subcontract Change Order 014',
-  completionState: 'completed',
+  agreementStatus: 'COMPLETED',
   sender: {
     displayName: 'Jordan Sender',
     emailAddress: 'jordan@hb.example.com',
   },
+  completedAtUtc: '2026-05-11T17:50:00.000Z',
   modifiedAtUtc: '2026-05-11T18:00:00.000Z',
   sourceOpenUrl: 'https://adobesign.example.com/agreements/completed-agreement-1',
 };
@@ -43,7 +44,7 @@ const COMPLETED_ITEM_2: MyWorkAdobeSignRecentCompletionsItem = {
   sourceSystem: 'adobe-sign',
   agreementId: 'completed-agreement-2',
   agreementName: 'Project Closeout Acknowledgement',
-  completionState: 'completed',
+  agreementStatus: 'COMPLETED',
   modifiedAtUtc: '2026-05-10T14:30:00.000Z',
 };
 
@@ -52,11 +53,12 @@ const COMPLETED_ITEM_3: MyWorkAdobeSignRecentCompletionsItem = {
   sourceSystem: 'adobe-sign',
   agreementId: 'completed-agreement-3',
   agreementName: 'Vendor Insurance Renewal',
-  completionState: 'completed',
+  agreementStatus: 'COMPLETED',
   sender: {
     displayName: 'Taylor Sender',
     emailAddress: 'taylor@hb.example.com',
   },
+  completedAtUtc: '2026-05-08T08:55:00.000Z',
   modifiedAtUtc: '2026-05-08T09:15:00.000Z',
 };
 
