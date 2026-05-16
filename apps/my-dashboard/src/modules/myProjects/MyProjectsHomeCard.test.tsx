@@ -94,9 +94,8 @@ describe('MyProjectsHomeCard', () => {
     await waitFor(() =>
       expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
     );
-    expect(container.textContent).toContain(
-      'Open the projects you are assigned to in SharePoint or Procore.',
-    );
+    expect(container.textContent).toContain('Open assigned projects in SharePoint or Procore.');
+    expect(container.textContent).toContain('My Portfolio');
   });
 
   it('shows compact loading block with verbatim copy and no metrics or launch region', () => {
@@ -251,7 +250,7 @@ describe('MyProjectsHomeCard', () => {
     );
     expect(banner?.getAttribute('data-my-projects-compact-state')).toBeNull();
     expect(container.querySelector('[data-my-projects-launch-region]')).not.toBeNull();
-    expect(container.querySelector('[data-my-projects-metrics]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
   it('renders principal-unresolved with banner only — no empty copy, no launch region, no metrics', async () => {
@@ -330,7 +329,7 @@ describe('MyProjectsHomeCard', () => {
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
-  it('renders bounded-source-with-rows as populated body with bounded warning banner preserved verbatim', async () => {
+  it('renders bounded-source-with-rows as populated body with bounded warning banner preserved verbatim and no metrics strip or Launch List label', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_BOUNDED_SOURCE_PARTIAL_WARNING);
     const { container } = renderCard();
 
@@ -341,10 +340,11 @@ describe('MyProjectsHomeCard', () => {
       'Your project list is available, but the source inventory exceeded the current review limit. Some assignments may not yet be shown.',
     );
     expect(container.querySelector('[data-my-projects-launch-region]')).not.toBeNull();
-    expect(container.querySelector('[data-my-projects-metrics]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
+    expect(container.textContent ?? '').not.toContain('Launch List');
   });
 
-  it('populated state renders metrics and launch region with no compact-state marker on the card body', async () => {
+  it('populated state renders launch region without metrics strip and without Launch List label', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
@@ -352,8 +352,9 @@ describe('MyProjectsHomeCard', () => {
       expect(container.querySelectorAll('[data-my-projects-row]').length).toBeGreaterThan(0),
     );
     expect(container.querySelector('[data-my-projects-launch-region]')).not.toBeNull();
-    expect(container.querySelector('[data-my-projects-metrics]')).not.toBeNull();
+    expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
     expect(container.querySelector('[data-my-projects-compact-state]')).toBeNull();
+    expect(container.textContent ?? '').not.toContain('Launch List');
   });
 
   it('maps procore-project-invalid warning to an unavailable row action with accessible explanation', async () => {

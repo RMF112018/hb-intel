@@ -17,20 +17,6 @@ export interface MyProjectsHomeCardProps {
   readonly spanOverrides?: MyWorkCardSpanOverrides;
 }
 
-interface MetricVm {
-  readonly assignedProjectCount: number;
-  readonly dualLaunchReadyCount: number;
-  readonly sharePointReadyCount: number;
-  readonly procoreReadyCount: number;
-}
-
-const EMPTY_METRICS: MetricVm = Object.freeze({
-  assignedProjectCount: 0,
-  dualLaunchReadyCount: 0,
-  sharePointReadyCount: 0,
-  procoreReadyCount: 0,
-});
-
 const EMPTY_ITEMS: readonly MyProjectLinkItem[] = Object.freeze([]);
 const INITIAL_VISIBLE_ROWS = 5;
 
@@ -301,7 +287,6 @@ export function MyProjectsHomeCard({
   }, [client]);
 
   const sourceStatus: MyWorkReadModelSourceStatus = envelope?.sourceStatus ?? 'backend-unavailable';
-  const summary = envelope?.data.summary ?? EMPTY_METRICS;
   const items = envelope?.data.items ?? EMPTY_ITEMS;
   const sourceReadiness = envelope?.data.sourceReadiness ?? null;
   const bannerText = isLoading
@@ -341,37 +326,14 @@ export function MyProjectsHomeCard({
       role="my-projects-home"
       footprint={footprint}
       spanOverrides={spanOverrides}
-      eyebrow="My Work"
+      eyebrow="My Portfolio"
       title="My Projects"
       extraDataAttributes={{
         'data-my-project-links-source-status': sourceStatus,
         'data-my-projects-visible-count': String(displayedItems.length),
       }}
     >
-      <p className={styles.purpose}>
-        Open the projects you are assigned to in SharePoint or Procore.
-      </p>
-
-      {isPopulated ? (
-        <div className={styles.metrics} data-my-projects-metrics="">
-          <div className={styles.metricTile}>
-            <span className={styles.metricLabel}>Assigned Projects</span>
-            <span className={styles.metricValue}>{summary.assignedProjectCount}</span>
-          </div>
-          <div className={styles.metricTile}>
-            <span className={styles.metricLabel}>Dual Launch Ready</span>
-            <span className={styles.metricValue}>{summary.dualLaunchReadyCount}</span>
-          </div>
-          <div className={styles.metricTile}>
-            <span className={styles.metricLabel}>SharePoint Ready</span>
-            <span className={styles.metricValue}>{summary.sharePointReadyCount}</span>
-          </div>
-          <div className={styles.metricTile}>
-            <span className={styles.metricLabel}>Procore Ready</span>
-            <span className={styles.metricValue}>{summary.procoreReadyCount}</span>
-          </div>
-        </div>
-      ) : null}
+      <p className={styles.purpose}>Open assigned projects in SharePoint or Procore.</p>
 
       {bannerText ? (
         <div
@@ -406,7 +368,6 @@ export function MyProjectsHomeCard({
             data-my-projects-expanded={expanded ? 'true' : 'false'}
             data-my-projects-has-disclosure={showRowDisclosure ? 'true' : 'false'}
           />
-          <p className={styles.launchTitle}>Launch List</p>
           <ul className={styles.rows} id="my-projects-row-list" data-my-projects-rows="">
             {displayedItems.map((row) => (
               <ProjectLaunchRow key={row.recordKey} row={row} />
