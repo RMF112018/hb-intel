@@ -34,6 +34,88 @@
   color: var(--my-work-color-text-muted);
 }
 
+.activityList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--my-work-color-border);
+}
+
+.activityRow {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--my-work-color-border);
+}
+
+.activityTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--my-work-color-text-primary);
+  line-height: 1.35;
+}
+
+.activityMetaRow {
+  margin-top: 4px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.activityMetadata {
+  margin: 0;
+  font-size: 12px;
+  color: var(--my-work-color-text-muted);
+  line-height: 1.35;
+}
+
+.activityOpenAction {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--my-work-color-rail-accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.activityOpenAction:focus-visible {
+  outline: 2px solid var(--my-work-color-rail-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.previewContext {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--my-work-color-text-muted);
+}
+
+.completedSummaryRail {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--my-work-color-text-primary);
+}
+
+.statePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statePanelTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--my-work-color-text-primary);
+}
+
+.statePanelActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
 .adobeSignViewToggle {
   display: inline-flex;
   align-items: center;
@@ -70,4 +152,69 @@
 .adobeSignViewButton:focus-visible {
   outline: 2px solid var(--my-work-color-rail-accent);
   outline-offset: 1px;
+}
+
+[data-adobe-sign-layout-mode='largeLaptop'] .upperLayout,
+[data-adobe-sign-layout-mode='desktop'] .upperLayout,
+[data-adobe-sign-layout-mode='ultrawide'] .upperLayout {
+  gap: 12px;
+}
+
+[data-adobe-sign-layout-mode='largeLaptop'] .activityMetaRow,
+[data-adobe-sign-layout-mode='desktop'] .activityMetaRow,
+[data-adobe-sign-layout-mode='ultrawide'] .activityMetaRow {
+  justify-content: space-between;
+}
+
+[data-adobe-sign-layout-mode='smallLaptop'] .statusRail,
+[data-adobe-sign-layout-mode='standardLaptop'] .statusRail {
+  align-items: flex-start;
+}
+
+[data-adobe-sign-layout-mode='smallLaptop'] .activityMetaRow,
+[data-adobe-sign-layout-mode='standardLaptop'] .activityMetaRow {
+  flex-wrap: wrap;
+}
+
+[data-adobe-sign-layout-mode='tabletLandscape'] .adobeSignViewToggle {
+  width: 100%;
+  justify-content: space-between;
+}
+
+[data-adobe-sign-layout-mode='tabletLandscape'] .activityMetaRow {
+  flex-wrap: wrap;
+}
+
+[data-adobe-sign-layout-mode='tabletPortrait'] .statusRail,
+[data-adobe-sign-layout-mode='phone'] .statusRail {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+[data-adobe-sign-layout-mode='tabletPortrait'] .adobeSignViewToggle,
+[data-adobe-sign-layout-mode='phone'] .adobeSignViewToggle {
+  width: 100%;
+}
+
+[data-adobe-sign-layout-mode='tabletPortrait'] .adobeSignViewButton,
+[data-adobe-sign-layout-mode='phone'] .adobeSignViewButton {
+  flex: 1 1 0;
+  min-height: 36px;
+}
+
+[data-adobe-sign-layout-mode='tabletPortrait'] .activityMetaRow,
+[data-adobe-sign-layout-mode='phone'] .activityMetaRow {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+[data-adobe-sign-layout-mode='tabletPortrait'] .activityOpenAction,
+[data-adobe-sign-layout-mode='phone'] .activityOpenAction {
+  display: inline-flex;
+}
+
+[data-adobe-sign-layout-mode='tabletPortrait'] .completedSummaryRail,
+[data-adobe-sign-layout-mode='phone'] .completedSummaryRail {
+  line-height: 1.35;
 }

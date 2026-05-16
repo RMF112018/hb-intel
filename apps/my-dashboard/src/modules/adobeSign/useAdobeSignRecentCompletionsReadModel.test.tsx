@@ -41,6 +41,7 @@ describe('useAdobeSignRecentCompletionsReadModel', () => {
     expect(result.current.status).toBe('idle');
     expect(result.current.hasFetched).toBe(false);
     expect(result.current.envelope).toBeUndefined();
+    expect(typeof result.current.retry).toBe('function');
     expect(client.getAdobeSignRecentCompletions).toHaveBeenCalledTimes(0);
   });
 
@@ -121,5 +122,31 @@ describe('useAdobeSignRecentCompletionsReadModel', () => {
     expect(result.current.envelope).toBeUndefined();
     expect((result.current.error as Error).message).toBe('backend-down');
     expect(client.getAdobeSignRecentCompletions).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries from error and reissues the request', async () => {
+    const getAdobeSignRecentCompletions = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('backend-down'))
+      .mockResolvedValueOnce(ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE);
+    const client = makeClient({ getAdobeSignRecentCompletions });
+
+    const { result } = renderHook(() =>
+      useAdobeSignRecentCompletionsReadModel({
+        client,
+        enabled: true,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('error');
+    });
+    act(() => {
+      result.current.retry();
+    });
+    await waitFor(() => {
+      expect(result.current.status).toBe('ready');
+    });
+    expect(client.getAdobeSignRecentCompletions).toHaveBeenCalledTimes(2);
   });
 });

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type {
   MyWorkAdobeSignRecentCompletionsQuery,
@@ -14,6 +14,7 @@ export interface AdobeSignRecentCompletionsReadModelState {
   readonly envelope?: MyWorkReadModelEnvelope<MyWorkAdobeSignRecentCompletionsReadModel>;
   readonly error?: unknown;
   readonly hasFetched: boolean;
+  readonly retry: () => void;
 }
 
 export interface UseAdobeSignRecentCompletionsReadModelInput {
@@ -27,15 +28,22 @@ export function useAdobeSignRecentCompletionsReadModel({
   query,
   enabled,
 }: UseAdobeSignRecentCompletionsReadModelInput): AdobeSignRecentCompletionsReadModelState {
-  const [state, setState] = useState<AdobeSignRecentCompletionsReadModelState>({
+  const [requestNonce, setRequestNonce] = useState(0);
+  const [state, setState] = useState<
+    Omit<AdobeSignRecentCompletionsReadModelState, 'retry'>
+  >({
     status: 'idle',
     hasFetched: false,
   });
 
   const hasRequestedRef = useRef(false);
+  const retry = useCallback(() => {
+    hasRequestedRef.current = false;
+    setRequestNonce((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
-    if (!enabled || hasRequestedRef.current) return;
+    if (!enabled || (hasRequestedRef.current && requestNonce === 0)) return;
 
     hasRequestedRef.current = true;
     let cancelled = false;
@@ -72,7 +80,10 @@ export function useAdobeSignRecentCompletionsReadModel({
     return () => {
       cancelled = true;
     };
-  }, [client, enabled, query]);
+  }, [client, enabled, query, requestNonce]);
 
-  return state;
+  return {
+    ...state,
+    retry,
+  };
 }
