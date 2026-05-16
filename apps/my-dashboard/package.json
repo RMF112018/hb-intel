@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "pnpm --filter @hbc/models build",
     "build": "tsc --noEmit && vite build",
     "check-types": "tsc --noEmit",
     "lint": "eslint src/ --ext .ts,.tsx",

@@ -1,0 +1,31 @@
+{
+  "package": "My Projects Multi-Platform Launch Expansion",
+  "generated_files": [
+    "00_Current_Repo_Truth_Baseline.md",
+    "01_Locked_Product_And_Schema_Decisions.md",
+    "02_Detailed_Implementation_Plan.md",
+    "03_File_Impact_Matrix.md",
+    "04_Validation_And_Live_Operator_Runbook.md",
+    "05_Acceptance_Criteria.md",
+    "PACKAGE_MANIFEST.md",
+    "README.md",
+    "prompts/Prompt_01_Repo_Truth_Lock_And_Final_Patch_Plan.md",
+    "prompts/Prompt_02_Schema_Provisioning_And_Readiness_Expansion.md",
+    "prompts/Prompt_03_Read_Model_Contracts_And_Backend_Provider_Expansion.md",
+    "prompts/Prompt_04_My_Projects_Frontend_Multi_Platform_Launch_UX.md",
+    "prompts/Prompt_05_Fixtures_Tests_Docs_And_Regression_Hardening.md",
+    "prompts/Prompt_06_Final_Integration_Validation_And_Commit_Closeout.md",
+    "supporting/Agent_Context_Seed.md",
+    "supporting/Field_Contract_Table.md",
+    "supporting/Git_Commit_Guidance.md",
+    "supporting/Test_Matrix.md"
+  ],
+  "prompt_order": [
+    "prompts/Prompt_01_Repo_Truth_Lock_And_Final_Patch_Plan.md",
+    "prompts/Prompt_02_Schema_Provisioning_And_Readiness_Expansion.md",
+    "prompts/Prompt_03_Read_Model_Contracts_And_Backend_Provider_Expansion.md",
+    "prompts/Prompt_04_My_Projects_Frontend_Multi_Platform_Launch_UX.md",
+    "prompts/Prompt_05_Fixtures_Tests_Docs_And_Regression_Hardening.md",
+    "prompts/Prompt_06_Final_Integration_Validation_And_Commit_Closeout.md"
+  ]
+}
