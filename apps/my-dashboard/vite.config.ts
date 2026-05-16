@@ -1,8 +1,25 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import { loadEnvFileIntoProcessEnv } from '../../tools/load-env-file';
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Align Vite build/runtime env with the SPFx packaging chain by loading the
+// repo-root `.env` and bridging non-VITE keys into Vite-prefixed keys.
+loadEnvFileIntoProcessEnv(resolve(__dirname, '../../.env'));
+if (!process.env.VITE_FUNCTION_APP_URL && process.env.FUNCTION_APP_URL) {
+  process.env.VITE_FUNCTION_APP_URL = process.env.FUNCTION_APP_URL;
+}
+if (!process.env.VITE_API_AUDIENCE && process.env.API_AUDIENCE) {
+  process.env.VITE_API_AUDIENCE = process.env.API_AUDIENCE;
+}
+if (!process.env.VITE_BACKEND_MODE && process.env.BACKEND_MODE) {
+  process.env.VITE_BACKEND_MODE = process.env.BACKEND_MODE;
+}
+if (!process.env.VITE_ALLOW_BACKEND_MODE_SWITCH && process.env.ALLOW_BACKEND_MODE_SWITCH) {
+  process.env.VITE_ALLOW_BACKEND_MODE_SWITCH = process.env.ALLOW_BACKEND_MODE_SWITCH;
+}
 
 export default defineConfig(({ command }) => ({
   plugins: [react()],
