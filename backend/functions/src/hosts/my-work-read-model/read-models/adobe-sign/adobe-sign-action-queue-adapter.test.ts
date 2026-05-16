@@ -733,15 +733,19 @@ describe('createAdobeSignActionQueueAdapter', () => {
       expect(events).toEqual([
         {
           name: 'adobeSign.read.search.result',
-          properties: { status: 'unauthorized' },
+          properties: expect.objectContaining({
+            durationMs: expect.any(Number),
+            status: 'unauthorized',
+          }),
         },
         {
           name: 'adobeSign.read.actionQueue.result',
-          properties: {
+          properties: expect.objectContaining({
+            durationMs: expect.any(Number),
             sourceStatus: 'authorization-required',
             resultStage: 'search',
             warningCodes: ['authorization-required'],
-          },
+          }),
         },
       ]);
       const serialized = JSON.stringify(events);
@@ -850,7 +854,8 @@ describe('createAdobeSignActionQueueAdapter', () => {
       expect(events).toEqual([
         {
           name: 'adobeSign.read.search.result',
-          properties: {
+          properties: expect.objectContaining({
+            durationMs: expect.any(Number),
             status: 'unreachable',
             reason: 'malformed-response',
             providerStatusCode: 400,
@@ -926,15 +931,16 @@ describe('createAdobeSignActionQueueAdapter', () => {
             searchMalformedTopLevelKeyTypesCsv: 'page:object,searchResult:object',
             searchMalformedTopLevelObjectChildKeyTypesCsv:
               'page.nextCursor:string,searchResult.agreementAssets:array',
-          },
+          }),
         },
         {
           name: 'adobeSign.read.actionQueue.result',
-          properties: {
+          properties: expect.objectContaining({
+            durationMs: expect.any(Number),
             sourceStatus: 'source-unavailable',
             resultStage: 'search',
             warningCodes: ['source-unavailable'],
-          },
+          }),
         },
       ]);
       const serialized = JSON.stringify(events);

@@ -99,7 +99,7 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
   it('rejects malformed JSON as invalid-input', async () => {
     const mod = await importModule();
     const reg = findRegistration(mod.ADOBE_SIGN_ACTION_LINK_ROUTE_NAME);
-    const response = await reg.config.handler(requestWithRawText('{not-valid-json'), {});
+    const response = await reg.config.handler(requestWithRawText('{not-valid-json'), { log: vi.fn() });
     expect(response.status).toBe(400);
     expect(response.jsonBody).toEqual({ data: { status: 'invalid-input' } });
   });
@@ -113,7 +113,7 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
         itemId: 'adobe-sign:agreement-1',
         requiredAction: 'signature',
       }),
-      {},
+      { log: vi.fn() },
     );
     expect(missingFieldResponse.status).toBe(400);
     expect(missingFieldResponse.jsonBody).toEqual({ data: { status: 'invalid-input' } });
@@ -125,7 +125,7 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
         requiredAction: 'signature',
         extra: 'not-allowed',
       }),
-      {},
+      { log: vi.fn() },
     );
     expect(extraFieldResponse.status).toBe(400);
     expect(extraFieldResponse.jsonBody).toEqual({ data: { status: 'invalid-input' } });
@@ -133,6 +133,7 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
 
   it('maps provider/token outcomes via injected dependencies', async () => {
     const mod = await importModule();
+    const trackEventSpy = vi.fn();
     const handler = mod.createAdobeSignActionLinkResolveHandler({
       resolveTenantId: () => '11111111-2222-3333-4444-555555555555',
       tokenService: {
@@ -150,6 +151,7 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
         })),
       },
       now: () => new Date('2026-05-16T16:00:00.000Z'),
+      trackEvent: trackEventSpy,
     });
 
     const response = await handler(
@@ -169,10 +171,15 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
         redirectUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=1',
       },
     });
+    const flattened = JSON.stringify(trackEventSpy.mock.calls);
+    expect(flattened).toContain('adobeSign.actionLink.resolve.attempt');
+    expect(flattened).toContain('adobeSign.actionLink.resolve.success');
+    expect(flattened).not.toContain('accessToken');
   });
 
   it('maps provider no-recipient-match to no-action-url without leaking secrets', async () => {
     const mod = await importModule();
+    const trackEventSpy = vi.fn();
     const handler = mod.createAdobeSignActionLinkResolveHandler({
       resolveTenantId: () => '11111111-2222-3333-4444-555555555555',
       tokenService: {
@@ -187,6 +194,7 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
         resolveActionLink: vi.fn(async () => ({ status: 'no-recipient-match' })),
       },
       now: () => new Date('2026-05-16T16:00:00.000Z'),
+      trackEvent: trackEventSpy,
     });
 
     const response = await handler(
@@ -202,10 +210,14 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
     expect(response.status).toBe(200);
     expect(response.jsonBody).toEqual({ data: { status: 'no-action-url' } });
     expect(JSON.stringify(response.jsonBody)).not.toContain('accessToken');
+    const flattened = JSON.stringify(trackEventSpy.mock.calls);
+    expect(flattened).toContain('adobeSign.actionLink.resolve.failure');
+    expect(flattened).not.toContain('https://secure.na1.adobesign.com/public/apiesign');
   });
 
   it('maps token authorization-required to authorization-required', async () => {
     const mod = await importModule();
+    const trackEventSpy = vi.fn();
     const handler = mod.createAdobeSignActionLinkResolveHandler({
       resolveTenantId: () => '11111111-2222-3333-4444-555555555555',
       tokenService: {
@@ -215,6 +227,7 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
         resolveActionLink: vi.fn(async () => ({ status: 'ok', redirectUrl: 'https://secure.example.com' })),
       },
       now: () => new Date('2026-05-16T16:00:00.000Z'),
+      trackEvent: trackEventSpy,
     });
 
     const response = await handler(
@@ -229,10 +242,14 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
 
     expect(response.status).toBe(200);
     expect(response.jsonBody).toEqual({ data: { status: 'authorization-required' } });
+    const flattened = JSON.stringify(trackEventSpy.mock.calls);
+    expect(flattened).toContain('adobeSign.actionLink.resolve.failure');
+    expect(flattened).not.toContain('accessToken');
   });
 
   it('maps principal normalization failure to principal-unresolved', async () => {
     const mod = await importModule();
+    const trackEventSpy = vi.fn();
     injectedAuth = {
       claims: {
         oid: 'oid-1',
@@ -257,6 +274,7 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
         resolveActionLink: vi.fn(async () => ({ status: 'ok', redirectUrl: 'https://secure.example.com' })),
       },
       now: () => new Date('2026-05-16T16:00:00.000Z'),
+      trackEvent: trackEventSpy,
     });
 
     const response = await handler(
@@ -271,5 +289,89 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
 
     expect(response.status).toBe(200);
     expect(response.jsonBody).toEqual({ data: { status: 'principal-unresolved' } });
+    const flattened = JSON.stringify(trackEventSpy.mock.calls);
+    expect(flattened).toContain('adobeSign.actionLink.resolve.failure');
+  });
+
+  it('maps allowed provider URL to policy-approved redirect-ready', async () => {
+    const mod = await importModule();
+    const trackEventSpy = vi.fn();
+    const handler = mod.createAdobeSignActionLinkResolveHandler({
+      resolveTenantId: () => '11111111-2222-3333-4444-555555555555',
+      tokenService: {
+        getAccessToken: vi.fn(async () => ({
+          status: 'ok',
+          accessToken: 'at-1',
+          expiresAtUtc: '2026-05-16T16:00:00.000Z',
+          apiAccessPoint: 'https://api.na1.adobesign.com',
+        })),
+      },
+      actionLinkClient: {
+        resolveActionLink: vi.fn(async () => ({
+          status: 'ok',
+          redirectUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=1',
+        })),
+      },
+      now: () => new Date('2026-05-16T16:00:00.000Z'),
+      trackEvent: trackEventSpy,
+    });
+
+    const response = await handler(
+      requestWithBody({
+        itemId: 'adobe-sign:agreement-1',
+        agreementId: 'agreement-1',
+        requiredAction: 'signature',
+      }),
+      {},
+      injectedAuth as any,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.jsonBody).toEqual({
+      data: {
+        status: 'redirect-ready',
+        redirectUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=1',
+      },
+    });
+  });
+
+  it('maps non-adobe provider URL to policy-rejected', async () => {
+    const mod = await importModule();
+    const trackEventSpy = vi.fn();
+    const handler = mod.createAdobeSignActionLinkResolveHandler({
+      resolveTenantId: () => '11111111-2222-3333-4444-555555555555',
+      tokenService: {
+        getAccessToken: vi.fn(async () => ({
+          status: 'ok',
+          accessToken: 'at-1',
+          expiresAtUtc: '2026-05-16T16:00:00.000Z',
+          apiAccessPoint: 'https://api.na1.adobesign.com',
+        })),
+      },
+      actionLinkClient: {
+        resolveActionLink: vi.fn(async () => ({
+          status: 'ok',
+          redirectUrl: 'https://attacker.example.com/public/apiesign?x=1',
+        })),
+      },
+      now: () => new Date('2026-05-16T16:00:00.000Z'),
+      trackEvent: trackEventSpy,
+    });
+
+    const response = await handler(
+      requestWithBody({
+        itemId: 'adobe-sign:agreement-1',
+        agreementId: 'agreement-1',
+        requiredAction: 'signature',
+      }),
+      {},
+      injectedAuth as any,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.jsonBody).toEqual({ data: { status: 'policy-rejected' } });
+    const flattened = JSON.stringify(trackEventSpy.mock.calls);
+    expect(flattened).toContain('adobeSign.actionLink.resolve.failure');
+    expect(flattened).not.toContain('attacker.example.com');
   });
 });

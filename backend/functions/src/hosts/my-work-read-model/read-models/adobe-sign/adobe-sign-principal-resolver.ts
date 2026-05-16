@@ -54,11 +54,16 @@ export function createAdobeSignPrincipalResolver(
   deps: AdobeSignPrincipalResolverDeps,
 ): AdobeSignPrincipalResolver {
   return async (context) => {
-    const trackResult = (result: AdobeSignPrincipalResolutionResult): AdobeSignPrincipalResolutionResult => {
+    const start = Date.now();
+    const trackResult = (
+      result: AdobeSignPrincipalResolutionResult,
+      durationMs: number = Date.now() - start,
+    ): AdobeSignPrincipalResolutionResult => {
       context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.principalResolution.result', {
         status: result.status,
         sourceStatus: toMyWorkSourceStatus(result.status),
         reason: 'reason' in result ? String(result.reason) : undefined,
+        durationMs,
       });
       return result;
     };

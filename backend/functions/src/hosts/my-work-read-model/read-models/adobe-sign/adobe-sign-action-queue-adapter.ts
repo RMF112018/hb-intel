@@ -192,15 +192,18 @@ export function createAdobeSignActionQueueAdapter(
 ): IAdobeSignActionQueueAdapter {
   return {
     async getActionQueue(context, query) {
+      const actionQueueStart = Date.now();
       const trackActionQueueResult = (
         sourceStatus: MyWorkReadModelSourceStatus,
         resultStage: AdobeSignActionQueueResultStage,
         warnings?: readonly MyWorkReadModelWarning[],
+        durationMs: number = Date.now() - actionQueueStart,
       ) => {
         context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.actionQueue.result', {
           sourceStatus,
           resultStage,
           warningCodes: warnings?.map((w) => w.code),
+          durationMs,
         });
       };
 
@@ -258,6 +261,7 @@ export function createAdobeSignActionQueueAdapter(
         cursor: query.cursor,
       });
 
+      const searchStart = Date.now();
       const searchResult = await deps.searchClient.search({
         actorKey: principal.actor.actorKey,
         accessToken: token.accessToken,
@@ -268,6 +272,7 @@ export function createAdobeSignActionQueueAdapter(
       if (searchResult.status === 'unauthorized') {
         context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.search.result', {
           status: 'unauthorized',
+          durationMs: Date.now() - searchStart,
         });
         const result = envelope(
           'authorization-required',
@@ -285,6 +290,7 @@ export function createAdobeSignActionQueueAdapter(
         context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.search.result', {
           status: 'unreachable',
           reason: searchResult.reason,
+          durationMs: Date.now() - searchStart,
           ...(searchResult.providerStatusCode !== undefined
             ? { providerStatusCode: searchResult.providerStatusCode }
             : {}),
@@ -469,6 +475,7 @@ export function createAdobeSignActionQueueAdapter(
         status: 'ok',
         itemCount: searchResult.items.length,
         hasMore: searchResult.nextCursor !== undefined,
+        durationMs: Date.now() - searchStart,
       });
 
       // ---------------------------------------------------------------

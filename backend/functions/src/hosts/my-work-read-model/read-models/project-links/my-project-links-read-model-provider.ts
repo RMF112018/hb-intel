@@ -810,10 +810,34 @@ export class MyProjectLinksReadModelProvider {
       };
     }
 
+    const projectsStart = Date.now();
+    let projectsDurationMs = 0;
+    const registryStart = Date.now();
+    let registryDurationMs = 0;
     const [projects, registry] = await Promise.all([
-      this.deps.loadProjectsRows(),
-      this.deps.loadRegistryRows(),
+      this.deps.loadProjectsRows().finally(() => {
+        projectsDurationMs = Date.now() - projectsStart;
+      }),
+      this.deps.loadRegistryRows().finally(() => {
+        registryDurationMs = Date.now() - registryStart;
+      }),
     ]);
+
+    if (context.projectLinksDiagnostics) {
+      context.projectLinksDiagnostics.trackMyProjectLinksRuntimeEvent(
+        'myProjectLinks.read.sources.result',
+        {
+          projectsDurationMs,
+          registryDurationMs,
+          projectsStatus: sourceReadinessStatus(projects),
+          registryStatus: sourceReadinessStatus(registry),
+          projectsRowCount: projects.ok ? projects.rows.length : 0,
+          registryRowCount: registry.ok ? registry.rows.length : 0,
+          projectsBounded: projects.ok ? projects.bounded : false,
+          registryBounded: registry.ok ? registry.bounded : false,
+        },
+      );
+    }
 
     // Tier-1 telemetry: when either source loader caught a GraphListClient
     // throw, name the failing stage on a customEvent so an operator can
@@ -838,10 +862,28 @@ export class MyProjectLinksReadModelProvider {
 
     const sourceStatus = selectEnvelopeStatus(projects, registry);
     const warnings = buildEnvelopeWarnings(sourceStatus, projects, registry);
+    const reconcileStart = Date.now();
     const items = reconcileProjectLinks(actorUpn, projects.rows, registry.rows, {
       projects,
       registry,
     });
+    const reconcileDurationMs = Date.now() - reconcileStart;
+    const summary = buildSummary(items);
+
+    if (context.projectLinksDiagnostics) {
+      context.projectLinksDiagnostics.trackMyProjectLinksRuntimeEvent(
+        'myProjectLinks.read.reconcile.result',
+        {
+          durationMs: reconcileDurationMs,
+          matchedItemCount: items.length,
+          sourceStatus,
+          assignedProjectCount: summary.assignedProjectCount,
+          dualLaunchReadyCount: summary.dualLaunchReadyCount,
+          sharePointReadyCount: summary.sharePointReadyCount,
+          procoreReadyCount: summary.procoreReadyCount,
+        },
+      );
+    }
 
     return {
       mode: 'backend',
@@ -855,7 +897,7 @@ export class MyProjectLinksReadModelProvider {
           principalName: actorUpn,
           ...(context.actor.displayName ? { displayName: context.actor.displayName } : {}),
         },
-        summary: buildSummary(items),
+        summary,
         items,
         sourceReadiness: {
           projects: sourceReadinessStatus(projects),

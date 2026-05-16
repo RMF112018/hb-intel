@@ -117,10 +117,16 @@ export function createAdobeSignTokenService(
 
   return {
     async getAccessToken(actorKey, now, diagnostics) {
-      const trackTokenResult = (result: AdobeSignAccessTokenAcquireResult) => {
+      const tokenStart = Date.now();
+      let refreshStart = 0;
+      const trackTokenResult = (
+        result: AdobeSignAccessTokenAcquireResult,
+        durationMs: number = Date.now() - tokenStart,
+      ) => {
         diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.tokenAcquisition.result', {
           status: result.status === 'ok' ? 'ok' : result.status,
           reason: result.status === 'ok' ? undefined : result.reason,
+          durationMs,
         });
       };
       const trackRefreshResult = (
@@ -128,9 +134,11 @@ export function createAdobeSignTokenService(
           | { readonly status: 'ok' }
           | { readonly status: 'invalid-grant' }
           | Extract<AdobeSignRefreshResult, { readonly status: 'unreachable' }>,
+        durationMs: number = Date.now() - refreshStart,
       ) => {
         diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.refresh.result', {
           status: refresh.status,
+          durationMs,
           ...(refresh.status === 'unreachable' ? { reason: refresh.reason } : {}),
           ...(refresh.status === 'unreachable' && refresh.providerErrorCode
             ? { providerErrorCode: refresh.providerErrorCode }
@@ -206,6 +214,7 @@ export function createAdobeSignTokenService(
       }
 
       let refresh;
+      refreshStart = Date.now();
       try {
         refresh = await deps.refreshClient.refresh({ actorKey, grant, now });
       } catch {

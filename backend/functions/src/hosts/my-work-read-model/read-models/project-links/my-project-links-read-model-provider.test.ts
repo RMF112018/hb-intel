@@ -436,13 +436,14 @@ describe('MyProjectLinksReadModelProvider — runtime-diagnostics reporter', () 
 
     await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
 
-    expect(track).toHaveBeenCalledTimes(1);
-    expect(track).toHaveBeenCalledWith('projects-loader.failed', {
+    const failures = track.mock.calls.filter((call) => String(call[0]).endsWith('.failed'));
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toEqual(['projects-loader.failed', {
       listName: 'Projects',
       stage: 'site',
       sanitizedMessage:
         'graph GET /sites/host:/sites/HBCentral -> 403: Authorization_RequestDenied',
-    });
+    }]);
   });
 
   it('emits "registry-loader.failed" with stage and sanitizedMessage when only Registry fails', async () => {
@@ -463,13 +464,14 @@ describe('MyProjectLinksReadModelProvider — runtime-diagnostics reporter', () 
 
     await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
 
-    expect(track).toHaveBeenCalledTimes(1);
-    expect(track).toHaveBeenCalledWith('registry-loader.failed', {
+    const failures = track.mock.calls.filter((call) => String(call[0]).endsWith('.failed'));
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toEqual(['registry-loader.failed', {
       listName: 'Legacy Project Fallback Registry',
       stage: 'list',
       sanitizedMessage:
         "graph-list-client: list 'Legacy Project Fallback Registry' not found on site site-id",
-    });
+    }]);
   });
 
   it('emits two events when both loaders fail (preserves the dual-failure cause distinction)', async () => {
@@ -496,11 +498,12 @@ describe('MyProjectLinksReadModelProvider — runtime-diagnostics reporter', () 
 
     await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
 
-    expect(track).toHaveBeenCalledTimes(2);
-    expect(track.mock.calls[0]?.[0]).toBe('projects-loader.failed');
-    expect(track.mock.calls[1]?.[0]).toBe('registry-loader.failed');
-    expect(track.mock.calls[0]?.[1]).toMatchObject({ stage: 'token', listName: 'Projects' });
-    expect(track.mock.calls[1]?.[1]).toMatchObject({
+    const failures = track.mock.calls.filter((call) => String(call[0]).endsWith('.failed'));
+    expect(failures).toHaveLength(2);
+    expect(failures[0]?.[0]).toBe('projects-loader.failed');
+    expect(failures[1]?.[0]).toBe('registry-loader.failed');
+    expect(failures[0]?.[1]).toMatchObject({ stage: 'token', listName: 'Projects' });
+    expect(failures[1]?.[1]).toMatchObject({
       stage: 'token',
       listName: 'Legacy Project Fallback Registry',
     });
@@ -516,7 +519,8 @@ describe('MyProjectLinksReadModelProvider — runtime-diagnostics reporter', () 
 
     await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
 
-    expect(track).not.toHaveBeenCalled();
+    const failures = track.mock.calls.filter((call) => String(call[0]).endsWith('.failed'));
+    expect(failures).toHaveLength(0);
   });
 
   it('falls back to stage="other" when failureStage is absent on the result', async () => {
@@ -534,9 +538,10 @@ describe('MyProjectLinksReadModelProvider — runtime-diagnostics reporter', () 
 
     await provider.getMyProjectLinks({ ...CONTEXT, projectLinksDiagnostics: reporter });
 
-    expect(track).toHaveBeenCalledTimes(1);
-    expect(track.mock.calls[0]?.[1]).toMatchObject({ stage: 'other' });
-    expect(track.mock.calls[0]?.[1]).not.toHaveProperty('sanitizedMessage');
+    const failures = track.mock.calls.filter((call) => String(call[0]).endsWith('.failed'));
+    expect(failures).toHaveLength(1);
+    expect(failures[0]?.[1]).toMatchObject({ stage: 'other' });
+    expect(failures[0]?.[1]).not.toHaveProperty('sanitizedMessage');
   });
 
   it('preserves existing behavior (no throw, no event) when no reporter is supplied', async () => {

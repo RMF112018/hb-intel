@@ -152,6 +152,7 @@ export interface AdobeSignRuntimeDiagnosticProperties {
   readonly itemCount?: number;
   readonly hasMore?: boolean;
   readonly windowDays?: 30;
+  readonly durationMs?: number;
 }
 
 export type AdobeSignActionQueueResultStage =

@@ -21,22 +21,58 @@
  * appear in event properties.
  */
 
-export type MyProjectLinksRuntimeEventName = 'projects-loader.failed' | 'registry-loader.failed';
+export type MyProjectLinksRuntimeEventName =
+  | 'projects-loader.failed'
+  | 'registry-loader.failed'
+  | 'myProjectLinks.read.sources.result'
+  | 'myProjectLinks.read.reconcile.result';
 
 export type MyProjectLinksLoaderStage = 'token' | 'site' | 'list' | 'items' | 'other';
 
 /**
- * Properties contributed by the provider for each loader-failure event.
+ * Properties contributed by the provider for each runtime event.
+ *
  * `correlationId` is intentionally absent here — the route-level reporter
  * (`createMyProjectLinksRuntimeDiagnosticsReporter`) adds it on emission so
  * the provider has no need to thread the request id into the properties
  * shape itself. Matches the Adobe Sign reporter convention in the same
  * routes file.
+ *
+ * The shape is a single flat interface (all fields optional) rather than a
+ * discriminated union so the route-level reporter — which generically
+ * spreads `...properties` into `logger.trackEvent` — needs no per-event
+ * branching. Each call site is responsible for passing the fields the
+ * particular event requires.
+ *
+ * Privacy contract: every field is a primitive (string, number, or
+ * boolean) or a closed-enum string. No actor UPN/OID, no project name, no
+ * URL, no error body, no token, no payload — ever. The provider must use
+ * `sanitizeForTelemetry` for any value that originates from a thrown
+ * error.
  */
 export interface MyProjectLinksRuntimeDiagnosticProperties {
-  readonly listName: string;
-  readonly stage: MyProjectLinksLoaderStage;
+  // Loader-failure shape — required at the failure call sites.
+  readonly listName?: string;
+  readonly stage?: MyProjectLinksLoaderStage;
   readonly sanitizedMessage?: string;
+  // sources.result shape.
+  readonly projectsDurationMs?: number;
+  readonly registryDurationMs?: number;
+  readonly projectsStatus?: string;
+  readonly registryStatus?: string;
+  readonly projectsRowCount?: number;
+  readonly registryRowCount?: number;
+  readonly projectsBounded?: boolean;
+  readonly registryBounded?: boolean;
+  // reconcile.result shape.
+  readonly durationMs?: number;
+  readonly matchedItemCount?: number;
+  readonly sourceStatus?: string;
+  // Optional safe summary counts (already produced by buildSummary).
+  readonly assignedProjectCount?: number;
+  readonly dualLaunchReadyCount?: number;
+  readonly sharePointReadyCount?: number;
+  readonly procoreReadyCount?: number;
 }
 
 export interface MyProjectLinksRuntimeDiagnosticReporter {

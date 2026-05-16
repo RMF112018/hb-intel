@@ -336,7 +336,8 @@ describe('token service — runtime result telemetry', () => {
     expect(events).toEqual([
       {
         name: 'adobeSign.read.refresh.result',
-        properties: {
+        properties: expect.objectContaining({
+          durationMs: expect.any(Number),
           status: 'unreachable',
           reason: 'http-4xx',
           providerErrorCode: 'invalid_request',
@@ -348,11 +349,15 @@ describe('token service — runtime result telemetry', () => {
           refreshHasRefreshTokenField: true,
           refreshHasClientIdField: true,
           refreshHasClientSecretField: true,
-        },
+        }),
       },
       {
         name: 'adobeSign.read.tokenAcquisition.result',
-        properties: { status: 'source-unavailable', reason: 'adobe-unreachable' },
+        properties: expect.objectContaining({
+          durationMs: expect.any(Number),
+          status: 'source-unavailable',
+          reason: 'adobe-unreachable',
+        }),
       },
     ]);
   });
@@ -402,7 +407,8 @@ describe('token service — runtime result telemetry', () => {
     expect(events).toEqual([
       {
         name: 'adobeSign.read.refresh.result',
-        properties: {
+        properties: expect.objectContaining({
+          durationMs: expect.any(Number),
           status: 'unreachable',
           reason: 'malformed-response',
           refreshEndpointHost: 'api.na1.adobesign.com',
@@ -416,11 +422,15 @@ describe('token service — runtime result telemetry', () => {
           refreshMalformedHasAccessToken: false,
           refreshMalformedHasRefreshToken: false,
           refreshMalformedHasExpiresIn: true,
-        },
+        }),
       },
       {
         name: 'adobeSign.read.tokenAcquisition.result',
-        properties: { status: 'source-unavailable', reason: 'adobe-unreachable' },
+        properties: expect.objectContaining({
+          durationMs: expect.any(Number),
+          status: 'source-unavailable',
+          reason: 'adobe-unreachable',
+        }),
       },
     ]);
   });
