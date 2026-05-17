@@ -1,11 +1,12 @@
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import {
   MY_PROJECT_ASSIGNMENT_ROLE_BY_ID,
   type MyProjectAssignmentRoleId,
   type MyProjectLinkItem,
 } from '@hbc/models/myWork';
 import { useMyWorkBentoContext } from '../../layout/MyWorkBentoGrid.js';
-import { ProjectLaunchActions, hasAvailableLaunchActions } from './ProjectLaunchActions.js';
+import { ProjectLaunchActions } from './ProjectLaunchActions.js';
+import { buildMyProjectLaunchPresentation } from './myProjectLaunchPresentation.js';
 import styles from './ProjectPortfolioTile.module.css';
 
 export interface ProjectPortfolioTileProps {
@@ -25,12 +26,15 @@ function sortedRoleLabels(roles: readonly MyProjectAssignmentRoleId[]): readonly
 export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortfolioTileProps) {
   const { mode } = useMyWorkBentoContext();
   const roleOverflowId = useId();
+  const launchOverflowPanelId = useId();
+  const moreResourcesTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [roleOverflowOpen, setRoleOverflowOpen] = useState(false);
 
   const labels = sortedRoleLabels(row.assignmentRoles);
   const primaryRoleLabel = labels[0];
   const overflowLabels = labels.slice(1);
-  const hasLaunchActions = hasAvailableLaunchActions(row);
+  const launchPresentation = buildMyProjectLaunchPresentation(row);
+  const hasLaunchActions = launchPresentation.hasAvailableLaunchActions;
   const isPhone = mode === 'phone';
   const tileLayout = !isPhone && hasLaunchActions ? 'content-rail' : 'content-only';
 
@@ -40,6 +44,12 @@ export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortf
       data-my-projects-tile={row.recordKey}
       data-my-projects-tile-source={row.source}
       data-my-projects-tile-layout={tileLayout}
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape') return;
+        if (!isOpen) return;
+        onOpenChange(false);
+        moreResourcesTriggerRef.current?.focus();
+      }}
     >
       <div className={styles.contentColumn}>
         <div className={styles.identity} data-my-projects-identity="">
@@ -96,10 +106,41 @@ export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortf
       {hasLaunchActions ? (
         <div className={styles.launchRail} data-my-projects-tile-actions="">
           <ProjectLaunchActions
-            row={row}
-            isActionOverlayOpen={isOpen}
-            onActionOverlayOpenChange={onOpenChange}
+            presentation={launchPresentation}
+            projectName={row.projectName}
+            isLaunchOptionsOpen={isOpen}
+            onLaunchOptionsOpenChange={onOpenChange}
+            moreResourcesPanelId={launchOverflowPanelId}
+            onMoreResourcesTriggerReady={(node) => {
+              moreResourcesTriggerRef.current = node;
+            }}
           />
+        </div>
+      ) : null}
+
+      {!isPhone && launchPresentation.overflowOptions.length > 0 ? (
+        <div
+          id={launchOverflowPanelId}
+          className={styles.moreResourcesPanel}
+          hidden={!isOpen}
+          data-my-projects-more-resources-panel=""
+          data-my-projects-more-resources-state={isOpen ? 'open' : 'closed'}
+        >
+          {launchPresentation.overflowOptions.map((option) => (
+            <a
+              key={option.key}
+              className={styles.moreResourceOption}
+              href={option.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={option.ariaLabel}
+              data-my-projects-more-resource-option={option.key}
+              data-my-projects-launch-option-state="available"
+              onClick={() => onOpenChange(false)}
+            >
+              {option.label}
+            </a>
+          ))}
         </div>
       ) : null}
     </article>

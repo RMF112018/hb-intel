@@ -191,6 +191,13 @@ describe('MyProjectsHomeCard', () => {
     expect(
       harborTile!.querySelector('[data-my-projects-more-resources-trigger]')?.textContent,
     ).toBe('More Resources · 2');
+    const panel = harborTile!.querySelector(
+      '[data-my-projects-more-resources-panel]',
+    ) as HTMLElement;
+    expect(panel).not.toBeNull();
+    expect(panel.getAttribute('data-my-projects-more-resources-state')).toBe('closed');
+    expect(panel.querySelector('[data-my-projects-more-resource-option="building-connected"]')).not.toBeNull();
+    expect(panel.querySelector('[data-my-projects-more-resource-option="document-crunch"]')).not.toBeNull();
 
     const sharePointLink = harborTile!.querySelector(
       '[data-my-projects-launch-option="sharepoint"]',
@@ -207,6 +214,37 @@ describe('MyProjectsHomeCard', () => {
 
     expect(harborTile!.querySelector('[data-my-projects-launch-option="building-connected"]')).toBeNull();
     expect(harborTile!.querySelector('[data-my-projects-launch-option="document-crunch"]')).toBeNull();
+  });
+
+  it('keeps only one non-phone inline resources panel open at a time across tiles', async () => {
+    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
+    const { container } = renderCard('desktop');
+
+    await waitFor(() =>
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(1),
+    );
+
+    const triggers = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[data-my-projects-more-resources-trigger]'),
+    );
+    expect(triggers.length).toBeGreaterThanOrEqual(1);
+
+    fireEvent.click(triggers[0]!);
+    expect(
+      container.querySelectorAll('[data-my-projects-more-resources-panel][data-my-projects-more-resources-state="open"]').length,
+    ).toBe(1);
+
+    if (triggers[1]) {
+      fireEvent.click(triggers[1]);
+      expect(
+        container.querySelectorAll('[data-my-projects-more-resources-panel][data-my-projects-more-resources-state="open"]').length,
+      ).toBe(1);
+    } else {
+      fireEvent.click(triggers[0]!);
+      expect(
+        container.querySelectorAll('[data-my-projects-more-resources-panel][data-my-projects-more-resources-state="open"]').length,
+      ).toBe(0);
+    }
   });
 
   it('omits unavailable launch destinations entirely from the DOM across all tiles', async () => {

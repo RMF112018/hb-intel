@@ -13,6 +13,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  font-family: var(--my-work-font-family);
+  color: var(--my-work-color-text-primary);
   background: linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, #f8fafc 60%, #ffffff) 100%);
   border-left: 1px solid var(--my-work-color-border);
   width: min(460px, 100vw);
@@ -226,10 +228,8 @@
 .empty {
   margin: 24px 0 0 0;
   text-align: center;
-  font-family: Georgia, 'Times New Roman', 'Iowan Old Style', serif;
-  font-style: italic;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.4;
   color: var(--my-work-executive-ink-soft);
 }
 

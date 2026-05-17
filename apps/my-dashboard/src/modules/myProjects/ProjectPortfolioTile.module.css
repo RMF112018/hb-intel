@@ -118,6 +118,39 @@
   min-width: 0;
 }
 
+.moreResourcesPanel {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px solid color-mix(in srgb, var(--my-work-color-border) 74%, transparent);
+}
+
+.moreResourceOption {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: var(--my-work-radius-sm);
+  border: 1px solid color-mix(in srgb, var(--my-work-color-rail-accent) 36%, #ffffff 64%);
+  background: color-mix(in srgb, var(--my-work-color-rail-accent) 8%, #ffffff 92%);
+  text-decoration: none;
+  color: var(--my-work-color-text-primary);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.moreResourceOption:hover {
+  background: color-mix(in srgb, var(--my-work-color-rail-accent) 14%, #ffffff 86%);
+}
+
+.moreResourceOption:focus-visible {
+  outline: 2px solid var(--my-work-color-rail-accent);
+  outline-offset: 2px;
+}
+
 .projectStage {
   /* Compact uppercase pill matching the .primaryRole register — replaces the
      prior serif-italic treatment that read off-family from the rest of the UI. */
@@ -212,6 +245,11 @@
 
 :global([data-my-work-mode='phone']) .launchRail {
   align-self: stretch;
+}
+
+:global([data-my-work-mode='tabletPortrait']) .moreResourcesPanel,
+:global([data-my-work-mode='phone']) .moreResourcesPanel {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -7,93 +7,28 @@ import {
   useInteractions,
   useRole,
 } from '@floating-ui/react';
+import { useRef } from 'react';
 import type { MyProjectLinkItem } from '@hbc/models/myWork';
 import { useMyWorkBentoContext } from '../../layout/MyWorkBentoGrid.js';
+import { MY_WORK_THEME_VARS } from '../../shell/myWorkTheme.js';
+import {
+  buildMyProjectLaunchPresentation,
+  type LaunchOptionView,
+  type MyProjectLaunchPresentation,
+} from './myProjectLaunchPresentation.js';
 import styles from './ProjectLaunchActions.module.css';
 
 export interface ProjectLaunchActionsProps {
-  readonly row: MyProjectLinkItem;
-  readonly isActionOverlayOpen: boolean;
-  readonly onActionOverlayOpenChange: (open: boolean) => void;
-}
-
-type LaunchOptionKey = 'sharepoint' | 'procore' | 'building-connected' | 'document-crunch';
-
-interface LaunchOptionView {
-  readonly key: LaunchOptionKey;
-  readonly label: string;
-  readonly href: string;
-  readonly ariaLabel: string;
-}
-
-function sharePointLabel(kind: MyProjectLinkItem['sharePointAction']['kind']): string {
-  return kind === 'legacy-folder' ? 'SharePoint Folder' : 'SharePoint Site';
-}
-
-function buildAvailableOptions(row: MyProjectLinkItem): readonly LaunchOptionView[] {
-  const options: LaunchOptionView[] = [];
-  const projectName = row.projectName;
-
-  const sharePoint = row.sharePointAction;
-  if (sharePoint.state === 'available' && sharePoint.href) {
-    const label = sharePointLabel(sharePoint.kind);
-    options.push({
-      key: 'sharepoint',
-      label,
-      href: sharePoint.href,
-      ariaLabel: `Open ${label} for ${projectName}`,
-    });
-  }
-
-  const procore = row.procoreAction;
-  if (procore.state === 'available' && procore.href) {
-    options.push({
-      key: 'procore',
-      label: 'Procore',
-      href: procore.href,
-      ariaLabel: `Open Procore for ${projectName}`,
-    });
-  }
-
-  const buildingConnected = row.buildingConnectedAction;
-  if (buildingConnected.state === 'available' && buildingConnected.href) {
-    options.push({
-      key: 'building-connected',
-      label: 'BuildingConnected',
-      href: buildingConnected.href,
-      ariaLabel: `Open BuildingConnected for ${projectName}`,
-    });
-  }
-
-  const documentCrunch = row.documentCrunchAction;
-  if (documentCrunch.state === 'available' && documentCrunch.href) {
-    options.push({
-      key: 'document-crunch',
-      label: 'Document Crunch',
-      href: documentCrunch.href,
-      ariaLabel: `Open Document Crunch for ${projectName}`,
-    });
-  }
-
-  return options;
+  readonly presentation: MyProjectLaunchPresentation;
+  readonly projectName: string;
+  readonly isLaunchOptionsOpen: boolean;
+  readonly onLaunchOptionsOpenChange: (open: boolean) => void;
+  readonly moreResourcesPanelId: string;
+  readonly onMoreResourcesTriggerReady: (node: HTMLButtonElement | null) => void;
 }
 
 export function hasAvailableLaunchActions(row: MyProjectLinkItem): boolean {
-  return buildAvailableOptions(row).length > 0;
-}
-
-interface SplitDesktopOptions {
-  readonly primaryVisibleOptions: readonly LaunchOptionView[];
-  readonly overflowOptions: readonly LaunchOptionView[];
-}
-
-function splitAvailableOptionsForDesktopRail(
-  allAvailableOptions: readonly LaunchOptionView[],
-): SplitDesktopOptions {
-  return {
-    primaryVisibleOptions: allAvailableOptions.slice(0, 2),
-    overflowOptions: allAvailableOptions.slice(2),
-  };
+  return buildMyProjectLaunchPresentation(row).hasAvailableLaunchActions;
 }
 
 interface LaunchOptionAnchorProps {
@@ -123,73 +58,8 @@ interface InlineActionRailProps {
   readonly overflowOptions: readonly LaunchOptionView[];
   readonly isOpen: boolean;
   readonly onOpenChange: (open: boolean) => void;
-}
-
-function InlineOverflowMenu({
-  overflowOptions,
-  isOpen,
-  onOpenChange,
-}: {
-  readonly overflowOptions: readonly LaunchOptionView[];
-  readonly isOpen: boolean;
-  readonly onOpenChange: (open: boolean) => void;
-}) {
-  const { refs, context } = useFloating({
-    open: isOpen,
-    onOpenChange,
-  });
-  const click = useClick(context);
-  const dismiss = useDismiss(context, { escapeKey: true, outsidePress: true });
-  const role = useRole(context, { role: 'menu' });
-  const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
-
-  if (overflowOptions.length === 0) return null;
-
-  const closeMenu = () => onOpenChange(false);
-
-  return (
-    <>
-      <button
-        ref={refs.setReference}
-        type="button"
-        className={styles.moreResourcesTrigger}
-        aria-haspopup="menu"
-        aria-expanded={isOpen ? 'true' : 'false'}
-        data-my-projects-more-resources-trigger=""
-        {...getReferenceProps()}
-      >
-        More Resources · {overflowOptions.length}
-      </button>
-      {isOpen ? (
-        <FloatingPortal>
-          <FloatingFocusManager context={context} modal returnFocus>
-            <div
-              ref={refs.setFloating}
-              className={styles.moreResourcesMenu}
-              data-my-projects-more-resources-menu=""
-              {...getFloatingProps()}
-            >
-              {overflowOptions.map((option) => (
-                <a
-                  key={option.key}
-                  className={styles.moreResourcesOption}
-                  href={option.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={option.ariaLabel}
-                  data-my-projects-more-resource-option={option.key}
-                  data-my-projects-launch-option-state="available"
-                  onClick={closeMenu}
-                >
-                  {option.label}
-                </a>
-              ))}
-            </div>
-          </FloatingFocusManager>
-        </FloatingPortal>
-      ) : null}
-    </>
-  );
+  readonly moreResourcesPanelId: string;
+  readonly onMoreResourcesTriggerReady: (node: HTMLButtonElement | null) => void;
 }
 
 function InlineActionRail({
@@ -197,8 +67,11 @@ function InlineActionRail({
   overflowOptions,
   isOpen,
   onOpenChange,
+  moreResourcesPanelId,
+  onMoreResourcesTriggerReady,
 }: InlineActionRailProps) {
   if (primaryVisibleOptions.length === 0 && overflowOptions.length === 0) return null;
+
   return (
     <div
       className={styles.rail}
@@ -209,11 +82,20 @@ function InlineActionRail({
       {primaryVisibleOptions.map((option) => (
         <LaunchOptionAnchor key={option.key} option={option} />
       ))}
-      <InlineOverflowMenu
-        overflowOptions={overflowOptions}
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-      />
+      {overflowOptions.length > 0 ? (
+        <button
+          ref={onMoreResourcesTriggerReady}
+          type="button"
+          className={styles.moreResourcesTrigger}
+          aria-expanded={isOpen ? 'true' : 'false'}
+          aria-controls={moreResourcesPanelId}
+          aria-label={`Toggle additional project resources (${overflowOptions.length})`}
+          data-my-projects-more-resources-trigger=""
+          onClick={() => onOpenChange(!isOpen)}
+        >
+          More Resources · {overflowOptions.length}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -256,25 +138,31 @@ function DrawerActions({ options, projectName, isOpen, onOpenChange }: DrawerAct
       </button>
       {isOpen ? (
         <FloatingPortal>
-          <div className={styles.drawerBackdrop} aria-hidden="true" />
-          <FloatingFocusManager context={context} modal initialFocus={0}>
-            <div
-              ref={refs.setFloating}
-              className={styles.drawer}
-              data-my-projects-launch-shape="drawer"
-              data-my-projects-launch-drawer=""
-              data-my-projects-launch-count={options.length}
-              {...getFloatingProps()}
-            >
-              <div className={styles.drawerHandle} aria-hidden="true" />
-              <p className={styles.drawerTitle}>Launch options</p>
-              <div className={styles.drawerList}>
-                {options.map((option) => (
-                  <LaunchOptionAnchor key={option.key} option={option} onActivate={closeDrawer} />
-                ))}
+          <div
+            className={styles.themedPortalRoot}
+            style={MY_WORK_THEME_VARS}
+            data-my-work-themed-portal="launch-drawer"
+          >
+            <div className={styles.drawerBackdrop} aria-hidden="true" />
+            <FloatingFocusManager context={context} modal initialFocus={0}>
+              <div
+                ref={refs.setFloating}
+                className={styles.drawer}
+                data-my-projects-launch-shape="drawer"
+                data-my-projects-launch-drawer=""
+                data-my-projects-launch-count={options.length}
+                {...getFloatingProps()}
+              >
+                <div className={styles.drawerHandle} aria-hidden="true" />
+                <p className={styles.drawerTitle}>Launch options</p>
+                <div className={styles.drawerList}>
+                  {options.map((option) => (
+                    <LaunchOptionAnchor key={option.key} option={option} onActivate={closeDrawer} />
+                  ))}
+                </div>
               </div>
-            </div>
-          </FloatingFocusManager>
+            </FloatingFocusManager>
+          </div>
         </FloatingPortal>
       ) : null}
     </>
@@ -282,32 +170,39 @@ function DrawerActions({ options, projectName, isOpen, onOpenChange }: DrawerAct
 }
 
 export function ProjectLaunchActions({
-  row,
-  isActionOverlayOpen,
-  onActionOverlayOpenChange,
+  presentation,
+  projectName,
+  isLaunchOptionsOpen,
+  onLaunchOptionsOpenChange,
+  moreResourcesPanelId,
+  onMoreResourcesTriggerReady,
 }: ProjectLaunchActionsProps) {
   const { mode } = useMyWorkBentoContext();
-  const allAvailableOptions = buildAvailableOptions(row);
+  const releaseRef = useRef(onMoreResourcesTriggerReady);
+  releaseRef.current = onMoreResourcesTriggerReady;
+  const attachTriggerRef = (node: HTMLButtonElement | null) => {
+    releaseRef.current(node);
+  };
 
   if (mode !== 'phone') {
-    const { primaryVisibleOptions, overflowOptions } =
-      splitAvailableOptionsForDesktopRail(allAvailableOptions);
     return (
       <InlineActionRail
-        primaryVisibleOptions={primaryVisibleOptions}
-        overflowOptions={overflowOptions}
-        isOpen={isActionOverlayOpen}
-        onOpenChange={onActionOverlayOpenChange}
+        primaryVisibleOptions={presentation.primaryVisibleOptions}
+        overflowOptions={presentation.overflowOptions}
+        isOpen={isLaunchOptionsOpen}
+        onOpenChange={onLaunchOptionsOpenChange}
+        moreResourcesPanelId={moreResourcesPanelId}
+        onMoreResourcesTriggerReady={attachTriggerRef}
       />
     );
   }
 
   return (
     <DrawerActions
-      options={allAvailableOptions}
-      projectName={row.projectName}
-      isOpen={isActionOverlayOpen}
-      onOpenChange={onActionOverlayOpenChange}
+      options={presentation.allAvailableOptions}
+      projectName={projectName}
+      isOpen={isLaunchOptionsOpen}
+      onOpenChange={onLaunchOptionsOpenChange}
     />
   );
 }

@@ -10,6 +10,7 @@ import {
 } from '@floating-ui/react';
 import type { MyProjectLinkItem } from '@hbc/models/myWork';
 import type { MyWorkResponsiveMode } from '../../layout/useMyWorkContainerBreakpoint.js';
+import { MY_WORK_THEME_VARS } from '../../shell/myWorkTheme.js';
 import { ProjectPortfolioTile } from './ProjectPortfolioTile.js';
 import {
   filterMyProjectsByQuery,
@@ -90,11 +91,13 @@ export function ProjectPortfolioBrowser({
           <div
             ref={refs.setFloating}
             className={styles.panel}
+            style={MY_WORK_THEME_VARS}
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
             data-my-projects-portfolio-browser=""
             data-my-projects-browser-posture={posture}
+            data-my-work-themed-portal="portfolio-browser"
             {...getFloatingProps()}
           >
             <header className={styles.header}>

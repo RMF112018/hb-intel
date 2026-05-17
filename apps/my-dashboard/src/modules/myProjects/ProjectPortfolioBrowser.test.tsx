@@ -67,6 +67,7 @@ describe('ProjectPortfolioBrowser — mount lifecycle', () => {
     const search = getSearchInput();
     expect(search).not.toBeNull();
     expect(search.getAttribute('placeholder')).toBe('Search by project name or number');
+    expect(browser.getAttribute('data-my-work-themed-portal')).toBe('portfolio-browser');
 
     const close = browser.querySelector('[data-my-projects-browser-close]') as HTMLButtonElement;
     expect(close.getAttribute('aria-label')).toBe('Close All My Projects');
@@ -286,10 +287,18 @@ describe('ProjectPortfolioBrowser — non-phone rail split parity', () => {
     expect(triggers.length).toBeGreaterThanOrEqual(2);
 
     fireEvent.click(triggers[0]!);
-    expect(document.body.querySelectorAll('[data-my-projects-more-resources-menu]').length).toBe(1);
+    expect(
+      document.body.querySelectorAll(
+        '[data-my-projects-portfolio-browser] [data-my-projects-more-resources-panel][data-my-projects-more-resources-state=\"open\"]',
+      ).length,
+    ).toBe(1);
 
     fireEvent.click(triggers[1]!);
-    expect(document.body.querySelectorAll('[data-my-projects-more-resources-menu]').length).toBe(1);
+    expect(
+      document.body.querySelectorAll(
+        '[data-my-projects-portfolio-browser] [data-my-projects-more-resources-panel][data-my-projects-more-resources-state=\"open\"]',
+      ).length,
+    ).toBe(1);
     expect(triggers[0]!.getAttribute('aria-expanded')).toBe('false');
     expect(triggers[1]!.getAttribute('aria-expanded')).toBe('true');
   });

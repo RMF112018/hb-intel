@@ -9,12 +9,7 @@
   box-shadow:
     inset 0 0 0 1px var(--my-work-color-border),
     var(--my-work-elevation-card);
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: var(--my-work-font-family);
   border-radius: var(--my-work-radius-lg);
 }
 
