@@ -79,23 +79,6 @@ function selectBannerText(params: {
   return null;
 }
 
-function buildMissingDestinationLabels(items: readonly MyProjectLinkItem[]): readonly string[] {
-  const labels: string[] = [];
-  if (items.some((item) => item.sharePointAction.state === 'unavailable')) {
-    labels.push('SharePoint');
-  }
-  if (items.some((item) => item.procoreAction.state === 'unavailable')) {
-    labels.push('Procore');
-  }
-  if (items.some((item) => item.buildingConnectedAction.state === 'unavailable')) {
-    labels.push('BuildingConnected');
-  }
-  if (items.some((item) => item.documentCrunchAction.state === 'unavailable')) {
-    labels.push('Document Crunch');
-  }
-  return labels;
-}
-
 export function MyProjectsHomeCard({ footprint = 'full', spanOverrides }: MyProjectsHomeCardProps) {
   const { mode } = useMyWorkBentoContext();
   const client = useMyWorkReadModelClient();
@@ -246,16 +229,6 @@ export function MyProjectsHomeCard({ footprint = 'full', spanOverrides }: MyProj
               View all projects
             </button>
           ) : null}
-          {(() => {
-            const missing = buildMissingDestinationLabels(sortedItems);
-            if (missing.length === 0) return null;
-            return (
-              <p className={styles.assistiveHint} data-my-projects-missing-hint="">
-                Some assigned projects do not currently have launch destinations for:{' '}
-                {missing.join(', ')}.
-              </p>
-            );
-          })()}
         </div>
       ) : null}
 

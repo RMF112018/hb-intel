@@ -120,7 +120,7 @@ describe('MyProjectsHomeCard', () => {
     expect(container.querySelector('[data-my-projects-metrics]')).toBeNull();
   });
 
-  it('renders all four launch destinations inline on each tile in locked order (desktop)', async () => {
+  it('renders the available-only launch grid on the fully-ready tile in locked order with concise labels (desktop)', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
@@ -137,10 +137,12 @@ describe('MyProjectsHomeCard', () => {
     );
     expect(harborTile).toBeTruthy();
 
-    // Inline mode: no trigger and no drawer; four options render directly.
     expect(harborTile!.querySelector('[data-my-projects-launch-trigger]')).toBeNull();
     expect(document.body.querySelector('[data-my-projects-launch-drawer]')).toBeNull();
-    expect(harborTile!.querySelector('[data-my-projects-launch-shape="inline"]')).not.toBeNull();
+    const grid = harborTile!.querySelector('[data-my-projects-launch-shape="grid"]');
+    expect(grid).not.toBeNull();
+    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('4');
+    expect(grid!.getAttribute('data-my-projects-launch-layout')).toBe('two-by-two');
 
     const options = Array.from(
       harborTile!.querySelectorAll<HTMLElement>('[data-my-projects-launch-option]'),
@@ -151,43 +153,35 @@ describe('MyProjectsHomeCard', () => {
       'building-connected',
       'document-crunch',
     ]);
+    expect(options.every((node) => node.tagName === 'A')).toBe(true);
 
     const sharePointLink = harborTile!.querySelector(
-      '[data-my-projects-launch-option="sharepoint"][data-my-projects-launch-option-state="available"]',
+      '[data-my-projects-launch-option="sharepoint"]',
     ) as HTMLAnchorElement;
-    expect(sharePointLink.tagName).toBe('A');
-    expect(sharePointLink.textContent).toBe('Open SharePoint Site');
-    expect(sharePointLink.getAttribute('href')).toContain('https://');
+    expect(sharePointLink.textContent).toBe('SharePoint Site');
     expect(sharePointLink.getAttribute('target')).toBe('_blank');
     expect(sharePointLink.getAttribute('rel')).toBe('noopener noreferrer');
 
     const procoreLink = harborTile!.querySelector(
-      '[data-my-projects-launch-option="procore"][data-my-projects-launch-option-state="available"]',
+      '[data-my-projects-launch-option="procore"]',
     ) as HTMLAnchorElement;
-    expect(procoreLink.tagName).toBe('A');
-    expect(procoreLink.textContent).toBe('Open Procore');
+    expect(procoreLink.textContent).toBe('Procore');
     expect(procoreLink.getAttribute('href')).toContain('https://app.procore.com/');
 
     const buildingConnectedLink = harborTile!.querySelector(
-      '[data-my-projects-launch-option="building-connected"][data-my-projects-launch-option-state="available"]',
+      '[data-my-projects-launch-option="building-connected"]',
     ) as HTMLAnchorElement;
-    expect(buildingConnectedLink.tagName).toBe('A');
-    expect(buildingConnectedLink.textContent).toBe('Open BuildingConnected');
-    expect(buildingConnectedLink.getAttribute('href')).toContain('https://');
+    expect(buildingConnectedLink.textContent).toBe('BuildingConnected');
     expect(buildingConnectedLink.getAttribute('target')).toBe('_blank');
-    expect(buildingConnectedLink.getAttribute('rel')).toBe('noopener noreferrer');
 
     const documentCrunchLink = harborTile!.querySelector(
-      '[data-my-projects-launch-option="document-crunch"][data-my-projects-launch-option-state="available"]',
+      '[data-my-projects-launch-option="document-crunch"]',
     ) as HTMLAnchorElement;
-    expect(documentCrunchLink.tagName).toBe('A');
-    expect(documentCrunchLink.textContent).toBe('Open Document Crunch');
-    expect(documentCrunchLink.getAttribute('href')).toContain('https://');
-    expect(documentCrunchLink.getAttribute('target')).toBe('_blank');
+    expect(documentCrunchLink.textContent).toBe('Document Crunch');
     expect(documentCrunchLink.getAttribute('rel')).toBe('noopener noreferrer');
   });
 
-  it('renders unavailable launch options as non-anchor disabled inline buttons', async () => {
+  it('omits unavailable launch destinations entirely from the DOM across all tiles', async () => {
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
@@ -195,19 +189,21 @@ describe('MyProjectsHomeCard', () => {
       expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
-    // Inline mode: harvest unavailable options from the tile grid directly —
-    // no menu to open, no trigger to click.
-    const observed = Array.from(
-      container.querySelectorAll<HTMLElement>(
-        '[data-my-projects-launch-option-state="unavailable"]',
-      ),
-    );
-    expect(observed.length).toBeGreaterThan(0);
-    observed.forEach((node) => {
-      expect(node.tagName).toBe('BUTTON');
-      expect(node.getAttribute('href')).toBeNull();
-      expect(node.getAttribute('aria-disabled')).toBe('true');
-    });
+    // No tile renders any unavailable-state launch control or disabled button.
+    expect(
+      container.querySelectorAll('[data-my-projects-launch-option-state="unavailable"]').length,
+    ).toBe(0);
+    expect(container.querySelector('button[disabled][data-my-projects-launch-option]')).toBeNull();
+
+    // No tile carries the legacy "inline" shape marker.
+    expect(container.querySelector('[data-my-projects-launch-shape="inline"]')).toBeNull();
+
+    // No unavailable-state aria-label leak.
+    const text = container.textContent ?? '';
+    expect(text).not.toContain('SharePoint unavailable');
+    expect(text).not.toContain('Procore unavailable');
+    expect(text).not.toContain('BuildingConnected unavailable');
+    expect(text).not.toContain('Document Crunch unavailable');
   });
 
   it('does not render a launch trigger on tablet or desktop (inline mode only)', async () => {
@@ -442,7 +438,7 @@ describe('MyProjectsHomeCard', () => {
     expect(container.textContent ?? '').not.toContain('Launch List');
   });
 
-  it('maps procore-project-invalid warning to an inline unavailable Procore option with accessible explanation', async () => {
+  it('omits the Procore launch option entirely when the row has the procore-project-invalid warning (unavailable)', async () => {
     getMyProjectLinksMock.mockResolvedValue(makeInvalidProcoreEnvelope());
     const { container } = renderCard();
 
@@ -450,15 +446,17 @@ describe('MyProjectsHomeCard', () => {
       expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(1),
     );
 
-    const unavailable = container.querySelector(
-      '[data-my-projects-launch-option="procore"][data-my-projects-launch-option-state="unavailable"]',
-    ) as HTMLButtonElement;
-    expect(unavailable).not.toBeNull();
-    expect(unavailable.tagName).toBe('BUTTON');
-    expect(unavailable.getAttribute('aria-disabled')).toBe('true');
-    expect(unavailable.getAttribute('aria-label')).toBe(
-      'Procore unavailable due to invalid project token.',
-    );
+    expect(container.querySelector('[data-my-projects-launch-option="procore"]')).toBeNull();
+    expect(
+      container.querySelector('[data-my-projects-launch-option-state="unavailable"]'),
+    ).toBeNull();
+    expect(container.textContent ?? '').not.toContain('Procore unavailable');
+
+    // The remaining available destination (SharePoint) is still rendered in
+    // the available-only grid.
+    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
+    expect(grid).not.toBeNull();
+    expect(grid!.querySelector('[data-my-projects-launch-option="sharepoint"]')).not.toBeNull();
   });
 
   it('opens a bottom-sheet drawer with four launch options in phone mode', async () => {
@@ -469,10 +467,18 @@ describe('MyProjectsHomeCard', () => {
       expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
-    const firstTile = container.querySelector('[data-my-projects-tile]') as HTMLElement;
-    // Phone mode: tile shows a trigger and no inline list.
-    expect(firstTile.querySelector('[data-my-projects-launch-shape="inline"]')).toBeNull();
-    const trigger = firstTile.querySelector(
+    // Scope to the fully-ready Harbor Office Renovation tile (24-100-01),
+    // which has every destination available — so the drawer must surface
+    // all four available options in locked order.
+    const tiles = Array.from(container.querySelectorAll<HTMLElement>('[data-my-projects-tile]'));
+    const harborTile = tiles.find(
+      (tile) =>
+        tile.querySelector('[data-my-projects-project-number]')?.textContent === '24-100-01',
+    );
+    expect(harborTile).toBeTruthy();
+    expect(harborTile!.querySelector('[data-my-projects-launch-shape="inline"]')).toBeNull();
+    expect(harborTile!.querySelector('[data-my-projects-launch-shape="grid"]')).toBeNull();
+    const trigger = harborTile!.querySelector(
       '[data-my-projects-launch-trigger]',
     ) as HTMLButtonElement;
     expect(trigger).not.toBeNull();
@@ -482,6 +488,7 @@ describe('MyProjectsHomeCard', () => {
     const drawer = document.body.querySelector('[data-my-projects-launch-drawer]') as HTMLElement;
     expect(drawer).not.toBeNull();
     expect(drawer.getAttribute('data-my-projects-launch-shape')).toBe('drawer');
+    expect(drawer.getAttribute('data-my-projects-launch-count')).toBe('4');
 
     const options = Array.from(
       drawer.querySelectorAll<HTMLElement>('[data-my-projects-launch-option]'),
@@ -492,6 +499,7 @@ describe('MyProjectsHomeCard', () => {
       'building-connected',
       'document-crunch',
     ]);
+    expect(options.every((node) => node.tagName === 'A')).toBe(true);
   });
 
   it('opens only one bottom-sheet drawer at a time across the tile grid in phone mode', async () => {
@@ -516,12 +524,11 @@ describe('MyProjectsHomeCard', () => {
     expect(triggers[1]!.getAttribute('aria-expanded')).toBe('true');
   });
 
-  it('renders the consolidated missing-destination hint with locked phrasing when at least one destination is unavailable', async () => {
-    // MY_PROJECT_LINKS_AVAILABLE carries one unavailable SharePoint, one
-    // unavailable Procore, one unavailable BuildingConnected, and one
-    // unavailable Document Crunch across its three items — so the
-    // consolidated hint must enumerate all four destinations in the
-    // locked order.
+  it('never renders the populated-state missing-destination hint, even when some items lack destinations', async () => {
+    // Populated tile grid where at least one item lacks at least one
+    // destination — the resting card must not surface a
+    // missing-destination paragraph; banner state is the only allowed
+    // source-readiness affordance.
     getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
     const { container } = renderCard();
 
@@ -529,54 +536,10 @@ describe('MyProjectsHomeCard', () => {
       expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
     );
 
-    const hint = container.querySelector('[data-my-projects-missing-hint]');
-    expect(hint).not.toBeNull();
-    expect(hint!.textContent).toBe(
-      'Some assigned projects do not currently have launch destinations for: SharePoint, Procore, BuildingConnected, Document Crunch.',
-    );
-
-    // Negative coverage: the old per-platform hint substrings must be gone.
+    expect(container.querySelector('[data-my-projects-missing-hint]')).toBeNull();
     const body = container.textContent ?? '';
     expect(body).not.toContain(
-      'One or more projects do not currently have a SharePoint launch destination.',
+      'Some assigned projects do not currently have launch destinations for',
     );
-    expect(body).not.toContain(
-      'One or more projects do not currently have a Procore launch destination.',
-    );
-  });
-
-  it('omits the consolidated missing-destination hint when every visible item has all four destinations available', async () => {
-    const allAvailable: MyWorkReadModelEnvelope<MyProjectLinksReadModel> = {
-      ...MY_PROJECT_LINKS_AVAILABLE,
-      data: {
-        ...MY_PROJECT_LINKS_AVAILABLE.data,
-        items: [MY_PROJECT_LINKS_AVAILABLE.data.items[0]!],
-        summary: {
-          ...MY_PROJECT_LINKS_AVAILABLE.data.summary,
-          assignedProjectCount: 1,
-          dualLaunchReadyCount: 1,
-          sharePointReadyCount: 1,
-          procoreReadyCount: 1,
-          noSharePointLaunchCount: 0,
-          noProcoreLaunchCount: 0,
-          buildingConnectedReadyCount: 1,
-          documentCrunchReadyCount: 1,
-          noBuildingConnectedLaunchCount: 0,
-          noDocumentCrunchLaunchCount: 0,
-          multiPlatformReadyCount: 1,
-          projectsOnlyCount: 1,
-          mergedCount: 0,
-          legacyOnlyCount: 0,
-        },
-      },
-    };
-    getMyProjectLinksMock.mockResolvedValue(allAvailable);
-    const { container } = renderCard();
-
-    await waitFor(() =>
-      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBe(1),
-    );
-
-    expect(container.querySelector('[data-my-projects-missing-hint]')).toBeNull();
   });
 });

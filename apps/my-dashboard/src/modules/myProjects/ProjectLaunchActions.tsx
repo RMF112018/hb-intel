@@ -17,151 +17,117 @@ export interface ProjectLaunchActionsProps {
   readonly onDrawerOpenChange: (open: boolean) => void;
 }
 
-function rowHasProcoreInvalidWarning(row: MyProjectLinkItem): boolean {
-  return row.warnings.some((warning) => warning.code === 'procore-project-invalid');
-}
-
-function rowHasBuildingConnectedInvalidWarning(row: MyProjectLinkItem): boolean {
-  return row.warnings.some((warning) => warning.code === 'building-connected-url-invalid');
-}
-
-function rowHasDocumentCrunchInvalidWarning(row: MyProjectLinkItem): boolean {
-  return row.warnings.some((warning) => warning.code === 'document-crunch-url-invalid');
-}
-
 type LaunchOptionKey = 'sharepoint' | 'procore' | 'building-connected' | 'document-crunch';
+type LaunchLayout = 'single-full' | 'pair' | 'third-full' | 'two-by-two';
 
 interface LaunchOptionView {
   readonly key: LaunchOptionKey;
-  readonly state: 'available' | 'unavailable';
   readonly label: string;
-  readonly href?: string;
-  readonly ariaLabel?: string;
+  readonly href: string;
+  readonly ariaLabel: string;
 }
 
-function buildOptions(row: MyProjectLinkItem): readonly LaunchOptionView[] {
+function sharePointLabel(kind: MyProjectLinkItem['sharePointAction']['kind']): string {
+  return kind === 'legacy-folder' ? 'SharePoint Folder' : 'SharePoint Site';
+}
+
+function buildAvailableOptions(row: MyProjectLinkItem): readonly LaunchOptionView[] {
+  const options: LaunchOptionView[] = [];
+  const projectName = row.projectName;
+
   const sharePoint = row.sharePointAction;
+  if (sharePoint.state === 'available' && sharePoint.href) {
+    const label = sharePointLabel(sharePoint.kind);
+    options.push({
+      key: 'sharepoint',
+      label,
+      href: sharePoint.href,
+      ariaLabel: `Open ${label} for ${projectName}`,
+    });
+  }
+
   const procore = row.procoreAction;
+  if (procore.state === 'available' && procore.href) {
+    options.push({
+      key: 'procore',
+      label: 'Procore',
+      href: procore.href,
+      ariaLabel: `Open Procore for ${projectName}`,
+    });
+  }
+
   const buildingConnected = row.buildingConnectedAction;
+  if (buildingConnected.state === 'available' && buildingConnected.href) {
+    options.push({
+      key: 'building-connected',
+      label: 'BuildingConnected',
+      href: buildingConnected.href,
+      ariaLabel: `Open BuildingConnected for ${projectName}`,
+    });
+  }
+
   const documentCrunch = row.documentCrunchAction;
+  if (documentCrunch.state === 'available' && documentCrunch.href) {
+    options.push({
+      key: 'document-crunch',
+      label: 'Document Crunch',
+      href: documentCrunch.href,
+      ariaLabel: `Open Document Crunch for ${projectName}`,
+    });
+  }
 
-  const sharePointOption: LaunchOptionView =
-    sharePoint.state === 'available' && sharePoint.href
-      ? {
-          key: 'sharepoint',
-          state: 'available',
-          label: sharePoint.label,
-          href: sharePoint.href,
-        }
-      : {
-          key: 'sharepoint',
-          state: 'unavailable',
-          label: 'SharePoint unavailable',
-          ariaLabel: 'SharePoint unavailable for this project.',
-        };
-
-  const procoreInvalid = rowHasProcoreInvalidWarning(row);
-  const procoreOption: LaunchOptionView =
-    procore.state === 'available' && procore.href
-      ? {
-          key: 'procore',
-          state: 'available',
-          label: 'Open Procore',
-          href: procore.href,
-        }
-      : {
-          key: 'procore',
-          state: 'unavailable',
-          label: 'Procore unavailable',
-          ariaLabel: procoreInvalid
-            ? 'Procore unavailable due to invalid project token.'
-            : 'Procore unavailable for this project.',
-        };
-
-  const buildingConnectedInvalid = rowHasBuildingConnectedInvalidWarning(row);
-  const buildingConnectedOption: LaunchOptionView =
-    buildingConnected.state === 'available' && buildingConnected.href
-      ? {
-          key: 'building-connected',
-          state: 'available',
-          label: 'Open BuildingConnected',
-          href: buildingConnected.href,
-        }
-      : {
-          key: 'building-connected',
-          state: 'unavailable',
-          label: 'BuildingConnected unavailable',
-          ariaLabel: buildingConnectedInvalid
-            ? 'BuildingConnected unavailable due to an invalid launch URL.'
-            : 'BuildingConnected unavailable for this project.',
-        };
-
-  const documentCrunchInvalid = rowHasDocumentCrunchInvalidWarning(row);
-  const documentCrunchOption: LaunchOptionView =
-    documentCrunch.state === 'available' && documentCrunch.href
-      ? {
-          key: 'document-crunch',
-          state: 'available',
-          label: 'Open Document Crunch',
-          href: documentCrunch.href,
-        }
-      : {
-          key: 'document-crunch',
-          state: 'unavailable',
-          label: 'Document Crunch unavailable',
-          ariaLabel: documentCrunchInvalid
-            ? 'Document Crunch unavailable due to an invalid launch URL.'
-            : 'Document Crunch unavailable for this project.',
-        };
-
-  return [sharePointOption, procoreOption, buildingConnectedOption, documentCrunchOption];
+  return options;
 }
 
-interface LaunchOptionRowProps {
+export function hasAvailableLaunchActions(row: MyProjectLinkItem): boolean {
+  return buildAvailableOptions(row).length > 0;
+}
+
+function layoutForCount(count: number): LaunchLayout {
+  if (count === 1) return 'single-full';
+  if (count === 2) return 'pair';
+  if (count === 3) return 'third-full';
+  return 'two-by-two';
+}
+
+interface LaunchOptionAnchorProps {
   readonly option: LaunchOptionView;
   readonly onActivate?: () => void;
 }
 
-function LaunchOptionRow({ option, onActivate }: LaunchOptionRowProps) {
-  if (option.state === 'available' && option.href) {
-    return (
-      <a
-        className={`${styles.row} ${styles.rowAvailable}`}
-        href={option.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        data-my-projects-launch-option={option.key}
-        data-my-projects-launch-option-state="available"
-        onClick={onActivate}
-      >
-        {option.label}
-      </a>
-    );
-  }
+function LaunchOptionAnchor({ option, onActivate }: LaunchOptionAnchorProps) {
   return (
-    <button
-      type="button"
-      className={`${styles.row} ${styles.rowUnavailable}`}
-      aria-disabled="true"
-      disabled
+    <a
+      className={`${styles.row} ${styles.rowAvailable}`}
+      href={option.href}
+      target="_blank"
+      rel="noopener noreferrer"
       aria-label={option.ariaLabel}
       data-my-projects-launch-option={option.key}
-      data-my-projects-launch-option-state="unavailable"
+      data-my-projects-launch-option-state="available"
+      onClick={onActivate}
     >
       {option.label}
-    </button>
+    </a>
   );
 }
 
-interface InlineActionsProps {
+interface InlineActionGridProps {
   readonly options: readonly LaunchOptionView[];
 }
 
-function InlineActions({ options }: InlineActionsProps) {
+function InlineActionGrid({ options }: InlineActionGridProps) {
+  if (options.length === 0) return null;
+  const layout = layoutForCount(options.length);
   return (
-    <div className={styles.inline} data-my-projects-launch-shape="inline">
+    <div
+      className={styles.grid}
+      data-my-projects-launch-shape="grid"
+      data-my-projects-launch-count={options.length}
+      data-my-projects-launch-layout={layout}
+    >
       {options.map((option) => (
-        <LaunchOptionRow key={option.key} option={option} />
+        <LaunchOptionAnchor key={option.key} option={option} />
       ))}
     </div>
   );
@@ -184,6 +150,8 @@ function DrawerActions({ options, projectName, isOpen, onOpenChange }: DrawerAct
   const dismiss = useDismiss(context, { escapeKey: true, outsidePress: true });
   const role = useRole(context, { role: 'dialog' });
   const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
+
+  if (options.length === 0) return null;
 
   const closeDrawer = () => onOpenChange(false);
 
@@ -210,13 +178,14 @@ function DrawerActions({ options, projectName, isOpen, onOpenChange }: DrawerAct
               className={styles.drawer}
               data-my-projects-launch-shape="drawer"
               data-my-projects-launch-drawer=""
+              data-my-projects-launch-count={options.length}
               {...getFloatingProps()}
             >
               <div className={styles.drawerHandle} aria-hidden="true" />
               <p className={styles.drawerTitle}>Launch options</p>
               <div className={styles.drawerList}>
                 {options.map((option) => (
-                  <LaunchOptionRow key={option.key} option={option} onActivate={closeDrawer} />
+                  <LaunchOptionAnchor key={option.key} option={option} onActivate={closeDrawer} />
                 ))}
               </div>
             </div>
@@ -233,10 +202,10 @@ export function ProjectLaunchActions({
   onDrawerOpenChange,
 }: ProjectLaunchActionsProps) {
   const { mode } = useMyWorkBentoContext();
-  const options = buildOptions(row);
+  const options = buildAvailableOptions(row);
 
   if (mode !== 'phone') {
-    return <InlineActions options={options} />;
+    return <InlineActionGrid options={options} />;
   }
 
   return (

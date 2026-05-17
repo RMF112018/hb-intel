@@ -23,12 +23,7 @@ function BrowserHarness({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   return (
     <MyWorkBentoGrid mode={mode}>
-      <button
-        ref={triggerRef}
-        type="button"
-        data-test-trigger=""
-        onClick={() => setIsOpen(true)}
-      >
+      <button ref={triggerRef} type="button" data-test-trigger="" onClick={() => setIsOpen(true)}>
         View all projects
       </button>
       <ProjectPortfolioBrowser
@@ -49,9 +44,7 @@ function getBrowser(): HTMLElement | null {
 }
 
 function getSearchInput(): HTMLInputElement {
-  return document.body.querySelector(
-    '[data-my-projects-portfolio-search]',
-  ) as HTMLInputElement;
+  return document.body.querySelector('[data-my-projects-portfolio-search]') as HTMLInputElement;
 }
 
 describe('ProjectPortfolioBrowser — mount lifecycle', () => {
@@ -124,9 +117,9 @@ describe('ProjectPortfolioBrowser — list and search', () => {
       '[data-my-projects-portfolio-browser] [data-my-projects-tile]',
     );
     expect(tiles).toHaveLength(1);
-    expect(
-      tiles[0]!.querySelector('[data-my-projects-project-name]')?.textContent,
-    ).toBe('Harbor Office Renovation');
+    expect(tiles[0]!.querySelector('[data-my-projects-project-name]')?.textContent).toBe(
+      'Harbor Office Renovation',
+    );
   });
 
   it('filters by exact project number', () => {
@@ -136,9 +129,9 @@ describe('ProjectPortfolioBrowser — list and search', () => {
       '[data-my-projects-portfolio-browser] [data-my-projects-tile]',
     );
     expect(tiles).toHaveLength(1);
-    expect(
-      tiles[0]!.querySelector('[data-my-projects-project-number]')?.textContent,
-    ).toBe('24-100-03');
+    expect(tiles[0]!.querySelector('[data-my-projects-project-number]')?.textContent).toBe(
+      '24-100-03',
+    );
   });
 
   it('filters by partial project-number prefix', () => {
@@ -160,9 +153,7 @@ describe('ProjectPortfolioBrowser — list and search', () => {
         '[data-my-projects-portfolio-browser] [data-my-projects-tile]',
       ),
     ).toHaveLength(0);
-    const empty = document.body.querySelector(
-      '[data-my-projects-search-empty]',
-    ) as HTMLElement;
+    const empty = document.body.querySelector('[data-my-projects-search-empty]') as HTMLElement;
     expect(empty).not.toBeNull();
     expect(empty.textContent).toBe('No projects match your search.');
   });
@@ -235,10 +226,10 @@ describe('ProjectPortfolioBrowser — posture by mode', () => {
 
 describe('ProjectPortfolioBrowser — in-browser launch drawer concurrency (phone)', () => {
   it('opens only one tile launch drawer at a time within the browser context', () => {
-    // Inline mode (tablet+desktop) renders all four destinations directly on
-    // each tile — no trigger, no concurrency surface. The launch drawer
-    // appears only in phone mode, so the concurrency contract is enforced
-    // there.
+    // Non-phone modes (tablet+desktop) render the available-only launch grid
+    // directly on each tile — no trigger, no concurrency surface. The launch
+    // drawer appears only in phone mode, so the concurrency contract is
+    // enforced there.
     render(<BrowserHarness mode="phone" initialOpen />);
     const triggers = Array.from(
       document.body.querySelectorAll<HTMLButtonElement>(

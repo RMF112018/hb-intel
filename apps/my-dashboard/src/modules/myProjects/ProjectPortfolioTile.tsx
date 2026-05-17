@@ -4,7 +4,7 @@ import {
   type MyProjectAssignmentRoleId,
   type MyProjectLinkItem,
 } from '@hbc/models/myWork';
-import { ProjectLaunchActions } from './ProjectLaunchActions.js';
+import { ProjectLaunchActions, hasAvailableLaunchActions } from './ProjectLaunchActions.js';
 import styles from './ProjectPortfolioTile.module.css';
 
 export interface ProjectPortfolioTileProps {
@@ -28,6 +28,7 @@ export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortf
   const labels = sortedRoleLabels(row.assignmentRoles);
   const primaryRoleLabel = labels[0];
   const overflowLabels = labels.slice(1);
+  const hasLaunchActions = hasAvailableLaunchActions(row);
 
   return (
     <article
@@ -52,9 +53,11 @@ export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortf
         ) : null}
       </div>
 
-      <div className={styles.actions} data-my-projects-tile-actions="">
-        <ProjectLaunchActions row={row} isDrawerOpen={isOpen} onDrawerOpenChange={onOpenChange} />
-      </div>
+      {hasLaunchActions ? (
+        <div className={styles.actions} data-my-projects-tile-actions="">
+          <ProjectLaunchActions row={row} isDrawerOpen={isOpen} onDrawerOpenChange={onOpenChange} />
+        </div>
+      ) : null}
 
       {primaryRoleLabel ? (
         <div className={styles.roleRow}>

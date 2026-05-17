@@ -1,30 +1,35 @@
-/* Inline shape (tablet + desktop): compact vertical stack of four button-
-   chips. Each row is a polished, full-width chip — subtle surface +
-   border, ~28px tall, tight gap — so the four destinations fit the tile
-   without inflating its height. */
+/* Grid shape (tablet + desktop): compact 2-column action grid of available
+   launch destinations. Single-action rows span both columns; a third action
+   on a row of three also spans both. Unavailable destinations are not
+   rendered at all. */
 
-.inline {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
   width: 100%;
 }
 
+.grid > .row:only-child,
+.grid > .row:nth-child(3):last-child {
+  grid-column: 1 / -1;
+}
+
 .row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 28px;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
   padding: 4px 10px;
-  border: 1px solid color-mix(in srgb, var(--my-work-color-border) 50%, transparent);
+  border: 1px solid color-mix(in srgb, var(--my-work-color-border) 55%, transparent);
   border-radius: var(--my-work-radius-md);
-  background: color-mix(in srgb, var(--my-work-color-rail) 28%, #ffffff);
+  background: color-mix(in srgb, var(--my-work-color-rail) 26%, #ffffff);
   font: inherit;
   font-size: 12px;
   font-weight: 600;
-  line-height: 1.2;
-  text-align: left;
+  line-height: 1.15;
+  text-align: center;
   text-decoration: none;
   color: var(--my-work-color-text-primary);
   transition:
@@ -53,15 +58,7 @@
   outline-offset: 2px;
 }
 
-.rowUnavailable {
-  color: var(--my-work-color-text-muted);
-  background: color-mix(in srgb, var(--my-work-color-rail) 18%, #ffffff);
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--my-work-color-border) 45%, transparent);
-  cursor: not-allowed;
-}
-
-/* Phone-mode trigger: replaces the inline stack with a single launcher button
+/* Phone-mode trigger: replaces the inline grid with a single launcher button
    that opens the bottom-sheet drawer. */
 
 .trigger {
@@ -146,6 +143,8 @@
 }
 
 .drawerList .row {
+  justify-content: flex-start;
+  text-align: left;
   min-height: 44px;
   padding: 10px 12px;
   font-size: 14px;

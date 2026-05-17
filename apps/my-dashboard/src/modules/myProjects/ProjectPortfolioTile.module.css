@@ -84,21 +84,18 @@
 .meta {
   display: flex;
   align-items: center;
-  /* Stage chip sits at the start; launch actions now occupy their own tile
-     grid row (.actions) below this metadata strip so the four-row launch
-     stack does not get crammed into a flex row sized for a single trigger. */
   justify-content: flex-start;
   gap: 10px;
   min-width: 0;
 }
 
 .actions {
-  /* Wrapper for ProjectLaunchActions in inline mode (tablet + desktop) and
-     for the bottom-sheet trigger in phone mode. Lives as its own grid row
-     so the four-row launch stack inherits the full tile width without
-     conflicting with the .meta flex layout. */
+  /* Wrapper for ProjectLaunchActions in non-phone modes (compact 2-column
+     action grid) and for the bottom-sheet trigger in phone mode. Only
+     rendered when at least one available launch destination exists. */
   display: block;
   min-width: 0;
+  margin-top: 2px;
 }
 
 .projectStage {

@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render } from '@testing-library/react';
 import type { MyProjectLinkItem } from '@hbc/models/myWork';
 import { MyWorkBentoGrid } from '../../layout/MyWorkBentoGrid.js';
 import type { MyWorkResponsiveMode } from '../../layout/useMyWorkContainerBreakpoint.js';
-import { ProjectLaunchActions } from './ProjectLaunchActions.js';
+import { ProjectLaunchActions, hasAvailableLaunchActions } from './ProjectLaunchActions.js';
 
 afterEach(() => {
   cleanup();
@@ -76,12 +76,34 @@ function getDrawer(): HTMLElement | null {
   return document.body.querySelector('[data-my-projects-launch-drawer]');
 }
 
-describe('ProjectLaunchActions — inline mode (desktop)', () => {
-  it('renders four launch options in locked order with no trigger and no drawer', () => {
+const UNAVAILABLE_SHAREPOINT: MyProjectLinkItem['sharePointAction'] = {
+  state: 'unavailable',
+  kind: 'none',
+  label: 'SharePoint unavailable',
+};
+const UNAVAILABLE_PROCORE: MyProjectLinkItem['procoreAction'] = {
+  state: 'unavailable',
+  label: 'Procore unavailable',
+};
+const UNAVAILABLE_BUILDING_CONNECTED: MyProjectLinkItem['buildingConnectedAction'] = {
+  state: 'unavailable',
+  label: 'BuildingConnected unavailable',
+};
+const UNAVAILABLE_DOCUMENT_CRUNCH: MyProjectLinkItem['documentCrunchAction'] = {
+  state: 'unavailable',
+  label: 'Document Crunch unavailable',
+};
+
+describe('ProjectLaunchActions — non-phone grid', () => {
+  it('renders only available destinations in locked order with the grid shape marker', () => {
     const row = makeRow({});
     const { container } = render(<Harness row={row} mode="desktop" />);
 
-    expect(container.querySelector('[data-my-projects-launch-shape="inline"]')).not.toBeNull();
+    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
+    expect(grid).not.toBeNull();
+    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('4');
+    expect(grid!.getAttribute('data-my-projects-launch-layout')).toBe('two-by-two');
+    expect(container.querySelector('[data-my-projects-launch-shape="inline"]')).toBeNull();
     expect(container.querySelector('[data-my-projects-launch-trigger]')).toBeNull();
     expect(getDrawer()).toBeNull();
 
@@ -94,9 +116,15 @@ describe('ProjectLaunchActions — inline mode (desktop)', () => {
       'building-connected',
       'document-crunch',
     ]);
+    expect(options.every((node) => node.tagName === 'A')).toBe(true);
+    expect(
+      options.every(
+        (node) => node.getAttribute('data-my-projects-launch-option-state') === 'available',
+      ),
+    ).toBe(true);
   });
 
-  it('renders every available destination as a safe external anchor with the locked label', () => {
+  it('renders every available destination as a safe external anchor with concise label and explicit aria-label', () => {
     const row = makeRow({});
     const { container } = render(<Harness row={row} mode="desktop" />);
 
@@ -107,108 +135,131 @@ describe('ProjectLaunchActions — inline mode (desktop)', () => {
     expect(sharePoint.getAttribute('href')).toBe(row.sharePointAction.href!);
     expect(sharePoint.getAttribute('target')).toBe('_blank');
     expect(sharePoint.getAttribute('rel')).toBe('noopener noreferrer');
-    expect(sharePoint.textContent).toBe('Open SharePoint Site');
+    expect(sharePoint.textContent).toBe('SharePoint Site');
+    expect(sharePoint.getAttribute('aria-label')).toBe(
+      'Open SharePoint Site for Harbor Office Renovation',
+    );
 
     const procore = container.querySelector(
       '[data-my-projects-launch-option="procore"]',
     ) as HTMLAnchorElement;
-    expect(procore.tagName).toBe('A');
-    expect(procore.getAttribute('href')).toBe(row.procoreAction.href!);
-    expect(procore.textContent).toBe('Open Procore');
+    expect(procore.textContent).toBe('Procore');
+    expect(procore.getAttribute('aria-label')).toBe('Open Procore for Harbor Office Renovation');
 
     const buildingConnected = container.querySelector(
       '[data-my-projects-launch-option="building-connected"]',
     ) as HTMLAnchorElement;
-    expect(buildingConnected.tagName).toBe('A');
-    expect(buildingConnected.getAttribute('href')).toBe(row.buildingConnectedAction.href!);
-    expect(buildingConnected.getAttribute('target')).toBe('_blank');
-    expect(buildingConnected.getAttribute('rel')).toBe('noopener noreferrer');
-    expect(buildingConnected.textContent).toBe('Open BuildingConnected');
+    expect(buildingConnected.textContent).toBe('BuildingConnected');
+    expect(buildingConnected.getAttribute('aria-label')).toBe(
+      'Open BuildingConnected for Harbor Office Renovation',
+    );
 
     const documentCrunch = container.querySelector(
       '[data-my-projects-launch-option="document-crunch"]',
     ) as HTMLAnchorElement;
-    expect(documentCrunch.tagName).toBe('A');
-    expect(documentCrunch.getAttribute('href')).toBe(row.documentCrunchAction.href!);
-    expect(documentCrunch.textContent).toBe('Open Document Crunch');
-  });
-
-  it('renders unavailable BuildingConnected as a disabled button with the empty aria-label', () => {
-    const row = makeRow({
-      buildingConnectedAction: { state: 'unavailable', label: 'BuildingConnected unavailable' },
-    });
-    const { container } = render(<Harness row={row} mode="desktop" />);
-    const node = container.querySelector(
-      '[data-my-projects-launch-option="building-connected"]',
-    ) as HTMLButtonElement;
-    expect(node.tagName).toBe('BUTTON');
-    expect(node.getAttribute('href')).toBeNull();
-    expect(node.getAttribute('aria-disabled')).toBe('true');
-    expect(node.hasAttribute('disabled')).toBe(true);
-    expect(node.getAttribute('aria-label')).toBe('BuildingConnected unavailable for this project.');
-    expect(node.getAttribute('data-my-projects-launch-option-state')).toBe('unavailable');
-  });
-
-  it('renders unavailable Document Crunch as a disabled button with the empty aria-label', () => {
-    const row = makeRow({
-      documentCrunchAction: { state: 'unavailable', label: 'Document Crunch unavailable' },
-    });
-    const { container } = render(<Harness row={row} mode="desktop" />);
-    const node = container.querySelector(
-      '[data-my-projects-launch-option="document-crunch"]',
-    ) as HTMLButtonElement;
-    expect(node.tagName).toBe('BUTTON');
-    expect(node.getAttribute('aria-label')).toBe('Document Crunch unavailable for this project.');
-  });
-
-  it('surfaces the invalid-URL aria-label variant for BuildingConnected when the warning is present', () => {
-    const row = makeRow({
-      buildingConnectedAction: { state: 'unavailable', label: 'BuildingConnected unavailable' },
-      warnings: [{ code: 'building-connected-url-invalid' }],
-    });
-    const { container } = render(<Harness row={row} mode="desktop" />);
-    const node = container.querySelector(
-      '[data-my-projects-launch-option="building-connected"]',
-    ) as HTMLButtonElement;
-    expect(node.getAttribute('aria-label')).toBe(
-      'BuildingConnected unavailable due to an invalid launch URL.',
+    expect(documentCrunch.textContent).toBe('Document Crunch');
+    expect(documentCrunch.getAttribute('aria-label')).toBe(
+      'Open Document Crunch for Harbor Office Renovation',
     );
   });
 
-  it('surfaces the invalid-URL aria-label variant for Document Crunch when the warning is present', () => {
+  it('renders SharePoint Folder label for legacy-folder kind', () => {
     const row = makeRow({
-      documentCrunchAction: { state: 'unavailable', label: 'Document Crunch unavailable' },
-      warnings: [{ code: 'document-crunch-url-invalid' }],
+      sharePointAction: {
+        state: 'available',
+        kind: 'legacy-folder',
+        label: 'Open SharePoint Folder',
+        href: 'https://example.invalid/sites/legacy',
+      },
     });
     const { container } = render(<Harness row={row} mode="desktop" />);
-    const node = container.querySelector(
-      '[data-my-projects-launch-option="document-crunch"]',
-    ) as HTMLButtonElement;
-    expect(node.getAttribute('aria-label')).toBe(
-      'Document Crunch unavailable due to an invalid launch URL.',
+    const sharePoint = container.querySelector(
+      '[data-my-projects-launch-option="sharepoint"]',
+    ) as HTMLAnchorElement;
+    expect(sharePoint.textContent).toBe('SharePoint Folder');
+    expect(sharePoint.getAttribute('aria-label')).toBe(
+      'Open SharePoint Folder for Harbor Office Renovation',
     );
   });
 
-  it('surfaces the invalid-token aria-label variant for Procore when the warning is present', () => {
+  it('omits unavailable destinations entirely from the DOM (no disabled buttons, no dashed rows)', () => {
     const row = makeRow({
-      procoreAction: { state: 'unavailable', label: 'Procore unavailable' },
-      warnings: [{ code: 'procore-project-invalid' }],
+      buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
+      documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
     });
     const { container } = render(<Harness row={row} mode="desktop" />);
-    const node = container.querySelector(
-      '[data-my-projects-launch-option="procore"]',
-    ) as HTMLButtonElement;
-    expect(node.getAttribute('aria-label')).toBe(
-      'Procore unavailable due to invalid project token.',
-    );
-  });
-});
 
-describe('ProjectLaunchActions — inline mode (tabletLandscape) shares the desktop shape', () => {
-  it('renders the same four-row inline list and no trigger on tabletLandscape', () => {
+    expect(
+      container.querySelector('[data-my-projects-launch-option="building-connected"]'),
+    ).toBeNull();
+    expect(
+      container.querySelector('[data-my-projects-launch-option="document-crunch"]'),
+    ).toBeNull();
+    expect(container.querySelector('button[disabled]')).toBeNull();
+    expect(
+      container.querySelectorAll('[data-my-projects-launch-option-state="unavailable"]').length,
+    ).toBe(0);
+
+    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
+    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('2');
+    expect(grid!.getAttribute('data-my-projects-launch-layout')).toBe('pair');
+  });
+
+  it('renders a single-action row that spans both columns (single-full layout)', () => {
+    const row = makeRow({
+      procoreAction: UNAVAILABLE_PROCORE,
+      buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
+      documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
+    });
+    const { container } = render(<Harness row={row} mode="desktop" />);
+
+    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
+    expect(grid).not.toBeNull();
+    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('1');
+    expect(grid!.getAttribute('data-my-projects-launch-layout')).toBe('single-full');
+    expect(container.querySelectorAll('[data-my-projects-launch-option]').length).toBe(1);
+  });
+
+  it('renders three actions with the third-full layout marker', () => {
+    const row = makeRow({
+      documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
+    });
+    const { container } = render(<Harness row={row} mode="desktop" />);
+
+    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
+    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('3');
+    expect(grid!.getAttribute('data-my-projects-launch-layout')).toBe('third-full');
+    const options = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-my-projects-launch-option]'),
+    );
+    expect(options.map((node) => node.getAttribute('data-my-projects-launch-option'))).toEqual([
+      'sharepoint',
+      'procore',
+      'building-connected',
+    ]);
+  });
+
+  it('renders nothing when no available destinations exist', () => {
+    const row = makeRow({
+      sharePointAction: UNAVAILABLE_SHAREPOINT,
+      procoreAction: UNAVAILABLE_PROCORE,
+      buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
+      documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
+    });
+    const { container } = render(<Harness row={row} mode="desktop" />);
+
+    expect(container.querySelector('[data-my-projects-launch-shape]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-launch-option]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-launch-trigger]')).toBeNull();
+    expect(hasAvailableLaunchActions(row)).toBe(false);
+  });
+
+  it('shares the same grid shape on tabletLandscape', () => {
     const row = makeRow({});
     const { container } = render(<Harness row={row} mode="tabletLandscape" />);
-    expect(container.querySelector('[data-my-projects-launch-shape="inline"]')).not.toBeNull();
+    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
+    expect(grid).not.toBeNull();
+    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('4');
     expect(container.querySelector('[data-my-projects-launch-trigger]')).toBeNull();
     expect(container.querySelectorAll('[data-my-projects-launch-option]').length).toBe(4);
   });
@@ -228,12 +279,26 @@ describe('ProjectLaunchActions — phone drawer mode', () => {
     expect(trigger.getAttribute('aria-label')).toBe(
       'Open launch options for Harbor Office Renovation',
     );
-    expect(container.querySelector('[data-my-projects-launch-shape="inline"]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-launch-shape="grid"]')).toBeNull();
     expect(getDrawer()).toBeNull();
   });
 
-  it('opens a portaled bottom-sheet drawer with four launch options in locked order on trigger click', () => {
-    const row = makeRow({});
+  it('renders no trigger and no DOM when zero available destinations exist', () => {
+    const row = makeRow({
+      sharePointAction: UNAVAILABLE_SHAREPOINT,
+      procoreAction: UNAVAILABLE_PROCORE,
+      buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
+      documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
+    });
+    const { container } = render(<Harness row={row} mode="phone" />);
+    expect(container.querySelector('[data-my-projects-launch-trigger]')).toBeNull();
+    expect(getDrawer()).toBeNull();
+  });
+
+  it('opens a portaled bottom-sheet drawer with available options only in locked order on trigger click', () => {
+    const row = makeRow({
+      buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
+    });
     const { container } = render(<Harness row={row} mode="phone" />);
     const trigger = container.querySelector(
       '[data-my-projects-launch-trigger]',
@@ -244,6 +309,10 @@ describe('ProjectLaunchActions — phone drawer mode', () => {
     const drawer = getDrawer();
     expect(drawer).not.toBeNull();
     expect(drawer!.getAttribute('data-my-projects-launch-shape')).toBe('drawer');
+    expect(drawer!.getAttribute('data-my-projects-launch-count')).toBe('3');
+    expect(
+      drawer!.querySelector('[data-my-projects-launch-option="building-connected"]'),
+    ).toBeNull();
 
     const options = Array.from(
       drawer!.querySelectorAll<HTMLElement>('[data-my-projects-launch-option]'),
@@ -251,9 +320,9 @@ describe('ProjectLaunchActions — phone drawer mode', () => {
     expect(options.map((node) => node.getAttribute('data-my-projects-launch-option'))).toEqual([
       'sharepoint',
       'procore',
-      'building-connected',
       'document-crunch',
     ]);
+    expect(options.every((node) => node.tagName === 'A')).toBe(true);
   });
 
   it('closes the drawer on Escape and restores focus to the trigger', () => {
@@ -304,20 +373,32 @@ describe('ProjectLaunchActions — phone drawer mode', () => {
     fireEvent.click(sharePoint);
     expect(onOpen).toHaveBeenLastCalledWith(false);
   });
+});
 
-  it('drawer renders unavailable Document Crunch as disabled button with empty aria-label', () => {
-    const row = makeRow({
-      documentCrunchAction: { state: 'unavailable', label: 'Document Crunch unavailable' },
-    });
-    const { container } = render(<Harness row={row} mode="phone" />);
-    fireEvent.click(
-      container.querySelector('[data-my-projects-launch-trigger]') as HTMLButtonElement,
-    );
-    const drawer = getDrawer();
-    const node = drawer!.querySelector(
-      '[data-my-projects-launch-option="document-crunch"]',
-    ) as HTMLButtonElement;
-    expect(node.tagName).toBe('BUTTON');
-    expect(node.getAttribute('aria-label')).toBe('Document Crunch unavailable for this project.');
+describe('hasAvailableLaunchActions', () => {
+  it('returns true when at least one destination is available', () => {
+    expect(hasAvailableLaunchActions(makeRow({}))).toBe(true);
+    expect(
+      hasAvailableLaunchActions(
+        makeRow({
+          procoreAction: UNAVAILABLE_PROCORE,
+          buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
+          documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it('returns false when every destination is unavailable', () => {
+    expect(
+      hasAvailableLaunchActions(
+        makeRow({
+          sharePointAction: UNAVAILABLE_SHAREPOINT,
+          procoreAction: UNAVAILABLE_PROCORE,
+          buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
+          documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
+        }),
+      ),
+    ).toBe(false);
   });
 });

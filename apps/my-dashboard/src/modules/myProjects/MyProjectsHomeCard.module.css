@@ -184,13 +184,6 @@
   outline-offset: 3px;
 }
 
-.assistiveHint {
-  margin: 8px 0 0 0;
-  font-size: 12px;
-  color: var(--my-work-color-text-muted);
-  overflow-wrap: anywhere;
-}
-
 .compactBlock {
   /* Transparent wrapper for loading / empty branches — the HB-blue gradient
      reads continuously underneath, matching the populated .portfolioRegion
