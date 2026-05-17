@@ -1,0 +1,25 @@
+{
+  "recordKey": "projects:123",
+  "projectName": "Example Project",
+  "projectNumber": "24-100-01",
+  "customLinks": [
+    {
+      "id": 9001,
+      "title": "Permit Portal",
+      "href": "https://example.com/permit-portal",
+      "visibility": "project",
+      "createdByCurrentUser": false,
+      "canEdit": false,
+      "canDelete": false
+    },
+    {
+      "id": 9002,
+      "title": "Private Provider Portal",
+      "href": "https://example.com/provider",
+      "visibility": "private",
+      "createdByCurrentUser": true,
+      "canEdit": true,
+      "canDelete": true
+    }
+  ]
+}
