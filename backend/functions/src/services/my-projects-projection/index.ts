@@ -89,3 +89,5 @@ export {
   type RegistryFieldReadinessEntry,
   type RegistryListFieldSnapshot,
 } from './registry-schema-readiness.js';
+
+export * from './state/index.js';
