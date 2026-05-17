@@ -1,7 +1,7 @@
 .tile {
   display: grid;
-  grid-template-rows: auto auto auto;
-  gap: 10px;
+  grid-template-rows: auto auto auto auto;
+  gap: 8px;
   border: 1px solid color-mix(in srgb, var(--my-work-color-border) 60%, transparent);
   border-radius: calc(var(--my-work-radius-md) + 2px);
   /* Near-pure-white surface so tiles read as floating panels on the HB-blue
@@ -84,11 +84,20 @@
 .meta {
   display: flex;
   align-items: center;
-  /* Tail-anchor the Open trigger so it sits at the same X-position in every
-     tile regardless of whether projectStage is present. Stage takes its own
-     space at the start; .trigger uses margin-left: auto for the gap. */
-  justify-content: flex-end;
+  /* Stage chip sits at the start; launch actions now occupy their own tile
+     grid row (.actions) below this metadata strip so the four-row launch
+     stack does not get crammed into a flex row sized for a single trigger. */
+  justify-content: flex-start;
   gap: 10px;
+  min-width: 0;
+}
+
+.actions {
+  /* Wrapper for ProjectLaunchActions in inline mode (tablet + desktop) and
+     for the bottom-sheet trigger in phone mode. Lives as its own grid row
+     so the four-row launch stack inherits the full tile width without
+     conflicting with the .meta flex layout. */
+  display: block;
   min-width: 0;
 }
 

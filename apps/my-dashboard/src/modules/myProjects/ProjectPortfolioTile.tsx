@@ -50,6 +50,9 @@ export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortf
             {row.projectStage}
           </p>
         ) : null}
+      </div>
+
+      <div className={styles.actions} data-my-projects-tile-actions="">
         <ProjectLaunchActions row={row} isDrawerOpen={isOpen} onDrawerOpenChange={onOpenChange} />
       </div>
 
