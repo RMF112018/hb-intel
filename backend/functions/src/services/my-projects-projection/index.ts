@@ -95,3 +95,5 @@ export * from './state/index.js';
 export * from './webhook/index.js';
 
 export * from './subscriptions/index.js';
+
+export * from './delta/index.js';

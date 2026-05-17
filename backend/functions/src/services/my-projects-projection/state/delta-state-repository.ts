@@ -142,6 +142,34 @@ export class ProjectionDeltaStateRepository {
     }
   }
 
+  /**
+   * Same as `get`, but also surfaces the SDK's ETag so callers can perform an
+   * ETag-guarded `advanceCheckpoint` / `markFailure` / `markNeedsResync` without
+   * a second round-trip. Storage SDK-specific concern; intentionally separate
+   * from `IProjectionDeltaStateEntity` so the typed entity stays SDK-clean.
+   */
+  async getWithEtag(
+    sourceListKind: SourceListKind,
+  ): Promise<{ entity: IProjectionDeltaStateEntity; etag: string } | null> {
+    await this.ensureTable();
+    try {
+      const raw = await this.client.getEntity<Record<string, unknown>>(
+        PROJECTION_STATE_PARTITION_KEY,
+        deltaRowKey(sourceListKind),
+      );
+      const etag = (raw as { etag?: string }).etag;
+      if (typeof etag !== 'string' || etag.length === 0) {
+        throw new Error(
+          `ProjectionDeltaStateRepository.getWithEtag: storage returned no ETag for source list '${sourceListKind}'.`,
+        );
+      }
+      return { entity: deserialize(raw), etag };
+    } catch (err: unknown) {
+      if ((err as { statusCode?: number }).statusCode === 404) return null;
+      throw err;
+    }
+  }
+
   async initializeBaseline(args: {
     sourceListKind: SourceListKind;
     deltaLink: string;

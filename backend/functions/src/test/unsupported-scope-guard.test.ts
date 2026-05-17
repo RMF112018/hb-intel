@@ -114,6 +114,7 @@ describe('P5-02 Unsupported scope regression guard', () => {
       'myProjectsProjectionWebhook',
       'myProjectsProjectionSubscriptionRenewal',
       'myProjectsProjectionSubscriptionAdmin',
+      'myProjectsProjectionSyncWorker',
     ]);
 
     const functionsDir = resolve(FUNCTIONS_SRC, 'functions');
