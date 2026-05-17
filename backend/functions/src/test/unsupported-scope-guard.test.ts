@@ -112,6 +112,8 @@ describe('P5-02 Unsupported scope regression guard', () => {
       'timerFullSpec',
       'legacyFallbackDiscovery',
       'myProjectsProjectionWebhook',
+      'myProjectsProjectionSubscriptionRenewal',
+      'myProjectsProjectionSubscriptionAdmin',
     ]);
 
     const functionsDir = resolve(FUNCTIONS_SRC, 'functions');

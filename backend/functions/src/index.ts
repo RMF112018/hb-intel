@@ -11,6 +11,9 @@ import './functions/notifications/index.js';
 import './functions/legacyFallbackDiscovery/index.js';
 // My Projects projection — Microsoft Graph webhook ingress (B05.13 Prompt 04).
 import './functions/myProjectsProjectionWebhook/index.js';
+// My Projects projection — Graph subscription renewal timer + admin route (B05.13 Prompt 05).
+import './functions/myProjectsProjectionSubscriptionRenewal/index.js';
+import './functions/myProjectsProjectionSubscriptionAdmin/index.js';
 // Legacy fallback review/admin routes. This module is the single source of
 // /admin/legacy-fallback/review/* registrations and is also imported by the
 // admin-control-plane host so both composition paths stay in sync.
