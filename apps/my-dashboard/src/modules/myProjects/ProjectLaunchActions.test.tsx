@@ -94,16 +94,15 @@ const UNAVAILABLE_DOCUMENT_CRUNCH: MyProjectLinkItem['documentCrunchAction'] = {
   label: 'Document Crunch unavailable',
 };
 
-describe('ProjectLaunchActions — non-phone grid', () => {
-  it('renders only available destinations in locked order with the grid shape marker', () => {
+describe('ProjectLaunchActions — non-phone rail', () => {
+  it('renders only available destinations in locked order with the rail shape marker', () => {
     const row = makeRow({});
     const { container } = render(<Harness row={row} mode="desktop" />);
 
-    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
-    expect(grid).not.toBeNull();
-    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('4');
-    expect(grid!.getAttribute('data-my-projects-launch-layout')).toBe('two-by-two');
-    expect(container.querySelector('[data-my-projects-launch-shape="inline"]')).toBeNull();
+    const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
+    expect(rail).not.toBeNull();
+    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('4');
+    expect(rail!.getAttribute('data-my-projects-launch-rail-density')).toBe('compact');
     expect(container.querySelector('[data-my-projects-launch-trigger]')).toBeNull();
     expect(getDrawer()).toBeNull();
 
@@ -200,12 +199,11 @@ describe('ProjectLaunchActions — non-phone grid', () => {
       container.querySelectorAll('[data-my-projects-launch-option-state="unavailable"]').length,
     ).toBe(0);
 
-    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
-    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('2');
-    expect(grid!.getAttribute('data-my-projects-launch-layout')).toBe('pair');
+    const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
+    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('2');
   });
 
-  it('renders a single-action row that spans both columns (single-full layout)', () => {
+  it('renders a single-action rail', () => {
     const row = makeRow({
       procoreAction: UNAVAILABLE_PROCORE,
       buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
@@ -213,22 +211,20 @@ describe('ProjectLaunchActions — non-phone grid', () => {
     });
     const { container } = render(<Harness row={row} mode="desktop" />);
 
-    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
-    expect(grid).not.toBeNull();
-    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('1');
-    expect(grid!.getAttribute('data-my-projects-launch-layout')).toBe('single-full');
+    const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
+    expect(rail).not.toBeNull();
+    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('1');
     expect(container.querySelectorAll('[data-my-projects-launch-option]').length).toBe(1);
   });
 
-  it('renders three actions with the third-full layout marker', () => {
+  it('renders three actions in rail order', () => {
     const row = makeRow({
       documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
     });
     const { container } = render(<Harness row={row} mode="desktop" />);
 
-    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
-    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('3');
-    expect(grid!.getAttribute('data-my-projects-launch-layout')).toBe('third-full');
+    const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
+    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('3');
     const options = Array.from(
       container.querySelectorAll<HTMLElement>('[data-my-projects-launch-option]'),
     );
@@ -254,12 +250,12 @@ describe('ProjectLaunchActions — non-phone grid', () => {
     expect(hasAvailableLaunchActions(row)).toBe(false);
   });
 
-  it('shares the same grid shape on tabletLandscape', () => {
+  it('shares the same rail shape on tabletLandscape', () => {
     const row = makeRow({});
     const { container } = render(<Harness row={row} mode="tabletLandscape" />);
-    const grid = container.querySelector('[data-my-projects-launch-shape="grid"]');
-    expect(grid).not.toBeNull();
-    expect(grid!.getAttribute('data-my-projects-launch-count')).toBe('4');
+    const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
+    expect(rail).not.toBeNull();
+    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('4');
     expect(container.querySelector('[data-my-projects-launch-trigger]')).toBeNull();
     expect(container.querySelectorAll('[data-my-projects-launch-option]').length).toBe(4);
   });
@@ -279,7 +275,7 @@ describe('ProjectLaunchActions — phone drawer mode', () => {
     expect(trigger.getAttribute('aria-label')).toBe(
       'Open launch options for Harbor Office Renovation',
     );
-    expect(container.querySelector('[data-my-projects-launch-shape="grid"]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-launch-shape="rail"]')).toBeNull();
     expect(getDrawer()).toBeNull();
   });
 

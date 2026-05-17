@@ -18,7 +18,6 @@ export interface ProjectLaunchActionsProps {
 }
 
 type LaunchOptionKey = 'sharepoint' | 'procore' | 'building-connected' | 'document-crunch';
-type LaunchLayout = 'single-full' | 'pair' | 'third-full' | 'two-by-two';
 
 interface LaunchOptionView {
   readonly key: LaunchOptionKey;
@@ -83,13 +82,6 @@ export function hasAvailableLaunchActions(row: MyProjectLinkItem): boolean {
   return buildAvailableOptions(row).length > 0;
 }
 
-function layoutForCount(count: number): LaunchLayout {
-  if (count === 1) return 'single-full';
-  if (count === 2) return 'pair';
-  if (count === 3) return 'third-full';
-  return 'two-by-two';
-}
-
 interface LaunchOptionAnchorProps {
   readonly option: LaunchOptionView;
   readonly onActivate?: () => void;
@@ -112,19 +104,18 @@ function LaunchOptionAnchor({ option, onActivate }: LaunchOptionAnchorProps) {
   );
 }
 
-interface InlineActionGridProps {
+interface InlineActionRailProps {
   readonly options: readonly LaunchOptionView[];
 }
 
-function InlineActionGrid({ options }: InlineActionGridProps) {
+function InlineActionRail({ options }: InlineActionRailProps) {
   if (options.length === 0) return null;
-  const layout = layoutForCount(options.length);
   return (
     <div
-      className={styles.grid}
-      data-my-projects-launch-shape="grid"
+      className={styles.rail}
+      data-my-projects-launch-shape="rail"
       data-my-projects-launch-count={options.length}
-      data-my-projects-launch-layout={layout}
+      data-my-projects-launch-rail-density="compact"
     >
       {options.map((option) => (
         <LaunchOptionAnchor key={option.key} option={option} />
@@ -205,7 +196,7 @@ export function ProjectLaunchActions({
   const options = buildAvailableOptions(row);
 
   if (mode !== 'phone') {
-    return <InlineActionGrid options={options} />;
+    return <InlineActionRail options={options} />;
   }
 
   return (

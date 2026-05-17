@@ -4,6 +4,7 @@ import {
   type MyProjectAssignmentRoleId,
   type MyProjectLinkItem,
 } from '@hbc/models/myWork';
+import { useMyWorkBentoContext } from '../../layout/MyWorkBentoGrid.js';
 import { ProjectLaunchActions, hasAvailableLaunchActions } from './ProjectLaunchActions.js';
 import styles from './ProjectPortfolioTile.module.css';
 
@@ -22,6 +23,7 @@ function sortedRoleLabels(roles: readonly MyProjectAssignmentRoleId[]): readonly
 }
 
 export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortfolioTileProps) {
+  const { mode } = useMyWorkBentoContext();
   const roleOverflowId = useId();
   const [roleOverflowOpen, setRoleOverflowOpen] = useState(false);
 
@@ -29,63 +31,69 @@ export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortf
   const primaryRoleLabel = labels[0];
   const overflowLabels = labels.slice(1);
   const hasLaunchActions = hasAvailableLaunchActions(row);
+  const isPhone = mode === 'phone';
+  const tileLayout = !isPhone && hasLaunchActions ? 'content-rail' : 'content-only';
 
   return (
     <article
       className={styles.tile}
       data-my-projects-tile={row.recordKey}
       data-my-projects-tile-source={row.source}
+      data-my-projects-tile-layout={tileLayout}
     >
-      <div className={styles.identity} data-my-projects-identity="">
-        <p className={styles.projectName} data-my-projects-project-name="">
-          {row.projectName}
-        </p>
-        <p className={styles.projectNumber} data-my-projects-project-number="">
-          {row.projectNumber}
-        </p>
-      </div>
-
-      <div className={styles.meta}>
-        {row.projectStage ? (
-          <p className={styles.projectStage} data-my-projects-project-stage="">
-            {row.projectStage}
+      <div className={styles.contentColumn}>
+        <div className={styles.identity} data-my-projects-identity="">
+          <p className={styles.projectName} data-my-projects-project-name="">
+            {row.projectName}
           </p>
+          <p className={styles.projectNumber} data-my-projects-project-number="">
+            {row.projectNumber}
+          </p>
+          <span className={styles.identityAccent} aria-hidden="true" />
+        </div>
+
+        <div className={styles.meta}>
+          {row.projectStage ? (
+            <p className={styles.projectStage} data-my-projects-project-stage="">
+              {row.projectStage}
+            </p>
+          ) : null}
+        </div>
+
+        {primaryRoleLabel ? (
+          <div className={styles.roleRow}>
+            <span className={styles.primaryRole} data-my-projects-primary-role="">
+              {primaryRoleLabel}
+            </span>
+            {overflowLabels.length > 0 ? (
+              <>
+                <button
+                  type="button"
+                  className={styles.roleOverflow}
+                  aria-expanded={roleOverflowOpen ? 'true' : 'false'}
+                  aria-controls={roleOverflowId}
+                  onClick={() => setRoleOverflowOpen((current) => !current)}
+                  data-my-projects-role-overflow=""
+                >
+                  +{overflowLabels.length}
+                </button>
+                <div
+                  id={roleOverflowId}
+                  hidden={!roleOverflowOpen}
+                  className={styles.roleOverflowDetails}
+                  data-my-projects-role-overflow-details=""
+                >
+                  {overflowLabels.join(', ')}
+                </div>
+              </>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
       {hasLaunchActions ? (
-        <div className={styles.actions} data-my-projects-tile-actions="">
+        <div className={styles.launchRail} data-my-projects-tile-actions="">
           <ProjectLaunchActions row={row} isDrawerOpen={isOpen} onDrawerOpenChange={onOpenChange} />
-        </div>
-      ) : null}
-
-      {primaryRoleLabel ? (
-        <div className={styles.roleRow}>
-          <span className={styles.primaryRole} data-my-projects-primary-role="">
-            {primaryRoleLabel}
-          </span>
-          {overflowLabels.length > 0 ? (
-            <>
-              <button
-                type="button"
-                className={styles.roleOverflow}
-                aria-expanded={roleOverflowOpen ? 'true' : 'false'}
-                aria-controls={roleOverflowId}
-                onClick={() => setRoleOverflowOpen((current) => !current)}
-                data-my-projects-role-overflow=""
-              >
-                +{overflowLabels.length}
-              </button>
-              <div
-                id={roleOverflowId}
-                hidden={!roleOverflowOpen}
-                className={styles.roleOverflowDetails}
-                data-my-projects-role-overflow-details=""
-              >
-                {overflowLabels.join(', ')}
-              </div>
-            </>
-          ) : null}
         </div>
       ) : null}
     </article>
