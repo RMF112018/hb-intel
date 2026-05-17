@@ -60,3 +60,32 @@ export {
   type IProjectionWebhookConfig,
   type ProjectionConfigIssueCode,
 } from './projection-config.js';
+
+export {
+  DEACTIVATION_REASON_CHOICES,
+  LAUNCH_ACTION_STATE_CHOICES,
+  MY_PROJECTS_REGISTRY_LIST_DESCRIPTOR,
+  MY_PROJECTS_REGISTRY_LIST_DESCRIPTORS,
+  MY_PROJECTS_REGISTRY_LIST_GOVERNANCE,
+  MY_PROJECTS_REGISTRY_LIST_HOST_SITE_URL,
+  MY_PROJECTS_REGISTRY_LIST_TITLE,
+  PROJECTION_SOURCE_CHOICES,
+  SHAREPOINT_ACTION_KIND_CHOICES,
+  SHAREPOINT_ACTION_STATE_CHOICES,
+  getMyProjectsRegistryListHostSiteUrl,
+  type DeactivationReasonChoice,
+  type IMyProjectsRegistryListGovernance,
+  type LaunchActionStateChoice,
+  type ProjectionSourceChoice,
+  type SharePointActionKindChoice,
+  type SharePointActionStateChoice,
+} from './registry-list-descriptor.js';
+
+export {
+  MY_PROJECTS_REGISTRY_READINESS_STATES,
+  buildMyProjectsRegistrySchemaReadinessReport,
+  type MyProjectsRegistryReadinessState,
+  type MyProjectsRegistrySchemaReadinessReport,
+  type RegistryFieldReadinessEntry,
+  type RegistryListFieldSnapshot,
+} from './registry-schema-readiness.js';

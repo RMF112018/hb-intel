@@ -14,11 +14,7 @@ import {
   ManagedIdentityTokenService,
   type IManagedIdentityTokenService,
 } from './managed-identity-token-service.js';
-import {
-  getPnPContext,
-  isNotFoundError,
-  waitForSite,
-} from './sharepoint-common.js';
+import { getPnPContext, isNotFoundError, waitForSite } from './sharepoint-common.js';
 import { createSharePointField } from './sharepoint-schema-provisioning/index.js';
 
 export interface IListDefinition {
@@ -34,11 +30,21 @@ export interface IListDefinition {
 export interface IFieldDefinition {
   internalName: string;
   displayName: string;
-  type: 'Text' | 'Number' | 'DateTime' | 'Boolean' | 'Choice' | 'User' | 'URL' | 'Lookup' | 'MultiLineText';
+  type:
+    | 'Text'
+    | 'Number'
+    | 'DateTime'
+    | 'Boolean'
+    | 'Choice'
+    | 'User'
+    | 'URL'
+    | 'Lookup'
+    | 'MultiLineText';
   required?: boolean;
   choices?: string[];
   defaultValue?: string;
   indexed?: boolean;
+  unique?: boolean;
   lookupListTitle?: string;
   lookupFieldName?: string;
 }
@@ -115,7 +121,10 @@ export class SharePointProvisioningService implements ISharePointProvisioningSer
   }
 
   private getSiteUrl(projectNumber: string, projectName: string): string {
-    const slug = projectName.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 40);
+    const slug = projectName
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-')
+      .slice(0, 40);
     return `${this.tenantUrl}/sites/${projectNumber}-${slug}`;
   }
 
@@ -323,7 +332,9 @@ export class SharePointProvisioningService implements ISharePointProvisioningSer
     const sp: any = await this.openPnPContext(siteUrl);
     const folderUrl = `/${new URL(siteUrl).pathname.slice(1)}/${entry.targetLibrary}`;
     const folder = sp.web.getFolderByServerRelativePath(folderUrl);
-    await folder.files.addUsingPath(entry.fileName, fs.readFileSync(fullPath), { Overwrite: false });
+    await folder.files.addUsingPath(entry.fileName, fs.readFileSync(fullPath), {
+      Overwrite: false,
+    });
     return true;
   }
 
@@ -385,7 +396,8 @@ export class SharePointProvisioningService implements ISharePointProvisioningSer
     await sp.web.breakRoleInheritance(false, true);
 
     const tenantId = process.env.AZURE_TENANT_ID;
-    if (!tenantId) throw new Error('AZURE_TENANT_ID env var is required for group permission assignment');
+    if (!tenantId)
+      throw new Error('AZURE_TENANT_ID env var is required for group permission assignment');
     const claimIdentity = `c:0t.c|tenant|${entraGroupId}`;
     const userInfo = await sp.web.ensureUser(claimIdentity);
     const principalId: number = userInfo.data?.Id ?? userInfo.Id;
