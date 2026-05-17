@@ -24,8 +24,16 @@ describe('P5-02 Unsupported scope regression guard', () => {
 
     // Domain services that must be lazy (getter-based, not eagerly constructed)
     const lazyDomains = [
-      'leads', 'projects', 'estimating', 'schedule', 'buyout',
-      'compliance', 'contracts', 'risk', 'scorecards', 'pmp',
+      'leads',
+      'projects',
+      'estimating',
+      'schedule',
+      'buyout',
+      'compliance',
+      'contracts',
+      'risk',
+      'scorecards',
+      'pmp',
     ];
 
     for (const domain of lazyDomains) {
@@ -81,11 +89,29 @@ describe('P5-02 Unsupported scope regression guard', () => {
   it('no new function registration files exist without documentation', () => {
     // Track the expected function directories — any new ones should be reviewed
     const expectedDomains = new Set([
-      'acknowledgments', 'adminApi', 'buyout', 'cleanupIdempotency', 'compliance',
-      'contracts', 'estimating', 'health', 'leads', 'notifications',
-      'pmp', 'projectRequests', 'projects', 'provisioningSaga',
-      'proxy', 'risk', 'safetyFieldExcellenceWeeklyRollup', 'schedule',
-      'scorecards', 'signalr', 'timerFullSpec', 'legacyFallbackDiscovery',
+      'acknowledgments',
+      'adminApi',
+      'buyout',
+      'cleanupIdempotency',
+      'compliance',
+      'contracts',
+      'estimating',
+      'health',
+      'leads',
+      'notifications',
+      'pmp',
+      'projectRequests',
+      'projects',
+      'provisioningSaga',
+      'proxy',
+      'risk',
+      'safetyFieldExcellenceWeeklyRollup',
+      'schedule',
+      'scorecards',
+      'signalr',
+      'timerFullSpec',
+      'legacyFallbackDiscovery',
+      'myProjectsProjectionWebhook',
     ]);
 
     const functionsDir = resolve(FUNCTIONS_SRC, 'functions');
