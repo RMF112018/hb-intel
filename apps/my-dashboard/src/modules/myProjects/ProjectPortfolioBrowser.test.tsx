@@ -245,3 +245,52 @@ describe('ProjectPortfolioBrowser — in-browser launch drawer concurrency (phon
     expect(document.body.querySelectorAll('[data-my-projects-launch-drawer]').length).toBe(1);
   });
 });
+
+describe('ProjectPortfolioBrowser — non-phone rail split parity', () => {
+  it('caps direct actions at two and exposes More Resources overflow trigger on fully ready tile', () => {
+    render(<BrowserHarness mode="desktop" initialOpen />);
+
+    const tiles = Array.from(
+      document.body.querySelectorAll<HTMLElement>(
+        '[data-my-projects-portfolio-browser] [data-my-projects-tile]',
+      ),
+    );
+    const harborTile = tiles.find(
+      (tile) =>
+        tile.querySelector('[data-my-projects-project-number]')?.textContent === '24-100-01',
+    ) as HTMLElement;
+    expect(harborTile).toBeTruthy();
+
+    const rail = harborTile.querySelector('[data-my-projects-launch-shape="rail"]');
+    expect(rail?.getAttribute('data-my-projects-primary-action-count')).toBe('2');
+    expect(rail?.getAttribute('data-my-projects-overflow-action-count')).toBe('2');
+    const direct = Array.from(
+      harborTile.querySelectorAll<HTMLElement>('[data-my-projects-launch-option]'),
+    );
+    expect(direct.map((node) => node.getAttribute('data-my-projects-launch-option'))).toEqual([
+      'sharepoint',
+      'procore',
+    ]);
+    expect(harborTile.querySelector('[data-my-projects-more-resources-trigger]')?.textContent).toBe(
+      'More Resources · 2',
+    );
+  });
+
+  it('keeps only one overflow menu open at a time across browser tiles', () => {
+    render(<BrowserHarness mode="desktop" initialOpen />);
+    const triggers = Array.from(
+      document.body.querySelectorAll<HTMLButtonElement>(
+        '[data-my-projects-portfolio-browser] [data-my-projects-more-resources-trigger]',
+      ),
+    );
+    expect(triggers.length).toBeGreaterThanOrEqual(2);
+
+    fireEvent.click(triggers[0]!);
+    expect(document.body.querySelectorAll('[data-my-projects-more-resources-menu]').length).toBe(1);
+
+    fireEvent.click(triggers[1]!);
+    expect(document.body.querySelectorAll('[data-my-projects-more-resources-menu]').length).toBe(1);
+    expect(triggers[0]!.getAttribute('aria-expanded')).toBe('false');
+    expect(triggers[1]!.getAttribute('aria-expanded')).toBe('true');
+  });
+});

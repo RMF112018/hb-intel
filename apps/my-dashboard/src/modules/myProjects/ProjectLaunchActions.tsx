@@ -13,8 +13,8 @@ import styles from './ProjectLaunchActions.module.css';
 
 export interface ProjectLaunchActionsProps {
   readonly row: MyProjectLinkItem;
-  readonly isDrawerOpen: boolean;
-  readonly onDrawerOpenChange: (open: boolean) => void;
+  readonly isActionOverlayOpen: boolean;
+  readonly onActionOverlayOpenChange: (open: boolean) => void;
 }
 
 type LaunchOptionKey = 'sharepoint' | 'procore' | 'building-connected' | 'document-crunch';
@@ -82,6 +82,20 @@ export function hasAvailableLaunchActions(row: MyProjectLinkItem): boolean {
   return buildAvailableOptions(row).length > 0;
 }
 
+interface SplitDesktopOptions {
+  readonly primaryVisibleOptions: readonly LaunchOptionView[];
+  readonly overflowOptions: readonly LaunchOptionView[];
+}
+
+function splitAvailableOptionsForDesktopRail(
+  allAvailableOptions: readonly LaunchOptionView[],
+): SplitDesktopOptions {
+  return {
+    primaryVisibleOptions: allAvailableOptions.slice(0, 2),
+    overflowOptions: allAvailableOptions.slice(2),
+  };
+}
+
 interface LaunchOptionAnchorProps {
   readonly option: LaunchOptionView;
   readonly onActivate?: () => void;
@@ -105,21 +119,101 @@ function LaunchOptionAnchor({ option, onActivate }: LaunchOptionAnchorProps) {
 }
 
 interface InlineActionRailProps {
-  readonly options: readonly LaunchOptionView[];
+  readonly primaryVisibleOptions: readonly LaunchOptionView[];
+  readonly overflowOptions: readonly LaunchOptionView[];
+  readonly isOpen: boolean;
+  readonly onOpenChange: (open: boolean) => void;
 }
 
-function InlineActionRail({ options }: InlineActionRailProps) {
-  if (options.length === 0) return null;
+function InlineOverflowMenu({
+  overflowOptions,
+  isOpen,
+  onOpenChange,
+}: {
+  readonly overflowOptions: readonly LaunchOptionView[];
+  readonly isOpen: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+}) {
+  const { refs, context } = useFloating({
+    open: isOpen,
+    onOpenChange,
+  });
+  const click = useClick(context);
+  const dismiss = useDismiss(context, { escapeKey: true, outsidePress: true });
+  const role = useRole(context, { role: 'menu' });
+  const { getReferenceProps, getFloatingProps } = useInteractions([click, dismiss, role]);
+
+  if (overflowOptions.length === 0) return null;
+
+  const closeMenu = () => onOpenChange(false);
+
+  return (
+    <>
+      <button
+        ref={refs.setReference}
+        type="button"
+        className={styles.moreResourcesTrigger}
+        aria-haspopup="menu"
+        aria-expanded={isOpen ? 'true' : 'false'}
+        data-my-projects-more-resources-trigger=""
+        {...getReferenceProps()}
+      >
+        More Resources · {overflowOptions.length}
+      </button>
+      {isOpen ? (
+        <FloatingPortal>
+          <FloatingFocusManager context={context} modal returnFocus>
+            <div
+              ref={refs.setFloating}
+              className={styles.moreResourcesMenu}
+              data-my-projects-more-resources-menu=""
+              {...getFloatingProps()}
+            >
+              {overflowOptions.map((option) => (
+                <a
+                  key={option.key}
+                  className={styles.moreResourcesOption}
+                  href={option.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={option.ariaLabel}
+                  data-my-projects-more-resource-option={option.key}
+                  data-my-projects-launch-option-state="available"
+                  onClick={closeMenu}
+                >
+                  {option.label}
+                </a>
+              ))}
+            </div>
+          </FloatingFocusManager>
+        </FloatingPortal>
+      ) : null}
+    </>
+  );
+}
+
+function InlineActionRail({
+  primaryVisibleOptions,
+  overflowOptions,
+  isOpen,
+  onOpenChange,
+}: InlineActionRailProps) {
+  if (primaryVisibleOptions.length === 0 && overflowOptions.length === 0) return null;
   return (
     <div
       className={styles.rail}
       data-my-projects-launch-shape="rail"
-      data-my-projects-launch-count={options.length}
-      data-my-projects-launch-rail-density="compact"
+      data-my-projects-primary-action-count={primaryVisibleOptions.length}
+      data-my-projects-overflow-action-count={overflowOptions.length}
     >
-      {options.map((option) => (
+      {primaryVisibleOptions.map((option) => (
         <LaunchOptionAnchor key={option.key} option={option} />
       ))}
+      <InlineOverflowMenu
+        overflowOptions={overflowOptions}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+      />
     </div>
   );
 }
@@ -189,22 +283,31 @@ function DrawerActions({ options, projectName, isOpen, onOpenChange }: DrawerAct
 
 export function ProjectLaunchActions({
   row,
-  isDrawerOpen,
-  onDrawerOpenChange,
+  isActionOverlayOpen,
+  onActionOverlayOpenChange,
 }: ProjectLaunchActionsProps) {
   const { mode } = useMyWorkBentoContext();
-  const options = buildAvailableOptions(row);
+  const allAvailableOptions = buildAvailableOptions(row);
 
   if (mode !== 'phone') {
-    return <InlineActionRail options={options} />;
+    const { primaryVisibleOptions, overflowOptions } =
+      splitAvailableOptionsForDesktopRail(allAvailableOptions);
+    return (
+      <InlineActionRail
+        primaryVisibleOptions={primaryVisibleOptions}
+        overflowOptions={overflowOptions}
+        isOpen={isActionOverlayOpen}
+        onOpenChange={onActionOverlayOpenChange}
+      />
+    );
   }
 
   return (
     <DrawerActions
-      options={options}
+      options={allAvailableOptions}
       projectName={row.projectName}
-      isOpen={isDrawerOpen}
-      onOpenChange={onDrawerOpenChange}
+      isOpen={isActionOverlayOpen}
+      onOpenChange={onActionOverlayOpenChange}
     />
   );
 }

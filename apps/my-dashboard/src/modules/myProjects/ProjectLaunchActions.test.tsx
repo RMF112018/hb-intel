@@ -62,8 +62,8 @@ function Harness({
     <MyWorkBentoGrid mode={mode}>
       <ProjectLaunchActions
         row={row}
-        isDrawerOpen={open}
-        onDrawerOpenChange={(next) => {
+        isActionOverlayOpen={open}
+        onActionOverlayOpenChange={(next) => {
           setOpen(next);
           onOpen?.(next);
         }}
@@ -95,14 +95,14 @@ const UNAVAILABLE_DOCUMENT_CRUNCH: MyProjectLinkItem['documentCrunchAction'] = {
 };
 
 describe('ProjectLaunchActions — non-phone rail', () => {
-  it('renders only available destinations in locked order with the rail shape marker', () => {
+  it('renders only two direct actions and overflow trigger when additional actions exist', () => {
     const row = makeRow({});
     const { container } = render(<Harness row={row} mode="desktop" />);
 
     const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
     expect(rail).not.toBeNull();
-    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('4');
-    expect(rail!.getAttribute('data-my-projects-launch-rail-density')).toBe('compact');
+    expect(rail!.getAttribute('data-my-projects-primary-action-count')).toBe('2');
+    expect(rail!.getAttribute('data-my-projects-overflow-action-count')).toBe('2');
     expect(container.querySelector('[data-my-projects-launch-trigger]')).toBeNull();
     expect(getDrawer()).toBeNull();
 
@@ -112,53 +112,143 @@ describe('ProjectLaunchActions — non-phone rail', () => {
     expect(options.map((node) => node.getAttribute('data-my-projects-launch-option'))).toEqual([
       'sharepoint',
       'procore',
+    ]);
+    expect(container.querySelector('[data-my-projects-more-resources-trigger]')?.textContent).toBe(
+      'More Resources · 2',
+    );
+    expect(container.querySelector('[data-my-projects-more-resources-menu]')).toBeNull();
+  });
+
+  it('shows no overflow trigger or menu seam when overflow count is zero', () => {
+    const row = makeRow({
+      buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
+      documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
+    });
+    const { container } = render(<Harness row={row} mode="desktop" />);
+
+    const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
+    expect(rail).not.toBeNull();
+    expect(rail!.getAttribute('data-my-projects-primary-action-count')).toBe('2');
+    expect(rail!.getAttribute('data-my-projects-overflow-action-count')).toBe('0');
+    expect(container.querySelector('[data-my-projects-more-resources-trigger]')).toBeNull();
+    expect(container.querySelector('[data-my-projects-more-resources-menu]')).toBeNull();
+  });
+
+  it('keeps direct actions deterministic when SharePoint and Procore are unavailable', () => {
+    const row = makeRow({
+      sharePointAction: UNAVAILABLE_SHAREPOINT,
+      procoreAction: UNAVAILABLE_PROCORE,
+    });
+    const { container } = render(<Harness row={row} mode="desktop" />);
+
+    const options = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-my-projects-launch-option]'),
+    );
+    expect(options.map((node) => node.getAttribute('data-my-projects-launch-option'))).toEqual([
       'building-connected',
       'document-crunch',
     ]);
-    expect(options.every((node) => node.tagName === 'A')).toBe(true);
-    expect(
-      options.every(
-        (node) => node.getAttribute('data-my-projects-launch-option-state') === 'available',
-      ),
-    ).toBe(true);
   });
 
-  it('renders every available destination as a safe external anchor with concise label and explicit aria-label', () => {
+  it('opens overflow menu and renders overflow-only actions in order', () => {
     const row = makeRow({});
     const { container } = render(<Harness row={row} mode="desktop" />);
+    const trigger = container.querySelector(
+      '[data-my-projects-more-resources-trigger]',
+    ) as HTMLButtonElement;
+    fireEvent.click(trigger);
 
-    const sharePoint = container.querySelector(
-      '[data-my-projects-launch-option="sharepoint"]',
-    ) as HTMLAnchorElement;
-    expect(sharePoint.tagName).toBe('A');
-    expect(sharePoint.getAttribute('href')).toBe(row.sharePointAction.href!);
-    expect(sharePoint.getAttribute('target')).toBe('_blank');
-    expect(sharePoint.getAttribute('rel')).toBe('noopener noreferrer');
-    expect(sharePoint.textContent).toBe('SharePoint Site');
-    expect(sharePoint.getAttribute('aria-label')).toBe(
-      'Open SharePoint Site for Harbor Office Renovation',
+    const menu = document.body.querySelector('[data-my-projects-more-resources-menu]') as HTMLElement;
+    expect(menu).not.toBeNull();
+    const options = Array.from(menu.querySelectorAll<HTMLElement>('[data-my-projects-more-resource-option]'));
+    expect(options.map((node) => node.getAttribute('data-my-projects-more-resource-option'))).toEqual([
+      'building-connected',
+      'document-crunch',
+    ]);
+  });
+
+  it('preserves safe external anchor attributes for overflow actions', () => {
+    const row = makeRow({});
+    const { container } = render(<Harness row={row} mode="desktop" />);
+    fireEvent.click(
+      container.querySelector('[data-my-projects-more-resources-trigger]') as HTMLButtonElement,
     );
-
-    const procore = container.querySelector(
-      '[data-my-projects-launch-option="procore"]',
+    const option = document.body.querySelector(
+      '[data-my-projects-more-resource-option="building-connected"]',
     ) as HTMLAnchorElement;
-    expect(procore.textContent).toBe('Procore');
-    expect(procore.getAttribute('aria-label')).toBe('Open Procore for Harbor Office Renovation');
-
-    const buildingConnected = container.querySelector(
-      '[data-my-projects-launch-option="building-connected"]',
-    ) as HTMLAnchorElement;
-    expect(buildingConnected.textContent).toBe('BuildingConnected');
-    expect(buildingConnected.getAttribute('aria-label')).toBe(
+    expect(option.getAttribute('target')).toBe('_blank');
+    expect(option.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(option.getAttribute('aria-label')).toBe(
       'Open BuildingConnected for Harbor Office Renovation',
     );
+  });
 
-    const documentCrunch = container.querySelector(
-      '[data-my-projects-launch-option="document-crunch"]',
+  it('closes overflow menu on Escape and restores focus to trigger', () => {
+    const row = makeRow({});
+    const { container } = render(<Harness row={row} mode="desktop" />);
+    const trigger = container.querySelector(
+      '[data-my-projects-more-resources-trigger]',
+    ) as HTMLButtonElement;
+    trigger.focus();
+    fireEvent.click(trigger);
+    expect(document.body.querySelector('[data-my-projects-more-resources-menu]')).not.toBeNull();
+
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+    expect(document.body.querySelector('[data-my-projects-more-resources-menu]')).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('closes overflow menu on outside press', () => {
+    const row = makeRow({});
+    const { container } = render(<Harness row={row} mode="desktop" />);
+    fireEvent.click(
+      container.querySelector('[data-my-projects-more-resources-trigger]') as HTMLButtonElement,
+    );
+    expect(document.body.querySelector('[data-my-projects-more-resources-menu]')).not.toBeNull();
+
+    fireEvent.pointerDown(document.body);
+    fireEvent.mouseDown(document.body);
+    fireEvent.click(document.body);
+    expect(document.body.querySelector('[data-my-projects-more-resources-menu]')).toBeNull();
+  });
+
+  it('closes overflow menu when a menu action is activated', () => {
+    const row = makeRow({});
+    const { container } = render(<Harness row={row} mode="desktop" />);
+    fireEvent.click(
+      container.querySelector('[data-my-projects-more-resources-trigger]') as HTMLButtonElement,
+    );
+    const overflowOption = document.body.querySelector(
+      '[data-my-projects-more-resource-option="building-connected"]',
     ) as HTMLAnchorElement;
-    expect(documentCrunch.textContent).toBe('Document Crunch');
-    expect(documentCrunch.getAttribute('aria-label')).toBe(
-      'Open Document Crunch for Harbor Office Renovation',
+    fireEvent.click(overflowOption);
+    expect(document.body.querySelector('[data-my-projects-more-resources-menu]')).toBeNull();
+  });
+
+  it('renders single direct action and no overflow trigger when only one action exists', () => {
+    const row = makeRow({
+      procoreAction: UNAVAILABLE_PROCORE,
+      buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
+      documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
+    });
+    const { container } = render(<Harness row={row} mode="desktop" />);
+
+    const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
+    expect(rail!.getAttribute('data-my-projects-primary-action-count')).toBe('1');
+    expect(rail!.getAttribute('data-my-projects-overflow-action-count')).toBe('0');
+    expect(container.querySelector('[data-my-projects-more-resources-trigger]')).toBeNull();
+  });
+
+  it('renders 2 direct + overflow 1 for three available actions', () => {
+    const row = makeRow({
+      documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
+    });
+    const { container } = render(<Harness row={row} mode="desktop" />);
+    const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
+    expect(rail!.getAttribute('data-my-projects-primary-action-count')).toBe('2');
+    expect(rail!.getAttribute('data-my-projects-overflow-action-count')).toBe('1');
+    expect(container.querySelector('[data-my-projects-more-resources-trigger]')?.textContent).toBe(
+      'More Resources · 1',
     );
   });
 
@@ -198,41 +288,10 @@ describe('ProjectLaunchActions — non-phone rail', () => {
     expect(
       container.querySelectorAll('[data-my-projects-launch-option-state="unavailable"]').length,
     ).toBe(0);
-
     const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
-    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('2');
-  });
-
-  it('renders a single-action rail', () => {
-    const row = makeRow({
-      procoreAction: UNAVAILABLE_PROCORE,
-      buildingConnectedAction: UNAVAILABLE_BUILDING_CONNECTED,
-      documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
-    });
-    const { container } = render(<Harness row={row} mode="desktop" />);
-
-    const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
-    expect(rail).not.toBeNull();
-    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('1');
-    expect(container.querySelectorAll('[data-my-projects-launch-option]').length).toBe(1);
-  });
-
-  it('renders three actions in rail order', () => {
-    const row = makeRow({
-      documentCrunchAction: UNAVAILABLE_DOCUMENT_CRUNCH,
-    });
-    const { container } = render(<Harness row={row} mode="desktop" />);
-
-    const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
-    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('3');
-    const options = Array.from(
-      container.querySelectorAll<HTMLElement>('[data-my-projects-launch-option]'),
-    );
-    expect(options.map((node) => node.getAttribute('data-my-projects-launch-option'))).toEqual([
-      'sharepoint',
-      'procore',
-      'building-connected',
-    ]);
+    expect(rail!.getAttribute('data-my-projects-primary-action-count')).toBe('2');
+    expect(rail!.getAttribute('data-my-projects-overflow-action-count')).toBe('0');
+    expect(container.querySelector('[data-my-projects-more-resources-trigger]')).toBeNull();
   });
 
   it('renders nothing when no available destinations exist', () => {
@@ -255,9 +314,10 @@ describe('ProjectLaunchActions — non-phone rail', () => {
     const { container } = render(<Harness row={row} mode="tabletLandscape" />);
     const rail = container.querySelector('[data-my-projects-launch-shape="rail"]');
     expect(rail).not.toBeNull();
-    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('4');
+    expect(rail!.getAttribute('data-my-projects-primary-action-count')).toBe('2');
+    expect(rail!.getAttribute('data-my-projects-overflow-action-count')).toBe('2');
     expect(container.querySelector('[data-my-projects-launch-trigger]')).toBeNull();
-    expect(container.querySelectorAll('[data-my-projects-launch-option]').length).toBe(4);
+    expect(container.querySelectorAll('[data-my-projects-launch-option]').length).toBe(2);
   });
 });
 

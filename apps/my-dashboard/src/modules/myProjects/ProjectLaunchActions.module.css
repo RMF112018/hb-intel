@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 6px;
+  gap: 5px;
   width: 100%;
 }
 
@@ -13,14 +13,14 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 29px;
-  padding: 4px 9px;
-  border: 1px solid color-mix(in srgb, var(--my-work-executive-ink) 72%, #0f172a 28%);
+  min-height: 27px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--my-work-color-rail-accent) 84%, #0a4f9f 16%);
   border-radius: var(--my-work-radius-md);
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--my-work-executive-ink) 86%, #2563eb 14%) 0%,
-    color-mix(in srgb, var(--my-work-executive-ink) 90%, #1d4ed8 10%) 100%
+    color-mix(in srgb, var(--my-work-color-rail-accent) 92%, #ffffff 8%) 0%,
+    var(--my-work-color-rail-accent) 100%
   );
   font: inherit;
   font-size: 11.75px;
@@ -30,8 +30,8 @@
   text-decoration: none;
   color: #ffffff;
   box-shadow:
-    0 1px 1px rgba(15, 23, 42, 0.16),
-    0 4px 10px rgba(15, 23, 42, 0.14);
+    0 1px 1px rgba(15, 23, 42, 0.1),
+    0 3px 8px rgba(15, 23, 42, 0.12);
   transition:
     background-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
     border-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -46,21 +46,81 @@
 .rowAvailable:hover {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--my-work-executive-ink) 82%, #3b82f6 18%) 0%,
-    color-mix(in srgb, var(--my-work-executive-ink) 86%, #2563eb 14%) 100%
+    color-mix(in srgb, var(--my-work-color-rail-accent) 88%, #ffffff 12%) 0%,
+    color-mix(in srgb, var(--my-work-color-rail-accent) 96%, #0a4f9f 4%) 100%
   );
-  border-color: color-mix(
-    in srgb,
-    var(--my-work-executive-ink) 78%,
-    #1e3a8a 22%
-  );
+  border-color: color-mix(in srgb, var(--my-work-color-rail-accent) 88%, #0a4f9f 12%);
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.18),
-    0 6px 12px rgba(15, 23, 42, 0.18);
+    0 1px 2px rgba(15, 23, 42, 0.12),
+    0 5px 10px rgba(15, 23, 42, 0.14);
 }
 
 .rowAvailable:focus-visible {
-  outline: 2px solid var(--my-work-color-accent);
+  outline: 2px solid var(--my-work-color-rail-accent);
+  outline-offset: 2px;
+}
+
+.moreResourcesTrigger {
+  min-height: 26px;
+  padding: 3px 8px;
+  border-radius: var(--my-work-radius-md);
+  border: 1px solid color-mix(in srgb, var(--my-work-color-rail-accent) 54%, #ffffff 46%);
+  background: color-mix(in srgb, var(--my-work-color-rail-accent) 12%, #ffffff 88%);
+  color: color-mix(in srgb, var(--my-work-color-rail-accent) 74%, var(--my-work-executive-ink) 26%);
+  font: inherit;
+  font-size: 11.25px;
+  font-weight: 700;
+  line-height: 1.15;
+  cursor: pointer;
+  transition:
+    background-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 140ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.moreResourcesTrigger:hover {
+  background: color-mix(in srgb, var(--my-work-color-rail-accent) 16%, #ffffff 84%);
+  border-color: color-mix(in srgb, var(--my-work-color-rail-accent) 68%, #ffffff 32%);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.1);
+}
+
+.moreResourcesTrigger:focus-visible {
+  outline: 2px solid var(--my-work-color-rail-accent);
+  outline-offset: 2px;
+}
+
+.moreResourcesMenu {
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 184px;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--my-work-color-border) 78%, transparent);
+  border-radius: calc(var(--my-work-radius-md) + 1px);
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+}
+
+.moreResourcesOption {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 8px;
+  border-radius: var(--my-work-radius-sm);
+  text-decoration: none;
+  color: var(--my-work-color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.moreResourcesOption:hover {
+  background: color-mix(in srgb, var(--my-work-color-rail-accent) 10%, #ffffff 90%);
+}
+
+.moreResourcesOption:focus-visible {
+  outline: 2px solid var(--my-work-color-rail-accent);
   outline-offset: 2px;
 }
 
@@ -94,7 +154,7 @@
 }
 
 .trigger:focus-visible {
-  outline: 2px solid var(--my-work-color-accent);
+  outline: 2px solid var(--my-work-color-rail-accent);
   outline-offset: 2px;
 }
 

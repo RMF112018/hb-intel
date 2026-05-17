@@ -174,8 +174,11 @@ describe('MyProjectsHomeCard', () => {
     expect(document.body.querySelector('[data-my-projects-launch-drawer]')).toBeNull();
     const rail = harborTile!.querySelector('[data-my-projects-launch-shape="rail"]');
     expect(rail).not.toBeNull();
-    expect(rail!.getAttribute('data-my-projects-launch-count')).toBe('4');
+    expect(rail!.getAttribute('data-my-projects-primary-action-count')).toBe('2');
+    expect(rail!.getAttribute('data-my-projects-overflow-action-count')).toBe('2');
     expect(harborTile!.getAttribute('data-my-projects-tile-layout')).toBe('content-rail');
+    expect(harborTile!.querySelector('[data-my-projects-project-name-accent]')).not.toBeNull();
+    expect(harborTile!.querySelector('[data-my-projects-meta-row]')).not.toBeNull();
 
     const options = Array.from(
       harborTile!.querySelectorAll<HTMLElement>('[data-my-projects-launch-option]'),
@@ -183,10 +186,11 @@ describe('MyProjectsHomeCard', () => {
     expect(options.map((node) => node.getAttribute('data-my-projects-launch-option'))).toEqual([
       'sharepoint',
       'procore',
-      'building-connected',
-      'document-crunch',
     ]);
     expect(options.every((node) => node.tagName === 'A')).toBe(true);
+    expect(
+      harborTile!.querySelector('[data-my-projects-more-resources-trigger]')?.textContent,
+    ).toBe('More Resources · 2');
 
     const sharePointLink = harborTile!.querySelector(
       '[data-my-projects-launch-option="sharepoint"]',
@@ -201,17 +205,8 @@ describe('MyProjectsHomeCard', () => {
     expect(procoreLink.textContent).toBe('Procore');
     expect(procoreLink.getAttribute('href')).toContain('https://app.procore.com/');
 
-    const buildingConnectedLink = harborTile!.querySelector(
-      '[data-my-projects-launch-option="building-connected"]',
-    ) as HTMLAnchorElement;
-    expect(buildingConnectedLink.textContent).toBe('BuildingConnected');
-    expect(buildingConnectedLink.getAttribute('target')).toBe('_blank');
-
-    const documentCrunchLink = harborTile!.querySelector(
-      '[data-my-projects-launch-option="document-crunch"]',
-    ) as HTMLAnchorElement;
-    expect(documentCrunchLink.textContent).toBe('Document Crunch');
-    expect(documentCrunchLink.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(harborTile!.querySelector('[data-my-projects-launch-option="building-connected"]')).toBeNull();
+    expect(harborTile!.querySelector('[data-my-projects-launch-option="document-crunch"]')).toBeNull();
   });
 
   it('omits unavailable launch destinations entirely from the DOM across all tiles', async () => {
