@@ -60,38 +60,47 @@
   );
 }
 
-.statusRail {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 12px;
-  flex-wrap: wrap;
-}
-
-.statusChip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 27px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid var(--adobe-warm-rail);
-  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 56%, white);
-  color: var(--adobe-warm-ink);
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
 .freshness {
   margin: 0;
-  max-width: 34ch;
-  font-size: 12px;
+  max-width: none;
+  font-size: 11px;
   color: color-mix(in srgb, var(--my-work-color-text-muted) 88%, var(--adobe-warm-ink));
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.3;
-  text-wrap: balance;
+  text-wrap: pretty;
+}
+
+.kpiGrid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.kpiCard {
+  margin: 0;
+  padding: 8px 9px;
+  border-radius: 8px;
+  border: 1px solid
+    color-mix(in srgb, var(--my-work-color-border) 78%, var(--adobe-warm-accent-soft));
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 28%, white);
+}
+
+.kpiLabel {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--my-work-color-text-muted) 80%, var(--adobe-warm-ink));
+}
+
+.kpiValue {
+  margin: 5px 0 0;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--adobe-warm-ink);
 }
 
 .activityList {
@@ -119,10 +128,11 @@
 
 .activityMetaRow {
   margin-top: 6px;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: start;
 }
 
 .activityMetadata {
@@ -147,6 +157,7 @@
   color: var(--my-work-color-text-primary);
   text-decoration: none;
   white-space: nowrap;
+  align-self: start;
   transition: background-color 140ms ease-out;
 }
 
@@ -196,15 +207,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
-  border: 1px solid
-    color-mix(in srgb, var(--my-work-color-border) 75%, var(--adobe-warm-accent-soft));
-  border-radius: var(--my-work-radius-md);
-  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 38%, white);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   color: var(--adobe-warm-ink);
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
   font-weight: 700;
   cursor: pointer;
@@ -215,7 +225,7 @@
 }
 
 .optionsButton:hover {
-  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 56%, white);
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 40%, white);
 }
 
 .optionsButton:focus-visible {
@@ -224,8 +234,7 @@
 }
 
 .optionsButton[data-adobe-sign-options-state='open'] {
-  border-color: var(--adobe-warm-accent);
-  background: white;
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 48%, white);
 }
 
 .optionsMenu {
@@ -357,27 +366,29 @@
   outline-offset: 1px;
 }
 
-[data-my-work-card-role='adobe-sign-action-queue'] [data-adobe-sign-action-queue-metrics] {
-  margin-bottom: 4px;
-  padding: 2px 0 0;
+[data-adobe-sign-activity-variant='queue'] [data-adobe-sign-queue-title-line] {
+  margin: 0;
+  font-size: clamp(14px, 1.05vw, 15px);
+  font-weight: 700;
+  color: var(--my-work-color-text-primary);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  min-width: 0;
 }
 
-[data-my-work-card-role='adobe-sign-action-queue'] [data-adobe-sign-action-queue-metrics] > div {
-  border-top-color: color-mix(
-    in srgb,
-    var(--my-work-color-border) 80%,
-    var(--adobe-warm-accent-soft)
-  );
+[data-adobe-sign-activity-variant='queue'] [data-adobe-sign-queue-row-two] {
+  margin-top: 4px;
 }
 
-[data-my-work-card-role='adobe-sign-action-queue'] [data-adobe-sign-action-queue-metrics] dt {
+[data-adobe-sign-activity-variant='queue'] [data-adobe-sign-queue-required-action] {
+  justify-self: end;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--adobe-warm-accent-soft) 70%, white);
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 44%, white);
   font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-[data-my-work-card-role='adobe-sign-action-queue'] [data-adobe-sign-action-queue-metrics] dd {
-  font-weight: 800;
+  font-weight: 600;
+  text-wrap: nowrap;
 }
 
 [data-adobe-sign-layout-mode='largeLaptop'] .upperLayout,
@@ -389,33 +400,17 @@
 [data-adobe-sign-layout-mode='largeLaptop'] .activityMetaRow,
 [data-adobe-sign-layout-mode='desktop'] .activityMetaRow,
 [data-adobe-sign-layout-mode='ultrawide'] .activityMetaRow {
-  justify-content: space-between;
-}
-
-[data-adobe-sign-layout-mode='smallLaptop'] .statusRail,
-[data-adobe-sign-layout-mode='standardLaptop'] .statusRail {
-  align-items: flex-start;
+  column-gap: 12px;
 }
 
 [data-adobe-sign-layout-mode='smallLaptop'] .activityMetaRow,
 [data-adobe-sign-layout-mode='standardLaptop'] .activityMetaRow {
-  flex-wrap: wrap;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 [data-adobe-sign-layout-mode='tabletLandscape'] .adobeSignViewToggle {
   width: 100%;
   justify-content: space-between;
-}
-
-[data-adobe-sign-layout-mode='tabletLandscape'] .activityMetaRow {
-  flex-wrap: wrap;
-}
-
-[data-adobe-sign-layout-mode='tabletPortrait'] .statusRail,
-[data-adobe-sign-layout-mode='phone'] .statusRail {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 7px;
 }
 
 [data-adobe-sign-layout-mode='tabletPortrait'] .adobeSignViewToggle,
@@ -432,8 +427,7 @@
 
 [data-adobe-sign-layout-mode='tabletPortrait'] .activityMetaRow,
 [data-adobe-sign-layout-mode='phone'] .activityMetaRow {
-  flex-direction: column;
-  align-items: flex-start;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
 }
 
@@ -452,7 +446,17 @@
   padding: 10px;
 }
 
-[data-adobe-sign-layout-mode='phone'] .freshness,
-[data-adobe-sign-layout-mode='tabletPortrait'] .freshness {
-  max-width: none;
+[data-adobe-sign-layout-mode='phone'] .kpiGrid,
+[data-adobe-sign-layout-mode='tabletPortrait'] .kpiGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+[data-adobe-sign-layout-mode='tabletLandscape'] .kpiGrid,
+[data-adobe-sign-layout-mode='smallLaptop'] .kpiGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+[data-adobe-sign-layout-mode='phone'] [data-adobe-sign-queue-required-action],
+[data-adobe-sign-layout-mode='tabletPortrait'] [data-adobe-sign-queue-required-action] {
+  justify-self: start;
 }

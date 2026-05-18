@@ -205,6 +205,7 @@ export interface AdobeAgreementListItem {
   readonly requiredActionLabel: string;
   readonly actionHandoff: MyWorkAdobeSignActionQueueItem['actionHandoff'];
   readonly senderLabel: string | null;
+  readonly receivedAtLabel: string | null;
   readonly expiresLabel: string | null;
   /**
    * Policy-approved, backend-derived row-level launch URL. When present the
@@ -358,6 +359,11 @@ export function selectAdobeAgreementListVmFromItems(
     requiredActionLabel: requiredActionLabel(it.requiredAction),
     actionHandoff: it.actionHandoff,
     senderLabel: it.sender?.displayName ?? null,
+    receivedAtLabel: it.createdAtUtc
+      ? `Received ${formatGeneratedAtUtc(it.createdAtUtc)}`
+      : it.modifiedAtUtc
+        ? `Updated ${formatGeneratedAtUtc(it.modifiedAtUtc)}`
+        : null,
     expiresLabel: it.expirationAtUtc ? formatGeneratedAtUtc(it.expirationAtUtc) : null,
     sourceOpenUrl: it.sourceOpenUrl,
   }));

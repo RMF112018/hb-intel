@@ -30,7 +30,6 @@ import { MY_WORK_MARK, markMyWork } from '../../runtime/myWorkPerformanceMarks.j
 import { useMyWorkReadModelClient } from '../../runtime/MyWorkReadModelClientProvider.js';
 import { AdobeSignActivityList } from './AdobeSignActivityList.js';
 import { AdobeSignStatePanel } from './AdobeSignStatePanel.js';
-import { AdobeSignStatusRail } from './AdobeSignStatusRail.js';
 import { AdobeSignViewSwitch } from './AdobeSignViewSwitch.js';
 import { useAdobeSignRecentCompletionsReadModel } from './useAdobeSignRecentCompletionsReadModel.js';
 
@@ -104,6 +103,11 @@ type QueueResolveUiState = 'idle' | 'resolving' | 'failed';
 interface QueueResolveRowState {
   readonly state: QueueResolveUiState;
   readonly lastFailure?: Exclude<AdobeSignActionLinkResolveResult['status'], 'redirect-ready'>;
+}
+
+function isValidTimestamp(iso: string | undefined): iso is string {
+  if (!iso) return false;
+  return !Number.isNaN(new Date(iso).getTime());
 }
 
 function resolveStateMarker(
@@ -358,8 +362,6 @@ export function AdobeSignActionQueueCard({
     }
   };
 
-  const showMetrics = stateMarker === 'partial' || stateMarker === 'available-items';
-
   const showItemList = stateMarker === 'partial' || stateMarker === 'available-items';
 
   const showQueueStatePanel =
@@ -435,6 +437,88 @@ export function AdobeSignActionQueueCard({
     completedPanelState === 'partial' ||
     completedPanelState === 'source-unavailable' ||
     completedPanelState === 'backend-unavailable';
+  const sourceTimestamp =
+    effectiveActiveView === 'action-queue'
+      ? homeEnvelope?.generatedAtUtc
+      : completedEnvelope?.generatedAtUtc;
+  const freshness = isValidTimestamp(sourceTimestamp)
+    ? `Last refreshed ${formatGeneratedAtUtc(sourceTimestamp)}`
+    : null;
+
+  const kpiVisible =
+    stateMarker === 'partial' || stateMarker === 'available-empty' || stateMarker === 'available-items';
+
+  const headerAction = optionsMenuVisible ? (
+    <div className={localStyles.optionsMenuRoot}>
+      <button
+        ref={optionsButtonRef}
+        type="button"
+        className={localStyles.optionsButton}
+        aria-label="Adobe Sign options"
+        aria-haspopup="menu"
+        aria-expanded={optionsMenuOpen}
+        data-adobe-sign-options-button="true"
+        data-adobe-sign-options-state={optionsMenuOpen ? 'open' : 'closed'}
+        onClick={() => setOptionsMenuOpen((prev) => !prev)}
+      >
+        <span aria-hidden="true">⋯</span>
+      </button>
+      {optionsMenuOpen ? (
+        <HbcAnchoredPopover
+          anchorRef={optionsButtonRef}
+          onDismiss={closeOptionsMenu}
+          placement="bottom-start"
+          role="menu"
+          aria-label="Adobe Sign options"
+          className={localStyles.optionsMenu}
+        >
+          {menuAvailability.showConnect ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={localStyles.optionsMenuItem}
+              data-adobe-sign-options-action="connect"
+              disabled={!menuAvailability.itemsEnabled}
+              onClick={() => {
+                closeOptionsMenu();
+                void handleConnectClick();
+              }}
+            >
+              Connect Adobe Sign
+            </button>
+          ) : null}
+          {menuAvailability.showReconnect ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={localStyles.optionsMenuItem}
+              data-adobe-sign-options-action="reconnect"
+              disabled={!menuAvailability.itemsEnabled}
+              onClick={() => {
+                void handleReconnectClick();
+              }}
+            >
+              Reconnect Adobe Sign
+            </button>
+          ) : null}
+          {menuAvailability.showDisconnect ? (
+            <button
+              type="button"
+              role="menuitem"
+              className={`${localStyles.optionsMenuItem} ${localStyles.optionsMenuItemDestructive}`}
+              data-adobe-sign-options-action="disconnect"
+              disabled={!menuAvailability.itemsEnabled || disconnectState === 'pending'}
+              onClick={() => {
+                void handleDisconnectClick();
+              }}
+            >
+              {disconnectState === 'pending' ? 'Disconnecting…' : 'Disconnect Adobe Sign'}
+            </button>
+          ) : null}
+        </HbcAnchoredPopover>
+      ) : null}
+    </div>
+  ) : undefined;
 
   const queuePanelCopy = useMemo(() => {
     switch (stateMarker) {
@@ -531,6 +615,7 @@ export function AdobeSignActionQueueCard({
       spanOverrides={spanOverrides}
       eyebrow={CARD_EYEBROW}
       title={CARD_TITLE}
+      action={headerAction}
       module={MODULE_ID}
       ariaLabel={ariaLabel}
       extraDataAttributes={{
@@ -541,17 +626,34 @@ export function AdobeSignActionQueueCard({
       }}
     >
       <div className={localStyles.upperLayout}>
-        <AdobeSignStatusRail
-          activeView={effectiveActiveView}
-          queueState={stateMarker}
-          completedState={completedPanelState}
-          queueGeneratedAtUtc={homeEnvelope?.generatedAtUtc}
-          completedGeneratedAtUtc={completedEnvelope?.generatedAtUtc}
-          formatTimestamp={formatGeneratedAtUtc}
-          className={localStyles.statusRail}
-          chipClassName={localStyles.statusChip}
-          freshnessClassName={localStyles.freshness}
-        />
+        {kpiVisible ? (
+          <dl className={localStyles.kpiGrid} data-adobe-sign-kpi-strip="">
+            <div className={localStyles.kpiCard}>
+              <dt className={localStyles.kpiLabel}>Pending Agreements</dt>
+              <dd className={localStyles.kpiValue} data-adobe-queue-summary-pending="">
+                {summaryVm.pendingAgreementsCount ?? '—'}
+              </dd>
+            </div>
+            <div className={localStyles.kpiCard}>
+              <dt className={localStyles.kpiLabel}>Signature Actions</dt>
+              <dd className={localStyles.kpiValue} data-adobe-queue-summary-signature="">
+                {summaryVm.signatureActionsCount ?? '—'}
+              </dd>
+            </div>
+            <div className={localStyles.kpiCard}>
+              <dt className={localStyles.kpiLabel}>Review Contracts</dt>
+              <dd className={localStyles.kpiValue} data-adobe-queue-summary-review="">
+                {summaryVm.reviewActionsCount ?? '—'}
+              </dd>
+            </div>
+            <div className={localStyles.kpiCard}>
+              <dt className={localStyles.kpiLabel}>Complete &lt; 30 Days</dt>
+              <dd className={localStyles.kpiValue} data-adobe-completed-summary-last-30="">
+                {completedSummaryVm.completedAgreementCount ?? '—'}
+              </dd>
+            </div>
+          </dl>
+        ) : null}
         {toggleVisible ? (
           <AdobeSignViewSwitch
             activeView={effectiveActiveView}
@@ -560,76 +662,10 @@ export function AdobeSignActionQueueCard({
             tabClassName={localStyles.adobeSignViewButton}
           />
         ) : null}
-        {optionsMenuVisible ? (
-          <div className={localStyles.optionsMenuRoot}>
-            <button
-              ref={optionsButtonRef}
-              type="button"
-              className={localStyles.optionsButton}
-              aria-label="Adobe Sign options"
-              aria-haspopup="menu"
-              aria-expanded={optionsMenuOpen}
-              data-adobe-sign-options-button="true"
-              data-adobe-sign-options-state={optionsMenuOpen ? 'open' : 'closed'}
-              onClick={() => setOptionsMenuOpen((prev) => !prev)}
-            >
-              <span aria-hidden="true">⋯</span>
-            </button>
-            {optionsMenuOpen ? (
-              <HbcAnchoredPopover
-                anchorRef={optionsButtonRef}
-                onDismiss={closeOptionsMenu}
-                placement="bottom-start"
-                role="menu"
-                aria-label="Adobe Sign options"
-                className={localStyles.optionsMenu}
-              >
-                {menuAvailability.showConnect ? (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className={localStyles.optionsMenuItem}
-                    data-adobe-sign-options-action="connect"
-                    disabled={!menuAvailability.itemsEnabled}
-                    onClick={() => {
-                      closeOptionsMenu();
-                      void handleConnectClick();
-                    }}
-                  >
-                    Connect Adobe Sign
-                  </button>
-                ) : null}
-                {menuAvailability.showReconnect ? (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className={localStyles.optionsMenuItem}
-                    data-adobe-sign-options-action="reconnect"
-                    disabled={!menuAvailability.itemsEnabled}
-                    onClick={() => {
-                      void handleReconnectClick();
-                    }}
-                  >
-                    Reconnect Adobe Sign
-                  </button>
-                ) : null}
-                {menuAvailability.showDisconnect ? (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className={`${localStyles.optionsMenuItem} ${localStyles.optionsMenuItemDestructive}`}
-                    data-adobe-sign-options-action="disconnect"
-                    disabled={!menuAvailability.itemsEnabled || disconnectState === 'pending'}
-                    onClick={() => {
-                      void handleDisconnectClick();
-                    }}
-                  >
-                    {disconnectState === 'pending' ? 'Disconnecting…' : 'Disconnect Adobe Sign'}
-                  </button>
-                ) : null}
-              </HbcAnchoredPopover>
-            ) : null}
-          </div>
+        {freshness ? (
+          <p className={localStyles.freshness} data-adobe-sign-freshness="">
+            {freshness}
+          </p>
         ) : null}
       </div>
       <section
@@ -667,28 +703,6 @@ export function AdobeSignActionQueueCard({
             }
           />
         ) : null}
-        {effectiveActiveView === 'action-queue' && showMetrics ? (
-          <dl className={styles.content} data-adobe-sign-action-queue-metrics="">
-            <div className={styles.row}>
-              <dt className={styles.rowLabel}>Pending agreements</dt>
-              <dd className={styles.rowValue} data-adobe-queue-summary-pending="">
-                {summaryVm.pendingAgreementsCount ?? '—'}
-              </dd>
-            </div>
-            <div className={styles.row}>
-              <dt className={styles.rowLabel}>Signature actions</dt>
-              <dd className={styles.rowValue} data-adobe-queue-summary-signature="">
-                {summaryVm.signatureActionsCount ?? '—'}
-              </dd>
-            </div>
-            <div className={styles.row}>
-              <dt className={styles.rowLabel}>Review actions</dt>
-              <dd className={styles.rowValue} data-adobe-queue-summary-review="">
-                {summaryVm.reviewActionsCount ?? '—'}
-              </dd>
-            </div>
-          </dl>
-        ) : null}
         {effectiveActiveView === 'action-queue' && showItemList && !agreementListVm.isEmpty ? (
           <AdobeSignActivityList
             variant="queue"
@@ -711,11 +725,10 @@ export function AdobeSignActionQueueCard({
                 : {}),
               key: item.itemId,
               title: item.agreementName,
-              metadataParts: [
-                item.requiredActionLabel,
-                item.senderLabel ? `From ${item.senderLabel}` : '',
-                item.expiresLabel ? `Expires ${item.expiresLabel}` : '',
-              ],
+              metadataParts: [],
+              senderText: item.senderLabel ?? 'Adobe Sign',
+              secondaryLeftText: item.receivedAtLabel ?? undefined,
+              secondaryRightText: item.requiredActionLabel,
               fallbackViewLabel: item.sourceOpenUrl ? 'View' : undefined,
               sourceOpenUrl: item.sourceOpenUrl,
               rowErrorMessage:

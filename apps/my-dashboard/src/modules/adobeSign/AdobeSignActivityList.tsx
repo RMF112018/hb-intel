@@ -4,6 +4,9 @@ export interface AdobeSignActivityListItem {
   readonly key: string;
   readonly title: string;
   readonly metadataParts: readonly string[];
+  readonly senderText?: string;
+  readonly secondaryLeftText?: string;
+  readonly secondaryRightText?: string;
   readonly primaryActionLabel?: string;
   readonly onPrimaryActionClick?: () => void;
   readonly primaryActionDisabled?: boolean;
@@ -46,6 +49,9 @@ export function AdobeSignActivityList({
             variant={variant}
             title={item.title}
             metadataParts={item.metadataParts}
+            senderText={item.senderText}
+            secondaryLeftText={item.secondaryLeftText}
+            secondaryRightText={item.secondaryRightText}
             primaryActionLabel={item.primaryActionLabel}
             onPrimaryActionClick={item.onPrimaryActionClick}
             primaryActionDisabled={item.primaryActionDisabled}

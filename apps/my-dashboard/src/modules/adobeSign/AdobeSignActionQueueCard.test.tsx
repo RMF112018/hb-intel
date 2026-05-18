@@ -353,14 +353,14 @@ describe('AdobeSignActionQueueCard — header toggle', () => {
 });
 
 describe('AdobeSignActionQueueCard — loading state', () => {
-  it('renders the locked loading badge + authored panel copy, no metrics, no items, no CTA', () => {
+  it('renders the locked loading badge + authored panel copy, no KPI strip, no items, no CTA', () => {
     const { container } = renderCard({ readinessVariant: 'loading' });
     const card = container.querySelector('[data-my-work-card-role="adobe-sign-action-queue"]')!;
     expect(card.getAttribute('data-adobe-sign-action-queue-state')).toBe('loading');
     expect(card.getAttribute('data-adobe-sign-action-queue-badge')).toBe('Loading');
-    expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe('Loading');
+    expect(container.querySelector('[data-adobe-sign-status-chip]')).toBeNull();
     expect(card.textContent).toContain('Loading your Adobe Sign action queue…');
-    expect(container.querySelector('[data-adobe-sign-action-queue-metrics]')).toBeNull();
+    expect(container.querySelector('[data-adobe-sign-kpi-strip]')).toBeNull();
     expect(container.querySelector('[data-adobe-sign-activity-list]')).toBeNull();
     expect(container.querySelector('[data-adobe-sign-connect-action="start"]')).toBeNull();
   });
@@ -540,9 +540,7 @@ describe('AdobeSignActionQueueCard — partial', () => {
     const card = container.querySelector('[data-my-work-card-role="adobe-sign-action-queue"]')!;
     expect(card.getAttribute('data-adobe-sign-action-queue-state')).toBe('partial');
     expect(card.getAttribute('data-adobe-sign-action-queue-badge')).toBe('Partial data');
-    expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe(
-      'Partial data',
-    );
+    expect(container.querySelector('[data-adobe-sign-status-chip]')).toBeNull();
     // Per ADOBE_SIGN_QUEUE_PARTIAL: 3 items total — 1 signature + 1 approval + 1 acceptance.
     expect(container.querySelector('[data-adobe-queue-summary-pending]')?.textContent).toBe('3');
     expect(container.querySelector('[data-adobe-queue-summary-signature]')?.textContent).toBe('1');
@@ -552,7 +550,7 @@ describe('AdobeSignActionQueueCard — partial', () => {
 });
 
 describe('AdobeSignActionQueueCard — available + zero items', () => {
-  it('renders the Ready badge + zero-state body + no metrics + no items', () => {
+  it('renders the Ready badge + zero-state body + KPI strip + no items', () => {
     const { container } = renderCard({
       readinessVariant: 'ready',
       homeEnvelope: MY_WORK_HOME_EMPTY,
@@ -565,13 +563,12 @@ describe('AdobeSignActionQueueCard — available + zero items', () => {
       'Your queue is clear based on the latest available Adobe Sign read.',
     );
     expect(container.querySelector('[data-adobe-sign-activity-list]')).toBeNull();
-    // State matrix 1.8: metrics are omitted in the ready + zero-items state.
-    expect(container.querySelector('[data-adobe-sign-action-queue-metrics]')).toBeNull();
+    expect(container.querySelector('[data-adobe-sign-kpi-strip]')).not.toBeNull();
   });
 });
 
 describe('AdobeSignActionQueueCard — available + items', () => {
-  it('renders the Ready badge + metrics + up to 5 items', () => {
+  it('renders the Ready badge + KPI strip + up to 5 items', () => {
     const { container } = renderCard({
       readinessVariant: 'ready',
       homeEnvelope: MY_WORK_HOME_AVAILABLE,
@@ -579,7 +576,7 @@ describe('AdobeSignActionQueueCard — available + items', () => {
     const card = container.querySelector('[data-my-work-card-role="adobe-sign-action-queue"]')!;
     expect(card.getAttribute('data-adobe-sign-action-queue-state')).toBe('available-items');
     expect(card.getAttribute('data-adobe-sign-action-queue-badge')).toBe('Ready');
-    expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe('Ready');
+    expect(container.querySelector('[data-adobe-sign-status-chip]')).toBeNull();
     expect(container.querySelector('[data-adobe-sign-freshness]')?.textContent).toContain(
       'Last refreshed',
     );
@@ -591,11 +588,23 @@ describe('AdobeSignActionQueueCard — available + items', () => {
     expect(container.querySelector('[data-adobe-sign-preview-context]')?.textContent).toContain(
       'Showing 5 of 6 agreements requiring action.',
     );
+    expect(container.querySelector('[data-adobe-sign-kpi-strip]')?.textContent).toContain(
+      'Pending Agreements',
+    );
+    expect(container.querySelector('[data-adobe-sign-kpi-strip]')?.textContent).toContain(
+      'Signature Actions',
+    );
+    expect(container.querySelector('[data-adobe-sign-kpi-strip]')?.textContent).toContain(
+      'Review Contracts',
+    );
+    expect(container.querySelector('[data-adobe-sign-kpi-strip]')?.textContent).toContain(
+      'Complete < 30 Days',
+    );
   });
 });
 
 describe('AdobeSignActionQueueCard — completed panel', () => {
-  it('shows Loading history status chip while completed fetch is in progress', async () => {
+  it('shows no status chip while completed fetch is in progress', async () => {
     let resolve!: (value: unknown) => void;
     const fetchCompleted = vi.fn(
       () =>
@@ -610,9 +619,7 @@ describe('AdobeSignActionQueueCard — completed panel', () => {
     });
     fireEvent.click(container.querySelector('[data-adobe-sign-card-view="completed"]')!);
     await waitFor(() => {
-      expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe(
-        'Loading history',
-      );
+      expect(container.querySelector('[data-adobe-sign-status-chip]')).toBeNull();
     });
     const panel = container.querySelector('#adobe-sign-panel-completed [role="status"]');
     expect(panel?.getAttribute('aria-live')).toBe('polite');
@@ -639,11 +646,12 @@ describe('AdobeSignActionQueueCard — completed panel', () => {
           ?.getAttribute('data-adobe-sign-completed-panel-state'),
       ).toBe('available-items');
     });
-    expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe('Ready');
+    expect(container.querySelector('[data-adobe-sign-status-chip]')).toBeNull();
 
     fireEvent.click(container.querySelector('[data-adobe-sign-card-view="action-queue"]')!);
-    expect(container.querySelector('[data-adobe-sign-action-queue-metrics]')).not.toBeNull();
+    expect(container.querySelector('[data-adobe-sign-kpi-strip]')).not.toBeNull();
     fireEvent.click(container.querySelector('[data-adobe-sign-card-view="completed"]')!);
+    expect(container.querySelector('[data-adobe-sign-kpi-strip]')).not.toBeNull();
     await waitFor(() => {
       expect(fetchCompleted).toHaveBeenCalledTimes(1);
     });
@@ -934,6 +942,41 @@ describe('AdobeSignActionQueueCard — item handoff actions', () => {
     expect(primaryActions.length).toBeGreaterThan(0);
     const labels = Array.from(primaryActions).map((el) => el.textContent?.trim());
     expect(labels.every((label) => label === 'Act now')).toBe(true);
+  });
+
+  it('renders two-row queue metadata with sender/date fallbacks and required action labels', () => {
+    const first = MY_WORK_HOME_AVAILABLE.data.adobeSignActionQueue.previewItems[0]!;
+    const customEnvelope: MyWorkReadModelEnvelope<MyWorkHomeReadModel> = {
+      ...MY_WORK_HOME_AVAILABLE,
+      data: {
+        ...MY_WORK_HOME_AVAILABLE.data,
+        adobeSignActionQueue: {
+          ...MY_WORK_HOME_AVAILABLE.data.adobeSignActionQueue,
+          previewItems: [
+            {
+              ...first,
+              sender: undefined,
+              createdAtUtc: undefined,
+              modifiedAtUtc: first.modifiedAtUtc,
+            },
+          ],
+        },
+      },
+    };
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: customEnvelope,
+    });
+
+    expect(container.querySelector('[data-adobe-sign-queue-row-one]')).not.toBeNull();
+    expect(container.querySelector('[data-adobe-sign-queue-row-two]')).not.toBeNull();
+    expect(container.textContent).toContain('received from Adobe Sign');
+    expect(container.querySelector('[data-adobe-sign-queue-date]')?.textContent).toContain(
+      'Updated',
+    );
+    expect(
+      container.querySelector('[data-adobe-sign-queue-required-action]')?.textContent,
+    ).toContain('required');
   });
 
   it('shows Opening… while resolving and surfaces row-local failure copy on non-success', async () => {
