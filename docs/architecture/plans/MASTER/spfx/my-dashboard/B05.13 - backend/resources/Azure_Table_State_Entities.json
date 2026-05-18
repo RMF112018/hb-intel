@@ -1,0 +1,87 @@
+{
+  "tables": {
+    "MyProjectsProjectionSubscriptions": {
+      "partitionKey": "MyProjectsProjection",
+      "rowKeys": [
+        "Subscription:Projects",
+        "Subscription:LegacyRegistry"
+      ],
+      "fields": [
+        "SourceListKind",
+        "SourceSiteId",
+        "SourceListId",
+        "SubscriptionId",
+        "Resource",
+        "NotificationUrl",
+        "ExpirationDateTimeUtc",
+        "Status",
+        "LastCreateAttemptUtc",
+        "LastRenewalAttemptUtc",
+        "LastRenewalSuccessUtc",
+        "LastFailureCode",
+        "LastFailureAtUtc"
+      ]
+    },
+    "MyProjectsProjectionDeltaState": {
+      "partitionKey": "MyProjectsProjection",
+      "rowKeys": [
+        "DeltaState:Projects",
+        "DeltaState:LegacyRegistry"
+      ],
+      "fields": [
+        "SourceListKind",
+        "DeltaLink",
+        "NeedsResync",
+        "LastDeltaPullStartedUtc",
+        "LastDeltaPullSucceededUtc",
+        "LastDeltaPullFailedUtc",
+        "LastFailureCode",
+        "LastChangedItemCount",
+        "LastDeletedItemCount",
+        "LastProjectionBatchId"
+      ]
+    },
+    "MyProjectsProjectionLeases": {
+      "partitionKey": "MyProjectsProjection",
+      "rowKeys": [
+        "Lease:Sync:Projects",
+        "Lease:Sync:LegacyRegistry",
+        "Lease:Rebuild:Global",
+        "Lease:DriftAudit:Global",
+        "Lease:Purge:Global"
+      ],
+      "fields": [
+        "LeaseOwner",
+        "LeaseAcquiredAtUtc",
+        "LeaseExpiresAtUtc",
+        "LeaseType",
+        "SourceListKind"
+      ]
+    },
+    "MyProjectsProjectionRuns": {
+      "partitionKey": "MyProjectsProjection",
+      "rowKeyTemplate": "Run:{StartedAtUtc}:{RunId}",
+      "fields": [
+        "RunId",
+        "RunType",
+        "StartedAtUtc",
+        "CompletedAtUtc",
+        "Status",
+        "SourceListKind",
+        "ProjectionBatchId",
+        "ChangedItemCount",
+        "DeletedItemCount",
+        "HelperRowsInserted",
+        "HelperRowsUpdated",
+        "HelperRowsReactivated",
+        "HelperRowsDeactivated",
+        "HelperRowsPurged",
+        "DriftMissingCount",
+        "DriftExtraCount",
+        "DriftContentMismatchCount",
+        "FailureCode",
+        "Notes"
+      ]
+    }
+  }
+}

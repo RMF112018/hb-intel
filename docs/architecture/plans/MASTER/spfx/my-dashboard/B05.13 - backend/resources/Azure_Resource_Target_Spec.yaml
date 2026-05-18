@@ -1,0 +1,43 @@
+package: "My Dashboard My Projects Incremental Projection"
+environment: "prod"
+azure:
+  serviceBus:
+    namespacePreferred: "sb-hb-myprojects-projection-prod"
+    namespaceFallback: "sb-hb-myprojects-projection-prod01"
+    tier: "Standard"
+    queue:
+      name: "my-projects-projection-sync"
+      lockDuration: "PT5M"
+      maxDeliveryCount: 10
+      defaultMessageTimeToLive: "P7D"
+      deadLetteringOnMessageExpiration: true
+      requiresDuplicateDetection: true
+      duplicateDetectionHistoryTimeWindow: "PT10M"
+      enablePartitioning: false
+      requiresSession: false
+      enableExpress: false
+    managedIdentityRoles:
+      - "Azure Service Bus Data Sender"
+      - "Azure Service Bus Data Receiver"
+  stateStorage:
+    storageAccountPreferred: "sthbmyprojopsprod"
+    storageAccountFallback: "sthbmyprojopsprod01"
+    kind: "StorageV2"
+    performance: "Standard"
+    redundancy: "LRS"
+    tables:
+      - "MyProjectsProjectionSubscriptions"
+      - "MyProjectsProjectionDeltaState"
+      - "MyProjectsProjectionLeases"
+      - "MyProjectsProjectionRuns"
+    managedIdentityRole: "Storage Table Data Contributor"
+sharePoint:
+  siteUrl: "https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard"
+  listTitle: "My Projects Registry"
+  hidden: false
+  breakPermissionInheritance: true
+timers:
+  subscriptionRenewal: "0 15 2 * * *"
+  driftAudit: "0 30 3 * * *"
+  weeklyRepair: "0 0 4 * * 0"
+  monthlyInactivePurge: "0 0 5 1 * *"

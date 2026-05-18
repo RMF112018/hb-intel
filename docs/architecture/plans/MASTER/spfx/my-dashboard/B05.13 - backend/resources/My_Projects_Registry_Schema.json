@@ -1,0 +1,293 @@
+{
+  "siteUrl": "https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard",
+  "listTitle": "My Projects Registry",
+  "hidden": false,
+  "breakPermissionInheritance": true,
+  "projectionGrain": "Normalized UserUpn x RecordKey",
+  "projectionKey": "sha256(lower(UserUpn) + '|' + RecordKey)",
+  "fields": [
+    {
+      "internalName": "Title",
+      "displayName": "Title",
+      "type": "Text",
+      "required": true,
+      "indexed": false,
+      "unique": false
+    },
+    {
+      "internalName": "ProjectionKey",
+      "displayName": "Projection Key",
+      "type": "Text",
+      "required": true,
+      "indexed": true,
+      "unique": true
+    },
+    {
+      "internalName": "RecordKey",
+      "displayName": "Record Key",
+      "type": "Text",
+      "required": true,
+      "indexed": false,
+      "unique": false
+    },
+    {
+      "internalName": "UserUpn",
+      "displayName": "User UPN",
+      "type": "Text",
+      "required": true,
+      "indexed": true,
+      "unique": false
+    },
+    {
+      "internalName": "ProjectionSource",
+      "displayName": "Projection Source",
+      "type": "Choice",
+      "required": true,
+      "indexed": false,
+      "choices": [
+        "projects-only",
+        "merged",
+        "legacy-only"
+      ]
+    },
+    {
+      "internalName": "IsActive",
+      "displayName": "Is Active",
+      "type": "Boolean",
+      "required": true,
+      "indexed": true
+    },
+    {
+      "internalName": "ProjectionVersion",
+      "displayName": "Projection Version",
+      "type": "Text",
+      "required": true,
+      "indexed": false
+    },
+    {
+      "internalName": "ProjectionContentHash",
+      "displayName": "Projection Content Hash",
+      "type": "Text",
+      "required": true,
+      "indexed": false
+    },
+    {
+      "internalName": "ProjectNumber",
+      "displayName": "Project Number",
+      "type": "Text",
+      "required": true,
+      "indexed": false
+    },
+    {
+      "internalName": "ProjectName",
+      "displayName": "Project Name",
+      "type": "Text",
+      "required": true,
+      "indexed": false
+    },
+    {
+      "internalName": "ProjectStage",
+      "displayName": "Project Stage",
+      "type": "Text",
+      "required": false,
+      "indexed": false
+    },
+    {
+      "internalName": "AssignmentRolesJson",
+      "displayName": "Assignment Roles JSON",
+      "type": "Note",
+      "required": true,
+      "indexed": false
+    },
+    {
+      "internalName": "ProjectsListItemId",
+      "displayName": "Projects List Item ID",
+      "type": "Number",
+      "required": false,
+      "indexed": true
+    },
+    {
+      "internalName": "LegacyRegistryItemId",
+      "displayName": "Legacy Registry Item ID",
+      "type": "Number",
+      "required": false,
+      "indexed": true
+    },
+    {
+      "internalName": "LegacyMatchedProjectListItemId",
+      "displayName": "Legacy Matched Project List Item ID",
+      "type": "Number",
+      "required": false,
+      "indexed": false
+    },
+    {
+      "internalName": "FallbackMatchMethod",
+      "displayName": "Fallback Match Method",
+      "type": "Text",
+      "required": false,
+      "indexed": false
+    },
+    {
+      "internalName": "FallbackMatchConfidence",
+      "displayName": "Fallback Match Confidence",
+      "type": "Text",
+      "required": false,
+      "indexed": false
+    },
+    {
+      "internalName": "SharePointActionState",
+      "displayName": "SharePoint Action State",
+      "type": "Choice",
+      "required": true,
+      "choices": [
+        "available",
+        "unavailable"
+      ]
+    },
+    {
+      "internalName": "SharePointActionKind",
+      "displayName": "SharePoint Action Kind",
+      "type": "Choice",
+      "required": true,
+      "choices": [
+        "project-site",
+        "legacy-folder",
+        "none"
+      ]
+    },
+    {
+      "internalName": "SharePointActionLabel",
+      "displayName": "SharePoint Action Label",
+      "type": "Text",
+      "required": true
+    },
+    {
+      "internalName": "SharePointActionHref",
+      "displayName": "SharePoint Action Href",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "internalName": "ProcoreActionState",
+      "displayName": "Procore Action State",
+      "type": "Choice",
+      "required": true,
+      "choices": [
+        "available",
+        "unavailable"
+      ]
+    },
+    {
+      "internalName": "ProcoreProject",
+      "displayName": "Procore Project",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "internalName": "ProcoreActionLabel",
+      "displayName": "Procore Action Label",
+      "type": "Text",
+      "required": true
+    },
+    {
+      "internalName": "ProcoreActionHref",
+      "displayName": "Procore Action Href",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "internalName": "BuildingConnectedActionState",
+      "displayName": "BuildingConnected Action State",
+      "type": "Choice",
+      "required": true,
+      "choices": [
+        "available",
+        "unavailable"
+      ]
+    },
+    {
+      "internalName": "BuildingConnectedActionLabel",
+      "displayName": "BuildingConnected Action Label",
+      "type": "Text",
+      "required": true
+    },
+    {
+      "internalName": "BuildingConnectedActionHref",
+      "displayName": "BuildingConnected Action Href",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "internalName": "DocumentCrunchActionState",
+      "displayName": "Document Crunch Action State",
+      "type": "Choice",
+      "required": true,
+      "choices": [
+        "available",
+        "unavailable"
+      ]
+    },
+    {
+      "internalName": "DocumentCrunchActionLabel",
+      "displayName": "Document Crunch Action Label",
+      "type": "Text",
+      "required": true
+    },
+    {
+      "internalName": "DocumentCrunchActionHref",
+      "displayName": "Document Crunch Action Href",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "internalName": "WarningsJson",
+      "displayName": "Warnings JSON",
+      "type": "Note",
+      "required": false
+    },
+    {
+      "internalName": "LastProjectedAtUtc",
+      "displayName": "Last Projected At UTC",
+      "type": "DateTime",
+      "required": true
+    },
+    {
+      "internalName": "MaxSourceModifiedUtc",
+      "displayName": "Max Source Modified UTC",
+      "type": "DateTime",
+      "required": false
+    },
+    {
+      "internalName": "ProjectionBatchId",
+      "displayName": "Projection Batch ID",
+      "type": "Text",
+      "required": true
+    },
+    {
+      "internalName": "DeactivatedAtUtc",
+      "displayName": "Deactivated At UTC",
+      "type": "DateTime",
+      "required": false
+    },
+    {
+      "internalName": "DeactivationReason",
+      "displayName": "Deactivation Reason",
+      "type": "Choice",
+      "required": false,
+      "choices": [
+        "assignment-removed",
+        "project-source-deleted",
+        "registry-source-deleted",
+        "merge-topology-changed",
+        "rebuild-obsolete",
+        "manual-repair",
+        "other"
+      ]
+    }
+  ],
+  "retention": {
+    "softDeactivate": true,
+    "inactiveRetentionDays": 90,
+    "monthlyPurge": true
+  }
+}

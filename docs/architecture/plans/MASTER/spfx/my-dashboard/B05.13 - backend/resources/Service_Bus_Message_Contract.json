@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MyProjectsProjectionSyncMessage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "messageType",
+    "sourceListKind",
+    "receivedAtUtc",
+    "debounceBucketUtc",
+    "notificationBatchId"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "v1"
+    },
+    "messageType": {
+      "type": "string",
+      "const": "my-projects-projection-sync"
+    },
+    "sourceListKind": {
+      "type": "string",
+      "enum": [
+        "Projects",
+        "LegacyRegistry"
+      ]
+    },
+    "receivedAtUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "debounceBucketUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notificationBatchId": {
+      "type": "string"
+    },
+    "subscriptionId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notificationCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "correlationId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "messageIdTemplate": "my-projects-projection:{sourceListKind}:{debounceBucketUtc}",
+  "sensitiveDataForbidden": [
+    "clientState",
+    "bearerToken",
+    "assertion",
+    "graphToken",
+    "rawNotificationPayload"
+  ]
+}
