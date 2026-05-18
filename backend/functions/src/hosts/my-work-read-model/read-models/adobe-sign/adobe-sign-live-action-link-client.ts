@@ -18,7 +18,7 @@ export interface AdobeSignLiveActionLinkClientDeps {
 }
 
 interface AdobeSignSigningUrlItem {
-  readonly email: string;
+  readonly email?: string;
   readonly esignUrl: string;
 }
 
@@ -47,9 +47,10 @@ function parseSigningUrlItems(value: unknown): readonly AdobeSignSigningUrlItem[
       if (rawItem === null || typeof rawItem !== 'object') continue;
       const candidate = rawItem as Record<string, unknown>;
       if (!isNonEmptyString(candidate.esignUrl)) continue;
-      if (!isNonEmptyString(candidate.email)) continue;
       items.push({
-        email: candidate.email.trim().toLowerCase(),
+        ...(isNonEmptyString(candidate.email)
+          ? { email: candidate.email.trim().toLowerCase() }
+          : {}),
         esignUrl: candidate.esignUrl,
       });
     }
@@ -61,9 +62,11 @@ function parseSigningUrlItems(value: unknown): readonly AdobeSignSigningUrlItem[
 function pickSigningUrl(
   items: readonly AdobeSignSigningUrlItem[],
   actorUpn: string | undefined,
-): { status: 'ok'; redirectUrl: string } | { status: 'no-action-url' | 'no-recipient-match' } {
+):
+  | { status: 'ok'; redirectUrl: string; selectedBy: 'actor-match' | 'single-candidate'; urlCandidateCount: number }
+  | { status: 'no-action-url' | 'no-recipient-match'; urlCandidateCount: number } {
   if (items.length === 0) {
-    return { status: 'no-action-url' };
+    return { status: 'no-action-url', urlCandidateCount: 0 };
   }
 
   const normalizedUpn = actorUpn?.trim().toLowerCase();
@@ -73,15 +76,22 @@ function pickSigningUrl(
       return {
         status: 'ok',
         redirectUrl: exactMatches[0]!.esignUrl,
+        selectedBy: 'actor-match',
+        urlCandidateCount: items.length,
       };
     }
   }
 
   if (items.length === 1) {
-    return { status: 'ok', redirectUrl: items[0]!.esignUrl };
+    return {
+      status: 'ok',
+      redirectUrl: items[0]!.esignUrl,
+      selectedBy: 'single-candidate',
+      urlCandidateCount: 1,
+    };
   }
 
-  return { status: 'no-recipient-match' };
+  return { status: 'no-recipient-match', urlCandidateCount: items.length };
 }
 
 export function createAdobeSignLiveActionLinkClient(
@@ -158,6 +168,8 @@ export function createAdobeSignLiveActionLinkClient(
       return {
         status: 'ok',
         redirectUrl: picked.redirectUrl,
+        selectedBy: picked.selectedBy,
+        urlCandidateCount: picked.urlCandidateCount,
       };
     },
   };

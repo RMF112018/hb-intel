@@ -11,6 +11,8 @@ export type AdobeSignActionLinkClientResult =
   | {
       readonly status: 'ok';
       readonly redirectUrl: string;
+      readonly urlCandidateCount: number;
+      readonly selectedBy: 'actor-match' | 'single-candidate';
     }
   | {
       readonly status: 'unauthorized';
@@ -20,9 +22,11 @@ export type AdobeSignActionLinkClientResult =
     }
   | {
       readonly status: 'no-action-url';
+      readonly urlCandidateCount?: number;
     }
   | {
       readonly status: 'no-recipient-match';
+      readonly urlCandidateCount?: number;
     }
   | {
       readonly status: 'rate-limited';

@@ -111,10 +111,43 @@ function mapProviderToRouteResult(result: AdobeSignActionLinkClientResult): Adob
   }
 }
 
-function sanitizeResultForTelemetry(
-  result: AdobeSignActionLinkResolveResult,
-): { readonly status: AdobeSignActionLinkResolveResult['status'] } {
-  return { status: result.status };
+type ResolveResultStage = 'invalid-input' | 'principal' | 'token' | 'provider' | 'policy' | 'completed';
+type ResolveSelectedBy = 'actor-match' | 'single-candidate' | 'none';
+type ResolvePolicyDecision = 'allowed' | 'rejected' | 'omitted';
+
+function emitResolveResultTelemetry(input: {
+  readonly trackEvent: (name: string, properties: Record<string, unknown>) => void;
+  readonly result: AdobeSignActionLinkResolveResult;
+  readonly resultStage: ResolveResultStage;
+  readonly requiredAction: string;
+  readonly hasAgreementId: boolean;
+  readonly hasItemId: boolean;
+  readonly startedAtMs: number;
+  readonly providerStatusCode?: number;
+  readonly urlCandidateCount?: number;
+  readonly selectedBy?: ResolveSelectedBy;
+  readonly policyDecision?: ResolvePolicyDecision;
+  readonly failureReason?: string;
+}): void {
+  input.trackEvent('adobeSign.actionLink.resolve.result', {
+    domain: 'my-work-adobe-sign-action-link',
+    operation: 'resolve',
+    status: input.result.status,
+    resultStage: input.resultStage,
+    requiredAction: input.requiredAction,
+    hasAgreementId: input.hasAgreementId,
+    hasItemId: input.hasItemId,
+    ...(typeof input.providerStatusCode === 'number'
+      ? { providerStatusCode: input.providerStatusCode }
+      : {}),
+    ...(typeof input.urlCandidateCount === 'number'
+      ? { urlCandidateCount: input.urlCandidateCount }
+      : {}),
+    selectedBy: input.selectedBy ?? 'none',
+    policyDecision: input.policyDecision ?? 'omitted',
+    ...(input.failureReason ? { failureReason: input.failureReason } : {}),
+    durationMs: Math.max(0, Date.now() - input.startedAtMs),
+  });
 }
 
 export function createAdobeSignActionLinkResolveHandler(deps: AdobeSignActionLinkRouteDeps) {
@@ -132,15 +165,27 @@ export function createAdobeSignActionLinkResolveHandler(deps: AdobeSignActionLin
       domain: 'my-work-adobe-sign-action-link',
       operation: 'resolve',
     });
+    const startedAtMs = Date.now();
 
     const parsed = await readResolveRequestBody(request);
     if (!parsed) {
+      const result = { status: 'invalid-input' } as const;
       trackEvent('adobeSign.actionLink.resolve.failure', {
         domain: 'my-work-adobe-sign-action-link',
         operation: 'resolve',
-        ...sanitizeResultForTelemetry({ status: 'invalid-input' }),
+        status: result.status,
       });
-      return { status: 400, jsonBody: { data: { status: 'invalid-input' satisfies AdobeSignActionLinkResolveResult['status'] } } };
+      emitResolveResultTelemetry({
+        trackEvent,
+        result,
+        resultStage: 'invalid-input',
+        requiredAction: 'unknown',
+        hasAgreementId: false,
+        hasItemId: false,
+        startedAtMs,
+        failureReason: 'invalid-input',
+      });
+      return { status: 400, jsonBody: { data: result } };
     }
 
     const actorResult = normalizeAdobeSignActor({
@@ -148,39 +193,83 @@ export function createAdobeSignActionLinkResolveHandler(deps: AdobeSignActionLin
       claims: auth.claims,
     });
     if (!actorResult.ok) {
+      const result = { status: 'principal-unresolved' } as const;
       trackEvent('adobeSign.actionLink.resolve.failure', {
         domain: 'my-work-adobe-sign-action-link',
         operation: 'resolve',
-        ...sanitizeResultForTelemetry({ status: 'principal-unresolved' }),
+        status: result.status,
       });
-      return { status: 200, jsonBody: { data: { status: 'principal-unresolved' } } };
+      emitResolveResultTelemetry({
+        trackEvent,
+        result,
+        resultStage: 'principal',
+        requiredAction: parsed.requiredAction,
+        hasAgreementId: true,
+        hasItemId: true,
+        startedAtMs,
+        failureReason: actorResult.reason,
+      });
+      return { status: 200, jsonBody: { data: result } };
     }
 
     const actor: AdobeSignDelegatedActor = actorResult.actor;
     const token = await deps.tokenService.getAccessToken(actor.actorKey, deps.now());
     if (token.status === 'authorization-required') {
+      const result = { status: 'authorization-required' } as const;
       trackEvent('adobeSign.actionLink.resolve.failure', {
         domain: 'my-work-adobe-sign-action-link',
         operation: 'resolve',
-        ...sanitizeResultForTelemetry({ status: 'authorization-required' }),
+        status: result.status,
       });
-      return { status: 200, jsonBody: { data: { status: 'authorization-required' } } };
+      emitResolveResultTelemetry({
+        trackEvent,
+        result,
+        resultStage: 'token',
+        requiredAction: parsed.requiredAction,
+        hasAgreementId: true,
+        hasItemId: true,
+        startedAtMs,
+        failureReason: token.reason,
+      });
+      return { status: 200, jsonBody: { data: result } };
     }
     if (token.status === 'scope-insufficient') {
+      const result = { status: 'scope-insufficient' } as const;
       trackEvent('adobeSign.actionLink.resolve.failure', {
         domain: 'my-work-adobe-sign-action-link',
         operation: 'resolve',
-        ...sanitizeResultForTelemetry({ status: 'scope-insufficient' }),
+        status: result.status,
       });
-      return { status: 200, jsonBody: { data: { status: 'scope-insufficient' } } };
+      emitResolveResultTelemetry({
+        trackEvent,
+        result,
+        resultStage: 'token',
+        requiredAction: parsed.requiredAction,
+        hasAgreementId: true,
+        hasItemId: true,
+        startedAtMs,
+        failureReason: token.reason,
+      });
+      return { status: 200, jsonBody: { data: result } };
     }
     if (token.status === 'source-unavailable') {
+      const result = { status: 'source-unavailable' } as const;
       trackEvent('adobeSign.actionLink.resolve.failure', {
         domain: 'my-work-adobe-sign-action-link',
         operation: 'resolve',
-        ...sanitizeResultForTelemetry({ status: 'source-unavailable' }),
+        status: result.status,
       });
-      return { status: 200, jsonBody: { data: { status: 'source-unavailable' } } };
+      emitResolveResultTelemetry({
+        trackEvent,
+        result,
+        resultStage: 'token',
+        requiredAction: parsed.requiredAction,
+        hasAgreementId: true,
+        hasItemId: true,
+        startedAtMs,
+        failureReason: token.reason,
+      });
+      return { status: 200, jsonBody: { data: result } };
     }
 
     const providerResult = await deps.actionLinkClient.resolveActionLink({
@@ -191,12 +280,39 @@ export function createAdobeSignActionLinkResolveHandler(deps: AdobeSignActionLin
     });
 
     let result = mapProviderToRouteResult(providerResult);
+    let policyDecision: ResolvePolicyDecision = 'omitted';
+    const selectedBy: ResolveSelectedBy =
+      providerResult.status === 'ok' ? providerResult.selectedBy : 'none';
+    const urlCandidateCount =
+      providerResult.status === 'ok' ||
+      providerResult.status === 'no-action-url' ||
+      providerResult.status === 'no-recipient-match'
+        ? providerResult.urlCandidateCount
+        : undefined;
+    const providerStatusCode =
+      providerResult.status === 'unreachable' ? providerResult.providerStatusCode : undefined;
+    const failureReason =
+      providerResult.status === 'unreachable'
+        ? providerResult.reason
+        : providerResult.status === 'no-recipient-match'
+          ? 'candidate-selection-failure'
+          : providerResult.status === 'no-action-url'
+            ? 'no-action-url'
+            : providerResult.status === 'not-ready'
+              ? 'not-ready'
+              : providerResult.status === 'rate-limited'
+                ? 'rate-limited'
+                : providerResult.status === 'unauthorized'
+                  ? 'authorization-required'
+                  : undefined;
     if (result.status === 'redirect-ready') {
       const policy = evaluateAdobeSignActionHandoff(result.redirectUrl);
       if (policy.status === 'allowed') {
         result = { status: 'redirect-ready', redirectUrl: policy.redirectUrl };
+        policyDecision = 'allowed';
       } else {
         result = { status: 'policy-rejected' };
+        policyDecision = 'rejected';
       }
     }
 
@@ -207,9 +323,23 @@ export function createAdobeSignActionLinkResolveHandler(deps: AdobeSignActionLin
       {
         domain: 'my-work-adobe-sign-action-link',
         operation: 'resolve',
-        ...sanitizeResultForTelemetry(result),
+        status: result.status,
       },
     );
+    emitResolveResultTelemetry({
+      trackEvent,
+      result,
+      resultStage: result.status === 'policy-rejected' ? 'policy' : 'provider',
+      requiredAction: parsed.requiredAction,
+      hasAgreementId: true,
+      hasItemId: true,
+      startedAtMs,
+      providerStatusCode,
+      urlCandidateCount,
+      selectedBy,
+      policyDecision,
+      failureReason: result.status === 'policy-rejected' ? 'policy-rejected' : failureReason,
+    });
 
     return { status: 200, jsonBody: { data: result } };
   };

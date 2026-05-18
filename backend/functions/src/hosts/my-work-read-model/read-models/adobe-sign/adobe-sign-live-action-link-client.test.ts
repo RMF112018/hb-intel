@@ -44,6 +44,8 @@ describe('createAdobeSignLiveActionLinkClient', () => {
     expect(result).toEqual({
       status: 'ok',
       redirectUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=1',
+      selectedBy: 'actor-match',
+      urlCandidateCount: 1,
     });
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const [url, init] = fetchSpy.mock.calls[0]!;
@@ -72,6 +74,8 @@ describe('createAdobeSignLiveActionLinkClient', () => {
     expect(await client.resolveActionLink(VALID_INPUT)).toEqual({
       status: 'ok',
       redirectUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=me',
+      selectedBy: 'actor-match',
+      urlCandidateCount: 2,
     });
   });
 
@@ -87,6 +91,45 @@ describe('createAdobeSignLiveActionLinkClient', () => {
     expect(await client.resolveActionLink(VALID_INPUT)).toEqual({
       status: 'ok',
       redirectUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=single',
+      selectedBy: 'single-candidate',
+      urlCandidateCount: 1,
+    });
+  });
+
+  it('resolves exactly one valid esignUrl candidate without requiring email match', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        signingUrlSetInfos: [
+          { signingUrls: [{ esignUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=single-no-email' }] },
+        ],
+      }),
+    );
+    const client = createAdobeSignLiveActionLinkClient({ fetch: fetchSpy });
+    expect(await client.resolveActionLink(VALID_INPUT)).toEqual({
+      status: 'ok',
+      redirectUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=single-no-email',
+      selectedBy: 'single-candidate',
+      urlCandidateCount: 1,
+    });
+  });
+
+  it('pre-patch failure classification: multiple candidates without actor match are no-recipient-match (candidate selection failure)', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        signingUrlSetInfos: [
+          {
+            signingUrls: [
+              { esignUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=a' },
+              { esignUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=b' },
+            ],
+          },
+        ],
+      }),
+    );
+    const client = createAdobeSignLiveActionLinkClient({ fetch: fetchSpy });
+    expect(await client.resolveActionLink(VALID_INPUT)).toEqual({
+      status: 'no-recipient-match',
+      urlCandidateCount: 2,
     });
   });
 
@@ -104,13 +147,16 @@ describe('createAdobeSignLiveActionLinkClient', () => {
       }),
     );
     const client = createAdobeSignLiveActionLinkClient({ fetch: fetchSpy });
-    expect(await client.resolveActionLink(VALID_INPUT)).toEqual({ status: 'no-recipient-match' });
+    expect(await client.resolveActionLink(VALID_INPUT)).toEqual({
+      status: 'no-recipient-match',
+      urlCandidateCount: 2,
+    });
   });
 
   it('returns no-action-url for empty signing URL collections', async () => {
     const fetchSpy = vi.fn(async () => jsonResponse({ signingUrlSetInfos: [{ signingUrls: [] }] }));
     const client = createAdobeSignLiveActionLinkClient({ fetch: fetchSpy });
-    expect(await client.resolveActionLink(VALID_INPUT)).toEqual({ status: 'no-action-url' });
+    expect(await client.resolveActionLink(VALID_INPUT)).toEqual({ status: 'no-action-url', urlCandidateCount: 0 });
   });
 
   it('returns malformed-response when body shape is not signingUrlSetInfos[]', async () => {

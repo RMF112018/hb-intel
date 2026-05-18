@@ -148,6 +148,8 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
         resolveActionLink: vi.fn(async () => ({
           status: 'ok',
           redirectUrl: 'https://secure.na1.adobesign.com/public/apiesign?x=1',
+          selectedBy: 'actor-match',
+          urlCandidateCount: 1,
         })),
       },
       now: () => new Date('2026-05-16T16:00:00.000Z'),
@@ -174,6 +176,9 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
     const flattened = JSON.stringify(trackEventSpy.mock.calls);
     expect(flattened).toContain('adobeSign.actionLink.resolve.attempt');
     expect(flattened).toContain('adobeSign.actionLink.resolve.success');
+    expect(flattened).toContain('adobeSign.actionLink.resolve.result');
+    expect(flattened).toContain('"selectedBy":"actor-match"');
+    expect(flattened).toContain('"policyDecision":"allowed"');
     expect(flattened).not.toContain('accessToken');
   });
 
@@ -191,7 +196,7 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
         })),
       },
       actionLinkClient: {
-        resolveActionLink: vi.fn(async () => ({ status: 'no-recipient-match' })),
+        resolveActionLink: vi.fn(async () => ({ status: 'no-recipient-match', urlCandidateCount: 2 })),
       },
       now: () => new Date('2026-05-16T16:00:00.000Z'),
       trackEvent: trackEventSpy,
@@ -212,7 +217,11 @@ describe('adobe-sign-action-link-routes — handler behavior', () => {
     expect(JSON.stringify(response.jsonBody)).not.toContain('accessToken');
     const flattened = JSON.stringify(trackEventSpy.mock.calls);
     expect(flattened).toContain('adobeSign.actionLink.resolve.failure');
+    expect(flattened).toContain('adobeSign.actionLink.resolve.result');
+    expect(flattened).toContain('"failureReason":"candidate-selection-failure"');
     expect(flattened).not.toContain('https://secure.na1.adobesign.com/public/apiesign');
+    expect(flattened).not.toContain('agreement-1');
+    expect(flattened).not.toContain('adobe-sign:agreement-1');
   });
 
   it('maps token authorization-required to authorization-required', async () => {
