@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Popover as HbcAnchoredPopover } from '@hbc/ui-kit/app-shell';
 import type {
   AdobeSignActionLinkResolveResult,
   ResolveAdobeSignActionLinkRequest,
@@ -51,6 +52,25 @@ export interface AdobeSignActionQueueCardProps {
    * `sourceStatus === 'authorization-required'` AND this prop is provided.
    */
   readonly onConnect?: () => Promise<void>;
+  /**
+   * Shell-wired OAuth-start callback for the Reconnect menu action. When
+   * omitted, the Reconnect menu item falls back to `onConnect`. Same start
+   * flow either way; the label distinction is purely user-facing wording.
+   */
+  readonly onReconnect?: () => Promise<void>;
+  /**
+   * Shell-wired idempotent disconnect callback. Resolves on success;
+   * throws on transport / auth / server failure so the card can surface a
+   * row-level error message. When omitted, the Disconnect menu item is
+   * not rendered.
+   */
+  readonly onDisconnect?: () => Promise<void>;
+  /**
+   * Optional callback invoked after `onDisconnect` resolves successfully.
+   * Typically wired to the home envelope hook's `refetch` so the card
+   * transitions to `authorization-required` once the read model reloads.
+   */
+  readonly onAfterDisconnect?: () => void;
   readonly ariaLabel?: string;
 }
 
@@ -119,6 +139,9 @@ export function AdobeSignActionQueueCard({
   homeEnvelope,
   sourceStatus,
   onConnect,
+  onReconnect,
+  onDisconnect,
+  onAfterDisconnect,
   ariaLabel,
 }: AdobeSignActionQueueCardProps) {
   const readModelClient = useMyWorkReadModelClient();
@@ -230,6 +253,110 @@ export function AdobeSignActionQueueCard({
   };
   const isConnecting = connectState === 'connecting';
   const ctaLabel = isConnecting ? 'Connecting…' : (stateCopy.ctaLabel ?? 'Connect Adobe Sign');
+
+  // ─── Adobe Sign account options menu ─────────────────────────────────────
+  // Ellipses-button-driven menu offering Connect / Reconnect / Disconnect
+  // actions, gated by current source status. Account-management surface for
+  // the card; not a primary CTA.
+  const optionsButtonRef = useRef<HTMLButtonElement>(null);
+  const [optionsMenuOpen, setOptionsMenuOpen] = useState(false);
+  const [disconnectState, setDisconnectState] = useState<'idle' | 'pending' | 'error'>('idle');
+
+  const closeOptionsMenu = useCallback(() => {
+    setOptionsMenuOpen(false);
+    if (typeof window !== 'undefined') {
+      // Return focus to the button for keyboard users so the toggle stays
+      // navigable after Escape / outside-click / item activation.
+      window.requestAnimationFrame(() => optionsButtonRef.current?.focus());
+    }
+  }, []);
+
+  // Escape closes the popover; the popover primitive handles outside-click.
+  useEffect(() => {
+    if (!optionsMenuOpen) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        closeOptionsMenu();
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [optionsMenuOpen, closeOptionsMenu]);
+
+  const menuAvailability: {
+    readonly showConnect: boolean;
+    readonly showReconnect: boolean;
+    readonly showDisconnect: boolean;
+    readonly itemsEnabled: boolean;
+  } = useMemo(() => {
+    switch (stateMarker) {
+      case 'authorization-required':
+        return {
+          showConnect: typeof onConnect === 'function',
+          showReconnect: typeof onConnect === 'function' || typeof onReconnect === 'function',
+          showDisconnect: false,
+          itemsEnabled: true,
+        };
+      case 'available-empty':
+      case 'available-items':
+      case 'partial':
+      case 'source-unavailable':
+        return {
+          showConnect: false,
+          showReconnect: typeof onConnect === 'function' || typeof onReconnect === 'function',
+          showDisconnect: typeof onDisconnect === 'function',
+          itemsEnabled: true,
+        };
+      case 'loading':
+      case 'backend-unavailable':
+      case 'configuration-required':
+      case 'principal-unresolved':
+      default:
+        return {
+          showConnect: typeof onConnect === 'function',
+          showReconnect: typeof onConnect === 'function' || typeof onReconnect === 'function',
+          showDisconnect: typeof onDisconnect === 'function',
+          itemsEnabled: false,
+        };
+    }
+  }, [stateMarker, onConnect, onReconnect, onDisconnect]);
+
+  const optionsMenuVisible =
+    menuAvailability.showConnect ||
+    menuAvailability.showReconnect ||
+    menuAvailability.showDisconnect;
+
+  const handleReconnectClick = async (): Promise<void> => {
+    closeOptionsMenu();
+    const start = onReconnect ?? onConnect;
+    if (!start) return;
+    setConnectState('connecting');
+    try {
+      await start();
+      setConnectState('idle');
+    } catch {
+      setConnectState('error');
+    }
+  };
+
+  const handleDisconnectClick = async (): Promise<void> => {
+    if (!onDisconnect) return;
+    closeOptionsMenu();
+    setDisconnectState('pending');
+    try {
+      await onDisconnect();
+      // Clear any stale row-level "Act now" failure copy so users aren't
+      // left looking at a scope-insufficient error after their grant has
+      // been revoked. The read-model refetch below transitions the card
+      // to `authorization-required`.
+      setQueueResolveStateByItemId({});
+      setDisconnectState('idle');
+      onAfterDisconnect?.();
+    } catch {
+      setDisconnectState('error');
+    }
+  };
 
   const showMetrics = stateMarker === 'partial' || stateMarker === 'available-items';
 
@@ -433,6 +560,77 @@ export function AdobeSignActionQueueCard({
             tabClassName={localStyles.adobeSignViewButton}
           />
         ) : null}
+        {optionsMenuVisible ? (
+          <div className={localStyles.optionsMenuRoot}>
+            <button
+              ref={optionsButtonRef}
+              type="button"
+              className={localStyles.optionsButton}
+              aria-label="Adobe Sign options"
+              aria-haspopup="menu"
+              aria-expanded={optionsMenuOpen}
+              data-adobe-sign-options-button="true"
+              data-adobe-sign-options-state={optionsMenuOpen ? 'open' : 'closed'}
+              onClick={() => setOptionsMenuOpen((prev) => !prev)}
+            >
+              <span aria-hidden="true">⋯</span>
+            </button>
+            {optionsMenuOpen ? (
+              <HbcAnchoredPopover
+                anchorRef={optionsButtonRef}
+                onDismiss={closeOptionsMenu}
+                placement="bottom-start"
+                role="menu"
+                aria-label="Adobe Sign options"
+                className={localStyles.optionsMenu}
+              >
+                {menuAvailability.showConnect ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={localStyles.optionsMenuItem}
+                    data-adobe-sign-options-action="connect"
+                    disabled={!menuAvailability.itemsEnabled}
+                    onClick={() => {
+                      closeOptionsMenu();
+                      void handleConnectClick();
+                    }}
+                  >
+                    Connect Adobe Sign
+                  </button>
+                ) : null}
+                {menuAvailability.showReconnect ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={localStyles.optionsMenuItem}
+                    data-adobe-sign-options-action="reconnect"
+                    disabled={!menuAvailability.itemsEnabled}
+                    onClick={() => {
+                      void handleReconnectClick();
+                    }}
+                  >
+                    Reconnect Adobe Sign
+                  </button>
+                ) : null}
+                {menuAvailability.showDisconnect ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={`${localStyles.optionsMenuItem} ${localStyles.optionsMenuItemDestructive}`}
+                    data-adobe-sign-options-action="disconnect"
+                    disabled={!menuAvailability.itemsEnabled || disconnectState === 'pending'}
+                    onClick={() => {
+                      void handleDisconnectClick();
+                    }}
+                  >
+                    {disconnectState === 'pending' ? 'Disconnecting…' : 'Disconnect Adobe Sign'}
+                  </button>
+                ) : null}
+              </HbcAnchoredPopover>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       <section
         role="tabpanel"
@@ -539,6 +737,11 @@ export function AdobeSignActionQueueCard({
         {effectiveActiveView === 'action-queue' && connectState === 'error' ? (
           <p className={styles.bodyText} role="alert">
             Unable to start the Adobe Sign connection. Please try again.
+          </p>
+        ) : null}
+        {effectiveActiveView === 'action-queue' && disconnectState === 'error' ? (
+          <p className={styles.bodyText} role="alert" data-adobe-sign-disconnect-error="true">
+            Unable to disconnect Adobe Sign right now. Please try again.
           </p>
         ) : null}
       </section>

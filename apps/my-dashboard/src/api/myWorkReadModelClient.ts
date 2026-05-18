@@ -49,6 +49,11 @@ export interface AdobeSignOAuthStartResponse {
   readonly stateExpiresAtUtc: string;
 }
 
+export interface AdobeSignOAuthDisconnectResponse {
+  /** Terminal status — always `'disconnected'` on the idempotent success path. */
+  readonly status: 'disconnected';
+}
+
 export interface IMyWorkReadModelClient {
   getMyWorkHome(): Promise<MyWorkReadModelEnvelope<MyWorkHomeReadModel>>;
   getAdobeSignActionQueue(
@@ -81,4 +86,21 @@ export interface IMyWorkReadModelClient {
    * `'adobe-sign-oauth-start-not-available-in-fixture-mode'`.
    */
   startAdobeSignOAuth(input: AdobeSignOAuthStartInput): Promise<AdobeSignOAuthStartResponse>;
+  /**
+   * Soft-deactivate the authenticated user's stored Adobe Sign OAuth
+   * grant so the next Connect/Reconnect forces a fresh consent flow.
+   *
+   * Backend route: `POST /api/my-work/me/adobe-sign/oauth/disconnect`
+   * (bearer-protected). Idempotent — returns `{ status: 'disconnected' }`
+   * regardless of whether a grant existed for the actor.
+   *
+   * Throws closed-enum `Error` codes on failure:
+   *   - `'adobe-sign-oauth-disconnect-unauthorized'` — 401 / 403.
+   *   - `'adobe-sign-oauth-disconnect-failed'`      — 5xx or malformed body.
+   *   - `'adobe-sign-oauth-disconnect-unreachable'` — network / token-acquire failure.
+   *
+   * Not available in fixture mode — the fixture client rejects with
+   * `'adobe-sign-oauth-disconnect-not-available-in-fixture-mode'`.
+   */
+  disconnectAdobeSignOAuth?(): Promise<AdobeSignOAuthDisconnectResponse>;
 }

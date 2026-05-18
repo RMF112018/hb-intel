@@ -1,17 +1,28 @@
 /**
- * Adobe Sign OAuth routes — B05 Prompt 03.
+ * Adobe Sign OAuth routes.
  *
- * Two and only two routes are registered here:
+ * Three routes are registered here:
  *
- *   POST /api/my-work/me/adobe-sign/oauth/start    (protected)
- *   GET  /api/my-work/adobe-sign/oauth/callback    (public)
+ *   POST /api/my-work/me/adobe-sign/oauth/start        (protected)
+ *   GET  /api/my-work/adobe-sign/oauth/callback        (public)
+ *   POST /api/my-work/me/adobe-sign/oauth/disconnect   (protected, idempotent)
  *
  * The callback intentionally lives **outside** `/me/...` because Adobe
  * cannot present the user's Entra bearer when redirecting back; the
  * route validates a single-use OAuth `state` parameter instead. The
- * start route stays under `/me/...` and is bound to the validated actor
- * via the existing auth middleware — no actor/user/principal override
- * is accepted from the request.
+ * start and disconnect routes stay under `/me/...` and are bound to the
+ * validated actor via the existing auth middleware — no actor/user/
+ * principal override is accepted from the request body.
+ *
+ * Operator note on scopes: the OAuth scope set is supplied by the env
+ * `ADOBE_SIGN_OAUTH_SCOPES`. The exact scope strings required for
+ * agreement search, agreement detail, and signing-URL/action-link
+ * resolution are an Adobe configuration dependency that must be
+ * verified against Adobe's published scope reference for the tenant.
+ * If the resolver reports `scope-insufficient`, the user-facing
+ * remediation is the Reconnect action on the Adobe Sign card, which
+ * forces a fresh consent and re-issues the grant under the currently
+ * configured env scope list.
  *
  * Composition contract:
  *   - `withAuth(withTelemetry(...))` wraps the start handler exactly as
@@ -94,11 +105,13 @@ import {
 export const ADOBE_SIGN_OAUTH_ROUTE_PATHS = {
   start: 'my-work/me/adobe-sign/oauth/start',
   callback: 'my-work/adobe-sign/oauth/callback',
+  disconnect: 'my-work/me/adobe-sign/oauth/disconnect',
 } as const;
 
 export const ADOBE_SIGN_OAUTH_ROUTE_NAMES = {
   start: 'startAdobeSignOAuth',
   callback: 'completeAdobeSignOAuthCallback',
+  disconnect: 'disconnectAdobeSignOAuth',
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -360,7 +373,11 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         hasState: Boolean(state),
         hasCode: Boolean(code),
       });
-      return buildRedirect(env, ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH, CALLBACK_UX_STATUS.invalidState);
+      return buildRedirect(
+        env,
+        ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH,
+        CALLBACK_UX_STATUS.invalidState,
+      );
     }
 
     const configReadiness = resolveAdobeSignOAuthConfigReadiness(env);
@@ -415,10 +432,18 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         correlationId: requestId,
         callbackHasApiAccessPoint: hasApiAccessPoint,
         callbackHasWebAccessPoint: hasWebAccessPoint,
-        apiAccessPointAllowed: hasApiAccessPoint ? isAllowedAdobeAccessPoint(apiAccessPoint) : false,
-        webAccessPointAllowed: hasWebAccessPoint ? isAllowedAdobeAccessPoint(webAccessPoint) : false,
+        apiAccessPointAllowed: hasApiAccessPoint
+          ? isAllowedAdobeAccessPoint(apiAccessPoint)
+          : false,
+        webAccessPointAllowed: hasWebAccessPoint
+          ? isAllowedAdobeAccessPoint(webAccessPoint)
+          : false,
       });
-      return buildRedirect(env, ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH, CALLBACK_UX_STATUS.invalidState);
+      return buildRedirect(
+        env,
+        ADOBE_SIGN_OAUTH_DEFAULT_RETURN_PATH,
+        CALLBACK_UX_STATUS.invalidState,
+      );
     }
 
     const takeResult = await stateStore.store.take(state, deps.now());
@@ -478,8 +503,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
               exchangeHasClientIdField: exchange.exchangeRequestDiagnostics.hasClientIdField,
               exchangeHasClientSecretField:
                 exchange.exchangeRequestDiagnostics.hasClientSecretField,
-              exchangeHasRedirectUriField:
-                exchange.exchangeRequestDiagnostics.hasRedirectUriField,
+              exchangeHasRedirectUriField: exchange.exchangeRequestDiagnostics.hasRedirectUriField,
             }
           : {}),
         callbackHasApiAccessPoint: hasApiAccessPoint,
@@ -544,6 +568,119 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
 }
 
 // ---------------------------------------------------------------------------
+// Disconnect route — idempotent soft-deactivate of the authenticated actor's
+// stored Adobe Sign grant. Removing the local grant forces a fresh OAuth
+// start on the next user interaction and refreshes the scope set against
+// the currently configured env scope list. No remote Adobe revocation is
+// performed here; only the local grant record is marked `revoked`.
+// ---------------------------------------------------------------------------
+
+type DisconnectResultStatus =
+  | 'disconnected'
+  | 'principal-unresolved'
+  | 'source-unavailable'
+  | 'configuration-required';
+
+type DisconnectResultStage = 'principal' | 'token-store' | 'complete';
+
+export function createDisconnectHandler(deps: AdobeSignOAuthRouteDeps) {
+  return async (
+    request: HttpRequest,
+    context: InvocationContext,
+    auth: { claims: Parameters<typeof normalizeAdobeSignActor>[0]['claims'] },
+  ): Promise<HttpResponseInit> => {
+    const requestId = extractOrGenerateRequestId(request);
+    const logger = createLogger(context);
+    const startedAt = deps.now().getTime();
+
+    const emit = (payload: {
+      readonly status: DisconnectResultStatus;
+      readonly resultStage: DisconnectResultStage;
+      readonly hadExistingGrant?: boolean;
+      readonly failureReason?: string;
+    }): void => {
+      logger.trackEvent('adobeSign.oauth.disconnect.result', {
+        correlationId: requestId,
+        status: payload.status,
+        resultStage: payload.resultStage,
+        ...(payload.hadExistingGrant !== undefined
+          ? { hadExistingGrant: payload.hadExistingGrant }
+          : {}),
+        ...(payload.failureReason ? { failureReason: payload.failureReason } : {}),
+        durationMs: Math.max(0, deps.now().getTime() - startedAt),
+      });
+    };
+
+    const actorResult = normalizeAdobeSignActor({
+      tenantId: deps.resolveTenantId(),
+      claims: auth.claims,
+    });
+    if (!actorResult.ok) {
+      emit({
+        status: 'principal-unresolved',
+        resultStage: 'principal',
+        failureReason: actorResult.reason,
+      });
+      return errorResponse(
+        actorResult.reason === 'app-only' ? 403 : 400,
+        'PRINCIPAL_UNRESOLVED',
+        'The signed-in identity is not eligible for personal Adobe Sign disconnect.',
+        requestId,
+        { reason: actorResult.reason },
+      );
+    }
+
+    const grantStoreResult = deps.resolveGrantStore();
+    if (grantStoreResult.readiness !== 'ready') {
+      emit({
+        status: 'configuration-required',
+        resultStage: 'token-store',
+        failureReason: grantStoreResult.reason,
+      });
+      return errorResponse(
+        503,
+        'CONFIGURATION_REQUIRED',
+        'Adobe Sign grant store is not configured.',
+        requestId,
+        { reason: grantStoreResult.reason },
+      );
+    }
+
+    let hadExistingGrant = false;
+    try {
+      const existing = await grantStoreResult.store.findGrant(actorResult.actor.actorKey);
+      hadExistingGrant = existing !== undefined && existing.state !== 'revoked';
+      if (existing !== undefined) {
+        await grantStoreResult.store.markRevoked(
+          actorResult.actor.actorKey,
+          deps.now().toISOString(),
+        );
+      }
+    } catch {
+      emit({
+        status: 'source-unavailable',
+        resultStage: 'token-store',
+        hadExistingGrant,
+        failureReason: 'grant-store-write-failed',
+      });
+      return errorResponse(
+        503,
+        'SOURCE_UNAVAILABLE',
+        'Adobe Sign grant store is temporarily unavailable.',
+        requestId,
+      );
+    }
+
+    emit({
+      status: 'disconnected',
+      resultStage: 'complete',
+      hadExistingGrant,
+    });
+    return successResponse({ status: 'disconnected' as const });
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Function-host registration. Default deps are used in production; tests
 // import the handler factories directly and inject their own deps.
 // ---------------------------------------------------------------------------
@@ -567,4 +704,16 @@ app.http(ADOBE_SIGN_OAUTH_ROUTE_NAMES.callback, {
   authLevel: 'anonymous',
   route: ADOBE_SIGN_OAUTH_ROUTE_PATHS.callback,
   handler: createCallbackHandler(deps),
+});
+
+app.http(ADOBE_SIGN_OAUTH_ROUTE_NAMES.disconnect, {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  route: ADOBE_SIGN_OAUTH_ROUTE_PATHS.disconnect,
+  handler: withAuth(
+    withTelemetry(createDisconnectHandler(deps), {
+      domain: 'my-work-adobe-sign-oauth',
+      operation: ADOBE_SIGN_OAUTH_ROUTE_NAMES.disconnect,
+    }),
+  ),
 });

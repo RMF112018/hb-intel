@@ -68,4 +68,20 @@ describe('My Work read-model client — interface conformance', () => {
       'startAdobeSignOAuth',
     ]);
   });
+
+  it('accepts a stub that also implements the optional disconnectAdobeSignOAuth method', () => {
+    const stub: IMyWorkReadModelClient = {
+      getMyWorkHome: async () => MY_WORK_HOME_AVAILABLE,
+      getAdobeSignActionQueue: async () => ADOBE_SIGN_QUEUE_AVAILABLE,
+      getAdobeSignRecentCompletions: async () => ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
+      getMyProjectLinks: async () => MY_PROJECT_LINKS_AVAILABLE,
+      resolveAdobeSignActionLink: async () => ({ status: 'source-unavailable' }),
+      startAdobeSignOAuth: async () => ({
+        authorizationUrl: 'https://secure.adobesign.com/public/oauth/v2?state=stub',
+        stateExpiresAtUtc: '2026-05-13T12:10:00.000Z',
+      }),
+      disconnectAdobeSignOAuth: async () => ({ status: 'disconnected' }),
+    };
+    expect(stub.disconnectAdobeSignOAuth).toBeDefined();
+  });
 });

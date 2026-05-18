@@ -20,6 +20,7 @@ import {
 import {
   useMyWorkHomeEnvelope,
   type EnvelopeState,
+  type EnvelopeStateWithRefetch,
 } from '../runtime/useMyWorkReadModelEnvelope.js';
 
 /**
@@ -48,9 +49,9 @@ export function useMyWorkActiveEnvelopeDataPath(): MyWorkActiveEnvelopeDataPath 
 
 // ─── Home envelope context ────────────────────────────────────────────────
 
-const MyWorkHomeEnvelopeContext = createContext<EnvelopeState<MyWorkHomeReadModel> | undefined>(
-  undefined,
-);
+const MyWorkHomeEnvelopeContext = createContext<
+  EnvelopeStateWithRefetch<MyWorkHomeReadModel> | undefined
+>(undefined);
 
 export function MyWorkHomeEnvelopeProvider({ children }: { readonly children: ReactNode }) {
   const state = useMyWorkHomeEnvelope();
@@ -64,7 +65,7 @@ export function MyWorkHomeEnvelopeProvider({ children }: { readonly children: Re
   );
 }
 
-export function useMyWorkHomeEnvelopeContext(): EnvelopeState<MyWorkHomeReadModel> {
+export function useMyWorkHomeEnvelopeContext(): EnvelopeStateWithRefetch<MyWorkHomeReadModel> {
   const state = useContext(MyWorkHomeEnvelopeContext);
   if (!state) {
     throw new Error(

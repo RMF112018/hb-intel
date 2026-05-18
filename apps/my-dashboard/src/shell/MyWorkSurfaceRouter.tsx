@@ -7,6 +7,8 @@ export interface MyWorkSurfaceRouterProps {
   readonly activePrimarySurfaceId: MyWorkPrimarySurfaceId;
   /** Shell-wired Adobe Sign OAuth start callback. Forwarded transparently to the home surface. */
   readonly onConnectAdobeSign?: () => Promise<void>;
+  /** Shell-wired Adobe Sign disconnect callback. Forwarded transparently to the home surface. */
+  readonly onDisconnectAdobeSign?: () => Promise<void>;
 }
 
 /**
@@ -21,7 +23,10 @@ export interface MyWorkSurfaceRouterProps {
  * `MyWorkActiveEnvelopeProvider` (mounted by the shell), so the hero band
  * shares the same fetch.
  */
-export function MyWorkSurfaceRouter({ onConnectAdobeSign }: MyWorkSurfaceRouterProps) {
+export function MyWorkSurfaceRouter({
+  onConnectAdobeSign,
+  onDisconnectAdobeSign,
+}: MyWorkSurfaceRouterProps) {
   const state = useMyWorkHomeEnvelopeContext();
   const readiness = selectSurfaceReadiness(state);
   return (
@@ -30,6 +35,8 @@ export function MyWorkSurfaceRouter({ onConnectAdobeSign }: MyWorkSurfaceRouterP
       sourceStatus={readiness.sourceStatus}
       homeEnvelope={readiness.envelope}
       onConnectAdobeSign={onConnectAdobeSign}
+      onDisconnectAdobeSign={onDisconnectAdobeSign}
+      onAfterDisconnectAdobeSign={state.refetch}
     />
   );
 }

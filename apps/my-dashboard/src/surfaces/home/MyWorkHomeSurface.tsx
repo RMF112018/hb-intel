@@ -33,6 +33,18 @@ export interface MyWorkHomeSurfaceProps {
    * `sourceStatus === 'authorization-required'` AND this prop is supplied.
    */
   readonly onConnectAdobeSign?: () => Promise<void>;
+  /**
+   * Shell-wired Adobe Sign disconnect callback. Threaded down to the card
+   * so the ellipses menu can offer a Disconnect action. Same OAuth start
+   * flow is reused for Reconnect — no separate callback needed.
+   */
+  readonly onDisconnectAdobeSign?: () => Promise<void>;
+  /**
+   * Shell-wired refetch trigger for the home envelope. Invoked by the card
+   * after a successful disconnect so the read model reloads and the card
+   * transitions to `authorization-required`.
+   */
+  readonly onAfterDisconnectAdobeSign?: () => void;
 }
 
 const MY_PROJECTS_HOME_SPAN_OVERRIDES: MyWorkCardSpanOverrides = {
@@ -62,6 +74,8 @@ export function MyWorkHomeSurface({
   sourceStatus,
   homeEnvelope,
   onConnectAdobeSign,
+  onDisconnectAdobeSign,
+  onAfterDisconnectAdobeSign,
 }: MyWorkHomeSurfaceProps) {
   const statusMarker = sourceStatus ? (
     <span hidden data-my-work-source-status={sourceStatus} />
@@ -73,6 +87,9 @@ export function MyWorkHomeSurface({
       homeEnvelope={homeEnvelope}
       sourceStatus={sourceStatus}
       onConnect={onConnectAdobeSign}
+      onReconnect={onConnectAdobeSign}
+      onDisconnect={onDisconnectAdobeSign}
+      onAfterDisconnect={onAfterDisconnectAdobeSign}
       spanOverrides={ADOBE_SIGN_HOME_SPAN_OVERRIDES}
     />
   );

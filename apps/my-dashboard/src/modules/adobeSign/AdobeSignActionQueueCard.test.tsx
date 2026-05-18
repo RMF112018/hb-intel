@@ -46,6 +46,9 @@ function renderCard(
       | 'source-unavailable'
       | 'backend-unavailable';
     onConnect?: () => Promise<void>;
+    onReconnect?: () => Promise<void>;
+    onDisconnect?: () => Promise<void>;
+    onAfterDisconnect?: () => void;
     recentCompletionsEnvelope?: unknown;
     getAdobeSignRecentCompletions?: () => Promise<unknown>;
     resolveAdobeSignActionLink?: () => Promise<AdobeSignActionLinkResolveResult>;
@@ -57,6 +60,9 @@ function renderCard(
     homeEnvelope,
     sourceStatus,
     onConnect,
+    onReconnect,
+    onDisconnect,
+    onAfterDisconnect,
     recentCompletionsEnvelope,
     getAdobeSignRecentCompletions,
     resolveAdobeSignActionLink,
@@ -73,8 +79,7 @@ function renderCard(
       throw new Error('unused');
     }),
     resolveAdobeSignActionLink:
-      resolveAdobeSignActionLink ??
-      vi.fn(async () => ({ status: 'source-unavailable' as const })),
+      resolveAdobeSignActionLink ?? vi.fn(async () => ({ status: 'source-unavailable' as const })),
     startAdobeSignOAuth: vi.fn(async () => {
       throw new Error('unused');
     }),
@@ -87,6 +92,9 @@ function renderCard(
           homeEnvelope={homeEnvelope}
           sourceStatus={sourceStatus}
           onConnect={onConnect}
+          onReconnect={onReconnect}
+          onDisconnect={onDisconnect}
+          onAfterDisconnect={onAfterDisconnect}
         />
       </MyWorkBentoGrid>
     </MyWorkReadModelClientProvider>,
@@ -187,12 +195,12 @@ describe('AdobeSignActionQueueCard — header toggle', () => {
     expect(container.querySelector('#adobe-sign-panel-completed')?.getAttribute('role')).toBe(
       'tabpanel',
     );
-    expect(container.querySelector('#adobe-sign-panel-action-queue')?.getAttribute('aria-labelledby')).toBe(
-      queueTab.id,
-    );
-    expect(container.querySelector('#adobe-sign-panel-completed')?.getAttribute('aria-labelledby')).toBe(
-      completedTab.id,
-    );
+    expect(
+      container.querySelector('#adobe-sign-panel-action-queue')?.getAttribute('aria-labelledby'),
+    ).toBe(queueTab.id);
+    expect(
+      container.querySelector('#adobe-sign-panel-completed')?.getAttribute('aria-labelledby'),
+    ).toBe(completedTab.id);
   });
 
   it('defaults to Action Queue selected and swaps selected markers on click', async () => {
@@ -239,9 +247,9 @@ describe('AdobeSignActionQueueCard — header toggle', () => {
   });
 
   it('uses manual activation: arrows/home/end move focus but do not activate', async () => {
-    const getAdobeSignRecentCompletions = vi.fn().mockResolvedValue(
-      ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE,
-    );
+    const getAdobeSignRecentCompletions = vi
+      .fn()
+      .mockResolvedValue(ADOBE_SIGN_RECENT_COMPLETIONS_AVAILABLE);
     const { container } = renderCard({
       readinessVariant: 'ready',
       homeEnvelope: MY_WORK_HOME_AVAILABLE,
@@ -492,7 +500,9 @@ describe('AdobeSignActionQueueCard — source-unavailable', () => {
     expect(card.getAttribute('data-adobe-sign-action-queue-state')).toBe('source-unavailable');
     expect(card.getAttribute('data-adobe-sign-action-queue-badge')).toBe('Temporarily unavailable');
     expect(card.textContent).toContain('Adobe Sign is temporarily unavailable.');
-    expect(card.textContent).toContain('Your action queue will resume once the source is reachable.');
+    expect(card.textContent).toContain(
+      'Your action queue will resume once the source is reachable.',
+    );
   });
 });
 
@@ -530,7 +540,9 @@ describe('AdobeSignActionQueueCard — partial', () => {
     const card = container.querySelector('[data-my-work-card-role="adobe-sign-action-queue"]')!;
     expect(card.getAttribute('data-adobe-sign-action-queue-state')).toBe('partial');
     expect(card.getAttribute('data-adobe-sign-action-queue-badge')).toBe('Partial data');
-    expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe('Partial data');
+    expect(container.querySelector('[data-adobe-sign-status-chip]')?.textContent).toBe(
+      'Partial data',
+    );
     // Per ADOBE_SIGN_QUEUE_PARTIAL: 3 items total — 1 signature + 1 approval + 1 acceptance.
     expect(container.querySelector('[data-adobe-queue-summary-pending]')?.textContent).toBe('3');
     expect(container.querySelector('[data-adobe-queue-summary-signature]')?.textContent).toBe('1');
@@ -549,7 +561,9 @@ describe('AdobeSignActionQueueCard — available + zero items', () => {
     expect(card.getAttribute('data-adobe-sign-action-queue-state')).toBe('available-empty');
     expect(card.getAttribute('data-adobe-sign-action-queue-badge')).toBe('Ready');
     expect(card.textContent).toContain('No Adobe Sign agreements need your action.');
-    expect(card.textContent).toContain('Your queue is clear based on the latest available Adobe Sign read.');
+    expect(card.textContent).toContain(
+      'Your queue is clear based on the latest available Adobe Sign read.',
+    );
     expect(container.querySelector('[data-adobe-sign-activity-list]')).toBeNull();
     // State matrix 1.8: metrics are omitted in the ready + zero-items state.
     expect(container.querySelector('[data-adobe-sign-action-queue-metrics]')).toBeNull();
@@ -687,12 +701,10 @@ describe('AdobeSignActionQueueCard — completed panel', () => {
     expect(container.querySelector('[data-adobe-sign-completed-metrics]')?.textContent).toContain(
       'completed in the last 30 days',
     );
-    expect(container.querySelectorAll('[data-adobe-sign-activity-row]').length).toBeGreaterThan(
-      0,
+    expect(container.querySelectorAll('[data-adobe-sign-activity-row]').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('[data-adobe-sign-activity-row]').length).toBeLessThanOrEqual(
+      5,
     );
-    expect(
-      container.querySelectorAll('[data-adobe-sign-activity-row]').length,
-    ).toBeLessThanOrEqual(5);
   });
 
   it('renders completed metadata with sender/date fallback and never shows legacy placeholder', async () => {
@@ -766,7 +778,9 @@ describe('AdobeSignActionQueueCard — completed panel', () => {
       });
       fireEvent.click(degraded.container.querySelector('[data-adobe-sign-card-view="completed"]')!);
       await waitFor(() => {
-        expect(degraded.container.textContent).toContain('Recent Adobe Sign completions are temporarily unavailable.');
+        expect(degraded.container.textContent).toContain(
+          'Recent Adobe Sign completions are temporarily unavailable.',
+        );
       });
       expect(degraded.container.querySelector('[data-adobe-sign-completed-retry]')).not.toBeNull();
       expect(
@@ -914,7 +928,9 @@ describe('AdobeSignActionQueueCard — item handoff actions', () => {
       readinessVariant: 'ready',
       homeEnvelope: MY_WORK_HOME_AVAILABLE,
     });
-    const primaryActions = container.querySelectorAll('[data-adobe-sign-row-primary-action="start"]');
+    const primaryActions = container.querySelectorAll(
+      '[data-adobe-sign-row-primary-action="start"]',
+    );
     expect(primaryActions.length).toBeGreaterThan(0);
     const labels = Array.from(primaryActions).map((el) => el.textContent?.trim());
     expect(labels.every((label) => label === 'Act now')).toBe(true);
@@ -954,7 +970,9 @@ describe('AdobeSignActionQueueCard — item handoff actions', () => {
   });
 
   it('surfaces reconnect guidance for scope-insufficient resolver failures', async () => {
-    const resolveAdobeSignActionLink = vi.fn(async () => ({ status: 'scope-insufficient' as const }));
+    const resolveAdobeSignActionLink = vi.fn(async () => ({
+      status: 'scope-insufficient' as const,
+    }));
     const { container } = renderCard({
       readinessVariant: 'ready',
       homeEnvelope: MY_WORK_HOME_AVAILABLE,
@@ -1143,5 +1161,224 @@ describe('AdobeSignActionQueueCard — sourceStatus fallback', () => {
     });
     const card = container.querySelector('[data-my-work-card-role="adobe-sign-action-queue"]')!;
     expect(card.getAttribute('data-adobe-sign-action-queue-state')).toBe('configuration-required');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Adobe Sign options menu — ellipses-driven Connect / Reconnect / Disconnect.
+// ---------------------------------------------------------------------------
+
+const openOptionsMenu = (container: HTMLElement): HTMLButtonElement => {
+  const button = container.querySelector<HTMLButtonElement>(
+    '[data-adobe-sign-options-button="true"]',
+  );
+  expect(button).not.toBeNull();
+  fireEvent.click(button!);
+  return button!;
+};
+
+const menuActionButton = (
+  action: 'connect' | 'reconnect' | 'disconnect',
+): HTMLButtonElement | null =>
+  document.querySelector<HTMLButtonElement>(`[data-adobe-sign-options-action="${action}"]`);
+
+describe('AdobeSignActionQueueCard — options menu', () => {
+  it('does not render an options button when no account-management callbacks are wired', () => {
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+    });
+    expect(container.querySelector('[data-adobe-sign-options-button="true"]')).toBeNull();
+  });
+
+  it('authorization-required state offers both Connect and Reconnect items (both reach onConnect)', async () => {
+    const onConnect = vi.fn(async () => {});
+    const { container } = renderCard({
+      readinessVariant: 'non-ready',
+      homeEnvelope: MY_WORK_HOME_AUTHORIZATION_REQUIRED,
+      sourceStatus: 'authorization-required',
+      onConnect,
+    });
+    const button = openOptionsMenu(container);
+    expect(button.getAttribute('aria-label')).toBe('Adobe Sign options');
+    expect(button.getAttribute('aria-haspopup')).toBe('menu');
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+
+    const connect = menuActionButton('connect');
+    const reconnect = menuActionButton('reconnect');
+    const disconnect = menuActionButton('disconnect');
+    expect(connect).not.toBeNull();
+    expect(reconnect).not.toBeNull();
+    expect(disconnect).toBeNull();
+    expect(connect!.textContent).toContain('Connect Adobe Sign');
+    expect(reconnect!.textContent).toContain('Reconnect Adobe Sign');
+
+    fireEvent.click(reconnect!);
+    await waitFor(() => expect(onConnect).toHaveBeenCalledTimes(1));
+  });
+
+  it('available state offers Reconnect and Disconnect (no Connect)', () => {
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      onConnect: vi.fn(async () => {}),
+      onDisconnect: vi.fn(async () => {}),
+    });
+    openOptionsMenu(container);
+    expect(menuActionButton('connect')).toBeNull();
+    expect(menuActionButton('reconnect')).not.toBeNull();
+    expect(menuActionButton('disconnect')).not.toBeNull();
+  });
+
+  it('partial and source-unavailable states keep the Reconnect + Disconnect surface', () => {
+    const partial = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_PARTIAL,
+      onConnect: vi.fn(async () => {}),
+      onDisconnect: vi.fn(async () => {}),
+    });
+    openOptionsMenu(partial.container);
+    expect(menuActionButton('reconnect')).not.toBeNull();
+    expect(menuActionButton('disconnect')).not.toBeNull();
+    cleanup();
+
+    const sourceUnavailable = renderCard({
+      readinessVariant: 'non-ready',
+      homeEnvelope: MY_WORK_HOME_SOURCE_UNAVAILABLE,
+      sourceStatus: 'source-unavailable',
+      onConnect: vi.fn(async () => {}),
+      onDisconnect: vi.fn(async () => {}),
+    });
+    openOptionsMenu(sourceUnavailable.container);
+    expect(menuActionButton('reconnect')).not.toBeNull();
+    expect(menuActionButton('disconnect')).not.toBeNull();
+  });
+
+  it('uses onReconnect when supplied; falls back to onConnect when not', async () => {
+    const onConnect = vi.fn(async () => {});
+    const onReconnect = vi.fn(async () => {});
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      onConnect,
+      onReconnect,
+    });
+    openOptionsMenu(container);
+    fireEvent.click(menuActionButton('reconnect')!);
+    await waitFor(() => expect(onReconnect).toHaveBeenCalledTimes(1));
+    expect(onConnect).not.toHaveBeenCalled();
+  });
+
+  it('successful disconnect triggers onAfterDisconnect and clears stale row-level error', async () => {
+    const onDisconnect = vi.fn(async () => {});
+    const onAfterDisconnect = vi.fn();
+    const resolveAdobeSignActionLink = vi.fn(async () => ({
+      status: 'scope-insufficient' as const,
+    }));
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      onConnect: vi.fn(async () => {}),
+      onDisconnect,
+      onAfterDisconnect,
+      resolveAdobeSignActionLink,
+    });
+
+    // First produce a row-level error by clicking the existing Act now button.
+    const actNow = container.querySelector<HTMLButtonElement>('[data-my-work-action-row-primary]');
+    if (actNow) {
+      fireEvent.click(actNow);
+      await waitFor(() => expect(container.textContent ?? '').toContain('Reconnect Adobe Sign'));
+    }
+
+    openOptionsMenu(container);
+    fireEvent.click(menuActionButton('disconnect')!);
+
+    await waitFor(() => expect(onDisconnect).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(onAfterDisconnect).toHaveBeenCalledTimes(1));
+
+    // Row-level scope-insufficient copy must not survive a successful disconnect.
+    expect(container.textContent ?? '').not.toContain(
+      'Reconnect Adobe Sign to refresh permissions',
+    );
+  });
+
+  it('failed disconnect surfaces safe error copy and does not call onAfterDisconnect', async () => {
+    const onDisconnect = vi.fn(async () => {
+      throw new Error('boom');
+    });
+    const onAfterDisconnect = vi.fn();
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      onConnect: vi.fn(async () => {}),
+      onDisconnect,
+      onAfterDisconnect,
+    });
+
+    openOptionsMenu(container);
+    fireEvent.click(menuActionButton('disconnect')!);
+
+    await waitFor(() => expect(onDisconnect).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(
+        container.querySelector('[data-adobe-sign-disconnect-error="true"]')?.textContent,
+      ).toContain('Unable to disconnect Adobe Sign right now. Please try again.'),
+    );
+    expect(onAfterDisconnect).not.toHaveBeenCalled();
+  });
+
+  it('options button is keyboard-focusable and opens the menu on click', () => {
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      onConnect: vi.fn(async () => {}),
+      onDisconnect: vi.fn(async () => {}),
+    });
+    const button = container.querySelector<HTMLButtonElement>(
+      '[data-adobe-sign-options-button="true"]',
+    )!;
+    button.focus();
+    expect(document.activeElement).toBe(button);
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(button);
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('Escape closes the open options menu', async () => {
+    const { container } = renderCard({
+      readinessVariant: 'ready',
+      homeEnvelope: MY_WORK_HOME_AVAILABLE,
+      onConnect: vi.fn(async () => {}),
+      onDisconnect: vi.fn(async () => {}),
+    });
+    const button = openOptionsMenu(container);
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() => expect(button.getAttribute('aria-expanded')).toBe('false'));
+    expect(menuActionButton('reconnect')).toBeNull();
+  });
+
+  it('renders disabled menu items in loading / configuration-required / principal-unresolved states', () => {
+    const loading = renderCard({
+      readinessVariant: 'loading',
+      onConnect: vi.fn(async () => {}),
+      onDisconnect: vi.fn(async () => {}),
+    });
+    openOptionsMenu(loading.container);
+    expect(menuActionButton('reconnect')?.disabled).toBe(true);
+    expect(menuActionButton('disconnect')?.disabled).toBe(true);
+    cleanup();
+
+    const configRequired = renderCard({
+      readinessVariant: 'non-ready',
+      homeEnvelope: MY_WORK_HOME_CONFIGURATION_REQUIRED,
+      sourceStatus: 'configuration-required',
+      onConnect: vi.fn(async () => {}),
+      onDisconnect: vi.fn(async () => {}),
+    });
+    openOptionsMenu(configRequired.container);
+    expect(menuActionButton('reconnect')?.disabled).toBe(true);
+    expect(menuActionButton('disconnect')?.disabled).toBe(true);
   });
 });

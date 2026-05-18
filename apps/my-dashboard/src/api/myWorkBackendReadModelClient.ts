@@ -29,6 +29,7 @@ import { MY_WORK_MARK, markMyWork, measureMyWork } from '../runtime/myWorkPerfor
 
 import {
   MY_WORK_READ_MODEL_ROUTE_PATHS,
+  type AdobeSignOAuthDisconnectResponse,
   type AdobeSignOAuthStartInput,
   type AdobeSignOAuthStartResponse,
   type GetApiToken,
@@ -46,7 +47,9 @@ export type MyWorkReadModelFetch = (
 ) => Promise<Response>;
 
 const ADOBE_SIGN_OAUTH_START_ROUTE_PATH = 'my-work/me/adobe-sign/oauth/start' as const;
-const ADOBE_SIGN_ACTION_LINK_RESOLVE_ROUTE_PATH = 'my-work/me/adobe-sign/action-link/resolve' as const;
+const ADOBE_SIGN_OAUTH_DISCONNECT_ROUTE_PATH = 'my-work/me/adobe-sign/oauth/disconnect' as const;
+const ADOBE_SIGN_ACTION_LINK_RESOLVE_ROUTE_PATH =
+  'my-work/me/adobe-sign/action-link/resolve' as const;
 
 export interface MyWorkBackendReadModelClientOptions {
   readonly backendBaseUrl: string;
@@ -270,6 +273,60 @@ class MyWorkBackendReadModelClient implements IMyWorkReadModelClient {
     };
   }
 
+  async disconnectAdobeSignOAuth(): Promise<AdobeSignOAuthDisconnectResponse> {
+    let token: string;
+    try {
+      token = await this.getApiToken();
+    } catch {
+      throw new Error('adobe-sign-oauth-disconnect-unreachable');
+    }
+    if (!token || token.trim().length === 0) {
+      throw new Error('adobe-sign-oauth-disconnect-unreachable');
+    }
+
+    const url = `${this.apiBaseUrl}/${ADOBE_SIGN_OAUTH_DISCONNECT_ROUTE_PATH}`;
+    let response: Response;
+    try {
+      response = await this.fetchImpl(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: '',
+      });
+    } catch {
+      throw new Error('adobe-sign-oauth-disconnect-unreachable');
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('adobe-sign-oauth-disconnect-unauthorized');
+    }
+    if (!response.ok) {
+      throw new Error('adobe-sign-oauth-disconnect-failed');
+    }
+
+    let body: unknown;
+    try {
+      body = await response.json();
+    } catch {
+      throw new Error('adobe-sign-oauth-disconnect-failed');
+    }
+    if (typeof body !== 'object' || body === null) {
+      throw new Error('adobe-sign-oauth-disconnect-failed');
+    }
+    const data = (body as { data?: unknown }).data;
+    if (
+      typeof data !== 'object' ||
+      data === null ||
+      (data as Record<string, unknown>).status !== 'disconnected'
+    ) {
+      throw new Error('adobe-sign-oauth-disconnect-failed');
+    }
+    return { status: 'disconnected' };
+  }
+
   async resolveAdobeSignActionLink(
     input: ResolveAdobeSignActionLinkRequest,
   ): Promise<AdobeSignActionLinkResolveResult> {
@@ -317,7 +374,11 @@ class MyWorkBackendReadModelClient implements IMyWorkReadModelClient {
     }
 
     const data = (body as { data?: unknown }).data;
-    if (typeof data !== 'object' || data === null || typeof (data as { status?: unknown }).status !== 'string') {
+    if (
+      typeof data !== 'object' ||
+      data === null ||
+      typeof (data as { status?: unknown }).status !== 'string'
+    ) {
       return { status: 'source-unavailable' };
     }
 

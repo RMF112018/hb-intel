@@ -83,6 +83,21 @@ export function MyWorkShell({
   }, [getApiToken]);
   const handleConnectAdobeSign = typeof getApiToken === 'function' ? onConnectAdobeSign : undefined;
 
+  // Adobe Sign disconnect — idempotent soft-deactivate of the local grant.
+  // Only wired in backend posture (matching the Connect callback gate).
+  const onDisconnectAdobeSign = useCallback(async (): Promise<void> => {
+    if (typeof getApiToken !== 'function') {
+      throw new Error('adobe-sign-oauth-disconnect-not-available-in-fixture-mode');
+    }
+    const client = createMyWorkReadModelClient({ readModelMode: 'backend', getApiToken });
+    if (!client.disconnectAdobeSignOAuth) {
+      throw new Error('adobe-sign-oauth-disconnect-not-available-in-fixture-mode');
+    }
+    await client.disconnectAdobeSignOAuth();
+  }, [getApiToken]);
+  const handleDisconnectAdobeSign =
+    typeof getApiToken === 'function' ? onDisconnectAdobeSign : undefined;
+
   // Production-mode runtime-config posture for hosted operator triage. When
   // the deployed bundle was built without one or more of FUNCTION_APP_URL,
   // API_AUDIENCE, or with a token-provider that failed to construct, the
@@ -117,6 +132,7 @@ export function MyWorkShell({
               <MyWorkSurfaceRouter
                 activePrimarySurfaceId={activePrimarySurfaceId}
                 onConnectAdobeSign={handleConnectAdobeSign}
+                onDisconnectAdobeSign={handleDisconnectAdobeSign}
               />
               {children}
             </MyWorkBentoGrid>

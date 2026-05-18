@@ -110,6 +110,13 @@ class MyWorkFixtureReadModelClient implements IMyWorkReadModelClient {
     throw new Error('adobe-sign-oauth-start-not-available-in-fixture-mode');
   }
 
+  async disconnectAdobeSignOAuth(): Promise<{ readonly status: 'disconnected' }> {
+    // Fixture mode is deliberate-no-network; the disconnect flow can only
+    // run in backend mode. Parents must only call this in backend-mode
+    // contexts.
+    throw new Error('adobe-sign-oauth-disconnect-not-available-in-fixture-mode');
+  }
+
   async resolveAdobeSignActionLink(
     _input: ResolveAdobeSignActionLinkRequest,
   ): Promise<AdobeSignActionLinkResolveResult> {

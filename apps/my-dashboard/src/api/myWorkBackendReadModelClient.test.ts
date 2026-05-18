@@ -592,11 +592,139 @@ describe('My Work backend read-model client — startAdobeSignOAuth', () => {
   });
 });
 
+describe('My Work backend read-model client — disconnectAdobeSignOAuth', () => {
+  const happyResponse = { data: { status: 'disconnected' as const } };
+
+  it('POSTs to my-work/me/adobe-sign/oauth/disconnect with bearer + JSON headers and returns { status: "disconnected" }', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse(happyResponse));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok-disconnect',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+
+    const result = await client.disconnectAdobeSignOAuth!();
+
+    expect(result).toEqual({ status: 'disconnected' });
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(url).toBe('https://example.invalid/api/my-work/me/adobe-sign/oauth/disconnect');
+    expect(init.method).toBe('POST');
+    expect(init.headers.Authorization).toBe('Bearer tok-disconnect');
+    expect(init.headers['Content-Type']).toBe('application/json');
+    expect(init.headers.Accept).toBe('application/json');
+    // No actor / user / principal in the URL — the route binds the actor server-side from claims.
+    for (const forbidden of ['actor', 'user', 'principal', 'email', 'upn']) {
+      expect(String(url).toLowerCase()).not.toContain(forbidden);
+    }
+  });
+
+  it('throws adobe-sign-oauth-disconnect-unauthorized on 401', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ code: 'UNAUTHORIZED' }, { status: 401 }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.disconnectAdobeSignOAuth!()).rejects.toThrow(
+      'adobe-sign-oauth-disconnect-unauthorized',
+    );
+  });
+
+  it('throws adobe-sign-oauth-disconnect-unauthorized on 403', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ code: 'PRINCIPAL_UNRESOLVED' }, { status: 403 }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.disconnectAdobeSignOAuth!()).rejects.toThrow(
+      'adobe-sign-oauth-disconnect-unauthorized',
+    );
+  });
+
+  it('throws adobe-sign-oauth-disconnect-failed on 503', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ code: 'SOURCE_UNAVAILABLE' }, { status: 503 }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.disconnectAdobeSignOAuth!()).rejects.toThrow(
+      'adobe-sign-oauth-disconnect-failed',
+    );
+  });
+
+  it('throws adobe-sign-oauth-disconnect-unreachable when fetch throws', async () => {
+    const fetchSpy = vi.fn<MyWorkReadModelFetch>().mockRejectedValue(new Error('network down'));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.disconnectAdobeSignOAuth!()).rejects.toThrow(
+      'adobe-sign-oauth-disconnect-unreachable',
+    );
+  });
+
+  it('throws adobe-sign-oauth-disconnect-unreachable when the token-provider throws', async () => {
+    const fetchSpy = vi.fn<MyWorkReadModelFetch>();
+    const getApiToken: GetApiToken = async () => {
+      throw new Error('no token');
+    };
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken,
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.disconnectAdobeSignOAuth!()).rejects.toThrow(
+      'adobe-sign-oauth-disconnect-unreachable',
+    );
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('throws adobe-sign-oauth-disconnect-failed on a malformed success body', async () => {
+    const fetchSpy = vi
+      .fn<MyWorkReadModelFetch>()
+      .mockResolvedValue(makeJsonResponse({ data: { status: 'maybe' } }));
+    const client = createMyWorkBackendReadModelClient({
+      backendBaseUrl: 'https://example.invalid',
+      getApiToken: async () => 'tok',
+      fetch: fetchSpy,
+      fallback: makeBackendUnavailableFallback(),
+    });
+    await expect(client.disconnectAdobeSignOAuth!()).rejects.toThrow(
+      'adobe-sign-oauth-disconnect-failed',
+    );
+  });
+});
+
 describe('My Work backend read-model client — resolveAdobeSignActionLink', () => {
   it('posts to the canonical resolver route with bearer auth and body', async () => {
     const fetchSpy = vi
       .fn<MyWorkReadModelFetch>()
-      .mockResolvedValue(makeJsonResponse({ data: { status: 'redirect-ready', redirectUrl: 'https://secure.adobesign.com/public/apiesign?x=1' } }));
+      .mockResolvedValue(
+        makeJsonResponse({
+          data: {
+            status: 'redirect-ready',
+            redirectUrl: 'https://secure.adobesign.com/public/apiesign?x=1',
+          },
+        }),
+      );
     const client = createMyWorkBackendReadModelClient({
       backendBaseUrl: 'https://example.invalid',
       getApiToken: async () => 'tok-resolve',

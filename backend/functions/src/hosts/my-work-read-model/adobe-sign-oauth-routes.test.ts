@@ -185,9 +185,9 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('adobe-sign-oauth-routes — registration shape', () => {
-  it('registers exactly two routes — start (POST, /me/) and callback (GET, NOT /me/)', async () => {
+  it('registers exactly three routes — start (POST, /me/), callback (GET, NOT /me/), disconnect (POST, /me/)', async () => {
     const mod = await importModule();
-    expect(registrations).toHaveLength(2);
+    expect(registrations).toHaveLength(3);
     const byName = Object.fromEntries(registrations.map((r) => [r.name, r.config]));
 
     expect(byName[mod.ADOBE_SIGN_OAUTH_ROUTE_NAMES.start].route).toBe(
@@ -204,6 +204,15 @@ describe('adobe-sign-oauth-routes — registration shape', () => {
     expect(byName[mod.ADOBE_SIGN_OAUTH_ROUTE_NAMES.callback].authLevel).toBe('anonymous');
     expect((byName[mod.ADOBE_SIGN_OAUTH_ROUTE_NAMES.callback].handler as any).__withAuth).toBe(
       undefined,
+    );
+
+    expect(byName[mod.ADOBE_SIGN_OAUTH_ROUTE_NAMES.disconnect].route).toBe(
+      'my-work/me/adobe-sign/oauth/disconnect',
+    );
+    expect(byName[mod.ADOBE_SIGN_OAUTH_ROUTE_NAMES.disconnect].methods).toEqual(['POST']);
+    expect(byName[mod.ADOBE_SIGN_OAUTH_ROUTE_NAMES.disconnect].authLevel).toBe('anonymous');
+    expect((byName[mod.ADOBE_SIGN_OAUTH_ROUTE_NAMES.disconnect].handler as any).__withAuth).toBe(
+      true,
     );
   });
 
@@ -814,11 +823,238 @@ describe('callback handler', () => {
 // ---------------------------------------------------------------------------
 
 describe('locked-path documentation alignment', () => {
-  it('matches the locked B05 OAuth route contract', async () => {
+  it('matches the locked OAuth route contract', async () => {
     const mod = await importModule();
     expect(mod.ADOBE_SIGN_OAUTH_ROUTE_PATHS).toEqual({
       start: 'my-work/me/adobe-sign/oauth/start',
       callback: 'my-work/adobe-sign/oauth/callback',
+      disconnect: 'my-work/me/adobe-sign/oauth/disconnect',
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Disconnect handler behavior
+// ---------------------------------------------------------------------------
+
+const disconnectRequest = (body?: unknown) => ({
+  method: 'POST',
+  url: 'http://localhost/api/my-work/me/adobe-sign/oauth/disconnect',
+  query: new URLSearchParams(),
+  headers: new Map(),
+  text: async () => (body === undefined ? '' : JSON.stringify(body)),
+});
+
+const seedActiveGrant = async (
+  seams: SeamHandles,
+): Promise<{ markRevokedSpy: ReturnType<typeof vi.fn> }> => {
+  await seams.grantStore.upsertGrant({
+    actorTenantId: TENANT_ID,
+    actorOid: OID,
+    actorKey: ACTOR_KEY,
+    adobeApiAccessPoint: 'https://api.na1.adobesign.com',
+    adobeWebAccessPoint: 'https://secure.na1.adobesign.com',
+    encryptedRefreshTokenRef: {
+      storeKind: 'table-storage',
+      address: ACTOR_KEY,
+      lastPersistedAtUtc: FIXED_NOW.toISOString(),
+    } as any,
+    grantedScopes: ['agreement_read', 'agreement_send'],
+    grantedAtUtc: FIXED_NOW.toISOString(),
+    state: 'active',
+  });
+  const markRevokedSpy = vi.fn(seams.grantStore.markRevoked.bind(seams.grantStore));
+  seams.grantStore.markRevoked = markRevokedSpy as any;
+  return { markRevokedSpy };
+};
+
+const FORBIDDEN_TELEMETRY_KEYS = [
+  'email',
+  'accessToken',
+  'refreshToken',
+  'tokenId',
+  'actorOid',
+  'actorEmail',
+  'record',
+  'adobeAccountId',
+  'agreementId',
+  'url',
+  'upn',
+];
+
+const findDisconnectEvent = (): { name: string; payload: any } | undefined => {
+  const calls = (loggerTrackEventSpy as any).mock.calls as Array<[string, any]>;
+  for (const [name, payload] of calls) {
+    if (name === 'adobeSign.oauth.disconnect.result') return { name, payload };
+  }
+  return undefined;
+};
+
+describe('disconnect handler', () => {
+  it('soft-revokes an existing grant and returns { status: "disconnected" }', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    const { markRevokedSpy } = await seedActiveGrant(seams);
+
+    const handler = mod.createDisconnectHandler(deps);
+    const response = await handler(disconnectRequest() as any, {} as any, injectedAuth as any);
+
+    expect(response.status).toBe(200);
+    expect((response.jsonBody as any).data).toEqual({ status: 'disconnected' });
+
+    expect(markRevokedSpy).toHaveBeenCalledTimes(1);
+    expect(markRevokedSpy).toHaveBeenCalledWith(ACTOR_KEY, FIXED_NOW.toISOString());
+
+    const stored = await seams.grantStore.findGrant(ACTOR_KEY);
+    expect(stored?.state).toBe('revoked');
+    expect(stored?.revokedAtUtc).toBe(FIXED_NOW.toISOString());
+
+    const evt = findDisconnectEvent();
+    expect(evt).toBeDefined();
+    expect(evt!.payload.status).toBe('disconnected');
+    expect(evt!.payload.resultStage).toBe('complete');
+    expect(evt!.payload.hadExistingGrant).toBe(true);
+    expect(typeof evt!.payload.durationMs).toBe('number');
+    expect(evt!.payload.correlationId).toBe('req-oauth');
+  });
+
+  it('is idempotent when no grant exists and never calls markRevoked', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    const markRevokedSpy = vi.fn(seams.grantStore.markRevoked.bind(seams.grantStore));
+    seams.grantStore.markRevoked = markRevokedSpy as any;
+
+    const handler = mod.createDisconnectHandler(deps);
+    const response = await handler(disconnectRequest() as any, {} as any, injectedAuth as any);
+
+    expect(response.status).toBe(200);
+    expect((response.jsonBody as any).data).toEqual({ status: 'disconnected' });
+    expect(markRevokedSpy).not.toHaveBeenCalled();
+
+    const evt = findDisconnectEvent();
+    expect(evt).toBeDefined();
+    expect(evt!.payload.status).toBe('disconnected');
+    expect(evt!.payload.resultStage).toBe('complete');
+    expect(evt!.payload.hadExistingGrant).toBe(false);
+  });
+
+  it('ignores actor/user/principal/oid override fields in the request body', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    const { markRevokedSpy } = await seedActiveGrant(seams);
+    // Seed a SECOND grant for a different (would-be spoofed) actor — it must remain untouched.
+    const spoofedKey = adobeSignActorKey(TENANT_ID, 'spoofed-oid');
+    await seams.grantStore.upsertGrant({
+      actorTenantId: TENANT_ID,
+      actorOid: 'spoofed-oid',
+      actorKey: spoofedKey,
+      adobeApiAccessPoint: 'https://api.na1.adobesign.com',
+      adobeWebAccessPoint: 'https://secure.na1.adobesign.com',
+      encryptedRefreshTokenRef: {
+        storeKind: 'table-storage',
+        address: spoofedKey,
+        lastPersistedAtUtc: FIXED_NOW.toISOString(),
+      } as any,
+      grantedScopes: ['agreement_read'],
+      grantedAtUtc: FIXED_NOW.toISOString(),
+      state: 'active',
+    });
+
+    const handler = mod.createDisconnectHandler(deps);
+    const response = await handler(
+      disconnectRequest({
+        actorOid: 'spoofed-oid',
+        oid: 'spoofed-oid',
+        principalName: 'other@example.com',
+        upn: 'other@example.com',
+        user: 'spoofed-oid',
+      }) as any,
+      {} as any,
+      injectedAuth as any,
+    );
+
+    expect(response.status).toBe(200);
+    expect(markRevokedSpy).toHaveBeenCalledTimes(1);
+    expect(markRevokedSpy).toHaveBeenCalledWith(ACTOR_KEY, FIXED_NOW.toISOString());
+    // Authenticated actor's grant moved to revoked; spoofed actor's grant left alone.
+    expect((await seams.grantStore.findGrant(ACTOR_KEY))?.state).toBe('revoked');
+    expect((await seams.grantStore.findGrant(spoofedKey))?.state).toBe('active');
+  });
+
+  it('rejects app-only callers with 403 PRINCIPAL_UNRESOLVED and emits principal-stage telemetry', async () => {
+    const mod = await importModule();
+    injectedAuth = {
+      claims: { upn: '', oid: 'sp-oid', roles: [], idtyp: 'app' },
+    };
+    const { deps } = buildDeps();
+    const handler = mod.createDisconnectHandler(deps);
+    const response = await handler(disconnectRequest() as any, {} as any, injectedAuth as any);
+    expect(response.status).toBe(403);
+    expect((response.jsonBody as any).code).toBe('PRINCIPAL_UNRESOLVED');
+
+    const evt = findDisconnectEvent();
+    expect(evt).toBeDefined();
+    expect(evt!.payload.status).toBe('principal-unresolved');
+    expect(evt!.payload.resultStage).toBe('principal');
+    expect(evt!.payload.failureReason).toBe('app-only');
+  });
+
+  it('returns 503 CONFIGURATION_REQUIRED when the grant store is not selected', async () => {
+    const mod = await importModule();
+    const { deps } = buildDeps();
+    deps.resolveGrantStore = () => ({
+      readiness: 'configuration-required',
+      reason: 'production-store-not-selected',
+    });
+    const handler = mod.createDisconnectHandler(deps);
+    const response = await handler(disconnectRequest() as any, {} as any, injectedAuth as any);
+    expect(response.status).toBe(503);
+    expect((response.jsonBody as any).code).toBe('CONFIGURATION_REQUIRED');
+
+    const evt = findDisconnectEvent();
+    expect(evt).toBeDefined();
+    expect(evt!.payload.status).toBe('configuration-required');
+    expect(evt!.payload.resultStage).toBe('token-store');
+  });
+
+  it('returns 503 SOURCE_UNAVAILABLE when the grant store throws on read/write', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    // Replace findGrant to throw; markRevoked must not be reached.
+    const markRevokedSpy = vi.fn(seams.grantStore.markRevoked.bind(seams.grantStore));
+    seams.grantStore.markRevoked = markRevokedSpy as any;
+    seams.grantStore.findGrant = vi.fn(async () => {
+      throw new Error('table-storage-503');
+    }) as any;
+    const handler = mod.createDisconnectHandler(deps);
+    const response = await handler(disconnectRequest() as any, {} as any, injectedAuth as any);
+
+    expect(response.status).toBe(503);
+    expect((response.jsonBody as any).code).toBe('SOURCE_UNAVAILABLE');
+    expect(markRevokedSpy).not.toHaveBeenCalled();
+
+    const evt = findDisconnectEvent();
+    expect(evt).toBeDefined();
+    expect(evt!.payload.status).toBe('source-unavailable');
+    expect(evt!.payload.resultStage).toBe('token-store');
+    expect(evt!.payload.failureReason).toBe('grant-store-write-failed');
+  });
+
+  it('never emits forbidden identifier fields in disconnect telemetry payloads', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    await seedActiveGrant(seams);
+    const handler = mod.createDisconnectHandler(deps);
+    await handler(disconnectRequest() as any, {} as any, injectedAuth as any);
+
+    const evt = findDisconnectEvent();
+    expect(evt).toBeDefined();
+    const payloadKeys = Object.keys(evt!.payload);
+    for (const forbidden of FORBIDDEN_TELEMETRY_KEYS) {
+      expect(payloadKeys).not.toContain(forbidden);
+    }
+    const serialized = JSON.stringify(evt!.payload);
+    expect(serialized).not.toContain('avery@hbc.test');
+    expect(serialized).not.toContain(OID);
   });
 });

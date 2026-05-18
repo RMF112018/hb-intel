@@ -184,6 +184,106 @@
   letter-spacing: -0.01em;
 }
 
+.optionsMenuRoot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.optionsButton {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid
+    color-mix(in srgb, var(--my-work-color-border) 75%, var(--adobe-warm-accent-soft));
+  border-radius: var(--my-work-radius-md);
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 38%, white);
+  color: var(--adobe-warm-ink);
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease-out,
+    color 140ms ease-out,
+    border-color 140ms ease-out;
+}
+
+.optionsButton:hover {
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 56%, white);
+}
+
+.optionsButton:focus-visible {
+  outline: 2px solid var(--my-work-color-rail-accent);
+  outline-offset: 1px;
+}
+
+.optionsButton[data-adobe-sign-options-state='open'] {
+  border-color: var(--adobe-warm-accent);
+  background: white;
+}
+
+.optionsMenu {
+  display: flex;
+  flex-direction: column;
+  min-width: 232px;
+  padding: 6px;
+  border: 1px solid
+    color-mix(in srgb, var(--my-work-color-border) 70%, var(--adobe-warm-accent-soft));
+  border-radius: var(--my-work-radius-md);
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(58, 40, 32, 0.08),
+    0 8px 24px rgba(58, 40, 32, 0.12);
+}
+
+.optionsMenuItem {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: calc(var(--my-work-radius-md) - 2px);
+  background: transparent;
+  color: var(--my-work-color-text-primary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease-out;
+}
+
+.optionsMenuItem:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--adobe-warm-accent-soft) 36%, white);
+}
+
+.optionsMenuItem:focus-visible {
+  outline: 2px solid var(--my-work-color-rail-accent);
+  outline-offset: -2px;
+}
+
+.optionsMenuItem:disabled {
+  color: var(--my-work-color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.optionsMenuItemDestructive {
+  color: #8a3a1e;
+}
+
+.optionsMenuItemDestructive:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--adobe-warm-accent) 12%, white);
+  color: #6f2c14;
+}
+
 .statePanel {
   display: flex;
   flex-direction: column;
