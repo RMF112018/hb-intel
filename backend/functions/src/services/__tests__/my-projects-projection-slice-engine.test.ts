@@ -83,6 +83,9 @@ function makeRepository(recorder: IFakeRecorder): IMyProjectsRegistryRepository 
         });
       }
     },
+    async findActiveByUserUpn() {
+      return [];
+    },
   };
 }
 
@@ -551,6 +554,9 @@ describe('ProjectionSliceEngine — failure path', () => {
       },
       async patchRow() {
         // not reached
+      },
+      async findActiveByUserUpn() {
+        return [];
       },
     };
     const engine = new ProjectionSliceEngine({

@@ -96,6 +96,14 @@ export type MyProjectLinksPrincipalUnresolvedReason =
  * provider populates this synchronously; the route layer passes it
  * through unchanged.
  */
+/**
+ * Closed-set identifier surfaced on `MyProjectLinksDiagnostics.projectionMode`.
+ * Lets operators tell whether the route response came from the legacy
+ * aggregation provider or the projection-backed provider without reading
+ * server-side configuration.
+ */
+export type MyProjectLinksProjectionMode = 'legacy' | 'projection';
+
 export interface MyProjectLinksDiagnostics {
   readonly classification: MyProjectLinksDiagnosticClassification;
   readonly principalResolution: 'resolved' | 'unresolved';
@@ -103,6 +111,22 @@ export interface MyProjectLinksDiagnostics {
   readonly matchCount: number;
   readonly projectsSourceStatus: MyWorkReadModelSourceStatus;
   readonly legacyFallbackRegistrySourceStatus: MyWorkReadModelSourceStatus;
+  /**
+   * Which provider served the read. Optional for backward compatibility with
+   * existing fixtures; the live provider stamps it on every response.
+   */
+  readonly projectionMode?: MyProjectLinksProjectionMode;
+  /**
+   * In projection mode, the maximum `LastProjectedAtUtc` across the helper
+   * rows that produced this response. Operators use it to gauge freshness
+   * relative to source-side delta. Omitted in legacy mode.
+   */
+  readonly projectionMaxLastProjectedAtUtc?: string;
+  /**
+   * In projection mode, the most recent `ProjectionBatchId` observed across
+   * the helper rows in this response. Omitted in legacy mode.
+   */
+  readonly projectionBatchId?: string;
 }
 
 export interface MyProjectLinksReadModel {

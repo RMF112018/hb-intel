@@ -14,6 +14,7 @@ import {
   type MyProjectAssignmentRoleId,
   type MyProjectLinkItem,
   type MyProjectLinkWarning,
+  type MyProjectLinksReadModel,
 } from '@hbc/models/myWork';
 
 const PROCORE_TOKEN_PATTERN = /^[A-Za-z0-9_-]+$/;
@@ -447,6 +448,53 @@ export function sortItems(items: MyProjectLinkItem[]): MyProjectLinkItem[] {
 
 export function projectYearKey(projectNumber: string, year: number | null): string {
   return `${projectNumber.trim()}::${year == null ? '' : String(year)}`;
+}
+
+/**
+ * Aggregate the per-item availability counts surfaced by the read-model
+ * `summary` block. Pure function of the item list; shared between the legacy
+ * aggregation provider and the projection-backed provider so both modes
+ * report identical summary semantics.
+ */
+export function buildSummary(
+  items: readonly MyProjectLinkItem[],
+): MyProjectLinksReadModel['summary'] {
+  const sharePointReadyCount = items.filter(
+    (item) => item.sharePointAction.state === 'available',
+  ).length;
+  const procoreReadyCount = items.filter((item) => item.procoreAction.state === 'available').length;
+  const buildingConnectedReadyCount = items.filter(
+    (item) => item.buildingConnectedAction.state === 'available',
+  ).length;
+  const documentCrunchReadyCount = items.filter(
+    (item) => item.documentCrunchAction.state === 'available',
+  ).length;
+
+  return {
+    assignedProjectCount: items.length,
+    dualLaunchReadyCount: items.filter(
+      (item) =>
+        item.sharePointAction.state === 'available' && item.procoreAction.state === 'available',
+    ).length,
+    sharePointReadyCount,
+    procoreReadyCount,
+    noSharePointLaunchCount: items.length - sharePointReadyCount,
+    noProcoreLaunchCount: items.length - procoreReadyCount,
+    buildingConnectedReadyCount,
+    documentCrunchReadyCount,
+    noBuildingConnectedLaunchCount: items.length - buildingConnectedReadyCount,
+    noDocumentCrunchLaunchCount: items.length - documentCrunchReadyCount,
+    multiPlatformReadyCount: items.filter(
+      (item) =>
+        item.sharePointAction.state === 'available' &&
+        item.procoreAction.state === 'available' &&
+        item.buildingConnectedAction.state === 'available' &&
+        item.documentCrunchAction.state === 'available',
+    ).length,
+    projectsOnlyCount: items.filter((item) => item.source === 'projects-only').length,
+    mergedCount: items.filter((item) => item.source === 'merged').length,
+    legacyOnlyCount: items.filter((item) => item.source === 'legacy-only').length,
+  };
 }
 
 export function reconcileProjectLinks(

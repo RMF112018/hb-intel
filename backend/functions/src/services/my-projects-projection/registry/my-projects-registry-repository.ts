@@ -15,10 +15,12 @@ import {
   MY_PROJECTS_REGISTRY_LIST_HOST_SITE_URL,
   MY_PROJECTS_REGISTRY_LIST_TITLE,
 } from '../registry-list-descriptor.js';
-import type {
-  IMyProjectsRegistryExistingRow,
-  IMyProjectsRegistryRowFields,
-  IMyProjectsRegistryRowPatch,
+import {
+  parseRegistryReadRow,
+  type IMyProjectsRegistryExistingRow,
+  type IMyProjectsRegistryReadRow,
+  type IMyProjectsRegistryRowFields,
+  type IMyProjectsRegistryRowPatch,
 } from './my-projects-registry-row-mapper.js';
 
 export interface IMyProjectsRegistryRepository {
@@ -29,6 +31,12 @@ export interface IMyProjectsRegistryRepository {
   findByLegacyRegistryItemId(
     legacyRegistryItemId: number,
   ): Promise<readonly IMyProjectsRegistryExistingRow[]>;
+  /**
+   * Read every active helper row for the given UPN. Consumed by the
+   * projection-backed read provider (Prompt 09) to reconstruct
+   * `MyProjectLinkItem[]` for the route response.
+   */
+  findActiveByUserUpn(userUpn: string): Promise<readonly IMyProjectsRegistryReadRow[]>;
   insertRow(fields: IMyProjectsRegistryRowFields): Promise<{ readonly listItemId: number }>;
   /**
    * Patch business fields on an existing row. `null`-valued entries explicitly
@@ -51,6 +59,41 @@ const QUERY_SELECT_FIELDS = [
   'RecordKey',
   'ProjectsListItemId',
   'LegacyRegistryItemId',
+] as const;
+
+const READ_SELECT_FIELDS = [
+  'ProjectionKey',
+  'RecordKey',
+  'UserUpn',
+  'IsActive',
+  'ProjectionSource',
+  'ProjectionContentHash',
+  'ProjectNumber',
+  'ProjectName',
+  'ProjectStage',
+  'AssignmentRolesJson',
+  'ProjectsListItemId',
+  'LegacyRegistryItemId',
+  'LegacyMatchedProjectListItemId',
+  'FallbackMatchMethod',
+  'FallbackMatchConfidence',
+  'SharePointActionState',
+  'SharePointActionKind',
+  'SharePointActionLabel',
+  'SharePointActionHref',
+  'ProcoreActionState',
+  'ProcoreActionLabel',
+  'ProcoreActionHref',
+  'ProcoreProject',
+  'BuildingConnectedActionState',
+  'BuildingConnectedActionLabel',
+  'BuildingConnectedActionHref',
+  'DocumentCrunchActionState',
+  'DocumentCrunchActionLabel',
+  'DocumentCrunchActionHref',
+  'WarningsJson',
+  'LastProjectedAtUtc',
+  'ProjectionBatchId',
 ] as const;
 
 function mapToExisting(entry: {
@@ -135,6 +178,19 @@ export function createGraphMyProjectsRegistryRepository(
       for (const row of rows) {
         const mapped = mapToExisting({ id: String(row.id), fields: row.fields });
         if (mapped) out.push(mapped);
+      }
+      return out;
+    },
+    async findActiveByUserUpn(userUpn) {
+      const escaped = userUpn.replace(/'/g, "''");
+      const rows = await graph.listItems(listTitle, {
+        filter: `fields/UserUpn eq '${escaped}' and fields/IsActive eq true`,
+        select: [...READ_SELECT_FIELDS],
+      });
+      const out: IMyProjectsRegistryReadRow[] = [];
+      for (const row of rows) {
+        const parsed = parseRegistryReadRow(Number(row.id), row.fields);
+        if (parsed && parsed.isActive) out.push(parsed);
       }
       return out;
     },

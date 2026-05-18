@@ -25,6 +25,7 @@ import {
 } from './my-project-links-runtime-diagnostics.js';
 import {
   buildRoleFieldObjectFromRow,
+  buildSummary,
   readOptionalNumber,
   readOptionalUrl,
   reconcileProjectLinks,
@@ -69,45 +70,6 @@ interface IProjectLinksSourceDeps {
   loadProjectsRows: () => Promise<ISourceLoadResult<IProjectSourceRow>>;
   loadRegistryRows: () => Promise<ISourceLoadResult<ILegacyRegistrySourceRow>>;
   now: () => string;
-}
-
-function buildSummary(items: readonly MyProjectLinkItem[]): MyProjectLinksReadModel['summary'] {
-  const sharePointReadyCount = items.filter(
-    (item) => item.sharePointAction.state === 'available',
-  ).length;
-  const procoreReadyCount = items.filter((item) => item.procoreAction.state === 'available').length;
-  const buildingConnectedReadyCount = items.filter(
-    (item) => item.buildingConnectedAction.state === 'available',
-  ).length;
-  const documentCrunchReadyCount = items.filter(
-    (item) => item.documentCrunchAction.state === 'available',
-  ).length;
-
-  return {
-    assignedProjectCount: items.length,
-    dualLaunchReadyCount: items.filter(
-      (item) =>
-        item.sharePointAction.state === 'available' && item.procoreAction.state === 'available',
-    ).length,
-    sharePointReadyCount,
-    procoreReadyCount,
-    noSharePointLaunchCount: items.length - sharePointReadyCount,
-    noProcoreLaunchCount: items.length - procoreReadyCount,
-    buildingConnectedReadyCount,
-    documentCrunchReadyCount,
-    noBuildingConnectedLaunchCount: items.length - buildingConnectedReadyCount,
-    noDocumentCrunchLaunchCount: items.length - documentCrunchReadyCount,
-    multiPlatformReadyCount: items.filter(
-      (item) =>
-        item.sharePointAction.state === 'available' &&
-        item.procoreAction.state === 'available' &&
-        item.buildingConnectedAction.state === 'available' &&
-        item.documentCrunchAction.state === 'available',
-    ).length,
-    projectsOnlyCount: items.filter((item) => item.source === 'projects-only').length,
-    mergedCount: items.filter((item) => item.source === 'merged').length,
-    legacyOnlyCount: items.filter((item) => item.source === 'legacy-only').length,
-  };
 }
 
 function selectEnvelopeStatus(
@@ -174,6 +136,7 @@ function selectDiagnostics(input: {
       matchCount: 0,
       projectsSourceStatus: 'principal-unresolved',
       legacyFallbackRegistrySourceStatus: 'principal-unresolved',
+      projectionMode: 'legacy',
     };
   }
 
@@ -198,6 +161,7 @@ function selectDiagnostics(input: {
     matchCount: input.matchCount,
     projectsSourceStatus,
     legacyFallbackRegistrySourceStatus,
+    projectionMode: 'legacy',
   };
 }
 

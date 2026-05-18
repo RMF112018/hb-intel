@@ -25,7 +25,9 @@ export type MyProjectLinksRuntimeEventName =
   | 'projects-loader.failed'
   | 'registry-loader.failed'
   | 'myProjectLinks.read.sources.result'
-  | 'myProjectLinks.read.reconcile.result';
+  | 'myProjectLinks.read.reconcile.result'
+  | 'myProjectLinks.read.projection.load.result'
+  | 'myProjectLinks.read.projection.failed';
 
 export type MyProjectLinksLoaderStage = 'token' | 'site' | 'list' | 'items' | 'other';
 export type RegistryCacheTelemetryState = 'hit' | 'miss' | 'coalesced';
@@ -78,6 +80,10 @@ export interface MyProjectLinksRuntimeDiagnosticProperties {
   readonly dualLaunchReadyCount?: number;
   readonly sharePointReadyCount?: number;
   readonly procoreReadyCount?: number;
+  // projection.load.result / projection.failed shape (Prompt 09).
+  readonly projectionRowCount?: number;
+  readonly projectionMaxLastProjectedAtUtc?: string;
+  readonly projectionBatchId?: string;
 }
 
 export interface MyProjectLinksRuntimeDiagnosticReporter {

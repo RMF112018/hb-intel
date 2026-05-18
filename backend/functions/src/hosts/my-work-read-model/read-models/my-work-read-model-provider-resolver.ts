@@ -53,6 +53,52 @@ import { MyWorkAdobeSignLiveReadModelProvider } from './my-work-adobe-sign-live-
 import { MyWorkMockReadModelProvider } from './my-work-mock-read-model-provider.js';
 import type { IMyWorkReadModelProvider } from './my-work-read-model-provider.js';
 import { MyProjectLinksReadModelProvider } from './project-links/my-project-links-read-model-provider.js';
+import { ProjectionMyProjectLinksReadModelProvider } from './project-links/my-project-links-projection-provider.js';
+import { GraphListClient } from '../../../services/legacy-fallback/graph-list-client.js';
+import { getProjectionConfig } from '../../../services/my-projects-projection/projection-config.js';
+import { createGraphMyProjectsRegistryRepository } from '../../../services/my-projects-projection/registry/my-projects-registry-repository.js';
+
+/**
+ * Build the active My Projects read provider based on `config.enablement.readMode`.
+ * Production defaults to `legacy`; flipping to `projection` is an operator
+ * config change (env var + restart). When the projection config is not
+ * available (e.g., local-only tests with no env), the resolver falls through
+ * to the legacy provider — never to a synthesized stub.
+ */
+/**
+ * Exposed for unit tests so the read-mode branch can be exercised without
+ * forcing every projection-config env var into the test environment.
+ */
+export interface IBuildProjectLinksProviderOptions {
+  /** Override the config reader (defaults to `getProjectionConfig`). */
+  readonly readProjectionConfig?: () => { readonly enablement: { readonly readMode: string } };
+  /** Override the projection provider factory (tests inject a fake). */
+  readonly projectionProviderFactory?: () => Pick<IMyWorkReadModelProvider, 'getMyProjectLinks'>;
+  /** Override the legacy provider factory (tests inject a fake). */
+  readonly legacyProviderFactory?: () => Pick<IMyWorkReadModelProvider, 'getMyProjectLinks'>;
+}
+
+export function buildProjectLinksProvider(
+  opts: IBuildProjectLinksProviderOptions = {},
+): Pick<IMyWorkReadModelProvider, 'getMyProjectLinks'> {
+  const readConfig = opts.readProjectionConfig ?? getProjectionConfig;
+  try {
+    const cfg = readConfig();
+    if (cfg.enablement.readMode === 'projection') {
+      if (opts.projectionProviderFactory) return opts.projectionProviderFactory();
+      const fullCfg = getProjectionConfig();
+      const registryGraph = new GraphListClient(fullCfg.sites.registrySiteUrl);
+      return new ProjectionMyProjectLinksReadModelProvider({
+        registryRepository: createGraphMyProjectsRegistryRepository({ graph: registryGraph }),
+      });
+    }
+  } catch {
+    /* projection config unavailable → fall through to legacy */
+  }
+  return opts.legacyProviderFactory
+    ? opts.legacyProviderFactory()
+    : new MyProjectLinksReadModelProvider();
+}
 
 export type AdobeSignLiveStackCompositionReason =
   | 'oauth-config-not-ready'
@@ -147,7 +193,7 @@ function composeLiveProvider(
     recentCompletionsAdapter: composition.recentCompletionsAdapter,
     now: options?.now ?? (() => new Date()),
   });
-  const projectLinksProvider = options?.projectLinksProvider ?? new MyProjectLinksReadModelProvider();
+  const projectLinksProvider = options?.projectLinksProvider ?? buildProjectLinksProvider();
   return {
     getMyWorkHome: (context) => adobeProvider.getMyWorkHome(context),
     getAdobeSignActionQueue: (context, query) =>
@@ -162,7 +208,7 @@ function composeFallbackProvider(
   options?: ResolveMyWorkReadModelProviderOptions,
 ): IMyWorkReadModelProvider {
   const mockProvider = new MyWorkMockReadModelProvider({ simulateBackendUnavailable: true });
-  const projectLinksProvider = options?.projectLinksProvider ?? new MyProjectLinksReadModelProvider();
+  const projectLinksProvider = options?.projectLinksProvider ?? buildProjectLinksProvider();
   return {
     getMyWorkHome: (context) => mockProvider.getMyWorkHome(context),
     getAdobeSignActionQueue: (context, query) =>
@@ -177,7 +223,11 @@ function composeMockProvider(
   _options?: ResolveMyWorkReadModelProviderOptions,
 ): IMyWorkReadModelProvider {
   const mockProvider = new MyWorkMockReadModelProvider();
-  const projectLinksProvider = _options?.projectLinksProvider ?? new MyProjectLinksReadModelProvider();
+  // Mock-mode tests use the legacy provider directly. The projection-backed
+  // path is only consulted in live composition; mock fixtures don't go through
+  // the SharePoint helper list.
+  const projectLinksProvider =
+    _options?.projectLinksProvider ?? new MyProjectLinksReadModelProvider();
   return {
     getMyWorkHome: (context) => mockProvider.getMyWorkHome(context),
     getAdobeSignActionQueue: (context, query) =>

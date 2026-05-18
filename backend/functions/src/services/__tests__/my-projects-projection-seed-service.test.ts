@@ -68,6 +68,9 @@ function makeRepo(state: IFakeRepoState): IMyProjectsRegistryRepository {
         });
       }
     },
+    async findActiveByUserUpn() {
+      return [];
+    },
   };
 }
 

@@ -812,6 +812,7 @@ describe('MyProjectLinksReadModelProvider — diagnostics (Prompt 04)', () => {
       matchCount: 0,
       projectsSourceStatus: 'principal-unresolved',
       legacyFallbackRegistrySourceStatus: 'principal-unresolved',
+      projectionMode: 'legacy',
     });
   });
 
@@ -861,6 +862,7 @@ describe('MyProjectLinksReadModelProvider — diagnostics (Prompt 04)', () => {
       matchCount: 0,
       projectsSourceStatus: 'available',
       legacyFallbackRegistrySourceStatus: 'available',
+      projectionMode: 'legacy',
     });
   });
 
@@ -892,6 +894,7 @@ describe('MyProjectLinksReadModelProvider — diagnostics (Prompt 04)', () => {
       matchCount: 1,
       projectsSourceStatus: 'available',
       legacyFallbackRegistrySourceStatus: 'available',
+      projectionMode: 'legacy',
     });
   });
 
@@ -947,6 +950,7 @@ describe('MyProjectLinksReadModelProvider — diagnostics (Prompt 04)', () => {
       matchCount: 0,
       projectsSourceStatus: 'source-unavailable',
       legacyFallbackRegistrySourceStatus: 'source-unavailable',
+      projectionMode: 'legacy',
     });
   });
 
