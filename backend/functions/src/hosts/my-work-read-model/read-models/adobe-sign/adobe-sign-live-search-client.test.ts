@@ -223,6 +223,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingNameCount: 0,
       dropMissingRecipientStatusCount: 0,
       mappedFromRecipientStatusCount: 1,
+      mappedFromStatusCount: 0,
       mappedFromStatusRoleCount: 0,
       dropUnsupportedStatusRoleCount: 0,
       dropUnsupportedOrUnmappedShapeCount: 0,
@@ -377,9 +378,47 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingNameCount: 0,
       dropMissingRecipientStatusCount: 0,
       mappedFromRecipientStatusCount: 2,
+      mappedFromStatusCount: 0,
       mappedFromStatusRoleCount: 0,
       dropUnsupportedStatusRoleCount: 0,
       dropUnsupportedOrUnmappedShapeCount: 0,
+    });
+  });
+
+  it('maps actionable top-level status when recipientStatus is missing', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreements: [
+          {
+            id: 'agr-1',
+            name: 'Status Based Row',
+            status: 'WAITING_FOR_MY_SIGNATURE',
+            role: 'SIGNER',
+          },
+        ],
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.items).toEqual([
+      {
+        intent: 'action-queue',
+        agreementId: 'agr-1',
+        agreementName: 'Status Based Row',
+        recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+      },
+    ]);
+    expect(result.searchRowDiagnostics).toMatchObject({
+      rawAgreementRowCount: 1,
+      mappedItemCount: 1,
+      droppedRowCount: 0,
+      dropMissingRecipientStatusCount: 1,
+      mappedFromRecipientStatusCount: 0,
+      mappedFromStatusCount: 1,
+      mappedFromStatusRoleCount: 0,
+      dropUnsupportedStatusRoleCount: 0,
     });
   });
 
@@ -410,6 +449,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       droppedRowCount: 0,
       dropMissingRecipientStatusCount: 1,
       mappedFromRecipientStatusCount: 0,
+      mappedFromStatusCount: 0,
       mappedFromStatusRoleCount: 1,
       dropUnsupportedStatusRoleCount: 0,
     });
@@ -435,6 +475,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingNameCount: 0,
       dropMissingRecipientStatusCount: 1,
       mappedFromRecipientStatusCount: 0,
+      mappedFromStatusCount: 0,
       mappedFromStatusRoleCount: 0,
       dropUnsupportedStatusRoleCount: 1,
       dropUnsupportedOrUnmappedShapeCount: 0,
@@ -461,6 +502,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       droppedRowCount: 1,
       dropMissingRecipientStatusCount: 1,
       mappedFromRecipientStatusCount: 0,
+      mappedFromStatusCount: 0,
       mappedFromStatusRoleCount: 0,
       dropUnsupportedStatusRoleCount: 1,
       dropUnsupportedOrUnmappedShapeCount: 0,
@@ -487,6 +529,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingNameCount: 1,
       dropMissingRecipientStatusCount: 0,
       mappedFromRecipientStatusCount: 0,
+      mappedFromStatusCount: 0,
       mappedFromStatusRoleCount: 0,
       dropUnsupportedStatusRoleCount: 0,
       dropUnsupportedOrUnmappedShapeCount: 0,
@@ -525,6 +568,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingNameCount: 0,
       dropMissingRecipientStatusCount: 0,
       mappedFromRecipientStatusCount: 0,
+      mappedFromStatusCount: 0,
       mappedFromStatusRoleCount: 0,
       dropUnsupportedStatusRoleCount: 0,
       dropUnsupportedOrUnmappedShapeCount: 0,
@@ -599,6 +643,7 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingNameCount: 1,
       dropMissingRecipientStatusCount: 0,
       mappedFromRecipientStatusCount: 0,
+      mappedFromStatusCount: 0,
       mappedFromStatusRoleCount: 0,
       dropUnsupportedStatusRoleCount: 0,
       dropUnsupportedOrUnmappedShapeCount: 0,

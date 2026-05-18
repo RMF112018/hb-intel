@@ -515,6 +515,7 @@ export function createAdobeSignActionQueueAdapter(
                 searchResult.searchRowDiagnostics.dropMissingRecipientStatusCount,
               searchMappedFromRecipientStatusCount:
                 searchResult.searchRowDiagnostics.mappedFromRecipientStatusCount,
+              searchMappedFromStatusCount: searchResult.searchRowDiagnostics.mappedFromStatusCount,
               searchMappedFromStatusRoleCount:
                 searchResult.searchRowDiagnostics.mappedFromStatusRoleCount,
               searchDropUnsupportedStatusRoleCount:

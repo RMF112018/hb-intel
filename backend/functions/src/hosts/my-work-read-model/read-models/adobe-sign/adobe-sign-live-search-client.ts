@@ -474,7 +474,7 @@ const STATUS_ROLE_TO_ACTIONABLE_STATUS: Readonly<Record<string, string>> = {
   'OUT_FOR_FORM_FILLING:FORM_FILLER': 'WAITING_FOR_MY_FORM_FILLING',
 } as const;
 
-type ActionQueueStatusResolutionSource = 'recipientStatus' | 'statusRole' | 'none';
+type ActionQueueStatusResolutionSource = 'recipientStatus' | 'status' | 'statusRole' | 'none';
 
 function deriveActionQueueStatusResolution(row: unknown): {
   readonly recipientStatus?: string;
@@ -486,6 +486,9 @@ function deriveActionQueueStatusResolution(row: unknown): {
   }
 
   const status = readStringField(row, 'status');
+  if (status && ACTIONABLE_RECIPIENT_STATUS_SET.has(status)) {
+    return { recipientStatus: status, source: 'status' };
+  }
   const role = readStringField(row, 'role');
   if (!status || !role) return { source: 'none' };
   const derived = STATUS_ROLE_TO_ACTIONABLE_STATUS[`${status}:${role}`];
@@ -566,6 +569,7 @@ function buildSearchRowDiagnostics(
   let dropMissingNameCount = 0;
   let dropMissingRecipientStatusCount = 0;
   let mappedFromRecipientStatusCount = 0;
+  let mappedFromStatusCount = 0;
   let mappedFromStatusRoleCount = 0;
   let dropUnsupportedStatusRoleCount = 0;
   let dropUnsupportedOrUnmappedShapeCount = 0;
@@ -599,6 +603,7 @@ function buildSearchRowDiagnostics(
       if (intent === 'action-queue') {
         const resolution = deriveActionQueueStatusResolution(row);
         if (resolution.source === 'recipientStatus') mappedFromRecipientStatusCount++;
+        if (resolution.source === 'status') mappedFromStatusCount++;
         if (resolution.source === 'statusRole') mappedFromStatusRoleCount++;
       }
       mappedItemCount++;
@@ -647,6 +652,7 @@ function buildSearchRowDiagnostics(
     dropMissingNameCount,
     dropMissingRecipientStatusCount,
     mappedFromRecipientStatusCount,
+    mappedFromStatusCount,
     mappedFromStatusRoleCount,
     dropUnsupportedStatusRoleCount,
     dropUnsupportedOrUnmappedShapeCount,

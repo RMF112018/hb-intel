@@ -96,6 +96,7 @@ export type AdobeSignSearchResult =
         readonly dropMissingNameCount: number;
         readonly dropMissingRecipientStatusCount: number;
         readonly mappedFromRecipientStatusCount: number;
+        readonly mappedFromStatusCount: number;
         readonly mappedFromStatusRoleCount: number;
         readonly dropUnsupportedStatusRoleCount: number;
         readonly dropUnsupportedOrUnmappedShapeCount: number;

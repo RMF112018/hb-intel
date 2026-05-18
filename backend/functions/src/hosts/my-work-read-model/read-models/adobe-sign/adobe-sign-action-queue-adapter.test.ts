@@ -1021,6 +1021,7 @@ describe('createAdobeSignActionQueueAdapter', () => {
           dropMissingNameCount: 0,
           dropMissingRecipientStatusCount: 0,
           mappedFromRecipientStatusCount: 3,
+          mappedFromStatusCount: 0,
           mappedFromStatusRoleCount: 0,
           dropUnsupportedStatusRoleCount: 0,
           dropUnsupportedOrUnmappedShapeCount: 0,
@@ -1073,6 +1074,7 @@ describe('createAdobeSignActionQueueAdapter', () => {
             searchDropMissingNameCount: 0,
             searchDropMissingRecipientStatusCount: 0,
             searchMappedFromRecipientStatusCount: 3,
+            searchMappedFromStatusCount: 0,
             searchMappedFromStatusRoleCount: 0,
             searchDropUnsupportedStatusRoleCount: 0,
             searchDropUnsupportedOrUnmappedShapeCount: 0,
@@ -1111,6 +1113,83 @@ describe('createAdobeSignActionQueueAdapter', () => {
       expect(serialized).not.toContain(unsafeUrl);
       expect(serialized).not.toContain('Bearer ');
       expect(serialized).not.toContain('token');
+    });
+
+    it('emits mappedFromStatusCount and retained counters for a status-resolved actionable row', async () => {
+      const events: Array<{ name: string; properties: Record<string, unknown> }> = [];
+      const diagnostics = {
+        trackAdobeSignRuntimeEvent(name: string, properties: Record<string, unknown>) {
+          events.push({ name, properties });
+        },
+      };
+      const result: AdobeSignSearchResult = {
+        status: 'ok',
+        items: [
+          {
+            intent: 'action-queue',
+            agreementId: 'agr-1',
+            agreementName: 'Agreement 1',
+            recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+          },
+        ],
+        searchRowDiagnostics: {
+          queryIntent: 'action-queue',
+          rawAgreementRowCount: 1,
+          mappedItemCount: 1,
+          droppedRowCount: 0,
+          dropMissingIdCount: 0,
+          dropMissingNameCount: 0,
+          dropMissingRecipientStatusCount: 1,
+          mappedFromRecipientStatusCount: 0,
+          mappedFromStatusCount: 1,
+          mappedFromStatusRoleCount: 0,
+          dropUnsupportedStatusRoleCount: 0,
+          dropUnsupportedOrUnmappedShapeCount: 0,
+          firstRowWasObject: true,
+          firstRowHasIdField: true,
+          firstRowHasNameField: true,
+          firstRowHasStatusField: true,
+          firstRowHasRecipientStatusField: false,
+          firstRowHasRoleField: true,
+          firstRowHasParticipantSetsInfoField: false,
+          firstRowHasMembersField: false,
+          firstRowHasSenderInfoField: false,
+          firstRowHasDisplayDateField: false,
+          firstRowHasLastUpdateField: false,
+          firstRowHasExpirationTimeField: false,
+          firstRowHasViewURLField: false,
+          firstRowHasAgreementViewUrlField: false,
+        },
+      };
+      const adapter = createAdobeSignActionQueueAdapter(
+        buildDeps({ searchClient: createDeterministicMockSearchClient([result]) }),
+      );
+
+      const env = await adapter.getActionQueue(context(diagnostics), QUERY_EMPTY);
+      expect(env.sourceStatus).toBe('available');
+      expect(env.warnings.map((w) => w.code)).not.toContain('unsupported-source-status-filtered');
+      expect(env.data.items).toHaveLength(1);
+      expect(env.data.items[0]?.requiredAction).toBe('signature');
+      expect(env.data.items[0]?.adobeRecipientStatus).toBe('WAITING_FOR_MY_SIGNATURE');
+
+      expect(events).toEqual([
+        {
+          name: 'adobeSign.read.search.result',
+          properties: expect.objectContaining({
+            status: 'ok',
+            searchMappedFromStatusCount: 1,
+          }),
+        },
+        {
+          name: 'adobeSign.read.actionQueue.result',
+          properties: expect.objectContaining({
+            resultStage: 'mapped-results',
+            adapterInputItemCount: 1,
+            adapterRetainedItemCount: 1,
+            adapterDroppedUnsupportedRecipientStatusCount: 0,
+          }),
+        },
+      ]);
     });
   });
 });
