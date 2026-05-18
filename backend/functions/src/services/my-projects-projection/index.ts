@@ -144,3 +144,9 @@ export {
 } from './engine/projection-seed-service.js';
 
 export { MAX_PROJECTION_SEED_SOURCE_ROWS } from './engine/projection-source-fetch-client.js';
+
+export {
+  MY_PROJECTS_PROJECTION_EVENT_GROUPS,
+  MY_PROJECTS_PROJECTION_EVENT_NAMES,
+  type MyProjectsProjectionEventName,
+} from './telemetry/event-names.js';
