@@ -113,6 +113,11 @@ export type AdobeSignSearchResult =
         readonly firstRowHasExpirationTimeField: boolean;
         readonly firstRowHasViewURLField: boolean;
         readonly firstRowHasAgreementViewUrlField: boolean;
+        readonly firstRowStatusValue?: string;
+        readonly firstRowRoleValue?: string;
+        readonly observedStatusValuesCsv?: string;
+        readonly observedRoleValuesCsv?: string;
+        readonly observedStatusRolePairsCsv?: string;
       };
     }
   | {

@@ -536,6 +536,23 @@ function hasOwnField(value: unknown, key: string): boolean {
     : false;
 }
 
+function sanitizeAdobeEnumTelemetryValue(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  if (trimmed.length === 0 || trimmed.length > 64) return undefined;
+  const normalized = trimmed.toUpperCase().replace(/[-\s]+/g, '_');
+  if (normalized.length === 0 || normalized.length > 64) return undefined;
+  return /^[A-Z0-9_]+$/.test(normalized) ? normalized : undefined;
+}
+
+function buildBoundedSortedCsv(values: Iterable<string>): string | undefined {
+  const sorted = [...new Set(values)].sort().slice(0, 12);
+  if (sorted.length === 0) return undefined;
+  const csv = sorted.join(',');
+  if (csv.length === 0 || csv.length > 512) return undefined;
+  return csv;
+}
+
 function buildSearchRowDiagnostics(
   rawAgreements: readonly unknown[],
   intent: AdobeSignSearchClientInput['request']['intent'],
@@ -552,8 +569,22 @@ function buildSearchRowDiagnostics(
   let mappedFromStatusRoleCount = 0;
   let dropUnsupportedStatusRoleCount = 0;
   let dropUnsupportedOrUnmappedShapeCount = 0;
+  const observedStatusValues = new Set<string>();
+  const observedRoleValues = new Set<string>();
+  const observedStatusRolePairs = new Set<string>();
+
+  const firstRowStatusValue = firstRowObj
+    ? sanitizeAdobeEnumTelemetryValue(firstRowObj.status)
+    : undefined;
+  const firstRowRoleValue = firstRowObj ? sanitizeAdobeEnumTelemetryValue(firstRowObj.role) : undefined;
 
   for (const row of rawAgreements) {
+    const sanitizedStatus = sanitizeAdobeEnumTelemetryValue(readStringField(row, 'status'));
+    const sanitizedRole = sanitizeAdobeEnumTelemetryValue(readStringField(row, 'role'));
+    if (sanitizedStatus) observedStatusValues.add(sanitizedStatus);
+    if (sanitizedRole) observedRoleValues.add(sanitizedRole);
+    if (sanitizedStatus && sanitizedRole) observedStatusRolePairs.add(`${sanitizedStatus}:${sanitizedRole}`);
+
     if (
       intent === 'action-queue' &&
       row !== null &&
@@ -604,6 +635,9 @@ function buildSearchRowDiagnostics(
   }
 
   const droppedRowCount = rawAgreements.length - mappedItemCount;
+  const observedStatusValuesCsv = buildBoundedSortedCsv(observedStatusValues);
+  const observedRoleValuesCsv = buildBoundedSortedCsv(observedRoleValues);
+  const observedStatusRolePairsCsv = buildBoundedSortedCsv(observedStatusRolePairs);
   return {
     queryIntent: intent,
     rawAgreementRowCount: rawAgreements.length,
@@ -635,6 +669,11 @@ function buildSearchRowDiagnostics(
     firstRowHasViewURLField: firstRowObj !== undefined && hasOwnField(firstRowObj, 'viewURL'),
     firstRowHasAgreementViewUrlField:
       firstRowObj !== undefined && hasOwnField(firstRowObj, 'agreementViewUrl'),
+    ...(firstRowStatusValue !== undefined ? { firstRowStatusValue } : {}),
+    ...(firstRowRoleValue !== undefined ? { firstRowRoleValue } : {}),
+    ...(observedStatusValuesCsv !== undefined ? { observedStatusValuesCsv } : {}),
+    ...(observedRoleValuesCsv !== undefined ? { observedRoleValuesCsv } : {}),
+    ...(observedStatusRolePairsCsv !== undefined ? { observedStatusRolePairsCsv } : {}),
   };
 }
 

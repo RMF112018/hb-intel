@@ -1038,6 +1038,11 @@ describe('createAdobeSignActionQueueAdapter', () => {
           firstRowHasExpirationTimeField: false,
           firstRowHasViewURLField: true,
           firstRowHasAgreementViewUrlField: false,
+          firstRowStatusValue: 'OUT_FOR_SIGNATURE',
+          firstRowRoleValue: 'SIGNER',
+          observedStatusValuesCsv: 'OUT_FOR_SIGNATURE',
+          observedRoleValuesCsv: 'SIGNER',
+          observedStatusRolePairsCsv: 'OUT_FOR_SIGNATURE:SIGNER',
         },
       };
       const passthroughSearchClient = {
@@ -1075,6 +1080,11 @@ describe('createAdobeSignActionQueueAdapter', () => {
             searchFirstRowHasIdField: true,
             searchFirstRowHasNameField: true,
             searchFirstRowHasRecipientStatusField: true,
+            searchFirstRowStatusValue: 'OUT_FOR_SIGNATURE',
+            searchFirstRowRoleValue: 'SIGNER',
+            searchObservedStatusValuesCsv: 'OUT_FOR_SIGNATURE',
+            searchObservedRoleValuesCsv: 'SIGNER',
+            searchObservedStatusRolePairsCsv: 'OUT_FOR_SIGNATURE:SIGNER',
           }),
         },
         {

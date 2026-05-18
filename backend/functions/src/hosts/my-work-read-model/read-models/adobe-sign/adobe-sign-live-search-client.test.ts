@@ -312,6 +312,47 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
     expect(result.nextCursor).toBeUndefined();
   });
 
+  it('adds sanitized status/role enum diagnostics for successful action-queue rows', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreements: [
+          {
+            id: 'agr-1',
+            name: 'A',
+            status: 'out for signature',
+            role: 'signer',
+            recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+          },
+          {
+            id: 'agr-2',
+            name: 'B',
+            status: 'out-for-signature',
+            role: 'form filler',
+            recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+          },
+          {
+            id: 'agr-3',
+            name: 'C',
+            status: 'OUT$FOR$SIGNATURE',
+            role: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+            recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+          },
+        ],
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.searchRowDiagnostics).toMatchObject({
+      firstRowStatusValue: 'OUT_FOR_SIGNATURE',
+      firstRowRoleValue: 'SIGNER',
+      observedStatusValuesCsv: 'OUT_FOR_SIGNATURE',
+      observedRoleValuesCsv: 'FORM_FILLER,SIGNER',
+      observedStatusRolePairsCsv: 'OUT_FOR_SIGNATURE:FORM_FILLER,OUT_FOR_SIGNATURE:SIGNER',
+    });
+  });
+
   it('silently drops a row that is missing a required field; the rest survive', async () => {
     const fetchSpy = vi.fn(async () =>
       jsonResponse({

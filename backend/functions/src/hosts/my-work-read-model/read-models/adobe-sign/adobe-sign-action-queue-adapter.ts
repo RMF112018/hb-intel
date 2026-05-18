@@ -544,6 +544,13 @@ export function createAdobeSignActionQueueAdapter(
                 searchResult.searchRowDiagnostics.firstRowHasViewURLField,
               searchFirstRowHasAgreementViewUrlField:
                 searchResult.searchRowDiagnostics.firstRowHasAgreementViewUrlField,
+              searchFirstRowStatusValue: searchResult.searchRowDiagnostics.firstRowStatusValue,
+              searchFirstRowRoleValue: searchResult.searchRowDiagnostics.firstRowRoleValue,
+              searchObservedStatusValuesCsv:
+                searchResult.searchRowDiagnostics.observedStatusValuesCsv,
+              searchObservedRoleValuesCsv: searchResult.searchRowDiagnostics.observedRoleValuesCsv,
+              searchObservedStatusRolePairsCsv:
+                searchResult.searchRowDiagnostics.observedStatusRolePairsCsv,
             }
           : {}),
       });
