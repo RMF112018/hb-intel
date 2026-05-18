@@ -61,17 +61,22 @@ export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortf
             data-my-projects-project-name-accent=""
             aria-hidden="true"
           />
-          <p className={styles.projectNumber} data-my-projects-project-number="">
-            {row.projectNumber}
-          </p>
+          <div
+            className={styles.projectNumberStageRow}
+            data-my-projects-project-number-stage-row=""
+          >
+            <p className={styles.projectNumber} data-my-projects-project-number="">
+              {row.projectNumber}
+            </p>
+            {row.projectStage ? (
+              <p className={styles.projectStage} data-my-projects-project-stage="">
+                {row.projectStage}
+              </p>
+            ) : null}
+          </div>
         </div>
 
-        <div className={styles.meta} data-my-projects-meta-row="">
-          {row.projectStage ? (
-            <p className={styles.projectStage} data-my-projects-project-stage="">
-              {row.projectStage}
-            </p>
-          ) : null}
+        <div className={styles.meta} data-my-projects-meta-row="" data-my-projects-role-row="">
           {primaryRoleLabel ? (
             <span className={styles.primaryRole} data-my-projects-primary-role="">
               {primaryRoleLabel}
@@ -118,13 +123,12 @@ export function ProjectPortfolioTile({ row, isOpen, onOpenChange }: ProjectPortf
         </div>
       ) : null}
 
-      {!isPhone && launchPresentation.overflowOptions.length > 0 ? (
+      {!isPhone && isOpen && launchPresentation.overflowOptions.length > 0 ? (
         <div
           id={launchOverflowPanelId}
           className={styles.moreResourcesPanel}
-          hidden={!isOpen}
           data-my-projects-more-resources-panel=""
-          data-my-projects-more-resources-state={isOpen ? 'open' : 'closed'}
+          data-my-projects-more-resources-state="open"
         >
           {launchPresentation.overflowOptions.map((option) => (
             <a

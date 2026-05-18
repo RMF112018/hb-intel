@@ -178,7 +178,9 @@ describe('MyProjectsHomeCard', () => {
     expect(rail!.getAttribute('data-my-projects-overflow-action-count')).toBe('2');
     expect(harborTile!.getAttribute('data-my-projects-tile-layout')).toBe('content-rail');
     expect(harborTile!.querySelector('[data-my-projects-project-name-accent]')).not.toBeNull();
-    expect(harborTile!.querySelector('[data-my-projects-meta-row]')).not.toBeNull();
+    expect(harborTile!.querySelector('[data-my-projects-project-number-stage-row]')).not.toBeNull();
+    expect(harborTile!.querySelector('[data-my-projects-project-stage]')).not.toBeNull();
+    expect(harborTile!.querySelector('[data-my-projects-role-row]')).not.toBeNull();
 
     const options = Array.from(
       harborTile!.querySelectorAll<HTMLElement>('[data-my-projects-launch-option]'),
@@ -191,13 +193,9 @@ describe('MyProjectsHomeCard', () => {
     expect(
       harborTile!.querySelector('[data-my-projects-more-resources-trigger]')?.textContent,
     ).toBe('More Resources · 2');
-    const panel = harborTile!.querySelector(
-      '[data-my-projects-more-resources-panel]',
-    ) as HTMLElement;
-    expect(panel).not.toBeNull();
-    expect(panel.getAttribute('data-my-projects-more-resources-state')).toBe('closed');
-    expect(panel.querySelector('[data-my-projects-more-resource-option="building-connected"]')).not.toBeNull();
-    expect(panel.querySelector('[data-my-projects-more-resource-option="document-crunch"]')).not.toBeNull();
+    expect(harborTile!.querySelector('[data-my-projects-more-resources-panel]')).toBeNull();
+    expect(harborTile!.querySelector('[data-my-projects-more-resource-option="building-connected"]')).toBeNull();
+    expect(harborTile!.querySelector('[data-my-projects-more-resource-option="document-crunch"]')).toBeNull();
 
     const sharePointLink = harborTile!.querySelector(
       '[data-my-projects-launch-option="sharepoint"]',
@@ -245,6 +243,37 @@ describe('MyProjectsHomeCard', () => {
         container.querySelectorAll('[data-my-projects-more-resources-panel][data-my-projects-more-resources-state="open"]').length,
       ).toBe(0);
     }
+  });
+
+  it('opens and closes panel lifecycle within owning tile', async () => {
+    getMyProjectLinksMock.mockResolvedValue(MY_PROJECT_LINKS_AVAILABLE);
+    const { container } = renderCard('desktop');
+
+    await waitFor(() =>
+      expect(container.querySelectorAll('[data-my-projects-tile]').length).toBeGreaterThan(0),
+    );
+
+    const harborTile = Array.from(container.querySelectorAll<HTMLElement>('[data-my-projects-tile]')).find(
+      (tile) => tile.querySelector('[data-my-projects-project-number]')?.textContent === '24-100-01',
+    );
+    expect(harborTile).toBeTruthy();
+
+    const trigger = harborTile!.querySelector(
+      '[data-my-projects-more-resources-trigger]',
+    ) as HTMLButtonElement;
+    expect(trigger).not.toBeNull();
+    expect(harborTile!.querySelector('[data-my-projects-more-resources-panel]')).toBeNull();
+
+    fireEvent.click(trigger);
+    const openPanel = harborTile!.querySelector(
+      '[data-my-projects-more-resources-panel][data-my-projects-more-resources-state="open"]',
+    );
+    expect(openPanel).not.toBeNull();
+    expect(openPanel?.querySelector('[data-my-projects-more-resource-option="building-connected"]')).not.toBeNull();
+    expect(openPanel?.querySelector('[data-my-projects-more-resource-option="document-crunch"]')).not.toBeNull();
+
+    fireEvent.click(trigger);
+    expect(harborTile!.querySelector('[data-my-projects-more-resources-panel]')).toBeNull();
   });
 
   it('omits unavailable launch destinations entirely from the DOM across all tiles', async () => {

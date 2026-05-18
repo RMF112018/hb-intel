@@ -68,6 +68,14 @@
   min-width: 0;
 }
 
+.projectNumberStageRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
 .projectNameAccent {
   display: block;
   width: clamp(72px, 42%, 132px);
@@ -152,16 +160,14 @@
 }
 
 .projectStage {
-  /* Compact uppercase pill matching the .primaryRole register — replaces the
-     prior serif-italic treatment that read off-family from the rest of the UI. */
   margin: 0;
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
+  padding: 1px 8px;
   border-radius: var(--my-work-radius-full);
   border: 1px solid var(--my-work-executive-rail-tint);
   background: color-mix(in srgb, var(--my-work-color-rail) 50%, #ffffff);
-  font-size: 10px;
+  font-size: 9.25px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -232,6 +238,10 @@
 :global([data-my-work-mode='tabletPortrait']) .meta {
   flex-direction: column;
   align-items: stretch;
+}
+
+:global([data-my-work-mode='phone']) .projectNumberStageRow {
+  align-items: flex-start;
 }
 
 .tile[data-my-projects-tile-layout='content-only'] {

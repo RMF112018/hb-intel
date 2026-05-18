@@ -275,6 +275,9 @@ describe('ProjectPortfolioBrowser — non-phone rail split parity', () => {
     expect(harborTile.querySelector('[data-my-projects-more-resources-trigger]')?.textContent).toBe(
       'More Resources · 2',
     );
+    expect(harborTile.querySelector('[data-my-projects-more-resources-panel]')).toBeNull();
+    expect(harborTile.querySelector('[data-my-projects-project-number-stage-row]')).not.toBeNull();
+    expect(harborTile.querySelector('[data-my-projects-role-row]')).not.toBeNull();
   });
 
   it('keeps only one overflow menu open at a time across browser tiles', () => {
