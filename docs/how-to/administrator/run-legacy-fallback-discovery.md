@@ -6,14 +6,14 @@ This runbook covers hosted execution of the legacy fallback discovery pipeline f
 
 Authoritative host for the legacy fallback lane is the default Function App composition on `hb-intel-function-app`, whose entrypoint is `backend/functions/src/index.ts` (shipped as `dist/index.js` per `backend/functions/package.json`). That entrypoint registers exactly these eight functions for this lane:
 
-- `legacyFallbackDiscoveryRun` — `POST /api/admin/legacy-fallback/discovery/run`
+- `legacyFallbackDiscoveryRun` — `POST /api/admin-api/legacy-fallback/discovery/run`
 - `legacyFallbackDiscoveryTimer` — timer trigger (gated by config)
-- `adminLegacyFallbackReviewList` — `GET /api/admin/legacy-fallback/review/records`
-- `adminLegacyFallbackReviewGetRecord` — `GET /api/admin/legacy-fallback/review/records/{recordId}`
-- `adminLegacyFallbackReviewManualBind` — `POST /api/admin/legacy-fallback/review/records/{recordId}/bind`
-- `adminLegacyFallbackReviewIgnore` — `POST /api/admin/legacy-fallback/review/records/{recordId}/ignore`
-- `adminLegacyFallbackReviewDisable` — `POST /api/admin/legacy-fallback/review/records/{recordId}/disable`
-- `adminLegacyFallbackReviewRevalidate` — `POST /api/admin/legacy-fallback/review/revalidate`
+- `adminLegacyFallbackReviewList` — `GET /api/admin-api/legacy-fallback/review/records`
+- `adminLegacyFallbackReviewGetRecord` — `GET /api/admin-api/legacy-fallback/review/records/{recordId}`
+- `adminLegacyFallbackReviewManualBind` — `POST /api/admin-api/legacy-fallback/review/records/{recordId}/bind`
+- `adminLegacyFallbackReviewIgnore` — `POST /api/admin-api/legacy-fallback/review/records/{recordId}/ignore`
+- `adminLegacyFallbackReviewDisable` — `POST /api/admin-api/legacy-fallback/review/records/{recordId}/disable`
+- `adminLegacyFallbackReviewRevalidate` — `POST /api/admin-api/legacy-fallback/review/revalidate`
 
 The review/admin registrations live in `backend/functions/src/functions/adminApi/legacy-fallback-routes.ts`; that module is the single registration source and is imported by both the default host (`src/index.ts`) and the admin-control-plane host. The admin-control-plane host remains intentionally out of scope for this lane's operational deployment.
 
@@ -39,6 +39,7 @@ pnpm exec tsx scripts/package-functions-artifact.ts \
 ```
 
 The artifact includes:
+
 - compiled runtime output (`dist/`)
 - host metadata (`host.json`)
 - runtime package metadata (`package.json`)
@@ -70,19 +71,19 @@ curl -sS "https://${HOST}/admin/functions?code=${MASTER_KEY}" | jq 'map(.name)'
 
 ## Discovery endpoints
 
-- HTTP trigger: `POST /api/admin/legacy-fallback/discovery/run`
+- HTTP trigger: `POST /api/admin-api/legacy-fallback/discovery/run`
 - Timer trigger: `legacyFallbackDiscoveryTimer` (gated by config)
 
 ## Review and override endpoints
 
 Maintainer review/override is hosted in the same admin API surface and requires delegated admin auth:
 
-- `GET /api/admin/legacy-fallback/review/records`
-- `GET /api/admin/legacy-fallback/review/records/{recordId}`
-- `POST /api/admin/legacy-fallback/review/records/{recordId}/bind`
-- `POST /api/admin/legacy-fallback/review/records/{recordId}/ignore`
-- `POST /api/admin/legacy-fallback/review/records/{recordId}/disable`
-- `POST /api/admin/legacy-fallback/review/revalidate`
+- `GET /api/admin-api/legacy-fallback/review/records`
+- `GET /api/admin-api/legacy-fallback/review/records/{recordId}`
+- `POST /api/admin-api/legacy-fallback/review/records/{recordId}/bind`
+- `POST /api/admin-api/legacy-fallback/review/records/{recordId}/ignore`
+- `POST /api/admin-api/legacy-fallback/review/records/{recordId}/disable`
+- `POST /api/admin-api/legacy-fallback/review/revalidate`
 
 `/review/records` defaults to queue view (`review-required` / `unmatched` and `low`/`none` confidence). Optional query filters:
 
@@ -120,6 +121,7 @@ Optional discovery controls:
 - `HBC_LEGACY_FALLBACK_TARGET_AUTH_MODEL_NOTES=<operational notes>`
 
 Secret posture:
+
 - Do not commit secrets into repo.
 - Keep credentials in environment and/or Key Vault references.
 - Treat portal-only ad-hoc config edits as temporary and back-port them to IaC/scripted configuration.
@@ -135,7 +137,7 @@ Secret posture:
 FUNCTION_BASE_URL="https://$(az functionapp show -g hb-intel -n hb-intel-function-app --query properties.defaultHostName -o tsv)"
 FUNCTION_TOKEN="<delegated-admin-bearer-token>"
 
-curl -sS -X POST "${FUNCTION_BASE_URL}/api/admin/legacy-fallback/discovery/run" \
+curl -sS -X POST "${FUNCTION_BASE_URL}/api/admin-api/legacy-fallback/discovery/run" \
   -H "Authorization: Bearer ${FUNCTION_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{"year":2024,"dryRun":false}'
@@ -179,7 +181,7 @@ Closure for this lane requires **all five proof classes below, in order, with ev
 
 ### C. Execution Proof
 
-- `POST /api/admin/legacy-fallback/discovery/run` returns `2xx` with a response body containing `runId` and a terminal `status` (`completed` or `failed`), OR the daily timer run completes and logs `legacy-fallback.timer.entry` / timer run summary.
+- `POST /api/admin-api/legacy-fallback/discovery/run` returns `2xx` with a response body containing `runId` and a terminal `status` (`completed` or `failed`), OR the daily timer run completes and logs `legacy-fallback.timer.entry` / timer run summary.
 - Capture the `runId` — every later proof class is filtered by it.
 
 ### D. Persistence Proof
@@ -221,7 +223,7 @@ Deployment success is not closure. Registration success is not closure. Closure 
 3. Controlled rerun:
    - re-enable required flags,
    - wait for rerun cooldown or lower it intentionally,
-   - run `POST /api/admin/legacy-fallback/review/revalidate` or `POST /api/admin/legacy-fallback/discovery/run`.
+   - run `POST /api/admin-api/legacy-fallback/review/revalidate` or `POST /api/admin-api/legacy-fallback/discovery/run`.
 
 ## Monitoring ownership and SLA
 

@@ -353,6 +353,42 @@ const grantStateForExchange = (exchange: { readonly status: string }): AdobeSign
   exchange.status === 'ok' ? 'active' : 'pending';
 const hasNonEmptyValue = (value: string): boolean => value.trim().length > 0;
 
+/**
+ * Closed-enum mapping of Adobe's `error` query parameter for the callback.
+ * Adobe (and the OAuth 2.0 spec it follows) sends `error=…&state=…` with no
+ * `code` when authorization fails — for example on user consent denial,
+ * invalid scope, or temporary provider failure. Mapping the raw vendor
+ * string to a closed enum keeps telemetry payloads diagnostic without
+ * letting arbitrary vendor strings leak into logs.
+ */
+type AdobeCallbackErrorCode =
+  | 'none'
+  | 'access_denied'
+  | 'invalid_scope'
+  | 'invalid_request'
+  | 'unauthorized_client'
+  | 'unsupported_response_type'
+  | 'server_error'
+  | 'temporarily_unavailable'
+  | 'other';
+
+const classifyAdobeCallbackError = (raw: string): AdobeCallbackErrorCode => {
+  const value = raw.trim().toLowerCase();
+  if (!value) return 'none';
+  switch (value) {
+    case 'access_denied':
+    case 'invalid_scope':
+    case 'invalid_request':
+    case 'unauthorized_client':
+    case 'unsupported_response_type':
+    case 'server_error':
+    case 'temporarily_unavailable':
+      return value;
+    default:
+      return 'other';
+  }
+};
+
 export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
   return async (request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     const requestId = extractOrGenerateRequestId(request);
@@ -365,6 +401,13 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
     const webAccessPoint = request.query.get('web_access_point') ?? '';
     const hasApiAccessPoint = hasNonEmptyValue(apiAccessPoint);
     const hasWebAccessPoint = hasNonEmptyValue(webAccessPoint);
+    // Adobe's OAuth 2.0 contract returns `error=…&state=…` (no `code`) when
+    // authorization fails. We capture the closed-enum classification but
+    // never the raw `error_description` value, which is vendor-controlled.
+    const rawErrorCode = request.query.get('error') ?? '';
+    const errorCode = classifyAdobeCallbackError(rawErrorCode);
+    const hasError = errorCode !== 'none';
+    const hasErrorDescription = hasNonEmptyValue(request.query.get('error_description') ?? '');
     const env = deps.resolveConfigEnv();
 
     if (!state || !code) {
@@ -372,6 +415,9 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
         correlationId: requestId,
         hasState: Boolean(state),
         hasCode: Boolean(code),
+        hasError,
+        errorCode,
+        hasErrorDescription,
       });
       return buildRedirect(
         env,

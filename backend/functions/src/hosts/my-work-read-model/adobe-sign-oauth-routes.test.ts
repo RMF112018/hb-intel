@@ -457,6 +457,72 @@ describe('callback handler', () => {
     expect(seams.service.exchangeAuthorizationCode).not.toHaveBeenCalled();
   });
 
+  it('emits invalid-input telemetry with hasError=false / errorCode=none when state is present but code is missing and no error param is supplied', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    await callback(callbackRequest({ state }) as any, {} as any);
+    expect(loggerTrackEventSpy).toHaveBeenCalledWith('adobeSign.oauth.callback.invalid-input', {
+      correlationId: 'req-oauth',
+      hasState: true,
+      hasCode: false,
+      hasError: false,
+      errorCode: 'none',
+      hasErrorDescription: false,
+    });
+  });
+
+  it('classifies Adobe error=access_denied and surfaces it in invalid-input telemetry', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    await callback(
+      callbackRequest({
+        state,
+        error: 'access_denied',
+        error_description: 'The user denied the request.',
+      }) as any,
+      {} as any,
+    );
+    expect(loggerTrackEventSpy).toHaveBeenCalledWith('adobeSign.oauth.callback.invalid-input', {
+      correlationId: 'req-oauth',
+      hasState: true,
+      hasCode: false,
+      hasError: true,
+      errorCode: 'access_denied',
+      hasErrorDescription: true,
+    });
+    // raw error_description text must never appear in telemetry payloads.
+    const serialized = JSON.stringify((loggerTrackEventSpy as any).mock.calls);
+    expect(serialized).not.toContain('The user denied the request.');
+  });
+
+  it('maps unknown Adobe error vendor codes to errorCode=other (never leaks raw vendor string)', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    await callback(
+      callbackRequest({
+        state,
+        error: 'vendor_specific_unknown_code',
+      }) as any,
+      {} as any,
+    );
+    expect(loggerTrackEventSpy).toHaveBeenCalledWith('adobeSign.oauth.callback.invalid-input', {
+      correlationId: 'req-oauth',
+      hasState: true,
+      hasCode: false,
+      hasError: true,
+      errorCode: 'other',
+      hasErrorDescription: false,
+    });
+    const serialized = JSON.stringify((loggerTrackEventSpy as any).mock.calls);
+    expect(serialized).not.toContain('vendor_specific_unknown_code');
+  });
+
   it('rejects unknown state with invalid-state and does not exchange', async () => {
     const mod = await importModule();
     const { deps, seams } = buildDeps();

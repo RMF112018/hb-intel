@@ -17,8 +17,10 @@ import './functions/myProjectsProjectionSubscriptionAdmin/index.js';
 // My Projects projection — Service Bus queue-trigger delta sync worker (B05.13 Prompt 06).
 import './functions/myProjectsProjectionSyncWorker/index.js';
 // Legacy fallback review/admin routes. This module is the single source of
-// /admin/legacy-fallback/review/* registrations and is also imported by the
-// admin-control-plane host so both composition paths stay in sync.
+// /admin-api/legacy-fallback/review/* registrations and is also imported by
+// the admin-control-plane host so both composition paths stay in sync. The
+// `admin-api/` prefix avoids the Azure Functions reserved `admin/` route
+// namespace that would otherwise produce a startup-time route conflict.
 import './functions/adminApi/legacy-fallback-routes.js';
 // Safety record-keeping admin API routes are co-hosted with the monolithic
 // host to support production ingestion and provisioning operations.
