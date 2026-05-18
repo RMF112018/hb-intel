@@ -737,6 +737,7 @@ describe('createAdobeSignActionQueueAdapter', () => {
           properties: expect.objectContaining({
             durationMs: expect.any(Number),
             status: 'unauthorized',
+            searchQueryIntent: 'action-queue',
           }),
         },
         {
@@ -858,6 +859,7 @@ describe('createAdobeSignActionQueueAdapter', () => {
           properties: expect.objectContaining({
             durationMs: expect.any(Number),
             status: 'unreachable',
+            searchQueryIntent: 'action-queue',
             reason: 'malformed-response',
             providerStatusCode: 400,
             providerErrorCode: 'invalid_request',
@@ -949,6 +951,127 @@ describe('createAdobeSignActionQueueAdapter', () => {
       expect(serialized).not.toContain('Contract A');
       expect(serialized).not.toContain('alice@example.com');
       expect(serialized).not.toContain('https://');
+    });
+
+    it('emits success search diagnostics and adapter retained/dropped counters without raw row values', async () => {
+      const events: Array<{ name: string; properties: Record<string, unknown> }> = [];
+      const diagnostics = {
+        trackAdobeSignRuntimeEvent(name: string, properties: Record<string, unknown>) {
+          events.push({ name, properties });
+        },
+      };
+      const unsafeAgreementId = 'agr-secret-777';
+      const unsafeAgreementName = 'Top Secret Agreement';
+      const unsafeSenderName = 'Private Sender';
+      const unsafeSenderEmail = 'private.sender@example.com';
+      const unsafeUrl = 'https://secure.na1.adobesign.com/account/agreementView?aid=secret';
+      const result: AdobeSignSearchResult = {
+        status: 'ok',
+        items: [
+          {
+            intent: 'action-queue',
+            agreementId: unsafeAgreementId,
+            agreementName: unsafeAgreementName,
+            recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+            senderDisplayName: unsafeSenderName,
+            senderEmail: unsafeSenderEmail,
+            sourceOpenUrlCandidate: unsafeUrl,
+          },
+          {
+            intent: 'action-queue',
+            agreementId: 'agr-unsupported',
+            agreementName: 'Unsupported',
+            recipientStatus: 'OUT_FOR_DELIVERY',
+          },
+          {
+            intent: 'recent-completions',
+            agreementId: 'agr-wrong-intent',
+            agreementName: 'Wrong Intent',
+          },
+        ],
+        searchRowDiagnostics: {
+          queryIntent: 'action-queue',
+          rawAgreementRowCount: 3,
+          mappedItemCount: 3,
+          droppedRowCount: 0,
+          dropMissingIdCount: 0,
+          dropMissingNameCount: 0,
+          dropMissingRecipientStatusCount: 0,
+          dropUnsupportedOrUnmappedShapeCount: 0,
+          firstRowWasObject: true,
+          firstRowHasIdField: true,
+          firstRowHasNameField: true,
+          firstRowHasStatusField: false,
+          firstRowHasRecipientStatusField: true,
+          firstRowHasRoleField: false,
+          firstRowHasParticipantSetsInfoField: false,
+          firstRowHasMembersField: false,
+          firstRowHasSenderInfoField: true,
+          firstRowHasDisplayDateField: false,
+          firstRowHasLastUpdateField: false,
+          firstRowHasExpirationTimeField: false,
+          firstRowHasViewURLField: true,
+          firstRowHasAgreementViewUrlField: false,
+        },
+      };
+      const passthroughSearchClient = {
+        async search() {
+          return result;
+        },
+      };
+      const adapter = createAdobeSignActionQueueAdapter(
+        buildDeps({ searchClient: passthroughSearchClient }),
+      );
+
+      const env = await adapter.getActionQueue(context(diagnostics), QUERY_EMPTY);
+      expect(env.sourceStatus).toBe('partial');
+
+      expect(events).toEqual([
+        {
+          name: 'adobeSign.read.search.result',
+          properties: expect.objectContaining({
+            durationMs: expect.any(Number),
+            status: 'ok',
+            searchQueryIntent: 'action-queue',
+            itemCount: 3,
+            hasMore: false,
+            searchRawAgreementRowCount: 3,
+            searchMappedItemCount: 3,
+            searchDroppedRowCount: 0,
+            searchDropMissingIdCount: 0,
+            searchDropMissingNameCount: 0,
+            searchDropMissingRecipientStatusCount: 0,
+            searchDropUnsupportedOrUnmappedShapeCount: 0,
+            searchFirstRowWasObject: true,
+            searchFirstRowHasIdField: true,
+            searchFirstRowHasNameField: true,
+            searchFirstRowHasRecipientStatusField: true,
+          }),
+        },
+        {
+          name: 'adobeSign.read.actionQueue.result',
+          properties: expect.objectContaining({
+            durationMs: expect.any(Number),
+            sourceStatus: 'partial',
+            resultStage: 'mapped-results',
+            warningCodes: ['partial-source-data', 'unsupported-source-status-filtered'],
+            adapterInputItemCount: 3,
+            adapterRetainedItemCount: 1,
+            adapterDroppedWrongIntentCount: 1,
+            adapterDroppedUnsupportedRecipientStatusCount: 1,
+          }),
+        },
+      ]);
+
+      const serialized = JSON.stringify(events);
+      expect(serialized).not.toContain(ACCESS_TOKEN);
+      expect(serialized).not.toContain(unsafeAgreementId);
+      expect(serialized).not.toContain(unsafeAgreementName);
+      expect(serialized).not.toContain(unsafeSenderName);
+      expect(serialized).not.toContain(unsafeSenderEmail);
+      expect(serialized).not.toContain(unsafeUrl);
+      expect(serialized).not.toContain('Bearer ');
+      expect(serialized).not.toContain('token');
     });
   });
 });

@@ -214,6 +214,30 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
         recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
       },
     ]);
+    expect(result.searchRowDiagnostics).toEqual({
+      queryIntent: 'action-queue',
+      rawAgreementRowCount: 1,
+      mappedItemCount: 1,
+      droppedRowCount: 0,
+      dropMissingIdCount: 0,
+      dropMissingNameCount: 0,
+      dropMissingRecipientStatusCount: 0,
+      dropUnsupportedOrUnmappedShapeCount: 0,
+      firstRowWasObject: true,
+      firstRowHasIdField: true,
+      firstRowHasNameField: true,
+      firstRowHasStatusField: false,
+      firstRowHasRecipientStatusField: true,
+      firstRowHasRoleField: false,
+      firstRowHasParticipantSetsInfoField: false,
+      firstRowHasMembersField: false,
+      firstRowHasSenderInfoField: false,
+      firstRowHasDisplayDateField: false,
+      firstRowHasLastUpdateField: false,
+      firstRowHasExpirationTimeField: false,
+      firstRowHasViewURLField: false,
+      firstRowHasAgreementViewUrlField: false,
+    });
   });
 
   it('accepts the confirmed live envelope with an empty agreementAssetsResultList', async () => {
@@ -300,6 +324,16 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.items.map((item) => item.agreementId)).toEqual(['agr-1', 'agr-3']);
+    expect(result.searchRowDiagnostics).toMatchObject({
+      queryIntent: 'action-queue',
+      rawAgreementRowCount: 3,
+      mappedItemCount: 2,
+      droppedRowCount: 1,
+      dropMissingIdCount: 1,
+      dropMissingNameCount: 0,
+      dropMissingRecipientStatusCount: 0,
+      dropUnsupportedOrUnmappedShapeCount: 0,
+    });
   });
 
   it('drops action-queue rows missing recipientStatus', async () => {
@@ -313,6 +347,39 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.items).toEqual([]);
+    expect(result.searchRowDiagnostics).toMatchObject({
+      queryIntent: 'action-queue',
+      rawAgreementRowCount: 1,
+      mappedItemCount: 0,
+      droppedRowCount: 1,
+      dropMissingIdCount: 0,
+      dropMissingNameCount: 0,
+      dropMissingRecipientStatusCount: 1,
+      dropUnsupportedOrUnmappedShapeCount: 0,
+    });
+  });
+
+  it('drops action-queue rows missing name', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreements: [{ id: 'agr-1', recipientStatus: 'WAITING_FOR_MY_SIGNATURE' }],
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.items).toEqual([]);
+    expect(result.searchRowDiagnostics).toMatchObject({
+      queryIntent: 'action-queue',
+      rawAgreementRowCount: 1,
+      mappedItemCount: 0,
+      droppedRowCount: 1,
+      dropMissingIdCount: 0,
+      dropMissingNameCount: 1,
+      dropMissingRecipientStatusCount: 0,
+      dropUnsupportedOrUnmappedShapeCount: 0,
+    });
   });
 
   it('retains recent-completions rows missing recipientStatus', async () => {
@@ -338,6 +405,16 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
         agreementName: 'Completed Without Recipient Status',
       },
     ]);
+    expect(result.searchRowDiagnostics).toMatchObject({
+      queryIntent: 'recent-completions',
+      rawAgreementRowCount: 1,
+      mappedItemCount: 1,
+      droppedRowCount: 0,
+      dropMissingIdCount: 0,
+      dropMissingNameCount: 0,
+      dropMissingRecipientStatusCount: 0,
+      dropUnsupportedOrUnmappedShapeCount: 0,
+    });
   });
 
   it('preserves optional recipientStatus passthrough for recent-completions rows', async () => {
@@ -370,6 +447,45 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
         recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
       },
     ]);
+  });
+
+  it('reports recent-completions missing id/name drop counts without changing mapper behavior', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreements: [
+          { id: 'agr-1', name: 'Completed A' },
+          { name: 'No Id' },
+          { id: 'agr-3' },
+        ],
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search({
+      ...VALID_INPUT,
+      request: buildAdobeSignRecentCompletionsRequest({
+        now: new Date('2026-05-15T12:00:00.000Z'),
+        pageSize: 10,
+      }),
+    });
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.items).toEqual([
+      {
+        intent: 'recent-completions',
+        agreementId: 'agr-1',
+        agreementName: 'Completed A',
+      },
+    ]);
+    expect(result.searchRowDiagnostics).toMatchObject({
+      queryIntent: 'recent-completions',
+      rawAgreementRowCount: 3,
+      mappedItemCount: 1,
+      droppedRowCount: 2,
+      dropMissingIdCount: 1,
+      dropMissingNameCount: 1,
+      dropMissingRecipientStatusCount: 0,
+      dropUnsupportedOrUnmappedShapeCount: 0,
+    });
   });
 
   it('omits nextCursor when absent from the response', async () => {

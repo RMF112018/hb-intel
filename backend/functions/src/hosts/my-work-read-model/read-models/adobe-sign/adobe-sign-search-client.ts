@@ -87,6 +87,30 @@ export type AdobeSignSearchResult =
       readonly items: readonly AdobeSignSearchClientItem[];
       /** Opaque continuation token — forwarded to the adapter without parsing. */
       readonly nextCursor?: string;
+      readonly searchRowDiagnostics?: {
+        readonly queryIntent: AdobeSignSearchIntent;
+        readonly rawAgreementRowCount: number;
+        readonly mappedItemCount: number;
+        readonly droppedRowCount: number;
+        readonly dropMissingIdCount: number;
+        readonly dropMissingNameCount: number;
+        readonly dropMissingRecipientStatusCount: number;
+        readonly dropUnsupportedOrUnmappedShapeCount: number;
+        readonly firstRowWasObject: boolean;
+        readonly firstRowHasIdField: boolean;
+        readonly firstRowHasNameField: boolean;
+        readonly firstRowHasStatusField: boolean;
+        readonly firstRowHasRecipientStatusField: boolean;
+        readonly firstRowHasRoleField: boolean;
+        readonly firstRowHasParticipantSetsInfoField: boolean;
+        readonly firstRowHasMembersField: boolean;
+        readonly firstRowHasSenderInfoField: boolean;
+        readonly firstRowHasDisplayDateField: boolean;
+        readonly firstRowHasLastUpdateField: boolean;
+        readonly firstRowHasExpirationTimeField: boolean;
+        readonly firstRowHasViewURLField: boolean;
+        readonly firstRowHasAgreementViewUrlField: boolean;
+      };
     }
   | {
       /**

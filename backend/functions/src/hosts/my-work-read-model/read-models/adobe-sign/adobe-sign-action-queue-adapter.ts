@@ -211,12 +211,14 @@ export function createAdobeSignActionQueueAdapter(
         resultStage: AdobeSignActionQueueResultStage,
         warnings?: readonly MyWorkReadModelWarning[],
         durationMs: number = Date.now() - actionQueueStart,
+        telemetryOverrides?: Record<string, unknown>,
       ) => {
         context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.actionQueue.result', {
           sourceStatus,
           resultStage,
           warningCodes: warnings?.map((w) => w.code),
           durationMs,
+          ...telemetryOverrides,
         });
       };
 
@@ -295,6 +297,7 @@ export function createAdobeSignActionQueueAdapter(
       if (searchResult.status === 'unauthorized') {
         context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.search.result', {
           status: 'unauthorized',
+          searchQueryIntent: request.intent,
           durationMs: Date.now() - searchStart,
         });
         const result = envelope(
@@ -312,6 +315,7 @@ export function createAdobeSignActionQueueAdapter(
       if (searchResult.status === 'unreachable') {
         context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.search.result', {
           status: 'unreachable',
+          searchQueryIntent: request.intent,
           reason: searchResult.reason,
           durationMs: Date.now() - searchStart,
           ...(searchResult.providerStatusCode !== undefined
@@ -496,9 +500,46 @@ export function createAdobeSignActionQueueAdapter(
       }
       context.diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.search.result', {
         status: 'ok',
+        searchQueryIntent: request.intent,
         itemCount: searchResult.items.length,
         hasMore: searchResult.nextCursor !== undefined,
         durationMs: Date.now() - searchStart,
+        ...(searchResult.searchRowDiagnostics
+          ? {
+              searchRawAgreementRowCount: searchResult.searchRowDiagnostics.rawAgreementRowCount,
+              searchMappedItemCount: searchResult.searchRowDiagnostics.mappedItemCount,
+              searchDroppedRowCount: searchResult.searchRowDiagnostics.droppedRowCount,
+              searchDropMissingIdCount: searchResult.searchRowDiagnostics.dropMissingIdCount,
+              searchDropMissingNameCount: searchResult.searchRowDiagnostics.dropMissingNameCount,
+              searchDropMissingRecipientStatusCount:
+                searchResult.searchRowDiagnostics.dropMissingRecipientStatusCount,
+              searchDropUnsupportedOrUnmappedShapeCount:
+                searchResult.searchRowDiagnostics.dropUnsupportedOrUnmappedShapeCount,
+              searchFirstRowWasObject: searchResult.searchRowDiagnostics.firstRowWasObject,
+              searchFirstRowHasIdField: searchResult.searchRowDiagnostics.firstRowHasIdField,
+              searchFirstRowHasNameField: searchResult.searchRowDiagnostics.firstRowHasNameField,
+              searchFirstRowHasStatusField: searchResult.searchRowDiagnostics.firstRowHasStatusField,
+              searchFirstRowHasRecipientStatusField:
+                searchResult.searchRowDiagnostics.firstRowHasRecipientStatusField,
+              searchFirstRowHasRoleField: searchResult.searchRowDiagnostics.firstRowHasRoleField,
+              searchFirstRowHasParticipantSetsInfoField:
+                searchResult.searchRowDiagnostics.firstRowHasParticipantSetsInfoField,
+              searchFirstRowHasMembersField:
+                searchResult.searchRowDiagnostics.firstRowHasMembersField,
+              searchFirstRowHasSenderInfoField:
+                searchResult.searchRowDiagnostics.firstRowHasSenderInfoField,
+              searchFirstRowHasDisplayDateField:
+                searchResult.searchRowDiagnostics.firstRowHasDisplayDateField,
+              searchFirstRowHasLastUpdateField:
+                searchResult.searchRowDiagnostics.firstRowHasLastUpdateField,
+              searchFirstRowHasExpirationTimeField:
+                searchResult.searchRowDiagnostics.firstRowHasExpirationTimeField,
+              searchFirstRowHasViewURLField:
+                searchResult.searchRowDiagnostics.firstRowHasViewURLField,
+              searchFirstRowHasAgreementViewUrlField:
+                searchResult.searchRowDiagnostics.firstRowHasAgreementViewUrlField,
+            }
+          : {}),
       });
 
       // ---------------------------------------------------------------
@@ -506,15 +547,19 @@ export function createAdobeSignActionQueueAdapter(
       // ---------------------------------------------------------------
       const items: MyWorkAdobeSignActionQueueItem[] = [];
       let droppedCount = 0;
+      let droppedWrongIntentCount = 0;
+      let droppedUnsupportedRecipientStatusCount = 0;
       let anyCandidateOmitted = false;
       const rejectedReasons = new Set<string>();
       for (const row of searchResult.items) {
         if (row.intent !== 'action-queue') {
           droppedCount++;
+          droppedWrongIntentCount++;
           continue;
         }
         if (!isActionableStatus(row.recipientStatus)) {
           droppedCount++;
+          droppedUnsupportedRecipientStatusCount++;
           continue;
         }
         const requiredAction = ADOBE_SIGN_STATUS_TO_REQUIRED_ACTION[row.recipientStatus];
@@ -589,7 +634,12 @@ export function createAdobeSignActionQueueAdapter(
       };
 
       const result = envelope(status, warnings, readModel, generatedAtUtc);
-      trackActionQueueResult(result.sourceStatus, 'mapped-results', result.warnings);
+      trackActionQueueResult(result.sourceStatus, 'mapped-results', result.warnings, undefined, {
+        adapterInputItemCount: searchResult.items.length,
+        adapterRetainedItemCount: items.length,
+        adapterDroppedWrongIntentCount: droppedWrongIntentCount,
+        adapterDroppedUnsupportedRecipientStatusCount: droppedUnsupportedRecipientStatusCount,
+      });
       return result;
     },
   };

@@ -491,6 +491,88 @@ function mapRowForIntent(
   return intent === 'recent-completions' ? mapRecentCompletionsRow(row) : mapActionQueueRow(row);
 }
 
+function hasOwnField(value: unknown, key: string): boolean {
+  return value !== null && typeof value === 'object'
+    ? Object.prototype.hasOwnProperty.call(value, key)
+    : false;
+}
+
+function buildSearchRowDiagnostics(
+  rawAgreements: readonly unknown[],
+  intent: AdobeSignSearchClientInput['request']['intent'],
+) {
+  const firstRow = rawAgreements[0];
+  const firstRowWasObject = firstRow !== null && typeof firstRow === 'object';
+  const firstRowObj = firstRowWasObject ? (firstRow as Record<string, unknown>) : undefined;
+
+  let mappedItemCount = 0;
+  let dropMissingIdCount = 0;
+  let dropMissingNameCount = 0;
+  let dropMissingRecipientStatusCount = 0;
+  let dropUnsupportedOrUnmappedShapeCount = 0;
+
+  for (const row of rawAgreements) {
+    const mapped = mapRowForIntent(row, intent);
+    if (mapped !== undefined) {
+      mappedItemCount++;
+      continue;
+    }
+
+    if (row === null || typeof row !== 'object') {
+      dropUnsupportedOrUnmappedShapeCount++;
+      continue;
+    }
+
+    const hasId = readStringField(row, 'id') !== undefined;
+    const hasName = readStringField(row, 'name') !== undefined;
+    const hasRecipientStatus = readStringField(row, 'recipientStatus') !== undefined;
+    if (!hasId) {
+      dropMissingIdCount++;
+      continue;
+    }
+    if (!hasName) {
+      dropMissingNameCount++;
+      continue;
+    }
+    if (intent === 'action-queue' && !hasRecipientStatus) {
+      dropMissingRecipientStatusCount++;
+      continue;
+    }
+    dropUnsupportedOrUnmappedShapeCount++;
+  }
+
+  const droppedRowCount = rawAgreements.length - mappedItemCount;
+  return {
+    queryIntent: intent,
+    rawAgreementRowCount: rawAgreements.length,
+    mappedItemCount,
+    droppedRowCount,
+    dropMissingIdCount,
+    dropMissingNameCount,
+    dropMissingRecipientStatusCount,
+    dropUnsupportedOrUnmappedShapeCount,
+    firstRowWasObject,
+    firstRowHasIdField: firstRowObj !== undefined && hasOwnField(firstRowObj, 'id'),
+    firstRowHasNameField: firstRowObj !== undefined && hasOwnField(firstRowObj, 'name'),
+    firstRowHasStatusField: firstRowObj !== undefined && hasOwnField(firstRowObj, 'status'),
+    firstRowHasRecipientStatusField:
+      firstRowObj !== undefined && hasOwnField(firstRowObj, 'recipientStatus'),
+    firstRowHasRoleField: firstRowObj !== undefined && hasOwnField(firstRowObj, 'role'),
+    firstRowHasParticipantSetsInfoField:
+      firstRowObj !== undefined && hasOwnField(firstRowObj, 'participantSetsInfo'),
+    firstRowHasMembersField: firstRowObj !== undefined && hasOwnField(firstRowObj, 'members'),
+    firstRowHasSenderInfoField: firstRowObj !== undefined && hasOwnField(firstRowObj, 'senderInfo'),
+    firstRowHasDisplayDateField:
+      firstRowObj !== undefined && hasOwnField(firstRowObj, 'displayDate'),
+    firstRowHasLastUpdateField: firstRowObj !== undefined && hasOwnField(firstRowObj, 'lastUpdate'),
+    firstRowHasExpirationTimeField:
+      firstRowObj !== undefined && hasOwnField(firstRowObj, 'expirationTime'),
+    firstRowHasViewURLField: firstRowObj !== undefined && hasOwnField(firstRowObj, 'viewURL'),
+    firstRowHasAgreementViewUrlField:
+      firstRowObj !== undefined && hasOwnField(firstRowObj, 'agreementViewUrl'),
+  };
+}
+
 function readAgreementsRows(parsed: Record<string, unknown>): readonly unknown[] | undefined {
   const nestedResults = parsed.agreementAssetsResults;
   if (nestedResults !== null && typeof nestedResults === 'object') {
@@ -659,6 +741,7 @@ export function createAdobeSignLiveSearchClient(
         };
       }
 
+      const searchRowDiagnostics = buildSearchRowDiagnostics(rawAgreements, input.request.intent);
       const items: AdobeSignSearchClientItem[] = [];
       for (const row of rawAgreements) {
         const mapped = mapRowForIntent(row, input.request.intent);
@@ -668,6 +751,7 @@ export function createAdobeSignLiveSearchClient(
       return {
         status: 'ok',
         items,
+        searchRowDiagnostics,
       };
     },
   };
