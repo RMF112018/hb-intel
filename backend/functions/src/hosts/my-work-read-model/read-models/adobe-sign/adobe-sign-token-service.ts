@@ -29,8 +29,12 @@
 
 import type { AdobeSignActorKey } from './adobe-sign-actor-normalizer.js';
 import type { IAdobeSignGrantStore } from './adobe-sign-grant-store.js';
-import type { AdobeSignRefreshResult, IAdobeSignRefreshClient } from './adobe-sign-refresh-client.js';
+import type {
+  AdobeSignRefreshResult,
+  IAdobeSignRefreshClient,
+} from './adobe-sign-refresh-client.js';
 import type { AdobeSignRuntimeDiagnosticReporter } from './adobe-sign-runtime-diagnostics.js';
+import { buildAdobeScopeDiagnostics } from './adobe-sign-scope-diagnostics.js';
 
 /**
  * Margin before an access token is considered too close to expiry for the
@@ -175,21 +179,17 @@ export function createAdobeSignTokenService(
                   refresh.refreshRequestDiagnostics.endpointSelectionMode,
                 refreshBodyFieldCount: refresh.refreshRequestDiagnostics.bodyFieldCount,
                 refreshHasGrantTypeField: refresh.refreshRequestDiagnostics.hasGrantTypeField,
-                refreshHasRefreshTokenField:
-                  refresh.refreshRequestDiagnostics.hasRefreshTokenField,
+                refreshHasRefreshTokenField: refresh.refreshRequestDiagnostics.hasRefreshTokenField,
                 refreshHasClientIdField: refresh.refreshRequestDiagnostics.hasClientIdField,
-                refreshHasClientSecretField:
-                  refresh.refreshRequestDiagnostics.hasClientSecretField,
+                refreshHasClientSecretField: refresh.refreshRequestDiagnostics.hasClientSecretField,
               }
             : {}),
           ...(refresh.status === 'unreachable' && refresh.malformedResponseDiagnostics
             ? {
-                refreshMalformedHasAccessToken:
-                  refresh.malformedResponseDiagnostics.hasAccessToken,
+                refreshMalformedHasAccessToken: refresh.malformedResponseDiagnostics.hasAccessToken,
                 refreshMalformedHasRefreshToken:
                   refresh.malformedResponseDiagnostics.hasRefreshToken,
-                refreshMalformedHasExpiresIn:
-                  refresh.malformedResponseDiagnostics.hasExpiresIn,
+                refreshMalformedHasExpiresIn: refresh.malformedResponseDiagnostics.hasExpiresIn,
               }
             : {}),
         });
@@ -224,7 +224,21 @@ export function createAdobeSignTokenService(
           status: 'scope-insufficient',
           reason: 'grant-scope-insufficient',
         } as const;
-        trackTokenResult(result);
+        // Extend the existing tokenAcquisition.result event with the safe
+        // scope-diagnostic payload so operators can see configured-vs-
+        // granted coverage from the same KQL filter. The helper is
+        // non-throwing. Other branches (ok / authorization-required /
+        // source-unavailable) keep emitting via trackTokenResult unchanged.
+        const scopeDiagnostics = buildAdobeScopeDiagnostics({
+          configuredScopes: Array.from(governedScopes),
+          grantedScopes: grant.grantedScopes,
+        });
+        diagnostics?.trackAdobeSignRuntimeEvent('adobeSign.read.tokenAcquisition.result', {
+          status: result.status,
+          reason: result.reason,
+          durationMs: Date.now() - tokenStart,
+          ...scopeDiagnostics,
+        });
         return result;
       }
 

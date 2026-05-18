@@ -443,6 +443,127 @@ describe('callback handler', () => {
     expect(seams.cipher.encryptCalls).toEqual(['rt-secret']);
     const persisted = await seams.refreshTokenStore.getCiphertext(grant!.encryptedRefreshTokenRef);
     expect(persisted?.ciphertext).toBe('ct:rt-secret');
+    // Scope diagnostic event emitted alongside the granted event. Existing
+    // fixture configures `agreement_read agreement_send` (no `:self`
+    // qualifier) and the mock exchange returns the same set, so missing=0
+    // and the literal `agreement_*:self` booleans are false.
+    expect(loggerTrackEventSpy).toHaveBeenCalledWith(
+      'adobeSign.oauth.callback.scope-diagnostics',
+      expect.objectContaining({
+        correlationId: 'req-oauth',
+        configuredScopeCount: 2,
+        grantedScopeCount: 2,
+        missingGovernedScopeCount: 0,
+        hasAgreementReadSelfConfigured: false,
+        hasAgreementWriteSelfConfigured: false,
+        hasAgreementReadSelfGranted: false,
+        hasAgreementWriteSelfGranted: false,
+        grantedScopesCsv: 'agreement_read,agreement_send',
+      }),
+    );
+  });
+
+  it('scope-diagnostics: only agreement_read:self granted out of (read+write):self configured', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    deps.resolveConfigEnv = () => ({
+      ...FULL_CONFIG_ENV,
+      ADOBE_SIGN_OAUTH_SCOPES: 'agreement_read:self agreement_write:self',
+    });
+    (seams.service.exchangeAuthorizationCode as any).mockResolvedValueOnce({
+      status: 'ok',
+      refreshToken: 'rt-secret',
+      accessToken: 'at-secret',
+      grantedScopes: ['agreement_read:self'],
+      expiresInSeconds: 3600,
+      resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
+      resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
+      endpointSource: 'callback',
+    });
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    await callback(
+      callbackRequest({
+        state,
+        code: 'auth-code-xyz',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+
+    expect(loggerTrackEventSpy).toHaveBeenCalledWith(
+      'adobeSign.oauth.callback.scope-diagnostics',
+      expect.objectContaining({
+        correlationId: 'req-oauth',
+        configuredScopeCount: 2,
+        grantedScopeCount: 1,
+        missingGovernedScopeCount: 1,
+        hasAgreementReadSelfConfigured: true,
+        hasAgreementWriteSelfConfigured: true,
+        hasAgreementReadSelfGranted: true,
+        hasAgreementWriteSelfGranted: false,
+        missingGovernedScopesCsv: 'agreement_write:self',
+        grantedScopesCsv: 'agreement_read:self',
+      }),
+    );
+
+    // No sensitive material in any callback telemetry payload.
+    const serialized = JSON.stringify((loggerTrackEventSpy as any).mock.calls);
+    expect(serialized).not.toContain('rt-secret');
+    expect(serialized).not.toContain('at-secret');
+    expect(serialized).not.toContain('auth-code-xyz');
+    expect(serialized).not.toContain('super-secret-do-not-echo');
+    expect(serialized).not.toContain('https://api.na1.adobesign.com');
+    expect(serialized).not.toContain('https://secure.na1.adobesign.com');
+    expect(serialized).not.toContain('avery@hbc.test');
+    expect(serialized).not.toContain('Avery Lead');
+  });
+
+  it('scope-diagnostics: both (read+write):self granted → missingGovernedScopeCount=0', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    deps.resolveConfigEnv = () => ({
+      ...FULL_CONFIG_ENV,
+      ADOBE_SIGN_OAUTH_SCOPES: 'agreement_read:self agreement_write:self',
+    });
+    (seams.service.exchangeAuthorizationCode as any).mockResolvedValueOnce({
+      status: 'ok',
+      refreshToken: 'rt-secret',
+      accessToken: 'at-secret',
+      grantedScopes: ['agreement_read:self', 'agreement_write:self'],
+      expiresInSeconds: 3600,
+      resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
+      resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
+      endpointSource: 'callback',
+    });
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    await callback(
+      callbackRequest({
+        state,
+        code: 'c',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+
+    expect(loggerTrackEventSpy).toHaveBeenCalledWith(
+      'adobeSign.oauth.callback.scope-diagnostics',
+      expect.objectContaining({
+        configuredScopeCount: 2,
+        grantedScopeCount: 2,
+        missingGovernedScopeCount: 0,
+        hasAgreementReadSelfGranted: true,
+        hasAgreementWriteSelfGranted: true,
+        grantedScopesCsv: 'agreement_read:self,agreement_write:self',
+      }),
+    );
+    // missing csv omitted when nothing is missing.
+    const calls = (loggerTrackEventSpy as any).mock.calls as Array<[string, any]>;
+    const event = calls.find(([n]) => n === 'adobeSign.oauth.callback.scope-diagnostics')!;
+    expect(event[1]).not.toHaveProperty('missingGovernedScopesCsv');
   });
 
   it('rejects missing state with a redirect carrying invalid-state status (no exchange)', async () => {

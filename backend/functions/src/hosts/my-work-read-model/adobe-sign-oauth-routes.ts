@@ -61,6 +61,7 @@ import {
   resolveAdobeSignGrantStore,
   type IAdobeSignGrantStore,
 } from './read-models/adobe-sign/adobe-sign-grant-store.js';
+import { buildAdobeScopeDiagnostics } from './read-models/adobe-sign/adobe-sign-scope-diagnostics.js';
 import type {
   AdobeSignGrantState,
   IAdobeSignGrantRecord,
@@ -557,6 +558,21 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       });
       return buildRedirect(env, stateRecord.returnPath, mapped);
     }
+
+    // Scope diagnostic — compare configured governed scopes against what
+    // Adobe actually granted on this exchange. Safe-by-construction: the
+    // helper sanitizes every scope value before emission, and computation
+    // is non-throwing. Emitted before refresh-token encryption / grant
+    // upsert so the diagnostic is captured even if a downstream store
+    // write fails. No control-flow change.
+    const scopeDiagnostics = buildAdobeScopeDiagnostics({
+      configuredScopes: parseAdobeSignScopes(env.ADOBE_SIGN_OAUTH_SCOPES),
+      grantedScopes: exchange.grantedScopes,
+    });
+    logger.trackEvent('adobeSign.oauth.callback.scope-diagnostics', {
+      correlationId: requestId,
+      ...scopeDiagnostics,
+    });
 
     const [actorTenantId, actorOid] = stateRecord.actorKey.split('::');
 

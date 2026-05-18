@@ -196,7 +196,11 @@ describe('token service — refresh revoked / invalid → authorization-required
 describe('token service — governed scope sufficiency', () => {
   it('returns scope-insufficient when grant scopes do not cover configured governed scopes', async () => {
     const grant = activeGrant({ grantedScopes: ['agreement_read'] });
-    const { service, refreshClient } = buildService(grant, [], ['agreement_read', 'agreement_send']);
+    const { service, refreshClient } = buildService(
+      grant,
+      [],
+      ['agreement_read', 'agreement_send'],
+    );
     const result = await service.getAccessToken(ACTOR_KEY, NOW);
     expect(result.status).toBe('scope-insufficient');
     if (result.status !== 'scope-insufficient') return;
@@ -209,6 +213,48 @@ describe('token service — governed scope sufficiency', () => {
     const { service } = buildService(grant, [refreshOk()], ['agreement_read']);
     const result = await service.getAccessToken(ACTOR_KEY, NOW);
     expect(result.status).toBe('ok');
+  });
+
+  it('scope-insufficient telemetry carries safe configured-vs-granted diagnostic fields', async () => {
+    const grant = activeGrant({ grantedScopes: ['agreement_read:self'] });
+    const { service } = buildService(grant, [], ['agreement_read:self', 'agreement_write:self']);
+    const { reporter, events } = createReporterCapture();
+
+    const result = await service.getAccessToken(ACTOR_KEY, NOW, reporter);
+    expect(result.status).toBe('scope-insufficient');
+    if (result.status !== 'scope-insufficient') return;
+    expect(result.reason).toBe('grant-scope-insufficient');
+
+    // Exactly one telemetry event on the scope-insufficient branch — the
+    // existing tokenAcquisition.result event, now carrying diagnostic fields.
+    expect(events).toEqual([
+      {
+        name: 'adobeSign.read.tokenAcquisition.result',
+        properties: expect.objectContaining({
+          status: 'scope-insufficient',
+          reason: 'grant-scope-insufficient',
+          durationMs: expect.any(Number),
+          configuredScopeCount: 2,
+          grantedScopeCount: 1,
+          missingGovernedScopeCount: 1,
+          hasAgreementReadSelfConfigured: true,
+          hasAgreementWriteSelfConfigured: true,
+          hasAgreementReadSelfGranted: true,
+          hasAgreementWriteSelfGranted: false,
+          missingGovernedScopesCsv: 'agreement_write:self',
+          grantedScopesCsv: 'agreement_read:self',
+        }),
+      },
+    ]);
+
+    // Sensitive material must not appear anywhere in the emitted payload.
+    const serialized = JSON.stringify(events);
+    expect(serialized).not.toContain(SECRET_ACCESS);
+    expect(serialized).not.toContain(SECRET_NEW_ACCESS);
+    expect(serialized).not.toContain('refresh_token');
+    expect(serialized).not.toContain('client_secret');
+    expect(serialized).not.toContain('rt-ref-1');
+    expect(serialized).not.toContain('https://');
   });
 });
 
