@@ -116,6 +116,12 @@ function makeSourceClient(state: IFakeSourceState): IProjectionSourceFetchClient
         (p) => p.projectNumber === projectNumber && p.year === year,
       );
     },
+    async listAllProjectsRows() {
+      return [...state.projects.values()];
+    },
+    async listAllRegistryRows() {
+      return [...state.registry.values()];
+    },
   };
 }
 

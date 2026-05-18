@@ -41,7 +41,17 @@ export interface IProjectionSourceFetchClient {
     projectNumber: string,
     year: number | null,
   ): Promise<readonly IProjectSourceRow[]>;
+  /**
+   * Full-source scan used by the seed / full-rebuild service. Bounded by
+   * `MAX_SOURCE_ROWS` (defaults to 25_000) to match the legacy aggregation
+   * provider's defensive cap. Incremental sync paths use the targeted
+   * `fetch*Row` methods instead.
+   */
+  listAllProjectsRows(): Promise<readonly IProjectSourceRow[]>;
+  listAllRegistryRows(): Promise<readonly ILegacyRegistrySourceRow[]>;
 }
+
+export const MAX_PROJECTION_SEED_SOURCE_ROWS = 25_000;
 
 export interface ICreateGraphProjectionSourceFetchClientDeps {
   readonly graph: GraphListClient;
@@ -214,6 +224,25 @@ export function createGraphProjectionSourceFetchClient(
         return mapped.filter((row) => row.year === null);
       }
       return mapped;
+    },
+    async listAllProjectsRows() {
+      const rows = await graph.listItems(projectsList, {
+        select: [...projectSelectFields()],
+        top: MAX_PROJECTION_SEED_SOURCE_ROWS,
+      });
+      const mapped: IProjectSourceRow[] = [];
+      for (const r of rows) {
+        const row = mapProjectsRow({ id: String(r.id), fields: r.fields });
+        if (row) mapped.push(row);
+      }
+      return mapped;
+    },
+    async listAllRegistryRows() {
+      const rows = await graph.listItems(registryList, {
+        select: [...registrySelectFields()],
+        top: MAX_PROJECTION_SEED_SOURCE_ROWS,
+      });
+      return rows.map((r) => mapRegistryRow({ id: String(r.id), fields: r.fields }));
     },
   };
 }

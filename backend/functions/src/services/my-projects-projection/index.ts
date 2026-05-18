@@ -133,3 +133,14 @@ export {
   createProjectionSliceEngine,
   type IProjectionSliceEngineDeps,
 } from './engine/projection-slice-engine.js';
+
+export {
+  ProjectionSeedService,
+  createProjectionSeedService,
+  type IProjectionSeedService,
+  type IProjectionSeedServiceDeps,
+  type ISeedRunCounts,
+  type ISeedRunResult,
+} from './engine/projection-seed-service.js';
+
+export { MAX_PROJECTION_SEED_SOURCE_ROWS } from './engine/projection-source-fetch-client.js';
