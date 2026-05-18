@@ -461,6 +461,29 @@ describe('createAdobeSignActionQueueAdapter', () => {
       expect(env.sourceStatus).toBe('available');
       expect(env.warnings.map((w) => w.code)).not.toContain('partial-source-data');
     });
+
+    it('accepts a derived WAITING_FOR_MY_SIGNATURE row as a normal actionable queue item', async () => {
+      const result: AdobeSignSearchResult = {
+        status: 'ok',
+        items: [
+          {
+            intent: 'action-queue',
+            agreementId: 'agr-derived-1',
+            agreementName: 'Derived Signature',
+            recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+          },
+        ],
+      };
+      const adapter = createAdobeSignActionQueueAdapter(
+        buildDeps({ searchClient: createDeterministicMockSearchClient([result]) }),
+      );
+      const env = await adapter.getActionQueue(context(), QUERY_EMPTY);
+      expect(env.sourceStatus).toBe('available');
+      expect(env.warnings.map((w) => w.code)).not.toContain('unsupported-source-status-filtered');
+      expect(env.data.items).toHaveLength(1);
+      expect(env.data.items[0]?.adobeRecipientStatus).toBe('WAITING_FOR_MY_SIGNATURE');
+      expect(env.data.items[0]?.requiredAction).toBe('signature');
+    });
   });
 
   describe('no raw Adobe payload returned to caller', () => {
@@ -997,6 +1020,9 @@ describe('createAdobeSignActionQueueAdapter', () => {
           dropMissingIdCount: 0,
           dropMissingNameCount: 0,
           dropMissingRecipientStatusCount: 0,
+          mappedFromRecipientStatusCount: 3,
+          mappedFromStatusRoleCount: 0,
+          dropUnsupportedStatusRoleCount: 0,
           dropUnsupportedOrUnmappedShapeCount: 0,
           firstRowWasObject: true,
           firstRowHasIdField: true,
@@ -1041,6 +1067,9 @@ describe('createAdobeSignActionQueueAdapter', () => {
             searchDropMissingIdCount: 0,
             searchDropMissingNameCount: 0,
             searchDropMissingRecipientStatusCount: 0,
+            searchMappedFromRecipientStatusCount: 3,
+            searchMappedFromStatusRoleCount: 0,
+            searchDropUnsupportedStatusRoleCount: 0,
             searchDropUnsupportedOrUnmappedShapeCount: 0,
             searchFirstRowWasObject: true,
             searchFirstRowHasIdField: true,

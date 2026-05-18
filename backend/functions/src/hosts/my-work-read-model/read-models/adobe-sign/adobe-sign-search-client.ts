@@ -95,6 +95,9 @@ export type AdobeSignSearchResult =
         readonly dropMissingIdCount: number;
         readonly dropMissingNameCount: number;
         readonly dropMissingRecipientStatusCount: number;
+        readonly mappedFromRecipientStatusCount: number;
+        readonly mappedFromStatusRoleCount: number;
+        readonly dropUnsupportedStatusRoleCount: number;
         readonly dropUnsupportedOrUnmappedShapeCount: number;
         readonly firstRowWasObject: boolean;
         readonly firstRowHasIdField: boolean;

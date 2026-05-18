@@ -513,6 +513,12 @@ export function createAdobeSignActionQueueAdapter(
               searchDropMissingNameCount: searchResult.searchRowDiagnostics.dropMissingNameCount,
               searchDropMissingRecipientStatusCount:
                 searchResult.searchRowDiagnostics.dropMissingRecipientStatusCount,
+              searchMappedFromRecipientStatusCount:
+                searchResult.searchRowDiagnostics.mappedFromRecipientStatusCount,
+              searchMappedFromStatusRoleCount:
+                searchResult.searchRowDiagnostics.mappedFromStatusRoleCount,
+              searchDropUnsupportedStatusRoleCount:
+                searchResult.searchRowDiagnostics.dropUnsupportedStatusRoleCount,
               searchDropUnsupportedOrUnmappedShapeCount:
                 searchResult.searchRowDiagnostics.dropUnsupportedOrUnmappedShapeCount,
               searchFirstRowWasObject: searchResult.searchRowDiagnostics.firstRowWasObject,

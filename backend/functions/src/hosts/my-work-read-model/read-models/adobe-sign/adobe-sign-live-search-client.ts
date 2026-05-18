@@ -433,7 +433,7 @@ function buildMalformedSearchResponseDiagnostics(parsed: unknown) {
 function mapActionQueueRow(row: unknown): AdobeSignSearchClientItem | undefined {
   const agreementId = readStringField(row, 'id');
   const agreementName = readStringField(row, 'name');
-  const recipientStatus = readStringField(row, 'recipientStatus');
+  const recipientStatus = deriveActionQueueRecipientStatus(row);
   if (!agreementId || !agreementName || !recipientStatus) return undefined;
 
   const senderDisplayName = readNestedString(row, 'senderInfo', 'name');
@@ -455,6 +455,45 @@ function mapActionQueueRow(row: unknown): AdobeSignSearchClientItem | undefined 
     ...(expirationAtUtc !== undefined ? { expirationAtUtc } : {}),
     ...(sourceOpenUrlCandidate !== undefined ? { sourceOpenUrlCandidate } : {}),
   };
+}
+
+const ACTIONABLE_RECIPIENT_STATUS_SET: ReadonlySet<string> = new Set([
+  'WAITING_FOR_MY_SIGNATURE',
+  'WAITING_FOR_MY_APPROVAL',
+  'WAITING_FOR_MY_ACCEPTANCE',
+  'WAITING_FOR_MY_ACKNOWLEDGEMENT',
+  'WAITING_FOR_MY_FORM_FILLING',
+  'WAITING_FOR_MY_DELEGATION',
+] as const);
+
+const STATUS_ROLE_TO_ACTIONABLE_STATUS: Readonly<Record<string, string>> = {
+  'OUT_FOR_SIGNATURE:SIGNER': 'WAITING_FOR_MY_SIGNATURE',
+  'OUT_FOR_APPROVAL:APPROVER': 'WAITING_FOR_MY_APPROVAL',
+  'OUT_FOR_ACCEPTANCE:ACCEPTOR': 'WAITING_FOR_MY_ACCEPTANCE',
+  'OUT_FOR_DELIVERY:CERTIFIED_RECIPIENT': 'WAITING_FOR_MY_ACKNOWLEDGEMENT',
+  'OUT_FOR_FORM_FILLING:FORM_FILLER': 'WAITING_FOR_MY_FORM_FILLING',
+} as const;
+
+type ActionQueueStatusResolutionSource = 'recipientStatus' | 'statusRole' | 'none';
+
+function deriveActionQueueStatusResolution(row: unknown): {
+  readonly recipientStatus?: string;
+  readonly source: ActionQueueStatusResolutionSource;
+} {
+  const topLevelRecipientStatus = readStringField(row, 'recipientStatus');
+  if (topLevelRecipientStatus && ACTIONABLE_RECIPIENT_STATUS_SET.has(topLevelRecipientStatus)) {
+    return { recipientStatus: topLevelRecipientStatus, source: 'recipientStatus' };
+  }
+
+  const status = readStringField(row, 'status');
+  const role = readStringField(row, 'role');
+  if (!status || !role) return { source: 'none' };
+  const derived = STATUS_ROLE_TO_ACTIONABLE_STATUS[`${status}:${role}`];
+  return derived ? { recipientStatus: derived, source: 'statusRole' } : { source: 'none' };
+}
+
+function deriveActionQueueRecipientStatus(row: unknown): string | undefined {
+  return deriveActionQueueStatusResolution(row).recipientStatus;
 }
 
 function mapRecentCompletionsRow(row: unknown): AdobeSignSearchClientItem | undefined {
@@ -509,11 +548,28 @@ function buildSearchRowDiagnostics(
   let dropMissingIdCount = 0;
   let dropMissingNameCount = 0;
   let dropMissingRecipientStatusCount = 0;
+  let mappedFromRecipientStatusCount = 0;
+  let mappedFromStatusRoleCount = 0;
+  let dropUnsupportedStatusRoleCount = 0;
   let dropUnsupportedOrUnmappedShapeCount = 0;
 
   for (const row of rawAgreements) {
+    if (
+      intent === 'action-queue' &&
+      row !== null &&
+      typeof row === 'object' &&
+      !hasOwnField(row, 'recipientStatus')
+    ) {
+      dropMissingRecipientStatusCount++;
+    }
+
     const mapped = mapRowForIntent(row, intent);
     if (mapped !== undefined) {
+      if (intent === 'action-queue') {
+        const resolution = deriveActionQueueStatusResolution(row);
+        if (resolution.source === 'recipientStatus') mappedFromRecipientStatusCount++;
+        if (resolution.source === 'statusRole') mappedFromStatusRoleCount++;
+      }
       mappedItemCount++;
       continue;
     }
@@ -534,8 +590,14 @@ function buildSearchRowDiagnostics(
       dropMissingNameCount++;
       continue;
     }
+    if (intent === 'action-queue') {
+      const resolution = deriveActionQueueStatusResolution(row);
+      if (resolution.source === 'none') {
+        dropUnsupportedStatusRoleCount++;
+        continue;
+      }
+    }
     if (intent === 'action-queue' && !hasRecipientStatus) {
-      dropMissingRecipientStatusCount++;
       continue;
     }
     dropUnsupportedOrUnmappedShapeCount++;
@@ -550,6 +612,9 @@ function buildSearchRowDiagnostics(
     dropMissingIdCount,
     dropMissingNameCount,
     dropMissingRecipientStatusCount,
+    mappedFromRecipientStatusCount,
+    mappedFromStatusRoleCount,
+    dropUnsupportedStatusRoleCount,
     dropUnsupportedOrUnmappedShapeCount,
     firstRowWasObject,
     firstRowHasIdField: firstRowObj !== undefined && hasOwnField(firstRowObj, 'id'),

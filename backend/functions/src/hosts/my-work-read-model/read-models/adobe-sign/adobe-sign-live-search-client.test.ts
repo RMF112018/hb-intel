@@ -222,6 +222,9 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingIdCount: 0,
       dropMissingNameCount: 0,
       dropMissingRecipientStatusCount: 0,
+      mappedFromRecipientStatusCount: 1,
+      mappedFromStatusRoleCount: 0,
+      dropUnsupportedStatusRoleCount: 0,
       dropUnsupportedOrUnmappedShapeCount: 0,
       firstRowWasObject: true,
       firstRowHasIdField: true,
@@ -332,7 +335,42 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingIdCount: 1,
       dropMissingNameCount: 0,
       dropMissingRecipientStatusCount: 0,
+      mappedFromRecipientStatusCount: 2,
+      mappedFromStatusRoleCount: 0,
+      dropUnsupportedStatusRoleCount: 0,
       dropUnsupportedOrUnmappedShapeCount: 0,
+    });
+  });
+
+  it('derives actionable status from status+role when recipientStatus is missing', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreements: [
+          { id: 'agr-1', name: 'Needs Signature', status: 'OUT_FOR_SIGNATURE', role: 'SIGNER' },
+        ],
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.items).toEqual([
+      {
+        intent: 'action-queue',
+        agreementId: 'agr-1',
+        agreementName: 'Needs Signature',
+        recipientStatus: 'WAITING_FOR_MY_SIGNATURE',
+      },
+    ]);
+    expect(result.searchRowDiagnostics).toMatchObject({
+      queryIntent: 'action-queue',
+      rawAgreementRowCount: 1,
+      mappedItemCount: 1,
+      droppedRowCount: 0,
+      dropMissingRecipientStatusCount: 1,
+      mappedFromRecipientStatusCount: 0,
+      mappedFromStatusRoleCount: 1,
+      dropUnsupportedStatusRoleCount: 0,
     });
   });
 
@@ -355,6 +393,35 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingIdCount: 0,
       dropMissingNameCount: 0,
       dropMissingRecipientStatusCount: 1,
+      mappedFromRecipientStatusCount: 0,
+      mappedFromStatusRoleCount: 0,
+      dropUnsupportedStatusRoleCount: 1,
+      dropUnsupportedOrUnmappedShapeCount: 0,
+    });
+  });
+
+  it('drops action-queue rows with unsupported status+role combinations', async () => {
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        agreements: [
+          { id: 'agr-1', name: 'Unsupported', status: 'OUT_FOR_SIGNATURE', role: 'OBSERVER' },
+        ],
+      }),
+    );
+    const client = createAdobeSignLiveSearchClient({ fetch: fetchSpy });
+    const result = await client.search(VALID_INPUT);
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.items).toEqual([]);
+    expect(result.searchRowDiagnostics).toMatchObject({
+      queryIntent: 'action-queue',
+      rawAgreementRowCount: 1,
+      mappedItemCount: 0,
+      droppedRowCount: 1,
+      dropMissingRecipientStatusCount: 1,
+      mappedFromRecipientStatusCount: 0,
+      mappedFromStatusRoleCount: 0,
+      dropUnsupportedStatusRoleCount: 1,
       dropUnsupportedOrUnmappedShapeCount: 0,
     });
   });
@@ -378,6 +445,9 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingIdCount: 0,
       dropMissingNameCount: 1,
       dropMissingRecipientStatusCount: 0,
+      mappedFromRecipientStatusCount: 0,
+      mappedFromStatusRoleCount: 0,
+      dropUnsupportedStatusRoleCount: 0,
       dropUnsupportedOrUnmappedShapeCount: 0,
     });
   });
@@ -413,6 +483,9 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingIdCount: 0,
       dropMissingNameCount: 0,
       dropMissingRecipientStatusCount: 0,
+      mappedFromRecipientStatusCount: 0,
+      mappedFromStatusRoleCount: 0,
+      dropUnsupportedStatusRoleCount: 0,
       dropUnsupportedOrUnmappedShapeCount: 0,
     });
   });
@@ -484,6 +557,9 @@ describe('createAdobeSignLiveSearchClient — happy path', () => {
       dropMissingIdCount: 1,
       dropMissingNameCount: 1,
       dropMissingRecipientStatusCount: 0,
+      mappedFromRecipientStatusCount: 0,
+      mappedFromStatusRoleCount: 0,
+      dropUnsupportedStatusRoleCount: 0,
       dropUnsupportedOrUnmappedShapeCount: 0,
     });
   });
