@@ -97,3 +97,39 @@ export * from './webhook/index.js';
 export * from './subscriptions/index.js';
 
 export * from './delta/index.js';
+
+export {
+  computeProjectionContentHash,
+  computeProjectionKey,
+  normalizeUpnForKey,
+  type IProjectionContentHashInput,
+} from './projection-content-hash.js';
+
+export {
+  buildDeactivationPatch,
+  buildReactivationOperationalPatch,
+  mapItemToRegistryRow,
+  type IDeactivationPatchInput,
+  type IMapItemToRegistryRowInput,
+  type IMyProjectsRegistryExistingRow,
+  type IMyProjectsRegistryRowFields,
+  type IMyProjectsRegistryRowPatch,
+} from './registry/my-projects-registry-row-mapper.js';
+
+export {
+  createGraphMyProjectsRegistryRepository,
+  type IGraphMyProjectsRegistryRepositoryDeps,
+  type IMyProjectsRegistryRepository,
+} from './registry/my-projects-registry-repository.js';
+
+export {
+  createGraphProjectionSourceFetchClient,
+  type ICreateGraphProjectionSourceFetchClientDeps,
+  type IProjectionSourceFetchClient,
+} from './engine/projection-source-fetch-client.js';
+
+export {
+  ProjectionSliceEngine,
+  createProjectionSliceEngine,
+  type IProjectionSliceEngineDeps,
+} from './engine/projection-slice-engine.js';

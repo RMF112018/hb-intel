@@ -232,4 +232,30 @@ export class GraphListClient {
       body: JSON.stringify(safeFields),
     });
   }
+
+  /**
+   * Same as `updateItem` but preserves `null` field values so callers can clear
+   * SharePoint columns (e.g., clearing `DeactivatedAtUtc` on reactivation).
+   * `undefined` properties are still dropped. Writable-column filtering still
+   * applies.
+   */
+  async updateItemAllowNulls(
+    listTitle: string,
+    itemId: string | number,
+    fields: Record<string, unknown>,
+  ): Promise<void> {
+    const siteId = await this.resolveSiteId();
+    const listId = await this.resolveListId(listTitle);
+    const writable = await this.getColumnNames(listId);
+    const payload: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(fields)) {
+      if (v === undefined) continue;
+      if (!writable.has(k)) continue;
+      payload[k] = v;
+    }
+    await this.graphFetch(`/sites/${siteId}/lists/${listId}/items/${itemId}/fields`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  }
 }
