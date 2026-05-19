@@ -1,0 +1,23 @@
+{
+  "package": "adobe_sign_embedded_modal_implementation_package",
+  "created_utc": "2026-05-18T14:21:17.285645Z",
+  "purpose": "Developer-ready implementation package for embedded Adobe Sign modal in HB Intel / My Dashboard",
+  "files": [
+    "README.md",
+    "architecture/01_target_architecture.md",
+    "architecture/02_contracts_and_state_machine.md",
+    "architecture/03_ui_modal_spec.md",
+    "architecture/04_security_csp_telemetry.md",
+    "architecture/05_file_level_change_map.md",
+    "implementation/01_implementation_plan.md",
+    "implementation/02_validation_plan.md",
+    "prompts/01_repo_truth_reverification.md",
+    "prompts/02_backend_contract_and_resolver.md",
+    "prompts/03_frontend_modal_foundation.md",
+    "prompts/04_embedded_event_handling_and_refresh.md",
+    "prompts/05_security_csp_telemetry_and_tests.md",
+    "prompts/06_live_tenant_validation_and_closeout.md",
+    "supporting/acceptance_criteria.md",
+    "supporting/feature_flags_and_config.md"
+  ]
+}
