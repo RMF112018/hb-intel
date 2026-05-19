@@ -64,6 +64,17 @@ Quarantined compatibility settings (not active MVP blockers):
 - `MyProjectsProjectionServiceBus__*`
 - Projection table-name settings (`..._SUBSCRIPTIONS_TABLE`, `..._DELTA_STATE_TABLE`, `..._LEASES_TABLE`, `..._RUNS_TABLE`)
 
+## 3.1 Storage provisioning/verifier scripts
+
+Use the seven-list MyDashboard storage scripts before cutover:
+
+- package-required names:
+  - `scripts/provision-my-dashboard-my-projects-projection-storage.ts`
+  - `scripts/verify-my-dashboard-my-projects-projection-storage.ts`
+- repo-convention aliases (same implementation path):
+  - `scripts/provision-my-projects-projection-storage.ts`
+  - `scripts/verify-my-projects-projection-storage.ts`
+
 ---
 
 ## 4. `readMode` safety check

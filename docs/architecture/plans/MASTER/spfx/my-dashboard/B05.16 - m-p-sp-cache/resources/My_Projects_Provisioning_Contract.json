@@ -1,0 +1,37 @@
+{
+  "contractVersion": "1.0.0",
+  "targetSiteUrl": "https://hedrickbrotherscom.sharepoint.com/sites/MyDashboard",
+  "scripts": {
+    "provision": "scripts/provision-my-dashboard-my-projects-projection-storage.ts",
+    "verify": "scripts/verify-my-dashboard-my-projects-projection-storage.ts",
+    "aliases": {
+      "provision": "scripts/provision-my-projects-projection-storage.ts",
+      "verify": "scripts/verify-my-projects-projection-storage.ts"
+    }
+  },
+  "cliRequirements": {
+    "dryRunDefault": true,
+    "applyFlag": "--apply",
+    "jsonFlag": "--json",
+    "siteFlag": "--site-url",
+    "mustRefuseWrongSite": true,
+    "mustRefuseUnsafeDriftOnApply": true,
+    "mustEmitNextCommands": true,
+    "mustEmitStructuredExitCode": true
+  },
+  "requiredChecks": [
+    "all 7 lists exist or are planned",
+    "all required fields exist with exact expected type",
+    "choice values match descriptor",
+    "required indexes exist or are planned",
+    "unique key fields enforce uniqueness",
+    "seed/control rows exist where required",
+    "permission inheritance manual step is explicitly reported",
+    "verification script is read-only and does not support --apply"
+  ],
+  "authPosture": [
+    "Follow the most current repo-truth provisioning/token pattern after Prompt 02 audit.",
+    "Do not silently invent a new provisioning stack.",
+    "Support explicit operator execution path and document required environment variables."
+  ]
+}
