@@ -24,7 +24,8 @@ import { requireAdmin, requireDelegatedScope } from '../../middleware/authorizat
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
 import { getProjectionConfig } from '../../services/my-projects-projection/projection-config.js';
-import { ProjectionSubscriptionStateRepository } from '../../services/my-projects-projection/state/subscription-state-repository.js';
+import { SharePointProjectionSubscriptionStateRepository } from '../../services/my-projects-projection/state/sharepoint-subscription-state-repository.js';
+import { SharePointStateStore } from '../../services/my-projects-projection/state/sharepoint-state-store.js';
 import { GraphListClient } from '../../services/legacy-fallback/graph-list-client.js';
 import {
   ProjectionSubscriptionManager,
@@ -38,8 +39,9 @@ import {
 import { createLogger } from '../../utils/logger.js';
 
 let cachedGraphClient: IProjectionGraphSubscriptionClient | null = null;
-let cachedRepository: ProjectionSubscriptionStateRepository | null = null;
+let cachedRepository: SharePointProjectionSubscriptionStateRepository | null = null;
 let cachedLocator: IProjectionSourceListLocator | null = null;
+let cachedStore: SharePointStateStore | null = null;
 
 function buildLocator(sourceSiteUrl: string): IProjectionSourceListLocator {
   if (cachedLocator !== null) return cachedLocator;
@@ -70,9 +72,15 @@ function buildGraphClient(): IProjectionGraphSubscriptionClient {
   return cachedGraphClient;
 }
 
-function buildRepository(): ProjectionSubscriptionStateRepository {
+function buildStore(registrySiteUrl: string): SharePointStateStore {
+  if (cachedStore !== null) return cachedStore;
+  cachedStore = new SharePointStateStore(registrySiteUrl);
+  return cachedStore;
+}
+
+function buildRepository(registrySiteUrl: string): SharePointProjectionSubscriptionStateRepository {
   if (cachedRepository !== null) return cachedRepository;
-  cachedRepository = new ProjectionSubscriptionStateRepository();
+  cachedRepository = new SharePointProjectionSubscriptionStateRepository(buildStore(registrySiteUrl));
   return cachedRepository;
 }
 
@@ -97,7 +105,7 @@ app.http('myProjectsProjectionSubscriptionAdmin', {
         const config = getProjectionConfig();
         const correlationId = randomUUID();
         const manager = new ProjectionSubscriptionManager({
-          stateRepository: buildRepository(),
+          stateRepository: buildRepository(config.sites.registrySiteUrl),
           graphClient: buildGraphClient(),
           locator: buildLocator(config.sites.sourceSiteUrl),
           config: {

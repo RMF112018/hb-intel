@@ -41,8 +41,8 @@ import type {
   ProjectionRunType,
   SourceListKind,
 } from '../projection-types.js';
-import type { ProjectionLeaseRepository } from '../state/lease-repository.js';
-import type { ProjectionRunRepository } from '../state/run-repository.js';
+import type { ProjectionLeaseRowKey } from '../state/lease-repository.js';
+import type { IProjectionRunStartArgs } from '../state/run-repository.js';
 import {
   buildDeactivationPatch,
   buildReactivationOperationalPatch,
@@ -97,8 +97,32 @@ export interface IProjectionSeedService {
 export interface IProjectionSeedServiceDeps {
   readonly sourceFetchClient: IProjectionSourceFetchClient;
   readonly registryRepository: IMyProjectsRegistryRepository;
-  readonly leaseRepository: ProjectionLeaseRepository;
-  readonly runRepository: ProjectionRunRepository;
+  readonly leaseRepository: {
+    tryAcquire(args: {
+      rowKey: ProjectionLeaseRowKey;
+      leaseType: 'sync' | 'rebuild' | 'audit' | 'purge';
+      leaseOwner: string;
+      ttlMinutes: number;
+      sourceListKind?: SourceListKind;
+      now: Date;
+    }): Promise<
+      | { readonly acquired: true; readonly expiresAtUtc: string }
+      | { readonly acquired: false; readonly reason: 'active'; readonly currentOwner: string; readonly expiresAtUtc: string }
+      | { readonly acquired: false; readonly reason: 'race-conflict' }
+    >;
+    release(args: { rowKey: ProjectionLeaseRowKey; leaseOwner: string }): Promise<{ released: boolean }>;
+  };
+  readonly runRepository: {
+    start(args: IProjectionRunStartArgs): Promise<{ rowKey: string }>;
+    finalize(args: {
+      rowKey: string;
+      status: ProjectionRunStatus;
+      completedAtUtc: string;
+      counts?: Record<string, number | undefined>;
+      failureCode?: string;
+      notes?: string;
+    }): Promise<void>;
+  };
   readonly now?: () => Date;
 }
 

@@ -33,3 +33,16 @@ export {
   type IProjectionRunListArgs,
   type IProjectionRunStartArgs,
 } from './run-repository.js';
+
+// SharePoint-backed active MVP repositories (B05.16 Prompt 04).
+export { SharePointStateStore } from './sharepoint-state-store.js';
+export { ProjectionSourceSyncStateRepository } from './source-sync-state-repository.js';
+export { SharePointProjectionSubscriptionStateRepository } from './sharepoint-subscription-state-repository.js';
+export {
+  SharePointProjectionControlStateRepository,
+  type LeaseAcquireOutcome as SharePointLeaseAcquireOutcome,
+  type ProjectionLeaseRowKey as SharePointProjectionLeaseRowKey,
+} from './sharepoint-control-state-repository.js';
+export { SharePointProjectionRunRepository } from './sharepoint-run-repository.js';
+export { PendingWorkRepository } from './pending-work-repository.js';
+export { SyncFailureRepository } from './sync-failure-repository.js';

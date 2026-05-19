@@ -15,7 +15,8 @@
 import { app, type InvocationContext, type Timer } from '@azure/functions';
 import { randomUUID } from 'node:crypto';
 import { getProjectionConfig } from '../../services/my-projects-projection/projection-config.js';
-import { ProjectionSubscriptionStateRepository } from '../../services/my-projects-projection/state/subscription-state-repository.js';
+import { SharePointProjectionSubscriptionStateRepository } from '../../services/my-projects-projection/state/sharepoint-subscription-state-repository.js';
+import { SharePointStateStore } from '../../services/my-projects-projection/state/sharepoint-state-store.js';
 import { GraphListClient } from '../../services/legacy-fallback/graph-list-client.js';
 import {
   ProjectionSubscriptionManager,
@@ -32,8 +33,9 @@ const TIMER_SCHEDULE =
   process.env.HBC_MY_PROJECTS_PROJECTION_SUBSCRIPTION_RENEWAL_TIMER_SCHEDULE ?? DEFAULT_SCHEDULE;
 
 let cachedGraphClient: IProjectionGraphSubscriptionClient | null = null;
-let cachedRepository: ProjectionSubscriptionStateRepository | null = null;
+let cachedRepository: SharePointProjectionSubscriptionStateRepository | null = null;
 let cachedLocator: IProjectionSourceListLocator | null = null;
+let cachedStore: SharePointStateStore | null = null;
 
 function buildLocator(sourceSiteUrl: string): IProjectionSourceListLocator {
   if (cachedLocator !== null) return cachedLocator;
@@ -64,9 +66,15 @@ function buildGraphClient(): IProjectionGraphSubscriptionClient {
   return cachedGraphClient;
 }
 
-function buildRepository(): ProjectionSubscriptionStateRepository {
+function buildStore(registrySiteUrl: string): SharePointStateStore {
+  if (cachedStore !== null) return cachedStore;
+  cachedStore = new SharePointStateStore(registrySiteUrl);
+  return cachedStore;
+}
+
+function buildRepository(registrySiteUrl: string): SharePointProjectionSubscriptionStateRepository {
   if (cachedRepository !== null) return cachedRepository;
-  cachedRepository = new ProjectionSubscriptionStateRepository();
+  cachedRepository = new SharePointProjectionSubscriptionStateRepository(buildStore(registrySiteUrl));
   return cachedRepository;
 }
 
@@ -93,7 +101,7 @@ app.timer('myProjectsProjectionSubscriptionRenewal', {
     }
 
     const manager = new ProjectionSubscriptionManager({
-      stateRepository: buildRepository(),
+      stateRepository: buildRepository(config.sites.registrySiteUrl),
       graphClient: buildGraphClient(),
       locator: buildLocator(config.sites.sourceSiteUrl),
       config: {

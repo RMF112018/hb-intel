@@ -32,8 +32,9 @@ import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
 import { GraphListClient } from '../../services/legacy-fallback/graph-list-client.js';
 import { getProjectionConfig } from '../../services/my-projects-projection/projection-config.js';
-import { ProjectionLeaseRepository } from '../../services/my-projects-projection/state/lease-repository.js';
-import { ProjectionRunRepository } from '../../services/my-projects-projection/state/run-repository.js';
+import { SharePointProjectionControlStateRepository } from '../../services/my-projects-projection/state/sharepoint-control-state-repository.js';
+import { SharePointProjectionRunRepository } from '../../services/my-projects-projection/state/sharepoint-run-repository.js';
+import { SharePointStateStore } from '../../services/my-projects-projection/state/sharepoint-state-store.js';
 import { createGraphMyProjectsRegistryRepository } from '../../services/my-projects-projection/registry/my-projects-registry-repository.js';
 import { createGraphProjectionSourceFetchClient } from '../../services/my-projects-projection/engine/projection-source-fetch-client.js';
 import { createProjectionSeedService } from '../../services/my-projects-projection/engine/projection-seed-service.js';
@@ -45,10 +46,18 @@ import {
 } from '../../services/my-projects-projection/admin/projection-admin-rebuild-handler.js';
 
 let cachedDeps: IProjectionAdminRebuildHandlerDeps | null = null;
-let cachedRunRepository: ProjectionRunRepository | null = null;
+let cachedRunRepository: SharePointProjectionRunRepository | null = null;
+let cachedStore: SharePointStateStore | null = null;
 
-function getRunRepository(): ProjectionRunRepository {
-  if (cachedRunRepository === null) cachedRunRepository = new ProjectionRunRepository();
+function getStore(registrySiteUrl: string): SharePointStateStore {
+  if (cachedStore === null) cachedStore = new SharePointStateStore(registrySiteUrl);
+  return cachedStore;
+}
+
+function getRunRepository(registrySiteUrl: string): SharePointProjectionRunRepository {
+  if (cachedRunRepository === null) {
+    cachedRunRepository = new SharePointProjectionRunRepository(getStore(registrySiteUrl));
+  }
   return cachedRunRepository;
 }
 
@@ -65,18 +74,18 @@ function buildDeps(context: InvocationContext): IProjectionAdminRebuildHandlerDe
   const seedService = createProjectionSeedService({
     sourceFetchClient: createGraphProjectionSourceFetchClient({ graph: sourceGraph }),
     registryRepository: createGraphMyProjectsRegistryRepository({ graph: registryGraph }),
-    leaseRepository: new ProjectionLeaseRepository(),
-    runRepository: getRunRepository(),
+    leaseRepository: new SharePointProjectionControlStateRepository(getStore(config.sites.registrySiteUrl)),
+    runRepository: getRunRepository(config.sites.registrySiteUrl),
   });
   cachedDeps = {
     seedService,
-    runRepository: getRunRepository(),
+    runRepository: getRunRepository(config.sites.registrySiteUrl),
     rebuildLeaseTtlMinutes: config.leases.rebuildLeaseMinutes,
     runIdProvider: () => randomUUID(),
     projectionBatchIdProvider: () => randomUUID(),
     leaseOwnerProvider: () => `admin-${context.invocationId ?? randomUUID()}`,
   };
-  return cachedDeps;
+  return cachedDeps!;
 }
 
 function withAdminGuard(
@@ -131,7 +140,7 @@ app.http('myProjectsProjectionAdminStatus', {
   handler: withAuth(
     withTelemetry(
       withAdminGuard((request) =>
-        handleProjectionStatus(request, { runRepository: getRunRepository() }),
+        handleProjectionStatus(request, { runRepository: getRunRepository(getProjectionConfig().sites.registrySiteUrl) }),
       ),
       { domain: 'myProjectsProjection', operation: 'status' },
     ),

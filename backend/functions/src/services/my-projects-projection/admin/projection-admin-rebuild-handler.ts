@@ -13,11 +13,17 @@ import type {
 } from '../projection-admin-contracts.js';
 import { isProjectionRunType, isSourceListKind, type SourceListKind } from '../projection-types.js';
 import type { IProjectionSeedService, ISeedRunResult } from '../engine/projection-seed-service.js';
-import type { ProjectionRunRepository } from '../state/run-repository.js';
+import type { IProjectionRunEntity } from '../projection-state-entities.js';
 
 export interface IProjectionAdminRebuildHandlerDeps {
   readonly seedService: IProjectionSeedService;
-  readonly runRepository: ProjectionRunRepository;
+  readonly runRepository: {
+    listRecent(args: {
+      runType?: string;
+      sourceListKind?: SourceListKind;
+      limit: number;
+    }): Promise<ReadonlyArray<IProjectionRunEntity>>;
+  };
   readonly rebuildLeaseTtlMinutes: number;
   readonly runIdProvider: () => string;
   readonly projectionBatchIdProvider: () => string;

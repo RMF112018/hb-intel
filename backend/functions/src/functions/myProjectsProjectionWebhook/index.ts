@@ -21,30 +21,36 @@ import {
 } from '@azure/functions';
 import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { getProjectionConfig } from '../../services/my-projects-projection/projection-config.js';
-import { ProjectionSubscriptionStateRepository } from '../../services/my-projects-projection/state/subscription-state-repository.js';
+import { SharePointProjectionSubscriptionStateRepository } from '../../services/my-projects-projection/state/sharepoint-subscription-state-repository.js';
+import { PendingWorkRepository } from '../../services/my-projects-projection/state/pending-work-repository.js';
+import { SharePointStateStore } from '../../services/my-projects-projection/state/sharepoint-state-store.js';
 import {
-  createProjectionSyncMessageSender,
   handleProjectionGraphWebhook,
-  type IProjectionSyncMessageSender,
   type IProjectionWebhookHandlerDeps,
 } from '../../services/my-projects-projection/webhook/index.js';
 import { createLogger } from '../../utils/logger.js';
 
-let cachedRepository: ProjectionSubscriptionStateRepository | null = null;
-let cachedSender: IProjectionSyncMessageSender | null = null;
+let cachedRepository: SharePointProjectionSubscriptionStateRepository | null = null;
+let cachedPendingWorkRepository: PendingWorkRepository | null = null;
+let cachedStore: SharePointStateStore | null = null;
 
-function getRepository(): ProjectionSubscriptionStateRepository {
+function getStore(registrySiteUrl: string): SharePointStateStore {
+  if (cachedStore === null) cachedStore = new SharePointStateStore(registrySiteUrl);
+  return cachedStore;
+}
+
+function getRepository(registrySiteUrl: string): SharePointProjectionSubscriptionStateRepository {
   if (cachedRepository === null) {
-    cachedRepository = new ProjectionSubscriptionStateRepository();
+    cachedRepository = new SharePointProjectionSubscriptionStateRepository(getStore(registrySiteUrl));
   }
   return cachedRepository;
 }
 
-function getSender(fqdn: string, queueName: string): IProjectionSyncMessageSender {
-  if (cachedSender === null) {
-    cachedSender = createProjectionSyncMessageSender({ fqdn, queueName });
+function getPendingWorkRepository(registrySiteUrl: string): PendingWorkRepository {
+  if (cachedPendingWorkRepository === null) {
+    cachedPendingWorkRepository = new PendingWorkRepository(getStore(registrySiteUrl));
   }
-  return cachedSender;
+  return cachedPendingWorkRepository;
 }
 
 app.http('myProjectsProjectionWebhook', {
@@ -55,8 +61,8 @@ app.http('myProjectsProjectionWebhook', {
     const logger = createLogger(context);
     const config = getProjectionConfig();
     const deps: IProjectionWebhookHandlerDeps = {
-      subscriptionStateRepository: getRepository(),
-      messageSender: getSender(config.queue.serviceBusFqdn, config.queue.queueName),
+      subscriptionStateRepository: getRepository(config.sites.registrySiteUrl),
+      pendingWorkRepository: getPendingWorkRepository(config.sites.registrySiteUrl),
       clientStateSecret: config.webhook.clientState,
       debounceWindowSeconds: config.queue.debounceWindowSeconds,
       now: () => new Date(),

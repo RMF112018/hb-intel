@@ -64,6 +64,11 @@ Quarantined compatibility settings (not active MVP blockers):
 - `MyProjectsProjectionServiceBus__*`
 - Projection table-name settings (`..._SUBSCRIPTIONS_TABLE`, `..._DELTA_STATE_TABLE`, `..._LEASES_TABLE`, `..._RUNS_TABLE`)
 
+Prompt 04 active-state redirect note:
+
+- Runtime operational repositories now use SharePoint-backed state lists (`Source Sync State`, `Subscription State`, `Pending Work`, `Control State`, `Runs`, `Sync Failures`) as the active persistence/control plane.
+- Azure Table state repositories and Service Bus sync enqueue path are superseded/quarantined compatibility seams and are not required active MVP blockers.
+
 ## 3.1 Storage provisioning/verifier scripts
 
 Use the seven-list MyDashboard storage scripts before cutover:
