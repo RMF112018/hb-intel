@@ -142,3 +142,12 @@ When sections 1–6 pass and `Sites.Read.All` is granted:
 - `telemetry-evidence.md`
 - `runtime-degradation-reference.md`
 - B05.16 package docs under `docs/architecture/plans/MASTER/spfx/my-dashboard/B05.16 - m-p-sp-cache/`
+
+## Prompt 10 Gate Status (2026-05-19)
+
+- Proof-gate execution record: `docs/architecture/plans/MASTER/spfx/my-dashboard/B05.16 - m-p-sp-cache/resources/Prompt_10_Closeout_Evidence.md`
+- Current decision: **Not Ready**.
+- Current blockers:
+  - local `@hbc/functions` typecheck fails on unrelated active drift in `adobe-sign-webhook-receiver-routes.ts`;
+  - provisioning verify/apply lane returned `401` in the current execution lane;
+  - hosted live proof sequence (Runbook 04) not yet captured in authorized operator lane.
