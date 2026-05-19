@@ -26,6 +26,7 @@ const EMITTING_SOURCE_FILES = [
   'services/my-projects-projection/delta/projection-sync-worker.ts',
   'services/my-projects-projection/subscriptions/projection-subscription-manager.ts',
   'services/my-projects-projection/webhook/projection-webhook-handler.ts',
+  'functions/myProjectsProjectionPendingWorkProcessor/index.ts',
   // My Work read model — legacy aggregation provider + projection-backed provider.
   'hosts/my-work-read-model/read-models/project-links/my-project-links-read-model-provider.ts',
   'hosts/my-work-read-model/read-models/project-links/my-project-links-projection-provider.ts',
@@ -74,7 +75,7 @@ describe('My Projects projection telemetry-name inventory', () => {
     ).toEqual([]);
   });
 
-  it('the canonical inventory has the expected total count (32 events)', () => {
-    expect(MY_PROJECTS_PROJECTION_EVENT_NAMES.length).toBe(32);
+  it('the canonical inventory has the expected total count (41 events)', () => {
+    expect(MY_PROJECTS_PROJECTION_EVENT_NAMES.length).toBe(41);
   });
 });

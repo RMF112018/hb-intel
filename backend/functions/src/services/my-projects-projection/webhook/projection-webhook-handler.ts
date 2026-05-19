@@ -32,12 +32,32 @@ export interface IProjectionWebhookHandlerDeps {
       nowUtc: string;
     }): Promise<void>;
   };
+  readonly failureRepository?: {
+    upsertFailure(args: {
+      failureId: string;
+      failureClass: 'pending-work';
+      failureCode: string;
+      sourceListKind?: SourceListKind;
+      relatedWorkKey?: string;
+      sanitizedMessage?: string;
+      atUtc: string;
+    }): Promise<void>;
+  };
   readonly clientStateSecret: string;
   readonly debounceWindowSeconds: number;
   readonly now: () => Date;
   readonly correlationIdProvider: () => string;
   readonly logger: ILogger;
   readonly notificationBatchIdProvider?: () => string;
+}
+
+function sanitizeForFailureLedger(input: unknown): string {
+  const raw = input instanceof Error ? input.message : String(input);
+  return raw
+    .replace(/Bearer\s+[A-Za-z0-9._+/=-]+/gi, '[REDACTED]')
+    .replace(/eyJ[A-Za-z0-9._-]{20,}/g, '[REDACTED]')
+    .replace(/clientState\s*[:=]\s*[A-Za-z0-9._-]+/gi, 'clientState=[REDACTED]')
+    .slice(0, 300);
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -198,6 +218,7 @@ export async function handleProjectionGraphWebhook(
       }
     } catch (err: unknown) {
       upsertFailures.push(sourceListKind);
+      const sanitizedReason = err instanceof Error ? err.message.slice(0, 240) : String(err).slice(0, 240);
       deps.logger.trackEvent('myProjectsProjection.notification.queue.failed', {
         correlationId,
         sourceListKind,
@@ -205,8 +226,29 @@ export async function handleProjectionGraphWebhook(
         queueMessageId: workKey,
         notificationBatchId,
         failureCode: 'pending-work-upsert-failed',
-        sanitizedReason: err instanceof Error ? err.message.slice(0, 240) : String(err).slice(0, 240),
+        sanitizedReason,
       });
+      try {
+        await deps.failureRepository?.upsertFailure({
+          failureId: `pending-work-upsert:${sourceListKind}:${workKey}`,
+          failureClass: 'pending-work',
+          failureCode: 'pending-work-upsert-failed',
+          sourceListKind,
+          relatedWorkKey: workKey,
+          sanitizedMessage: sanitizeForFailureLedger(err),
+          atUtc: receivedAtUtc,
+        });
+      } catch (failureErr: unknown) {
+        deps.logger.trackEvent('myProjectsProjection.notification.persistence.failed', {
+          correlationId,
+          sourceListKind,
+          failureCode: 'sync-failure-upsert-failed',
+          sanitizedReason:
+            failureErr instanceof Error
+              ? failureErr.message.slice(0, 240)
+              : String(failureErr).slice(0, 240),
+        });
+      }
     }
   }
 

@@ -23,6 +23,7 @@ import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { getProjectionConfig } from '../../services/my-projects-projection/projection-config.js';
 import { SharePointProjectionSubscriptionStateRepository } from '../../services/my-projects-projection/state/sharepoint-subscription-state-repository.js';
 import { PendingWorkRepository } from '../../services/my-projects-projection/state/pending-work-repository.js';
+import { SyncFailureRepository } from '../../services/my-projects-projection/state/sync-failure-repository.js';
 import { SharePointStateStore } from '../../services/my-projects-projection/state/sharepoint-state-store.js';
 import {
   handleProjectionGraphWebhook,
@@ -33,6 +34,7 @@ import { createLogger } from '../../utils/logger.js';
 let cachedRepository: SharePointProjectionSubscriptionStateRepository | null = null;
 let cachedPendingWorkRepository: PendingWorkRepository | null = null;
 let cachedStore: SharePointStateStore | null = null;
+let cachedFailureRepository: SyncFailureRepository | null = null;
 
 function getStore(registrySiteUrl: string): SharePointStateStore {
   if (cachedStore === null) cachedStore = new SharePointStateStore(registrySiteUrl);
@@ -53,6 +55,13 @@ function getPendingWorkRepository(registrySiteUrl: string): PendingWorkRepositor
   return cachedPendingWorkRepository;
 }
 
+function getFailureRepository(registrySiteUrl: string): SyncFailureRepository {
+  if (cachedFailureRepository === null) {
+    cachedFailureRepository = new SyncFailureRepository(getStore(registrySiteUrl));
+  }
+  return cachedFailureRepository;
+}
+
 app.http('myProjectsProjectionWebhook', {
   route: 'webhooks/my-projects-projection/graph',
   methods: ['POST'],
@@ -63,6 +72,7 @@ app.http('myProjectsProjectionWebhook', {
     const deps: IProjectionWebhookHandlerDeps = {
       subscriptionStateRepository: getRepository(config.sites.registrySiteUrl),
       pendingWorkRepository: getPendingWorkRepository(config.sites.registrySiteUrl),
+      failureRepository: getFailureRepository(config.sites.registrySiteUrl),
       clientStateSecret: config.webhook.clientState,
       debounceWindowSeconds: config.queue.debounceWindowSeconds,
       now: () => new Date(),

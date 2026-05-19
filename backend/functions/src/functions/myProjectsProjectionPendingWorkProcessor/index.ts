@@ -110,9 +110,18 @@ app.timer('myProjectsProjectionPendingWorkProcessor', {
     const now = new Date();
     const repo = getPendingWorkRepository(config.sites.registrySiteUrl);
     const due = await repo.listDue(now.toISOString(), 25);
+    logger.trackEvent('myProjectsProjection.pendingWork.scan.start', {
+      scanAtUtc: now.toISOString(),
+      dueLimit: 25,
+    });
     const runs = getRunRepository(config.sites.registrySiteUrl);
     const failures = getFailureRepository(config.sites.registrySiteUrl);
     const workerId = `pending-worker-${context.invocationId ?? randomUUID()}`;
+    let claimedCount = 0;
+    let succeededCount = 0;
+    let retryScheduledCount = 0;
+    let deadLetteredCount = 0;
+    let claimSkippedCount = 0;
     for (const item of due) {
       const claim = await repo.tryClaim({
         workKey: item.workKey,
@@ -121,7 +130,22 @@ app.timer('myProjectsProjectionPendingWorkProcessor', {
         leaseMinutes: config.pendingWork.claimLeaseMinutes,
         maxAttempts: config.pendingWork.maxAttempts,
       });
-      if (!claim.claimed) continue;
+      if (!claim.claimed) {
+        claimSkippedCount += 1;
+        logger.trackEvent('myProjectsProjection.pendingWork.claim.skipped', {
+          workKey: item.workKey,
+          sourceListKind: item.sourceListKind,
+          reason: claim.reason,
+        });
+        continue;
+      }
+      claimedCount += 1;
+      logger.trackEvent('myProjectsProjection.pendingWork.claim.succeeded', {
+        workKey: item.workKey,
+        sourceListKind: item.sourceListKind,
+        attemptCount: claim.item.attemptCount,
+        reclaimedExpiredClaim: item.status === 'claimed',
+      });
       const runId = randomUUID();
       const run = await runs.start({
         runId,
@@ -156,6 +180,12 @@ app.timer('myProjectsProjectionPendingWorkProcessor', {
           },
         );
         await repo.markSucceeded({ workKey: item.workKey, workerId, nowUtc: new Date().toISOString() });
+        succeededCount += 1;
+        logger.trackEvent('myProjectsProjection.pendingWork.item.succeeded', {
+          workKey: item.workKey,
+          sourceListKind: item.sourceListKind,
+          runId,
+        });
         await runs.finalize({
           rowKey: run.rowKey,
           status: 'succeeded',
@@ -172,6 +202,30 @@ app.timer('myProjectsProjectionPendingWorkProcessor', {
           maxAttempts: config.pendingWork.maxAttempts,
           retryDelaySeconds: RETRY_DELAY_SECONDS,
         });
+        if (failureResult === 'retry-scheduled') {
+          retryScheduledCount += 1;
+          logger.trackEvent('myProjectsProjection.pendingWork.retry.scheduled', {
+            workKey: item.workKey,
+            sourceListKind: item.sourceListKind,
+            runId,
+            failureCode,
+          });
+        } else if (failureResult === 'dead-lettered') {
+          deadLetteredCount += 1;
+          logger.trackEvent('myProjectsProjection.pendingWork.deadLettered', {
+            workKey: item.workKey,
+            sourceListKind: item.sourceListKind,
+            runId,
+            failureCode,
+          });
+        } else {
+          logger.trackEvent('myProjectsProjection.pendingWork.persistence.failed', {
+            workKey: item.workKey,
+            sourceListKind: item.sourceListKind,
+            runId,
+            failureCode: 'pending-work-mark-failed-noop',
+          });
+        }
         await runs.finalize({
           rowKey: run.rowKey,
           status: 'failed',
@@ -197,5 +251,13 @@ app.timer('myProjectsProjectionPendingWorkProcessor', {
         });
       }
     }
+    logger.trackEvent('myProjectsProjection.pendingWork.scan.completed', {
+      dueCount: due.length,
+      claimSkippedCount,
+      claimedCount,
+      succeededCount,
+      retryScheduledCount,
+      deadLetteredCount,
+    });
   },
 });

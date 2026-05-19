@@ -15,11 +15,11 @@ Single reference of every `customEvents` name the projection subsystem emits tod
 
 1. every emitted name is in the canonical inventory module;
 2. every entry in the canonical inventory is emitted by at least one source file (no orphans);
-3. the inventory total is exactly 32 names.
+3. the inventory total is exactly 41 names.
 
 New telemetry must update the inventory in the same commit. The KQL pack and this doc are downstream consumers — they must be updated when the inventory changes.
 
-## Canonical inventory (32 events)
+## Canonical inventory (41 events)
 
 ### Notification ingress — `services/my-projects-projection/webhook/projection-webhook-handler.ts`
 
@@ -32,6 +32,20 @@ New telemetry must update the inventory in the same commit. The KQL pack and thi
 | `myProjectsProjection.notification.queue.accepted`      | sourceListKind, notificationBatchId, debounceBucketUtc, correlationId |
 | `myProjectsProjection.notification.queue.failed`        | sourceListKind, failureCode, sanitizedReason, correlationId           |
 | `myProjectsProjection.notification.duplicate.bucketed`  | sourceListKind, debounceBucketUtc, correlationId                      |
+| `myProjectsProjection.notification.persistence.failed`   | sourceListKind, failureCode, sanitizedReason, correlationId           |
+
+### Pending Work processor — `functions/myProjectsProjectionPendingWorkProcessor/index.ts`
+
+| Event                                                | Properties (sanitized)                                                             |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `myProjectsProjection.pendingWork.scan.start`        | scanAtUtc, dueLimit                                                                |
+| `myProjectsProjection.pendingWork.scan.completed`    | dueCount, claimSkippedCount, claimedCount, succeededCount, retryScheduledCount, deadLetteredCount |
+| `myProjectsProjection.pendingWork.claim.succeeded`   | workKey, sourceListKind, attemptCount, reclaimedExpiredClaim                       |
+| `myProjectsProjection.pendingWork.claim.skipped`     | workKey, sourceListKind, reason                                                    |
+| `myProjectsProjection.pendingWork.item.succeeded`    | workKey, sourceListKind, runId                                                     |
+| `myProjectsProjection.pendingWork.retry.scheduled`   | workKey, sourceListKind, runId, failureCode                                        |
+| `myProjectsProjection.pendingWork.deadLettered`      | workKey, sourceListKind, runId, failureCode                                        |
+| `myProjectsProjection.pendingWork.persistence.failed`| workKey, sourceListKind, runId, failureCode                                        |
 
 ### Queue sync worker — `services/my-projects-projection/delta/projection-sync-worker.ts`
 
@@ -124,6 +138,6 @@ These do NOT cause operator confusion in practice because the KQL pack section �
 
 ## Status
 
-| Date       | HEAD          | Status                                                                                             |
-| ---------- | ------------- | -------------------------------------------------------------------------------------------------- |
-| 2026-05-18 | (this commit) | KQL pack aligned with committed code (10 renames). Inventory pins 32 event names. Lint test green. |
+| Date       | HEAD          | Status                                                                                                                           |
+| ---------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-19 | (this commit) | KQL pack aligned with committed code, Pending Work telemetry lane added, webhook failure-ledger persistence event added (41 names). |

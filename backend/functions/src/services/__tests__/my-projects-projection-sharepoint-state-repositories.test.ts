@@ -6,6 +6,7 @@ import { SharePointProjectionRunRepository } from '../my-projects-projection/sta
 import { PendingWorkRepository } from '../my-projects-projection/state/pending-work-repository.js';
 import { SyncFailureRepository } from '../my-projects-projection/state/sync-failure-repository.js';
 import { DeltaStateConcurrencyError } from '../my-projects-projection/state/delta-state-repository.js';
+import { MY_PROJECTS_PROJECTION_STORAGE_LIST_TITLES } from '../my-projects-projection/storage-list-descriptor.js';
 import type { SharePointStateStore } from '../my-projects-projection/state/sharepoint-state-store.js';
 
 interface IRow {
@@ -114,6 +115,7 @@ class FakeSharePointStateStore {
 function makeRepos() {
   const store = new FakeSharePointStateStore() as unknown as SharePointStateStore;
   return {
+    store,
     subscription: new SharePointProjectionSubscriptionStateRepository(store),
     sourceSync: new ProjectionSourceSyncStateRepository(store),
     control: new SharePointProjectionControlStateRepository(store),
@@ -409,5 +411,29 @@ describe('SharePoint projection operational repositories', () => {
         atUtc: '2026-05-01T00:02:00.000Z',
       }),
     ).resolves.toBeUndefined();
+  });
+
+  it('sync-failure repository redacts token-like and delta-link content by construction', async () => {
+    const { failures, store } = makeRepos();
+    await failures.upsertFailure({
+      failureId: 'f-redact',
+      failureClass: 'pending-work',
+      failureCode: 'pending-work-upsert-failed',
+      sourceListKind: 'Projects',
+      atUtc: '2026-05-01T00:00:00.000Z',
+      sanitizedMessage:
+        'Bearer abc.def.ghi @odata.deltaLink=https://graph.microsoft.com/v1.0/me/delta?token=raw clientState=secret123',
+    });
+    const rows = await store.listByFilter({
+      listTitle: MY_PROJECTS_PROJECTION_STORAGE_LIST_TITLES.syncFailures,
+      filter: "fields/FailureId eq 'f-redact'",
+      select: ['FailureId', 'LastSanitizedMessage'],
+      top: 1,
+    });
+    const msg = String(rows[0]?.fields.LastSanitizedMessage ?? '');
+    expect(msg).toContain('[REDACTED]');
+    expect(msg).not.toContain('abc.def.ghi');
+    expect(msg).not.toContain('graph.microsoft.com');
+    expect(msg).not.toContain('secret123');
   });
 });

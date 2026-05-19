@@ -50,6 +50,7 @@ function makeRepo(state: readonly IProjectionSubscriptionEntity[]): IProjectionS
 function makeDeps(overrides: Partial<IProjectionWebhookHandlerDeps> = {}) {
   const events: Array<{ name: string; properties: Record<string, unknown> }> = [];
   const upserts: Array<Record<string, unknown>> = [];
+  const failureUpserts: Array<Record<string, unknown>> = [];
   const noop = () => {};
   const logger: ILogger = {
     info: noop,
@@ -67,6 +68,11 @@ function makeDeps(overrides: Partial<IProjectionWebhookHandlerDeps> = {}) {
         upserts.push(args as unknown as Record<string, unknown>);
       },
     },
+    failureRepository: {
+      upsertFailure: async (args) => {
+        failureUpserts.push(args as unknown as Record<string, unknown>);
+      },
+    },
     clientStateSecret: CLIENT_STATE_SECRET,
     debounceWindowSeconds: 60,
     now: () => NOW,
@@ -74,7 +80,7 @@ function makeDeps(overrides: Partial<IProjectionWebhookHandlerDeps> = {}) {
     logger,
     notificationBatchIdProvider: () => `batch-${++batchCounter}`,
   };
-  return { deps: { ...base, ...overrides }, events, upserts };
+  return { deps: { ...base, ...overrides }, events, upserts, failureUpserts };
 }
 
 describe('handleProjectionGraphWebhook', () => {
@@ -151,5 +157,33 @@ describe('handleProjectionGraphWebhook', () => {
     const response = await handleProjectionGraphWebhook(request, deps);
     expect(response.status).toBe(200);
     expect(upserts).toHaveLength(0);
+  });
+
+  it('writes a sync-failure ledger row when pending-work upsert fails', async () => {
+    const { deps, failureUpserts } = makeDeps({
+      pendingWorkRepository: {
+        upsertDebounced: async () => {
+          throw new Error('Bearer super-secret-token clientState=abc123');
+        },
+      },
+    });
+    const request = makeRequest({
+      bodyJson: {
+        value: [
+          {
+            subscriptionId: 'sub-projects',
+            clientState: CLIENT_STATE_SECRET,
+            resource: '/sites/site/lists/list-projects',
+            changeType: 'updated',
+          },
+        ],
+      },
+    });
+    const response = await handleProjectionGraphWebhook(request, deps);
+    expect(response.status).toBe(503);
+    expect(failureUpserts).toHaveLength(1);
+    expect(failureUpserts[0]?.failureCode).toBe('pending-work-upsert-failed');
+    expect(String(failureUpserts[0]?.sanitizedMessage ?? '')).toContain('[REDACTED]');
+    expect(String(failureUpserts[0]?.sanitizedMessage ?? '')).not.toContain('super-secret-token');
   });
 });

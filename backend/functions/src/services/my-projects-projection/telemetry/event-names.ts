@@ -31,6 +31,17 @@ export const MY_PROJECTS_PROJECTION_EVENT_NAMES = [
   'myProjectsProjection.notification.queue.accepted',
   'myProjectsProjection.notification.queue.failed',
   'myProjectsProjection.notification.duplicate.bucketed',
+  'myProjectsProjection.notification.persistence.failed',
+
+  // -- Pending Work processor --
+  'myProjectsProjection.pendingWork.scan.start',
+  'myProjectsProjection.pendingWork.scan.completed',
+  'myProjectsProjection.pendingWork.claim.succeeded',
+  'myProjectsProjection.pendingWork.claim.skipped',
+  'myProjectsProjection.pendingWork.item.succeeded',
+  'myProjectsProjection.pendingWork.retry.scheduled',
+  'myProjectsProjection.pendingWork.deadLettered',
+  'myProjectsProjection.pendingWork.persistence.failed',
 
   // -- Queue sync worker --
   'myProjectsProjection.worker.message.received',
@@ -79,6 +90,17 @@ export const MY_PROJECTS_PROJECTION_EVENT_GROUPS = {
     'myProjectsProjection.notification.queue.accepted',
     'myProjectsProjection.notification.queue.failed',
     'myProjectsProjection.notification.duplicate.bucketed',
+    'myProjectsProjection.notification.persistence.failed',
+  ],
+  pendingWorkProcessor: [
+    'myProjectsProjection.pendingWork.scan.start',
+    'myProjectsProjection.pendingWork.scan.completed',
+    'myProjectsProjection.pendingWork.claim.succeeded',
+    'myProjectsProjection.pendingWork.claim.skipped',
+    'myProjectsProjection.pendingWork.item.succeeded',
+    'myProjectsProjection.pendingWork.retry.scheduled',
+    'myProjectsProjection.pendingWork.deadLettered',
+    'myProjectsProjection.pendingWork.persistence.failed',
   ],
   queueWorker: [
     'myProjectsProjection.worker.message.received',

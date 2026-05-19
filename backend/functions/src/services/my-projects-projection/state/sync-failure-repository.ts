@@ -19,6 +19,16 @@ export class SyncFailureRepository {
     this.store = store;
   }
 
+  private sanitizeMessage(value: string | undefined): string | null {
+    if (!value) return null;
+    return value
+      .replace(/Bearer\s+[A-Za-z0-9._+/=-]+/gi, '[REDACTED]')
+      .replace(/eyJ[A-Za-z0-9._-]{20,}/g, '[REDACTED]')
+      .replace(/(deltaLink|@odata\.deltaLink)\s*[:=]\s*https?:\/\/\S+/gi, '$1=[REDACTED]')
+      .replace(/clientState\s*[:=]\s*[A-Za-z0-9._-]+/gi, 'clientState=[REDACTED]')
+      .slice(0, 400);
+  }
+
   async upsertFailure(args: {
     failureId: string;
     failureClass: FailureClass;
@@ -50,7 +60,7 @@ export class SyncFailureRepository {
           LastSeenAtUtc: args.atUtc,
           AttemptCount: 1,
           ResolutionStatus: 'open',
-          LastSanitizedMessage: args.sanitizedMessage ?? null,
+          LastSanitizedMessage: this.sanitizeMessage(args.sanitizedMessage),
         },
       });
       return;
@@ -62,7 +72,7 @@ export class SyncFailureRepository {
         LastSeenAtUtc: args.atUtc,
         AttemptCount: (typeof row.fields.AttemptCount === 'number' ? row.fields.AttemptCount : 1) + 1,
         FailureCode: args.failureCode,
-        LastSanitizedMessage: args.sanitizedMessage ?? null,
+        LastSanitizedMessage: this.sanitizeMessage(args.sanitizedMessage),
       },
     });
   }
