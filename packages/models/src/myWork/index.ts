@@ -32,6 +32,7 @@ export {
 
 export * from './AdobeSignActionQueue.js';
 export * from './AdobeSignRecentCompletions.js';
+export * from './AdobeSignCacheControl.js';
 export * from './MyWorkReadModels.js';
 export * from './MyProjectLinksReadModel.js';
 export * from './MyProjectAssignmentRoles.js';

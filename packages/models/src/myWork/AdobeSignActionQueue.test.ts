@@ -200,8 +200,8 @@ describe('Adobe Sign Action Queue — DTO shapes', () => {
 });
 
 describe('Adobe Sign Action Queue — freshness vocabulary', () => {
-  it('accepts the three B04 freshness states', () => {
-    const states: readonly MyWorkFreshnessState[] = ['fresh', 'stale', 'unknown'];
+  it('accepts the B04 + B05.15 freshness states (fresh, aging, stale, unknown)', () => {
+    const states: readonly MyWorkFreshnessState[] = ['fresh', 'aging', 'stale', 'unknown'];
     for (const state of states) {
       const freshness: MyWorkAdobeSignActionQueueFreshness = {
         state,

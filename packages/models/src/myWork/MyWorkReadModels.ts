@@ -78,6 +78,9 @@ export const MY_WORK_READ_MODEL_WARNING_CODES = [
   'source-open-url-omitted',
   'source-open-url-policy-rejected',
   'unsupported-source-status-filtered',
+  'cache-hydration-pending',
+  'cache-refresh-in-progress',
+  'cache-refresh-failed',
 ] as const;
 
 export type MyWorkReadModelWarningCode = (typeof MY_WORK_READ_MODEL_WARNING_CODES)[number];

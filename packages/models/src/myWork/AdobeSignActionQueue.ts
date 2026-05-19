@@ -180,7 +180,7 @@ export interface MyWorkAdobeSignActionQueuePagination {
   readonly nextCursor?: string;
 }
 
-export type MyWorkFreshnessState = 'fresh' | 'stale' | 'unknown';
+export type MyWorkFreshnessState = 'fresh' | 'aging' | 'stale' | 'unknown';
 
 export interface MyWorkAdobeSignActionQueueFreshness {
   readonly state: MyWorkFreshnessState;
