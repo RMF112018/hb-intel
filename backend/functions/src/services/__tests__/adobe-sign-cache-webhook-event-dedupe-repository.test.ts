@@ -1,7 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { TableClient } from '@azure/data-tables';
 
-import { AdobeSignWebhookEventDedupeRepository } from '../adobe-sign-cache/webhook-event-dedupe-repository.js';
+import {
+  AdobeSignWebhookEventDedupeRepository,
+  composeAdobeSignWebhookEventDedupeRepository,
+} from '../adobe-sign-cache/webhook-event-dedupe-repository.js';
 
 interface FakeStoredRow {
   entity: Record<string, unknown>;
@@ -228,5 +231,69 @@ describe('AdobeSignWebhookEventDedupeRepository.deleteExpired', () => {
     await repo.tryReserve({ subscriptionKey: 'sub-1', dedupeKey: 'evt-1', ttlDays: 14 });
     const { deleted } = await repo.deleteExpired(FIXED_NOW);
     expect(deleted).toBe(0);
+  });
+});
+
+describe('composeAdobeSignWebhookEventDedupeRepository', () => {
+  const FULL_CACHE_ENV = {
+    ADOBE_SIGN_WEBHOOK_DEDUPE_TABLE_NAME: 'AdobeSignWebhookEventDedupe',
+    AZURE_TABLE_ENDPOINT: 'https://hbintelstorage.table.core.windows.net/',
+  };
+
+  it("returns 'configuration-required' when ADOBE_SIGN_WEBHOOK_DEDUPE_TABLE_NAME is unset", () => {
+    const composition = composeAdobeSignWebhookEventDedupeRepository({});
+    expect(composition.status).toBe('configuration-required');
+    if (composition.status === 'configuration-required') {
+      expect(composition.reason).toBe('table-name-not-configured');
+    }
+  });
+
+  it("returns 'configuration-required' when AZURE_TABLE_ENDPOINT is unset", () => {
+    const composition = composeAdobeSignWebhookEventDedupeRepository({
+      ADOBE_SIGN_WEBHOOK_DEDUPE_TABLE_NAME: 'AdobeSignWebhookEventDedupe',
+    });
+    expect(composition.status).toBe('configuration-required');
+    if (composition.status === 'configuration-required') {
+      expect(composition.reason).toBe('table-endpoint-not-configured');
+    }
+  });
+
+  it("returns 'ready' with the injected table client when buildTableClient is supplied", () => {
+    const stub = createFakeTableClient();
+    const composition = composeAdobeSignWebhookEventDedupeRepository(FULL_CACHE_ENV, {
+      buildTableClient: () => stub,
+    });
+    expect(composition.status).toBe('ready');
+    if (composition.status === 'ready') {
+      expect(composition.tableName).toBe('AdobeSignWebhookEventDedupe');
+      expect(composition.repository).toBeInstanceOf(AdobeSignWebhookEventDedupeRepository);
+    }
+  });
+
+  it('carries the default retentionDays=14 when tuning env is unset', () => {
+    const composition = composeAdobeSignWebhookEventDedupeRepository(FULL_CACHE_ENV, {
+      buildTableClient: () => createFakeTableClient(),
+    });
+    expect(composition.status).toBe('ready');
+    if (composition.status === 'ready') {
+      expect(composition.retentionDays).toBe(14);
+    }
+  });
+
+  it('honors the env override of ADOBE_SIGN_CACHE_DEDUPE_RETENTION_DAYS', () => {
+    const composition = composeAdobeSignWebhookEventDedupeRepository(
+      { ...FULL_CACHE_ENV, ADOBE_SIGN_CACHE_DEDUPE_RETENTION_DAYS: '30' },
+      { buildTableClient: () => createFakeTableClient() },
+    );
+    expect(composition.status).toBe('ready');
+    if (composition.status === 'ready') {
+      expect(composition.retentionDays).toBe(30);
+    }
+  });
+
+  it('passes the resolved tableName to the injected buildTableClient', () => {
+    const factorySpy = vi.fn(() => createFakeTableClient());
+    composeAdobeSignWebhookEventDedupeRepository(FULL_CACHE_ENV, { buildTableClient: factorySpy });
+    expect(factorySpy).toHaveBeenCalledWith('AdobeSignWebhookEventDedupe');
   });
 });

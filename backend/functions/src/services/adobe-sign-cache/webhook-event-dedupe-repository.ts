@@ -18,6 +18,12 @@
 
 import type { TableClient, TableEntity } from '@azure/data-tables';
 
+import { createAppTableClient } from '../../utils/table-client-factory.js';
+import {
+  ADOBE_SIGN_CACHE_TUNING_DEFAULTS,
+  resolveAdobeSignCacheConfigReadiness,
+} from '../../hosts/my-work-read-model/read-models/adobe-sign/adobe-sign-cache-config.js';
+
 export interface AdobeSignWebhookEventDedupeRecord {
   readonly subscriptionKey: string;
   readonly dedupeKey: string;
@@ -180,4 +186,67 @@ export class AdobeSignWebhookEventDedupeRepository {
     await Promise.all(tasks);
     return { deleted };
   }
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Composition root (B05.15 Prompt 06)
+// ───────────────────────────────────────────────────────────────────────────
+
+export type EnvLike = Readonly<Record<string, string | undefined>>;
+
+export type AdobeSignWebhookEventDedupeRepositoryCompositionReason =
+  | 'table-endpoint-not-configured'
+  | 'table-name-not-configured';
+
+export type AdobeSignWebhookEventDedupeRepositoryComposition =
+  | {
+      readonly status: 'ready';
+      readonly repository: AdobeSignWebhookEventDedupeRepository;
+      readonly tableName: string;
+      readonly retentionDays: number;
+    }
+  | {
+      readonly status: 'configuration-required';
+      readonly reason: AdobeSignWebhookEventDedupeRepositoryCompositionReason;
+    };
+
+export interface ComposeAdobeSignWebhookEventDedupeRepositoryOptions {
+  /** Tests inject a stub `TableClient` to avoid real Azure resources. */
+  readonly buildTableClient?: (tableName: string) => TableClient;
+  readonly now?: () => Date;
+}
+
+/**
+ * Production composition root. Reads `ADOBE_SIGN_WEBHOOK_DEDUPE_TABLE_NAME`
+ * (required), confirms `AZURE_TABLE_ENDPOINT` (required), and resolves the
+ * 14-day retention TTL from Prompt 01's cache-config readiness tuning
+ * surface. Returns the composed `AdobeSignWebhookEventDedupeRepository`
+ * along with the retention window so the receiver can pass `ttlDays` to
+ * `tryReserve` without re-resolving config.
+ */
+export function composeAdobeSignWebhookEventDedupeRepository(
+  env: EnvLike,
+  options: ComposeAdobeSignWebhookEventDedupeRepositoryOptions = {},
+): AdobeSignWebhookEventDedupeRepositoryComposition {
+  const tableName = env.ADOBE_SIGN_WEBHOOK_DEDUPE_TABLE_NAME?.trim();
+  if (tableName === undefined || tableName.length === 0) {
+    return { status: 'configuration-required', reason: 'table-name-not-configured' };
+  }
+  const tableEndpoint = env.AZURE_TABLE_ENDPOINT?.trim();
+  if (tableEndpoint === undefined || tableEndpoint.length === 0) {
+    return { status: 'configuration-required', reason: 'table-endpoint-not-configured' };
+  }
+  const tuning = resolveAdobeSignCacheConfigReadiness(env).tuning;
+  const retentionDays =
+    tuning.ADOBE_SIGN_CACHE_DEDUPE_RETENTION_DAYS ??
+    ADOBE_SIGN_CACHE_TUNING_DEFAULTS.ADOBE_SIGN_CACHE_DEDUPE_RETENTION_DAYS;
+  const client =
+    options.buildTableClient !== undefined
+      ? options.buildTableClient(tableName)
+      : createAppTableClient(tableName);
+  const repository = new AdobeSignWebhookEventDedupeRepository({
+    client,
+    now: options.now,
+  });
+  return { status: 'ready', repository, tableName, retentionDays };
 }
