@@ -49,6 +49,8 @@ import {
 import { resolveAdobeSignRefreshTokenStore } from './adobe-sign/adobe-sign-refresh-token-store.js';
 import { createAdobeSignTokenService } from './adobe-sign/adobe-sign-token-service.js';
 
+import { parseAdobeSignCacheReadMode } from './adobe-sign/adobe-sign-cache-config.js';
+import { MyWorkAdobeSignCacheReadModelProvider } from './my-work-adobe-sign-cache-read-model-provider.js';
 import { MyWorkAdobeSignLiveReadModelProvider } from './my-work-adobe-sign-live-read-model-provider.js';
 import { MyWorkMockReadModelProvider } from './my-work-mock-read-model-provider.js';
 import type { IMyWorkReadModelProvider } from './my-work-read-model-provider.js';
@@ -57,6 +59,9 @@ import { ProjectionMyProjectLinksReadModelProvider } from './project-links/my-pr
 import { GraphListClient } from '../../../services/legacy-fallback/graph-list-client.js';
 import { getProjectionConfig } from '../../../services/my-projects-projection/projection-config.js';
 import { createGraphMyProjectsRegistryRepository } from '../../../services/my-projects-projection/registry/my-projects-registry-repository.js';
+import { getMyDashboardAdobeSignCacheListHostSiteUrl } from '../../../services/adobe-sign-cache/cache-list-descriptors.js';
+import { createGraphAdobeSignAgreementProjectionCacheRepository } from '../../../services/adobe-sign-cache/repositories/agreement-projection-cache-repository.js';
+import { createGraphAdobeSignUserCacheRepository } from '../../../services/adobe-sign-cache/repositories/user-cache-repository.js';
 
 /**
  * Build the active My Projects read provider based on `config.enablement.readMode`.
@@ -171,6 +176,61 @@ export function composeAdobeSignLiveStack(env: EnvLike): AdobeSignLiveStackCompo
   return { status: 'ready', actionQueueAdapter, recentCompletionsAdapter };
 }
 
+export type AdobeSignCacheStackCompositionReason =
+  | 'oauth-config-not-ready'
+  | 'grant-store-not-ready';
+
+export type AdobeSignCacheStackComposition =
+  | {
+      readonly status: 'ready';
+      readonly cacheProvider: MyWorkAdobeSignCacheReadModelProvider;
+    }
+  | {
+      readonly status: 'configuration-required';
+      readonly reason: AdobeSignCacheStackCompositionReason;
+    };
+
+/**
+ * Compose the cache-backed Adobe Sign read provider. Requires the same
+ * OAuth + grant-store prerequisites as the live stack (the principal
+ * resolver is reused as-is — cache mode removes the live Adobe call,
+ * not the grant lookup). Reads the MyDashboard site URL from the cache
+ * descriptor and constructs a `GraphListClient` for the four cache lists.
+ *
+ * Note: Prompt 01's `resolveAdobeSignCacheConfigReadiness` validates the
+ * queue / dedupe / lease env keys; the cache **read** path doesn't
+ * actually depend on those (it only needs SharePoint), so we do NOT
+ * require it here. The worker spine (Prompts 05-09) will gate on it.
+ */
+export function composeAdobeSignCacheStack(env: EnvLike): AdobeSignCacheStackComposition {
+  const cfg = resolveAdobeSignOAuthConfigReadiness(env);
+  if (cfg.status !== 'ready') {
+    return { status: 'configuration-required', reason: 'oauth-config-not-ready' };
+  }
+  const grantStore = resolveAdobeSignGrantStore(env);
+  if (grantStore.readiness !== 'ready') {
+    return { status: 'configuration-required', reason: 'grant-store-not-ready' };
+  }
+  const resolvePrincipal = createAdobeSignPrincipalResolver({
+    resolveTenantId: () => env.AZURE_TENANT_ID,
+    resolveConfigEnv: () => env,
+    resolveGrantStore: () => grantStore,
+  });
+  const siteUrl = getMyDashboardAdobeSignCacheListHostSiteUrl();
+  const graph = new GraphListClient(siteUrl);
+  const userCacheRepository = createGraphAdobeSignUserCacheRepository({ graph });
+  const agreementProjectionCacheRepository = createGraphAdobeSignAgreementProjectionCacheRepository(
+    { graph },
+  );
+  const cacheProvider = new MyWorkAdobeSignCacheReadModelProvider({
+    resolvePrincipal,
+    userCacheRepository,
+    agreementProjectionCacheRepository,
+    now: () => new Date(),
+  });
+  return { status: 'ready', cacheProvider };
+}
+
 export interface ResolveMyWorkReadModelProviderOptions {
   /** Defaults to `() => new Date()`; the mock provider's now signature is `() => string`. */
   readonly now?: () => Date;
@@ -200,6 +260,22 @@ function composeLiveProvider(
       adobeProvider.getAdobeSignActionQueue(context, query),
     getAdobeSignRecentCompletions: (context, query) =>
       adobeProvider.getAdobeSignRecentCompletions(context, query),
+    getMyProjectLinks: (context) => projectLinksProvider.getMyProjectLinks(context),
+  };
+}
+
+function composeCacheBackedProvider(
+  cacheComposition: Extract<AdobeSignCacheStackComposition, { status: 'ready' }>,
+  options?: ResolveMyWorkReadModelProviderOptions,
+): IMyWorkReadModelProvider {
+  const cacheProvider = cacheComposition.cacheProvider;
+  const projectLinksProvider = options?.projectLinksProvider ?? buildProjectLinksProvider();
+  return {
+    getMyWorkHome: (context) => cacheProvider.getMyWorkHome(context),
+    getAdobeSignActionQueue: (context, query) =>
+      cacheProvider.getAdobeSignActionQueue(context, query),
+    getAdobeSignRecentCompletions: (context, query) =>
+      cacheProvider.getAdobeSignRecentCompletions(context, query),
     getMyProjectLinks: (context) => projectLinksProvider.getMyProjectLinks(context),
   };
 }
@@ -248,6 +324,20 @@ export function resolveMyWorkReadModelProvider(
   const composition = composeAdobeSignLiveStack(env);
   if (composition.status !== 'ready') {
     return composeFallbackProvider(options);
+  }
+  // B05.15 Prompt 04: cache-mode gate. When the operator has opted into
+  // `MY_WORK_ADOBE_SIGN_READ_MODE=cache` AND the cache stack composes
+  // ready, return the cache-backed provider for routine reads. Live
+  // provider remains the safe default for every other read-mode value
+  // (including unset, 'live', and unrecognized) AND when cache-stack
+  // composition is not yet ready — preserves availability while
+  // operators correct cache configuration.
+  const readMode = parseAdobeSignCacheReadMode(env.MY_WORK_ADOBE_SIGN_READ_MODE);
+  if (readMode === 'cache') {
+    const cacheComposition = composeAdobeSignCacheStack(env);
+    if (cacheComposition.status === 'ready') {
+      return composeCacheBackedProvider(cacheComposition, options);
+    }
   }
   return composeLiveProvider(composition, options);
 }
