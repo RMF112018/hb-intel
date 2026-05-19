@@ -54,28 +54,30 @@ The legacy provider is the rollback target for the projection path; it has its o
 | ----------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Validation handshake                      | 200 with decoded token           | `myProjectsProjection.notification.validation.request` + `.validation.success`            | None; this is the Graph subscription-create round trip.                                                                                              |
 | Forged / wrong-`clientState` notification | 200 with empty body (no enqueue) | `myProjectsProjection.notification.clientState.invalid`                                   | Investigate notification source; do **not** rotate the client state without coordinated subscription teardown — would invalidate live subscriptions. |
-| Service Bus send failure                  | 503                              | `myProjectsProjection.notification.queue.failed` (with `failureCode` + `sanitizedReason`) | Check Service Bus health + UAMI RBAC (Data Sender).                                                                                                  |
+| Pending-work persistence failure          | 503                              | `myProjectsProjection.notification.queue.failed` (with `failureCode` + `sanitizedReason`) | Check MyDashboard list write health/permissions for `Pending Work`; validate SharePoint identity lane.                                               |
 | Duplicate within debounce window          | 200 (already enqueued)           | `myProjectsProjection.notification.duplicate.bucketed`                                    | Informational; debounce is working as designed.                                                                                                      |
 
 Forged notifications never enqueue — eliminates a message-replay attack vector.
 
 ---
 
-## Queue sync worker
+## Pending-work timer worker
 
-**Module:** `backend/functions/src/services/my-projects-projection/delta/projection-sync-worker.ts`
+**Module:** `backend/functions/src/functions/myProjectsProjectionPendingWorkProcessor/index.ts` (orchestrator) plus `backend/functions/src/services/my-projects-projection/delta/projection-sync-worker.ts` (delta/recompute core)
 
 | Failure                                   | Worker outcome status                          | Telemetry event                                                                      | Operator action                                                                                                                                                           |
 | ----------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lease held by another worker              | `lease-skipped`                                | `myProjectsProjection.worker.lease.skipped` (with `currentOwner`, `reason`)          | None; the other worker is processing. If persistent across many messages, check for stuck workers.                                                                        |
+| Pending row already claimed by another worker | row skipped (no process)                    | warning with `failureOutcome: already-claimed` (processor lane)                        | None; active lease is working. If rows stay claimed past lease window, inspect worker health and claim-expiry timestamps.                                                |
 | No delta baseline                         | `resync-required-no-baseline`                  | `myProjectsProjection.worker.delta.resyncRequired` (`reason: no-baseline`)           | Run seed (`projection-admin-cli --command=seed`) to establish baseline.                                                                                                   |
 | State flag marks resync required          | `resync-required-state-flag`                   | `.delta.resyncRequired` (`reason: state-flag`)                                       | Investigate why state was marked; usually follows a prior 410.                                                                                                            |
 | Graph 410 Gone on delta                   | `resync-required-410`                          | `.delta.resyncRequired` (`reason: 410`)                                              | Run seed; the delta token is expired/invalid.                                                                                                                             |
-| Other delta failure (5xx, token, network) | (throws)                                       | `.delta.failure` (with `failureCode` + `sanitizedReason`)                            | Check Graph health; failure is marked in the delta-state row so future runs see the failure context.                                                                      |
+| Other delta failure (5xx, token, network) | row transitions to `failed` / `dead-lettered` | `.delta.failure` (with `failureCode` + `sanitizedReason`) and pending-work failure upsert | Check Graph health; retry scheduling is automatic until max attempts (default 5), then row is dead-lettered and requires operator remediation.                          |
 | Slice recompute write failure             | `completed` with `recomputeOutcome.ok = false` | `.projection.write.failure` (with `failureCode`, `partialCounts`, `sanitizedReason`) | Check helper-list writability (Graph rate-limits, schema drift). Delta checkpoint does NOT advance on recompute failure — the same delta page is retried on the next run. |
 | Recompute write success                   | `completed`                                    | `.projection.write.success` (with row counts)                                        | Normal path.                                                                                                                                                              |
 
-Slice recompute and delta checkpoint advance are atomic by intent: a write failure leaves the checkpoint where it was, so the next run reprocesses the same delta page rather than skipping forward.
+Slice recompute and delta checkpoint advance are atomic by intent: a write failure leaves the checkpoint where it was, so the next retry reprocesses the same delta page rather than skipping forward.
+
+Service Bus sender and queue-trigger worker seams remain in the repo as quarantined compatibility artifacts, but they are intentionally inactive in the SharePoint MVP runtime composition.
 
 ---
 

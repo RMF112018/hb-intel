@@ -23,6 +23,21 @@ export interface IPendingWorkItem {
   readonly updatedAtUtc: string;
 }
 
+export type PendingWorkClaimOutcome =
+  | { readonly claimed: true; readonly item: IPendingWorkItem }
+  | {
+      readonly claimed: false;
+      readonly reason:
+        | 'not-found'
+        | 'status-not-claimable'
+        | 'not-due'
+        | 'already-claimed'
+        | 'max-attempts-reached'
+        | 'conflict';
+    };
+
+export type PendingWorkFailureOutcome = 'retry-scheduled' | 'dead-lettered';
+
 function e(v: unknown): string | undefined {
   return typeof v === 'string' && v.length > 0 ? v : undefined;
 }
@@ -112,5 +127,153 @@ export class PendingWorkRepository {
       top: limit,
     });
     return rows.map((r) => fromFields(r.fields));
+  }
+
+  async tryClaim(args: {
+    workKey: string;
+    workerId: string;
+    nowUtc: string;
+    leaseMinutes: number;
+    maxAttempts: number;
+  }): Promise<PendingWorkClaimOutcome> {
+    const row = await this.store.getByTextField({
+      listTitle: this.listTitle,
+      field: 'WorkKey',
+      value: args.workKey,
+      select: [
+        'WorkKey',
+        'SourceListKind',
+        'DebounceBucketUtc',
+        'NotificationBatchId',
+        'SubscriptionId',
+        'NotificationCount',
+        'Status',
+        'AvailableAfterUtc',
+        'ClaimedBy',
+        'ClaimExpiresAtUtc',
+        'AttemptCount',
+        'LastAttemptAtUtc',
+        'LastFailureCode',
+        'CorrelationId',
+        'CreatedAtUtc',
+        'UpdatedAtUtc',
+      ],
+    });
+    if (!row) return { claimed: false, reason: 'not-found' };
+
+    const item = fromFields(row.fields);
+    const nowMs = Date.parse(args.nowUtc);
+    const dueMs = Date.parse(item.availableAfterUtc);
+    if (Number.isFinite(dueMs) && nowMs < dueMs) return { claimed: false, reason: 'not-due' };
+
+    if (item.status !== 'pending' && item.status !== 'failed' && item.status !== 'claimed') {
+      return { claimed: false, reason: 'status-not-claimable' };
+    }
+
+    const claimExpiresMs = Date.parse(item.claimExpiresAtUtc ?? '');
+    const hasActiveClaim =
+      item.status === 'claimed' &&
+      item.claimedBy &&
+      Number.isFinite(claimExpiresMs) &&
+      nowMs < claimExpiresMs &&
+      item.claimedBy !== args.workerId;
+    if (hasActiveClaim) return { claimed: false, reason: 'already-claimed' };
+
+    const nextAttemptCount = item.attemptCount + 1;
+    if (nextAttemptCount > args.maxAttempts) return { claimed: false, reason: 'max-attempts-reached' };
+
+    const latest = await this.store.getByTextField({
+      listTitle: this.listTitle,
+      field: 'WorkKey',
+      value: args.workKey,
+      select: ['WorkKey', 'UpdatedAtUtc'],
+    });
+    if (!latest || String(latest.fields.UpdatedAtUtc ?? '') !== item.updatedAtUtc) {
+      return { claimed: false, reason: 'conflict' };
+    }
+
+    const claimExpiresAtUtc = new Date(nowMs + args.leaseMinutes * 60_000).toISOString();
+    await this.store.update({
+      listTitle: this.listTitle,
+      itemId: row.id,
+      fields: {
+        Status: 'claimed',
+        ClaimedBy: args.workerId,
+        ClaimExpiresAtUtc: claimExpiresAtUtc,
+        AttemptCount: nextAttemptCount,
+        LastAttemptAtUtc: args.nowUtc,
+        UpdatedAtUtc: args.nowUtc,
+      },
+    });
+    return {
+      claimed: true,
+      item: {
+        ...item,
+        status: 'claimed',
+        claimedBy: args.workerId,
+        claimExpiresAtUtc,
+        attemptCount: nextAttemptCount,
+        lastAttemptAtUtc: args.nowUtc,
+        updatedAtUtc: args.nowUtc,
+      },
+    };
+  }
+
+  async markSucceeded(args: { workKey: string; workerId: string; nowUtc: string }): Promise<void> {
+    const row = await this.store.getByTextField({
+      listTitle: this.listTitle,
+      field: 'WorkKey',
+      value: args.workKey,
+      select: ['WorkKey', 'ClaimedBy'],
+    });
+    if (!row) return;
+    if (String(row.fields.ClaimedBy ?? '') !== args.workerId) return;
+    await this.store.update({
+      listTitle: this.listTitle,
+      itemId: row.id,
+      fields: {
+        Status: 'succeeded',
+        ClaimedBy: null,
+        ClaimExpiresAtUtc: null,
+        LastFailureCode: null,
+        UpdatedAtUtc: args.nowUtc,
+      },
+    });
+  }
+
+  async markFailed(args: {
+    workKey: string;
+    workerId: string;
+    nowUtc: string;
+    failureCode: string;
+    maxAttempts: number;
+    retryDelaySeconds: number;
+  }): Promise<PendingWorkFailureOutcome | null> {
+    const row = await this.store.getByTextField({
+      listTitle: this.listTitle,
+      field: 'WorkKey',
+      value: args.workKey,
+      select: ['WorkKey', 'ClaimedBy', 'AttemptCount'],
+    });
+    if (!row) return null;
+    if (String(row.fields.ClaimedBy ?? '') !== args.workerId) return null;
+    const attempts = n(row.fields.AttemptCount);
+    const deadLetter = attempts >= args.maxAttempts;
+    const availableAfterUtc = new Date(
+      Date.parse(args.nowUtc) + Math.max(args.retryDelaySeconds, 1) * 1000,
+    ).toISOString();
+    await this.store.update({
+      listTitle: this.listTitle,
+      itemId: row.id,
+      fields: {
+        Status: deadLetter ? 'dead-lettered' : 'failed',
+        ClaimedBy: null,
+        ClaimExpiresAtUtc: null,
+        LastFailureCode: args.failureCode,
+        AvailableAfterUtc: deadLetter ? args.nowUtc : availableAfterUtc,
+        UpdatedAtUtc: args.nowUtc,
+      },
+    });
+    return deadLetter ? 'dead-lettered' : 'retry-scheduled';
   }
 }

@@ -117,6 +117,32 @@ describe('handleProjectionGraphWebhook', () => {
     });
   });
 
+  it('dedupes same-bucket notifications into one pending-work upsert per source kind', async () => {
+    const { deps, upserts } = makeDeps();
+    const request = makeRequest({
+      bodyJson: {
+        value: [
+          {
+            subscriptionId: 'sub-projects',
+            clientState: CLIENT_STATE_SECRET,
+            resource: '/sites/site/lists/list-projects',
+            changeType: 'updated',
+          },
+          {
+            subscriptionId: 'sub-projects',
+            clientState: CLIENT_STATE_SECRET,
+            resource: '/sites/site/lists/list-projects',
+            changeType: 'updated',
+          },
+        ],
+      },
+    });
+    const response = await handleProjectionGraphWebhook(request, deps);
+    expect(response.status).toBe(202);
+    expect(upserts).toHaveLength(1);
+    expect(upserts[0]?.workKey).toBe('my-projects-projection:Projects:2026-05-17T14:32:00.000Z');
+  });
+
   it('does not upsert when clientState mismatches', async () => {
     const { deps, upserts } = makeDeps();
     const request = makeRequest({

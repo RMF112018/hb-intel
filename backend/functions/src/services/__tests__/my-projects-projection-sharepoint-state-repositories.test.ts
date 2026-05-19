@@ -274,6 +274,112 @@ describe('SharePoint projection operational repositories', () => {
     expect(due[0]?.notificationBatchId).toBe('batch-2');
   });
 
+  it('pending-work repository enforces claim contention and supports expired-claim reclaim', async () => {
+    const { pending } = makeRepos();
+    const workKey = 'my-projects-projection:Projects:2026-05-01T00:00:00.000Z';
+    await pending.upsertDebounced({
+      workKey,
+      sourceListKind: 'Projects',
+      debounceBucketUtc: '2026-05-01T00:00:00.000Z',
+      notificationBatchId: 'batch-1',
+      nowUtc: '2026-05-01T00:00:00.000Z',
+    });
+
+    const firstClaim = await pending.tryClaim({
+      workKey,
+      workerId: 'worker-1',
+      nowUtc: '2026-05-01T00:01:00.000Z',
+      leaseMinutes: 10,
+      maxAttempts: 5,
+    });
+    expect(firstClaim.claimed).toBe(true);
+
+    const blocked = await pending.tryClaim({
+      workKey,
+      workerId: 'worker-2',
+      nowUtc: '2026-05-01T00:05:00.000Z',
+      leaseMinutes: 10,
+      maxAttempts: 5,
+    });
+    expect(blocked).toMatchObject({ claimed: false, reason: 'already-claimed' });
+
+    const reclaimed = await pending.tryClaim({
+      workKey,
+      workerId: 'worker-2',
+      nowUtc: '2026-05-01T00:12:00.000Z',
+      leaseMinutes: 10,
+      maxAttempts: 5,
+    });
+    expect(reclaimed.claimed).toBe(true);
+    if (reclaimed.claimed) expect(reclaimed.item.claimedBy).toBe('worker-2');
+  });
+
+  it('pending-work repository schedules retries then dead-letters at max attempts', async () => {
+    const { pending } = makeRepos();
+    const workKey = 'my-projects-projection:Projects:2026-05-01T01:00:00.000Z';
+    await pending.upsertDebounced({
+      workKey,
+      sourceListKind: 'Projects',
+      debounceBucketUtc: '2026-05-01T01:00:00.000Z',
+      notificationBatchId: 'batch-1',
+      nowUtc: '2026-05-01T01:00:00.000Z',
+    });
+
+    const claim1 = await pending.tryClaim({
+      workKey,
+      workerId: 'worker-1',
+      nowUtc: '2026-05-01T01:01:00.000Z',
+      leaseMinutes: 10,
+      maxAttempts: 5,
+    });
+    expect(claim1.claimed).toBe(true);
+    const retryOutcome = await pending.markFailed({
+      workKey,
+      workerId: 'worker-1',
+      nowUtc: '2026-05-01T01:01:05.000Z',
+      failureCode: 'pending-work-processing-failed',
+      maxAttempts: 5,
+      retryDelaySeconds: 60,
+    });
+    expect(retryOutcome).toBe('retry-scheduled');
+
+    const retryWindows: Array<{ claimAtUtc: string; failAtUtc: string; attempt: number }> = [
+      { attempt: 2, claimAtUtc: '2026-05-01T01:02:10.000Z', failAtUtc: '2026-05-01T01:02:15.000Z' },
+      { attempt: 3, claimAtUtc: '2026-05-01T01:03:20.000Z', failAtUtc: '2026-05-01T01:03:25.000Z' },
+      { attempt: 4, claimAtUtc: '2026-05-01T01:04:30.000Z', failAtUtc: '2026-05-01T01:04:35.000Z' },
+      { attempt: 5, claimAtUtc: '2026-05-01T01:05:40.000Z', failAtUtc: '2026-05-01T01:05:45.000Z' },
+    ];
+    for (const window of retryWindows) {
+      const claim = await pending.tryClaim({
+        workKey,
+        workerId: 'worker-1',
+        nowUtc: window.claimAtUtc,
+        leaseMinutes: 10,
+        maxAttempts: 5,
+      });
+      expect(claim.claimed).toBe(true);
+      const outcome = await pending.markFailed({
+        workKey,
+        workerId: 'worker-1',
+        nowUtc: window.failAtUtc,
+        failureCode: 'pending-work-processing-failed',
+        maxAttempts: 5,
+        retryDelaySeconds: 60,
+      });
+      if (window.attempt < 5) expect(outcome).toBe('retry-scheduled');
+      if (window.attempt === 5) expect(outcome).toBe('dead-lettered');
+    }
+
+    const postDeadLetterClaim = await pending.tryClaim({
+      workKey,
+      workerId: 'worker-2',
+      nowUtc: '2026-05-01T01:10:00.000Z',
+      leaseMinutes: 10,
+      maxAttempts: 5,
+    });
+    expect(postDeadLetterClaim).toMatchObject({ claimed: false, reason: 'status-not-claimable' });
+  });
+
   it('sync-failure repository creates then increments attempt count', async () => {
     const { failures } = makeRepos();
     await failures.upsertFailure({

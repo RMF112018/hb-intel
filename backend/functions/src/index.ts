@@ -16,8 +16,9 @@ import './functions/myProjectsProjectionSubscriptionRenewal/index.js';
 import './functions/myProjectsProjectionSubscriptionAdmin/index.js';
 // My Projects projection — SharePoint pending-work processor timer (B05.16 Prompt 04).
 import './functions/myProjectsProjectionPendingWorkProcessor/index.js';
-// My Projects projection — Service Bus queue-trigger delta sync worker (B05.13 Prompt 06).
-import './functions/myProjectsProjectionSyncWorker/index.js';
+// My Projects projection — Service Bus queue-trigger delta sync worker (B05.13 Prompt 06)
+// is a quarantined compatibility seam and is intentionally not registered in the
+// active SharePoint MVP composition path.
 // Legacy fallback review/admin routes. This module is the single source of
 // /admin-api/legacy-fallback/review/* registrations and is also imported by
 // the admin-control-plane host so both composition paths stay in sync. The

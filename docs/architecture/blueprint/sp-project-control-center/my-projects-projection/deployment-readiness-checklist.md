@@ -67,7 +67,8 @@ Quarantined compatibility settings (not active MVP blockers):
 Prompt 04 active-state redirect note:
 
 - Runtime operational repositories now use SharePoint-backed state lists (`Source Sync State`, `Subscription State`, `Pending Work`, `Control State`, `Runs`, `Sync Failures`) as the active persistence/control plane.
-- Azure Table state repositories and Service Bus sync enqueue path are superseded/quarantined compatibility seams and are not required active MVP blockers.
+- Webhook ingress writes deterministic `Pending Work` rows and the 1-minute pending-work timer is the active worker lane.
+- Azure Table state repositories and Service Bus sender/queue-trigger seams are superseded/quarantined compatibility artifacts and are not required active MVP blockers.
 
 ## 3.1 Storage provisioning/verifier scripts
 
