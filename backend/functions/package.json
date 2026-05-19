@@ -19,6 +19,7 @@
     "@azure/functions": "^4.6.0",
     "@azure/identity": "^4.5.0",
     "@azure/service-bus": "^7.9.5",
+    "@azure/storage-queue": "^12.27.0",
     "@hbc/acknowledgment": "workspace:*",
     "@hbc/models": "workspace:*",
     "@hbc/notification-intelligence": "workspace:*",

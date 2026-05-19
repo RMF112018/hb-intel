@@ -50,6 +50,11 @@ import { extractOrGenerateRequestId } from '../../middleware/request-id.js';
 import { createLogger } from '../../utils/logger.js';
 import { errorResponse, successResponse } from '../../utils/response-helpers.js';
 import { withTelemetry } from '../../utils/withTelemetry.js';
+import {
+  composeAdobeSignCacheQueueEnqueuer,
+  type AdobeSignCacheQueueEnqueuerComposition,
+} from '../../services/adobe-sign-cache/queue-enqueuer.js';
+import { buildAdobeSignCacheWorkItem } from '../../services/adobe-sign-cache/queue-work-item-contract.js';
 
 import { normalizeAdobeSignActor } from './read-models/adobe-sign/adobe-sign-actor-normalizer.js';
 import {
@@ -139,6 +144,17 @@ export interface AdobeSignOAuthRouteDeps {
   readonly oauthService: IAdobeSignOAuthService;
   readonly now: () => Date;
   readonly randomBytes: (n: number) => Uint8Array;
+  /**
+   * Optional composition for the Adobe Sign cache queue enqueuer used to
+   * post `InitialHydration` + `EnsureUserWebhook` work items after a
+   * successful OAuth grant. Returning `'configuration-required'` causes
+   * the callback to skip the enqueues and log a sanitized diagnostic —
+   * the grant + redirect proceed unchanged so connect-flow availability
+   * survives unconfigured queue environments. Tests inject an
+   * in-memory composition.
+   */
+  readonly resolveQueueEnqueuer?: () => AdobeSignCacheQueueEnqueuerComposition;
+  readonly randomUUID?: () => string;
 }
 
 const defaultRandomBytes = (n: number): Uint8Array => new Uint8Array(nodeRandomBytes(n));
@@ -170,6 +186,8 @@ const defaultDeps = (): AdobeSignOAuthRouteDeps => ({
   }),
   now: () => new Date(),
   randomBytes: defaultRandomBytes,
+  resolveQueueEnqueuer: () => composeAdobeSignCacheQueueEnqueuer(process.env),
+  randomUUID: () => globalThis.crypto.randomUUID(),
 });
 
 // ---------------------------------------------------------------------------
@@ -625,6 +643,70 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
       callbackHasApiAccessPoint: hasApiAccessPoint,
       callbackHasWebAccessPoint: hasWebAccessPoint,
     });
+
+    // B05.15 Prompt 05: post-success enqueue of `InitialHydration` +
+    // `EnsureUserWebhook`. Enqueue failures MUST NOT roll back the
+    // grant or short-circuit the redirect — connect succeeds even if
+    // the queue is temporarily unreachable (reconciliation repairs the
+    // hydration gap later). When the enqueuer is unconfigured (queue
+    // env not yet wired in this environment), skip both enqueues and
+    // log a sanitized "not-configured" diagnostic.
+    const enqueuerComposition = deps.resolveQueueEnqueuer?.();
+    if (enqueuerComposition === undefined || enqueuerComposition.status !== 'ready') {
+      const reason =
+        enqueuerComposition === undefined
+          ? 'enqueuer-not-injected'
+          : enqueuerComposition.reason;
+      logger.trackEvent('adobeSign.oauth.callback.queueEnqueuer.notConfigured', {
+        correlationId: requestId,
+        reason,
+      });
+    } else {
+      const randomUUID = deps.randomUUID ?? (() => globalThis.crypto.randomUUID());
+      const enqueuePlan: ReadonlyArray<{
+        readonly eventNameRoot: string;
+        readonly workItemType: 'InitialHydration' | 'EnsureUserWebhook';
+        readonly refreshScope: 'UserWide' | 'SubscriptionOnly';
+      }> = [
+        {
+          eventNameRoot: 'adobeSign.oauth.callback.initialHydration.enqueue',
+          workItemType: 'InitialHydration',
+          refreshScope: 'UserWide',
+        },
+        {
+          eventNameRoot: 'adobeSign.oauth.callback.ensureUserWebhook.enqueue',
+          workItemType: 'EnsureUserWebhook',
+          refreshScope: 'SubscriptionOnly',
+        },
+      ];
+      for (const step of enqueuePlan) {
+        try {
+          const workItem = buildAdobeSignCacheWorkItem(
+            {
+              workItemType: step.workItemType,
+              correlationId: requestId,
+              adobeActorKey: grant.actorKey,
+              refreshScope: step.refreshScope,
+              requestedBy: 'oauth-callback',
+            },
+            { now: deps.now, randomUUID },
+          );
+          await enqueuerComposition.enqueuer.enqueue(workItem);
+          logger.trackEvent(`${step.eventNameRoot}.succeeded`, {
+            correlationId: requestId,
+            workItemId: workItem.workItemId,
+          });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          logger.trackEvent(`${step.eventNameRoot}.failed`, {
+            correlationId: requestId,
+            errorMessage: message.slice(0, 200),
+          });
+          // Do NOT roll back the grant; do NOT short-circuit the
+          // redirect. Reconciliation repairs the missed hydration.
+        }
+      }
+    }
 
     return buildRedirect(env, stateRecord.returnPath, CALLBACK_UX_STATUS.success);
   };

@@ -1305,3 +1305,131 @@ describe('disconnect handler', () => {
     expect(serialized).not.toContain(OID);
   });
 });
+
+// ─── B05.15 Prompt 05 — OAuth callback enqueue cases ──────────────────────
+
+describe('callback handler — B05.15 Prompt 05 enqueue', () => {
+  it('enqueues InitialHydration + EnsureUserWebhook (in that order) on successful grant', async () => {
+    const mod = await importModule();
+    const { createInMemoryAdobeSignCacheQueueEnqueuer } = await import(
+      '../../services/adobe-sign-cache/queue-enqueuer.js'
+    );
+    const enqueuer = createInMemoryAdobeSignCacheQueueEnqueuer();
+    const { deps, seams } = buildDeps({
+      resolveQueueEnqueuer: () => ({
+        status: 'ready',
+        enqueuer,
+        queueName: 'adobe-sign-cache-work-items',
+        queueEndpoint: 'https://stub.queue.core.windows.net/',
+      }),
+      randomUUID: (() => {
+        let i = 0;
+        return () => `00000000-0000-4000-8000-${String(++i).padStart(12, '0')}`;
+      })(),
+    } as any);
+    const { state } = await issueState(mod, deps, seams);
+
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state,
+        code: 'auth-code-xyz',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+
+    expect(response.status).toBe(302);
+    const grant = await seams.grantStore.findGrant(ACTOR_KEY);
+    expect(grant?.state).toBe('active');
+    expect(enqueuer.items).toHaveLength(2);
+    expect(enqueuer.items[0].workItemType).toBe('InitialHydration');
+    expect(enqueuer.items[0].refreshScope).toBe('UserWide');
+    expect(enqueuer.items[0].requestedBy).toBe('oauth-callback');
+    expect(enqueuer.items[0].adobeActorKey).toBe(ACTOR_KEY);
+    expect(enqueuer.items[1].workItemType).toBe('EnsureUserWebhook');
+    expect(enqueuer.items[1].refreshScope).toBe('SubscriptionOnly');
+    expect(enqueuer.items[1].requestedBy).toBe('oauth-callback');
+  });
+
+  it('enqueue failure does NOT roll back the grant and does NOT short-circuit the redirect', async () => {
+    const mod = await importModule();
+    const failingEnqueuer = {
+      enqueue: vi.fn(async () => {
+        throw new Error('storage unreachable');
+      }),
+      health: vi.fn(async () => ({ ready: false, reason: 'storage unreachable' })),
+    };
+    const { deps, seams } = buildDeps({
+      resolveQueueEnqueuer: () => ({
+        status: 'ready',
+        enqueuer: failingEnqueuer as any,
+        queueName: 'adobe-sign-cache-work-items',
+        queueEndpoint: 'https://stub.queue.core.windows.net/',
+      }),
+    } as any);
+    const { state } = await issueState(mod, deps, seams);
+
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state,
+        code: 'auth-code-xyz',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+
+    expect(response.status).toBe(302);
+    const location = (response.headers as Record<string, string>).Location;
+    expect(location).toContain('adobeSignAuthorization=success');
+    const grant = await seams.grantStore.findGrant(ACTOR_KEY);
+    expect(grant?.state).toBe('active');
+    // Both enqueue attempts were tried and failed; neither succeeded but
+    // the connect flow still returns success.
+    expect(failingEnqueuer.enqueue).toHaveBeenCalledTimes(2);
+    expect(
+      loggerTrackEventSpy.mock.calls.some(
+        ([name]) => name === 'adobeSign.oauth.callback.initialHydration.enqueue.failed',
+      ),
+    ).toBe(true);
+    expect(
+      loggerTrackEventSpy.mock.calls.some(
+        ([name]) => name === 'adobeSign.oauth.callback.ensureUserWebhook.enqueue.failed',
+      ),
+    ).toBe(true);
+  });
+
+  it('skips enqueueing and logs queueEnqueuer.notConfigured when composition is configuration-required', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps({
+      resolveQueueEnqueuer: () => ({
+        status: 'configuration-required',
+        reason: 'queue-endpoint-not-configured',
+      }),
+    } as any);
+    const { state } = await issueState(mod, deps, seams);
+
+    const callback = mod.createCallbackHandler(deps);
+    const response = await callback(
+      callbackRequest({
+        state,
+        code: 'auth-code-xyz',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+
+    expect(response.status).toBe(302);
+    const grant = await seams.grantStore.findGrant(ACTOR_KEY);
+    expect(grant?.state).toBe('active');
+    expect(
+      loggerTrackEventSpy.mock.calls.some(
+        ([name]) => name === 'adobeSign.oauth.callback.queueEnqueuer.notConfigured',
+      ),
+    ).toBe(true);
+  });
+});

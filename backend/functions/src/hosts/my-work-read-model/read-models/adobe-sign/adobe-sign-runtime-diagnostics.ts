@@ -13,7 +13,8 @@ export type AdobeSignRuntimeDiagnosticEventName =
   | 'adobeSign.read.refresh.result'
   | 'adobeSign.read.search.result'
   | 'adobeSign.read.actionQueue.result'
-  | 'adobeSign.read.recentCompletions.result';
+  | 'adobeSign.read.recentCompletions.result'
+  | 'adobeSign.cacheRefresh.manualRefresh.enqueue.result';
 
 export type AdobeSignTableStoreOperation =
   | 'find-grant'
