@@ -36,7 +36,9 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-function expectedDiagnostics(selectionMode: 'callback-api-access-point' | 'partner-default-api-na1') {
+function expectedDiagnostics(
+  selectionMode: 'callback-api-access-point' | 'partner-default-api-na1',
+) {
   return {
     endpointHost: 'api.na1.adobesign.com',
     endpointPath: '/oauth/v2/token',
@@ -132,7 +134,7 @@ describe('createAdobeSignLiveOAuthService — request shape', () => {
 });
 
 describe('createAdobeSignLiveOAuthService — result mapping', () => {
-  it('maps HTTP 200 + valid body to status "ok" with the four success fields', async () => {
+  it('maps HTTP 200 + valid body to status "ok" with the success fields and grantedScopeSource=token-response', async () => {
     const fetchSpy = vi.fn(async () => jsonResponse(VALID_TOKEN_BODY));
     const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
     const result = await service.exchangeAuthorizationCode(VALID_INPUT);
@@ -141,6 +143,7 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
       accessToken: 'at-value',
       refreshToken: 'rt-value',
       grantedScopes: ['agreement_read', 'agreement_send'],
+      grantedScopeSource: 'token-response',
       expiresInSeconds: 3600,
       resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
       resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
@@ -171,7 +174,7 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
     });
   });
 
-  it('maps HTTP 200 with granted scopes outside governedScopes to "scope-mismatch"', async () => {
+  it('maps HTTP 200 with disjoint granted scopes (no governed coverage) to "scope-mismatch"', async () => {
     const fetchSpy = vi.fn(async () =>
       jsonResponse({ ...VALID_TOKEN_BODY, scope: 'agreement_write' }),
     );
@@ -182,6 +185,120 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'scope-mismatch',
       grantedScopes: ['agreement_write'],
+    });
+  });
+
+  it('maps HTTP 200 with granted scopes narrower than governed scopes to "scope-mismatch" (coverage direction)', async () => {
+    // Adobe echoes only agreement_read:self when the deployment requires
+    // both agreement_read:self and agreement_write:self. Governance is
+    // `governed ⊆ granted` — a narrower response must be rejected at the
+    // token-exchange seam, not silently persisted and later tripped at
+    // the token-service.
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({ ...VALID_TOKEN_BODY, scope: 'agreement_read:self' }),
+    );
+    const service = createAdobeSignLiveOAuthService({
+      fetch: fetchSpy,
+      governedScopes: ['agreement_read:self', 'agreement_write:self'],
+    });
+    expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
+      status: 'scope-mismatch',
+      grantedScopes: ['agreement_read:self'],
+    });
+  });
+
+  it('maps HTTP 200 with granted scopes covering governed (extras preserved) to "ok" + grantedScopeSource=token-response', async () => {
+    // Adobe returns a superset of configured governance: agreement_read +
+    // agreement_send + an extra agreement_write. The coverage check
+    // (`governed ⊆ granted`) accepts this; the extras are tolerated and
+    // forwarded verbatim, matching downstream token-service enforcement.
+    const fetchSpy = vi.fn(async () =>
+      jsonResponse({
+        ...VALID_TOKEN_BODY,
+        scope: 'agreement_read agreement_send agreement_write',
+      }),
+    );
+    const service = createAdobeSignLiveOAuthService({
+      fetch: fetchSpy,
+      governedScopes: ['agreement_read', 'agreement_send'],
+    });
+    const result = await service.exchangeAuthorizationCode(VALID_INPUT);
+    expect(result).toEqual({
+      status: 'ok',
+      accessToken: 'at-value',
+      refreshToken: 'rt-value',
+      grantedScopes: ['agreement_read', 'agreement_send', 'agreement_write'],
+      grantedScopeSource: 'token-response',
+      expiresInSeconds: 3600,
+      resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
+      resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
+      endpointSource: 'callback',
+    });
+  });
+
+  it('maps HTTP 200 with missing scope field to "ok" + grantedScopeSource=configured-fallback (governed scopes substituted)', async () => {
+    // Adobe returned a successful token exchange but omitted the `scope`
+    // field. The adapter substitutes the configured governed scopes so
+    // the persisted grant satisfies downstream coverage enforcement.
+    const { scope: _scope, ...withoutScope } = VALID_TOKEN_BODY;
+    const fetchSpy = vi.fn(async () => jsonResponse(withoutScope));
+    const service = createAdobeSignLiveOAuthService({
+      fetch: fetchSpy,
+      governedScopes: ['agreement_read:self', 'agreement_write:self'],
+    });
+    const result = await service.exchangeAuthorizationCode(VALID_INPUT);
+    expect(result).toEqual({
+      status: 'ok',
+      accessToken: 'at-value',
+      refreshToken: 'rt-value',
+      grantedScopes: ['agreement_read:self', 'agreement_write:self'],
+      grantedScopeSource: 'configured-fallback',
+      expiresInSeconds: 3600,
+      resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
+      resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
+      endpointSource: 'callback',
+    });
+  });
+
+  it('maps HTTP 200 with blank/whitespace scope to "ok" + grantedScopeSource=configured-fallback', async () => {
+    const fetchSpy = vi.fn(async () => jsonResponse({ ...VALID_TOKEN_BODY, scope: '   ' }));
+    const service = createAdobeSignLiveOAuthService({
+      fetch: fetchSpy,
+      governedScopes: ['agreement_read:self', 'agreement_write:self'],
+    });
+    const result = await service.exchangeAuthorizationCode(VALID_INPUT);
+    expect(result).toEqual({
+      status: 'ok',
+      accessToken: 'at-value',
+      refreshToken: 'rt-value',
+      grantedScopes: ['agreement_read:self', 'agreement_write:self'],
+      grantedScopeSource: 'configured-fallback',
+      expiresInSeconds: 3600,
+      resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
+      resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
+      endpointSource: 'callback',
+    });
+  });
+
+  it('configured-fallback with empty governedScopes preserves the no-governance posture (grantedScopes=[])', async () => {
+    // No configured governed scopes + Adobe omits scope → grant is `[]`
+    // with source 'configured-fallback'. The adapter must not invent
+    // scopes; downstream enforcement vacuously passes (covers everything
+    // / nothing required).
+    const { scope: _scope, ...withoutScope } = VALID_TOKEN_BODY;
+    const fetchSpy = vi.fn(async () => jsonResponse(withoutScope));
+    const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
+    const result = await service.exchangeAuthorizationCode(VALID_INPUT);
+    expect(result).toEqual({
+      status: 'ok',
+      accessToken: 'at-value',
+      refreshToken: 'rt-value',
+      grantedScopes: [],
+      grantedScopeSource: 'configured-fallback',
+      expiresInSeconds: 3600,
+      resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
+      resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
+      endpointSource: 'callback',
     });
   });
 
@@ -198,6 +315,7 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
       accessToken: 'at-value',
       refreshToken: 'rt-value',
       grantedScopes: ['agreement_read', 'agreement_send'],
+      grantedScopeSource: 'token-response',
       expiresInSeconds: 3600,
       resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
       resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
@@ -258,9 +376,7 @@ describe('createAdobeSignLiveOAuthService — result mapping', () => {
   });
 
   it('maps HTTP 400 + Adobe error invalid_authorization_code to "invalid-code"', async () => {
-    const fetchSpy = vi.fn(async () =>
-      jsonResponse({ error: 'invalid_authorization_code' }, 400),
-    );
+    const fetchSpy = vi.fn(async () => jsonResponse({ error: 'invalid_authorization_code' }, 400));
     const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
     expect(await service.exchangeAuthorizationCode(VALID_INPUT)).toEqual({
       status: 'invalid-code',
@@ -365,10 +481,20 @@ describe('createAdobeSignLiveOAuthService — no secret leak in failure outcomes
       async () => {
         throw new Error('network');
       },
+      // Configured-fallback success branch: Adobe omits scope.
+      async () => {
+        const { scope: _scope, ...withoutScope } = VALID_TOKEN_BODY;
+        return jsonResponse(withoutScope);
+      },
+      // Scope-mismatch (coverage direction): Adobe returns narrower set.
+      async () => jsonResponse({ ...VALID_TOKEN_BODY, scope: 'agreement_read:self' }),
     ];
     for (const handler of cases) {
       const fetchSpy = vi.fn(handler);
-      const service = createAdobeSignLiveOAuthService({ fetch: fetchSpy });
+      const service = createAdobeSignLiveOAuthService({
+        fetch: fetchSpy,
+        governedScopes: ['agreement_read:self', 'agreement_write:self'],
+      });
       const result = await service.exchangeAuthorizationCode(VALID_INPUT);
       const serialized = JSON.stringify(result);
       expect(serialized).not.toContain(VALID_INPUT.clientSecret);

@@ -31,6 +31,7 @@
 
 import type {
   AdobeSignEndpointSource,
+  AdobeSignGrantedScopeSource,
   AdobeSignTokenExchangeInput,
   AdobeSignTokenExchangeResult,
   IAdobeSignOAuthService,
@@ -108,11 +109,25 @@ function parseScopes(raw: unknown): readonly string[] {
   );
 }
 
-function grantedScopesAreSubset(granted: readonly string[], governed: readonly string[]): boolean {
+/**
+ * Coverage check: does the granted scope set cover every configured
+ * governed scope? Governance requires `governed ⊆ granted`; a narrower
+ * Adobe response (e.g. only `agreement_read:self` when configured requires
+ * both `agreement_read:self` and `agreement_write:self`) must fail this
+ * check. Matches the existing token-service enforcement helper of the
+ * same name.
+ *
+ * Extras in `granted` beyond `governed` are tolerated by this check and
+ * by downstream token-service enforcement.
+ */
+function grantedScopesCoverGovernedScopes(
+  granted: readonly string[],
+  governed: readonly string[],
+): boolean {
   if (governed.length === 0) return true;
-  const allow = new Set(governed.map((s) => s.toLowerCase()));
-  for (const scope of granted) {
-    if (!allow.has(scope.toLowerCase())) return false;
+  const grantedSet = new Set(granted.map((s) => s.toLowerCase()));
+  for (const scope of governed) {
+    if (!grantedSet.has(scope.toLowerCase())) return false;
   }
   return true;
 }
@@ -275,9 +290,30 @@ export function createAdobeSignLiveOAuthService(
         return { status: 'unreachable', reason: 'malformed-response', exchangeRequestDiagnostics };
       }
 
-      const grantedScopes = parseScopes((parsed as AdobeTokenSuccessBody).scope);
-      if (!grantedScopesAreSubset(grantedScopes, governedScopes)) {
-        return { status: 'scope-mismatch', grantedScopes };
+      // Resolve effective grantedScopes + provenance.
+      //
+      //   - Adobe returned a non-empty `scope`: validate it covers the
+      //     configured governed scopes (`governed ⊆ granted`); narrower
+      //     responses fail with `scope-mismatch`. Extras are tolerated
+      //     and forwarded verbatim (matches token-service enforcement).
+      //   - Adobe returned 200 with a missing/blank `scope`: substitute
+      //     the configured governed scopes as the effective grant and
+      //     stamp `grantedScopeSource = 'configured-fallback'` so the
+      //     callback layer and persisted grant carry the correct
+      //     envelope. When `governedScopes` is empty, the substituted
+      //     value is `[]` (no-governance posture; do not invent scopes).
+      const tokenResponseScopes = parseScopes((parsed as AdobeTokenSuccessBody).scope);
+      let grantedScopes: readonly string[];
+      let grantedScopeSource: AdobeSignGrantedScopeSource;
+      if (tokenResponseScopes.length > 0) {
+        if (!grantedScopesCoverGovernedScopes(tokenResponseScopes, governedScopes)) {
+          return { status: 'scope-mismatch', grantedScopes: tokenResponseScopes };
+        }
+        grantedScopes = tokenResponseScopes;
+        grantedScopeSource = 'token-response';
+      } else {
+        grantedScopes = governedScopes;
+        grantedScopeSource = 'configured-fallback';
       }
 
       const responseApiAccessPoint = (parsed as AdobeTokenSuccessBody).api_access_point?.trim();
@@ -301,7 +337,10 @@ export function createAdobeSignLiveOAuthService(
       ) {
         return {
           status: 'unreachable',
-          reason: endpointSource === 'configured-fallback' ? 'missing-access-point' : 'invalid-access-point',
+          reason:
+            endpointSource === 'configured-fallback'
+              ? 'missing-access-point'
+              : 'invalid-access-point',
           exchangeRequestDiagnostics,
         };
       }
@@ -313,6 +352,7 @@ export function createAdobeSignLiveOAuthService(
         accessToken: (parsed as AdobeTokenSuccessBody).access_token,
         refreshToken: (parsed as AdobeTokenSuccessBody).refresh_token,
         grantedScopes,
+        grantedScopeSource,
         expiresInSeconds: (parsed as AdobeTokenSuccessBody).expires_in,
         resolvedApiAccessPoint,
         resolvedWebAccessPoint,

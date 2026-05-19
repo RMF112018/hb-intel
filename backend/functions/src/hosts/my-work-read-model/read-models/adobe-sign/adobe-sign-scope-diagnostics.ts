@@ -26,6 +26,28 @@ export const ADOBE_SCOPE_DIAGNOSTIC_LITERALS = {
   agreementWriteSelf: 'agreement_write:self',
 } as const;
 
+/**
+ * Closed enum recording where the persisted `grantedScopes` value
+ * originated for the active grant. Emitted alongside the configured-vs-
+ * granted comparison so operators can distinguish:
+ *
+ *   - `token-response`: Adobe echoed an explicit non-empty `scope` field
+ *     on the token exchange, and that value drives the grant.
+ *   - `configured-fallback`: Adobe returned 200 with a missing/blank
+ *     `scope`; the adapter substituted the deployment's governed scope
+ *     envelope so the grant satisfies downstream coverage enforcement.
+ *   - `none`: provenance is not available at the emission site (e.g.
+ *     token-service scope-insufficient emission, where the persisted
+ *     grant's origin is no longer relevant).
+ */
+export type AdobeScopeDiagnosticsGrantedScopeSource =
+  | 'token-response'
+  | 'configured-fallback'
+  | 'none';
+
+const ADOBE_SCOPE_DIAGNOSTICS_GRANTED_SCOPE_SOURCES: ReadonlySet<AdobeScopeDiagnosticsGrantedScopeSource> =
+  new Set(['token-response', 'configured-fallback', 'none']);
+
 export interface AdobeScopeDiagnosticsPayload {
   readonly configuredScopeCount: number;
   readonly grantedScopeCount: number;
@@ -36,6 +58,7 @@ export interface AdobeScopeDiagnosticsPayload {
   readonly hasAgreementWriteSelfGranted: boolean;
   readonly missingGovernedScopesCsv?: string;
   readonly grantedScopesCsv?: string;
+  readonly grantedScopeSource?: AdobeScopeDiagnosticsGrantedScopeSource;
 }
 
 /**
@@ -80,6 +103,24 @@ function buildCsv(values: readonly string[]): string | undefined {
 export interface AdobeScopeDiagnosticsInput {
   readonly configuredScopes: unknown;
   readonly grantedScopes: unknown;
+  /**
+   * Optional provenance for the `grantedScopes` value. When omitted the
+   * field is not emitted; when present it is sanitized to the closed enum
+   * and unknown values collapse to `'none'`.
+   */
+  readonly grantedScopeSource?: unknown;
+}
+
+function sanitizeGrantedScopeSource(
+  value: unknown,
+): AdobeScopeDiagnosticsGrantedScopeSource | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string') return 'none';
+  return ADOBE_SCOPE_DIAGNOSTICS_GRANTED_SCOPE_SOURCES.has(
+    value as AdobeScopeDiagnosticsGrantedScopeSource,
+  )
+    ? (value as AdobeScopeDiagnosticsGrantedScopeSource)
+    : 'none';
 }
 
 /**
@@ -123,9 +164,11 @@ export function buildAdobeScopeDiagnostics(
 
   const missingCsv = buildCsv(missing);
   const grantedCsv = buildCsv(granted);
+  const grantedScopeSource = sanitizeGrantedScopeSource(input.grantedScopeSource);
   return {
     ...payload,
     ...(missingCsv !== undefined ? { missingGovernedScopesCsv: missingCsv } : {}),
     ...(grantedCsv !== undefined ? { grantedScopesCsv: grantedCsv } : {}),
+    ...(grantedScopeSource !== undefined ? { grantedScopeSource } : {}),
   };
 }

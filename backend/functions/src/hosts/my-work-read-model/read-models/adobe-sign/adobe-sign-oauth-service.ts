@@ -47,11 +47,21 @@ export interface AdobeSignTokenExchangeInput {
 
 export type AdobeSignEndpointSource = 'callback' | 'token-response' | 'configured-fallback';
 
+/**
+ * Source of the `grantedScopes` value carried on a successful token
+ * exchange. `token-response` when Adobe echoed a non-empty `scope` field;
+ * `configured-fallback` when Adobe returned 200 with a missing/blank
+ * `scope` and the adapter substituted the deployment's governed scope
+ * envelope so downstream governance enforcement can proceed.
+ */
+export type AdobeSignGrantedScopeSource = 'token-response' | 'configured-fallback';
+
 export interface AdobeSignTokenExchangeSuccess {
   readonly status: 'ok';
   readonly refreshToken: string;
   readonly accessToken: string;
   readonly grantedScopes: readonly string[];
+  readonly grantedScopeSource: AdobeSignGrantedScopeSource;
   readonly expiresInSeconds: number;
   readonly resolvedApiAccessPoint: string;
   readonly resolvedWebAccessPoint: string;

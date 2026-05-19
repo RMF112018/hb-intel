@@ -568,6 +568,7 @@ export function createCallbackHandler(deps: AdobeSignOAuthRouteDeps) {
     const scopeDiagnostics = buildAdobeScopeDiagnostics({
       configuredScopes: parseAdobeSignScopes(env.ADOBE_SIGN_OAUTH_SCOPES),
       grantedScopes: exchange.grantedScopes,
+      grantedScopeSource: exchange.grantedScopeSource,
     });
     logger.trackEvent('adobeSign.oauth.callback.scope-diagnostics', {
       correlationId: requestId,

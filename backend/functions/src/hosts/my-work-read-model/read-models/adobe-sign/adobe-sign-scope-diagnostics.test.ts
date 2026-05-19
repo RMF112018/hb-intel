@@ -192,3 +192,50 @@ describe('buildAdobeScopeDiagnostics', () => {
     expect(result.grantedScopeCount).toBe(0);
   });
 });
+
+describe('buildAdobeScopeDiagnostics — grantedScopeSource closed-enum sanitization', () => {
+  const BASE = {
+    configuredScopes: ['agreement_read:self', 'agreement_write:self'],
+    grantedScopes: ['agreement_read:self', 'agreement_write:self'],
+  } as const;
+
+  it('omits grantedScopeSource entirely when the caller passes undefined / no value', () => {
+    expect(buildAdobeScopeDiagnostics({ ...BASE })).not.toHaveProperty('grantedScopeSource');
+    expect(
+      buildAdobeScopeDiagnostics({ ...BASE, grantedScopeSource: undefined }),
+    ).not.toHaveProperty('grantedScopeSource');
+  });
+
+  it('passes through the three valid enum values verbatim', () => {
+    for (const source of ['token-response', 'configured-fallback', 'none'] as const) {
+      const result = buildAdobeScopeDiagnostics({ ...BASE, grantedScopeSource: source });
+      expect(result.grantedScopeSource).toBe(source);
+    }
+  });
+
+  it('collapses any unknown string to "none"', () => {
+    for (const source of ['', 'garbage', 'TOKEN-RESPONSE', 'live', 'fixture']) {
+      const result = buildAdobeScopeDiagnostics({ ...BASE, grantedScopeSource: source });
+      expect(result.grantedScopeSource).toBe('none');
+    }
+  });
+
+  it('collapses non-string inputs to "none"', () => {
+    for (const source of [42, true, null, {}, []]) {
+      const result = buildAdobeScopeDiagnostics({ ...BASE, grantedScopeSource: source });
+      expect(result.grantedScopeSource).toBe('none');
+    }
+  });
+
+  it('does not emit raw scope strings beyond the existing sanitized CSV bounds when source is set', () => {
+    const result = buildAdobeScopeDiagnostics({
+      configuredScopes: ['agreement_read:self'],
+      grantedScopes: ['agreement_read:self', 'https://attacker.example.com', 'Bearer abc'],
+      grantedScopeSource: 'token-response',
+    });
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toContain('https://');
+    expect(serialized).not.toContain('Bearer');
+    expect(result.grantedScopeSource).toBe('token-response');
+  });
+});

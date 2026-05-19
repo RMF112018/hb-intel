@@ -145,6 +145,40 @@ describe('token service — expired/near-expiry refresh success', () => {
     expect(stored?.lastRefreshedAtUtc).toBe(NOW.toISOString());
     expect(stored?.expiresAtUtc).toBe('2026-05-13T13:00:00.000Z');
   });
+
+  it('preserves existing grant scopes when refresh succeeds with empty grantedScopes (Adobe omitted scope on refresh)', async () => {
+    // Adobe may return 200 on refresh with a missing/blank `scope` value.
+    // The refresh client reports verbatim — `grantedScopes: []`. If the
+    // token-service overwrites the persisted grant scopes with that empty
+    // array, a configured-fallback grant would be silently regressed and
+    // the next call would trip `scope-insufficient`. Coverage-enforced
+    // posture: preserve `grant.grantedScopes` in that case.
+    const grant = activeGrant({ grantedScopes: ['agreement_read:self', 'agreement_write:self'] });
+    const { service, grantStore } = buildService(
+      grant,
+      [refreshOk({ grantedScopes: [] })],
+      ['agreement_read:self', 'agreement_write:self'],
+    );
+    const result = await service.getAccessToken(ACTOR_KEY, NOW);
+    expect(result.status).toBe('ok');
+
+    const stored = await grantStore.findGrant(ACTOR_KEY);
+    expect(stored?.state).toBe('active');
+    // Persisted scopes still cover governed — not regressed to [].
+    expect(stored?.grantedScopes).toEqual(['agreement_read:self', 'agreement_write:self']);
+  });
+
+  it('overwrites grant scopes with refresh.grantedScopes when refresh returns a non-empty value', async () => {
+    // Sanity guard for the preserve-on-empty change: a non-empty refresh
+    // response continues to be the source of truth for stored scopes.
+    const grant = activeGrant({ grantedScopes: ['agreement_read:self'] });
+    const { service, grantStore } = buildService(grant, [
+      refreshOk({ grantedScopes: ['agreement_read:self', 'agreement_write:self'] }),
+    ]);
+    await service.getAccessToken(ACTOR_KEY, NOW);
+    const stored = await grantStore.findGrant(ACTOR_KEY);
+    expect(stored?.grantedScopes).toEqual(['agreement_read:self', 'agreement_write:self']);
+  });
 });
 
 describe('token service — refresh revoked / invalid → authorization-required', () => {

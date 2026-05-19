@@ -140,6 +140,7 @@ const buildDeps = (
     refreshToken: 'rt-secret',
     accessToken: 'at-secret',
     grantedScopes: ['agreement_read', 'agreement_send'],
+    grantedScopeSource: 'token-response',
     expiresInSeconds: 3600,
     resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
     resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
@@ -459,6 +460,7 @@ describe('callback handler', () => {
         hasAgreementReadSelfGranted: false,
         hasAgreementWriteSelfGranted: false,
         grantedScopesCsv: 'agreement_read,agreement_send',
+        grantedScopeSource: 'token-response',
       }),
     );
   });
@@ -475,6 +477,7 @@ describe('callback handler', () => {
       refreshToken: 'rt-secret',
       accessToken: 'at-secret',
       grantedScopes: ['agreement_read:self'],
+      grantedScopeSource: 'token-response',
       expiresInSeconds: 3600,
       resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
       resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
@@ -505,6 +508,7 @@ describe('callback handler', () => {
         hasAgreementWriteSelfGranted: false,
         missingGovernedScopesCsv: 'agreement_write:self',
         grantedScopesCsv: 'agreement_read:self',
+        grantedScopeSource: 'token-response',
       }),
     );
 
@@ -532,6 +536,7 @@ describe('callback handler', () => {
       refreshToken: 'rt-secret',
       accessToken: 'at-secret',
       grantedScopes: ['agreement_read:self', 'agreement_write:self'],
+      grantedScopeSource: 'token-response',
       expiresInSeconds: 3600,
       resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
       resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
@@ -558,12 +563,67 @@ describe('callback handler', () => {
         hasAgreementReadSelfGranted: true,
         hasAgreementWriteSelfGranted: true,
         grantedScopesCsv: 'agreement_read:self,agreement_write:self',
+        grantedScopeSource: 'token-response',
       }),
     );
     // missing csv omitted when nothing is missing.
     const calls = (loggerTrackEventSpy as any).mock.calls as Array<[string, any]>;
     const event = calls.find(([n]) => n === 'adobeSign.oauth.callback.scope-diagnostics')!;
     expect(event[1]).not.toHaveProperty('missingGovernedScopesCsv');
+  });
+
+  it('configured-fallback exchange: grant persists configured scopes; scope-diagnostics carries grantedScopeSource=configured-fallback and missing=0', async () => {
+    const mod = await importModule();
+    const { deps, seams } = buildDeps();
+    deps.resolveConfigEnv = () => ({
+      ...FULL_CONFIG_ENV,
+      ADOBE_SIGN_OAUTH_SCOPES: 'agreement_read:self agreement_write:self',
+    });
+    // Adobe returned 200 with missing/blank scope; the live OAuth service
+    // substituted the configured governed scopes and stamped the source
+    // as configured-fallback. The callback must persist those scopes
+    // verbatim into the grant and emit the source in scope-diagnostics.
+    (seams.service.exchangeAuthorizationCode as any).mockResolvedValueOnce({
+      status: 'ok',
+      refreshToken: 'rt-secret',
+      accessToken: 'at-secret',
+      grantedScopes: ['agreement_read:self', 'agreement_write:self'],
+      grantedScopeSource: 'configured-fallback',
+      expiresInSeconds: 3600,
+      resolvedApiAccessPoint: 'https://api.na1.adobesign.com',
+      resolvedWebAccessPoint: 'https://secure.na1.adobesign.com',
+      endpointSource: 'callback',
+    });
+    const { state } = await issueState(mod, deps, seams);
+    const callback = mod.createCallbackHandler(deps);
+    await callback(
+      callbackRequest({
+        state,
+        code: 'c',
+        api_access_point: 'https://api.na1.adobesign.com',
+        web_access_point: 'https://secure.na1.adobesign.com',
+      }) as any,
+      {} as any,
+    );
+
+    // Grant carries the substituted configured scopes — downstream
+    // token-service coverage enforcement now passes.
+    const grant = await seams.grantStore.findGrant(ACTOR_KEY);
+    expect(grant?.state).toBe('active');
+    expect(grant?.grantedScopes).toEqual(['agreement_read:self', 'agreement_write:self']);
+
+    expect(loggerTrackEventSpy).toHaveBeenCalledWith(
+      'adobeSign.oauth.callback.scope-diagnostics',
+      expect.objectContaining({
+        correlationId: 'req-oauth',
+        configuredScopeCount: 2,
+        grantedScopeCount: 2,
+        missingGovernedScopeCount: 0,
+        hasAgreementReadSelfGranted: true,
+        hasAgreementWriteSelfGranted: true,
+        grantedScopeSource: 'configured-fallback',
+      }),
+    );
   });
 
   it('rejects missing state with a redirect carrying invalid-state status (no exchange)', async () => {

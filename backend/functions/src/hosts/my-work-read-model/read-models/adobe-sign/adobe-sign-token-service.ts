@@ -294,12 +294,23 @@ export function createAdobeSignTokenService(
       trackRefreshResult({ status: 'ok' });
 
       // refresh.status === 'ok'
+      //
+      // Adobe may omit the `scope` field on a successful refresh response
+      // (same defect the token-exchange path guards against via the
+      // `configured-fallback` branch in `adobe-sign-live-oauth-service`).
+      // The refresh-client reports verbatim — an empty `refresh.grantedScopes`
+      // means Adobe did not echo a value. Preserve the previously-stored
+      // grant scopes in that case so a configured-fallback grant is not
+      // silently regressed to `[]` and tripped by the next call's coverage
+      // enforcement.
+      const refreshedGrantedScopes =
+        refresh.grantedScopes.length > 0 ? refresh.grantedScopes : grant.grantedScopes;
       await deps.grantStore.upsertGrant({
         ...grant,
         state: 'active',
         lastRefreshedAtUtc: now.toISOString(),
         encryptedRefreshTokenRef: refresh.updatedEncryptedRefreshTokenRef,
-        grantedScopes: refresh.grantedScopes,
+        grantedScopes: refreshedGrantedScopes,
         expiresAtUtc: refresh.expiresAtUtc,
       });
 
