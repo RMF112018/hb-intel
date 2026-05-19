@@ -17,10 +17,18 @@ const DEFAULT_DEBOUNCE_WINDOW_SECONDS = 60;
 const DEFAULT_SUBSCRIPTION_EXPIRATION_DAYS = 27;
 const DEFAULT_SUBSCRIPTION_RENEW_THRESHOLD_DAYS = 7;
 const DEFAULT_SUBSCRIPTION_RENEWAL_TIMER_SCHEDULE = '0 15 2 * * *';
+const DEFAULT_PENDING_WORK_PROCESSOR_TIMER_ENABLED = true;
+const DEFAULT_PENDING_WORK_PROCESSOR_TIMER_SCHEDULE = '0 */1 * * * *';
+const DEFAULT_PENDING_WORK_MAX_ATTEMPTS = 5;
+const DEFAULT_PENDING_WORK_CLAIM_LEASE_MINUTES = 10;
 const DEFAULT_DRIFT_AUDIT_TIMER_SCHEDULE = '0 30 3 * * *';
 const DEFAULT_WEEKLY_REPAIR_TIMER_SCHEDULE = '0 0 4 * * 0';
 const DEFAULT_MONTHLY_PURGE_TIMER_SCHEDULE = '0 0 5 1 * *';
 const DEFAULT_INACTIVE_RETENTION_DAYS = 90;
+const DEFAULT_PENDING_WORK_SUCCESS_RETENTION_DAYS = 30;
+const DEFAULT_PENDING_WORK_FAILURE_RETENTION_DAYS = 90;
+const DEFAULT_RUN_RETENTION_DAYS = 180;
+const DEFAULT_RESOLVED_FAILURE_RETENTION_DAYS = 180;
 const DEFAULT_SYNC_LEASE_MINUTES = 10;
 const DEFAULT_REBUILD_LEASE_MINUTES = 60;
 const DEFAULT_DRIFT_AUDIT_LEASE_MINUTES = 60;
@@ -80,16 +88,44 @@ export interface IProjectionSubscriptionsConfig {
 }
 
 export interface IProjectionQueueConfig {
+  /**
+   * Superseded active-MVP setting retained as a quarantined compatibility seam.
+   * Not required for SharePoint-backed MVP validation.
+   */
   readonly queueName: string;
+  /**
+   * Superseded active-MVP setting retained as a quarantined compatibility seam.
+   * Not required for SharePoint-backed MVP validation.
+   */
   readonly serviceBusFqdn: string;
   readonly debounceWindowSeconds: number;
 }
 
 export interface IProjectionTablesConfig {
+  /**
+   * Superseded active-MVP setting retained as a quarantined compatibility seam.
+   * Not required for SharePoint-backed MVP validation.
+   */
   readonly accountUrl: string;
+  /**
+   * Superseded active-MVP setting retained as a quarantined compatibility seam.
+   * Not required for SharePoint-backed MVP validation.
+   */
   readonly subscriptionsTable: string;
+  /**
+   * Superseded active-MVP setting retained as a quarantined compatibility seam.
+   * Not required for SharePoint-backed MVP validation.
+   */
   readonly deltaStateTable: string;
+  /**
+   * Superseded active-MVP setting retained as a quarantined compatibility seam.
+   * Not required for SharePoint-backed MVP validation.
+   */
   readonly leasesTable: string;
+  /**
+   * Superseded active-MVP setting retained as a quarantined compatibility seam.
+   * Not required for SharePoint-backed MVP validation.
+   */
   readonly runsTable: string;
 }
 
@@ -103,7 +139,11 @@ export interface IProjectionDriftConfig {
 export interface IProjectionPurgeConfig {
   readonly monthlyPurgeEnabled: boolean;
   readonly monthlyPurgeTimerSchedule: string;
-  readonly inactiveRetentionDays: number;
+  readonly registryInactiveRetentionDays: number;
+  readonly pendingWorkSuccessRetentionDays: number;
+  readonly pendingWorkFailureRetentionDays: number;
+  readonly runRetentionDays: number;
+  readonly resolvedFailureRetentionDays: number;
 }
 
 export interface IProjectionLeasesConfig {
@@ -114,11 +154,19 @@ export interface IProjectionLeasesConfig {
   readonly maxDeltaPagesPerRun: number;
 }
 
+export interface IProjectionPendingWorkConfig {
+  readonly processorTimerEnabled: boolean;
+  readonly processorTimerSchedule: string;
+  readonly maxAttempts: number;
+  readonly claimLeaseMinutes: number;
+}
+
 export interface IProjectionConfig {
   readonly enablement: IProjectionEnablement;
   readonly sites: IProjectionSitesConfig;
   readonly webhook: IProjectionWebhookConfig;
   readonly subscriptions: IProjectionSubscriptionsConfig;
+  readonly pendingWork: IProjectionPendingWorkConfig;
   readonly queue: IProjectionQueueConfig;
   readonly tables: IProjectionTablesConfig;
   readonly drift: IProjectionDriftConfig;
@@ -282,18 +330,7 @@ export function validateProjectionConfig(
       'HBC_MY_PROJECTS_PROJECTION_NOTIFICATION_URL',
       readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_NOTIFICATION_URL'),
     );
-    requireHttpsUrl(
-      issues,
-      'HBC_MY_PROJECTS_PROJECTION_TABLE_ACCOUNT_URL',
-      readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_TABLE_ACCOUNT_URL'),
-    );
-
     requireString(issues, SECRET_ENV_KEY, readTrimmed(env, SECRET_ENV_KEY));
-    requireString(
-      issues,
-      'HBC_MY_PROJECTS_PROJECTION_SERVICEBUS_FQDN',
-      readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_SERVICEBUS_FQDN'),
-    );
 
     requireSixFieldCron(
       issues,
@@ -314,6 +351,11 @@ export function validateProjectionConfig(
       issues,
       'HBC_MY_PROJECTS_PROJECTION_MONTHLY_PURGE_TIMER_SCHEDULE',
       readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_MONTHLY_PURGE_TIMER_SCHEDULE'),
+    );
+    requireSixFieldCron(
+      issues,
+      'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_PROCESSOR_TIMER_SCHEDULE',
+      readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_PROCESSOR_TIMER_SCHEDULE'),
     );
 
     requireBooleanLiteral(
@@ -336,6 +378,11 @@ export function validateProjectionConfig(
       'HBC_MY_PROJECTS_PROJECTION_MONTHLY_PURGE_ENABLED',
       readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_MONTHLY_PURGE_ENABLED'),
     );
+    requireBooleanLiteral(
+      issues,
+      'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_PROCESSOR_TIMER_ENABLED',
+      readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_PROCESSOR_TIMER_ENABLED'),
+    );
   }
 
   for (const optionalIntegerKey of [
@@ -343,7 +390,13 @@ export function validateProjectionConfig(
     'HBC_MY_PROJECTS_PROJECTION_SUBSCRIPTION_EXPIRATION_DAYS',
     'HBC_MY_PROJECTS_PROJECTION_SUBSCRIPTION_RENEW_THRESHOLD_DAYS',
     'HBC_MY_PROJECTS_PROJECTION_DEBOUNCE_WINDOW_SECONDS',
-    'HBC_MY_PROJECTS_PROJECTION_INACTIVE_RETENTION_DAYS',
+    'HBC_MY_PROJECTS_PROJECTION_REGISTRY_INACTIVE_RETENTION_DAYS',
+    'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_SUCCESS_RETENTION_DAYS',
+    'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_FAILURE_RETENTION_DAYS',
+    'HBC_MY_PROJECTS_PROJECTION_RUN_RETENTION_DAYS',
+    'HBC_MY_PROJECTS_PROJECTION_RESOLVED_FAILURE_RETENTION_DAYS',
+    'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_MAX_ATTEMPTS',
+    'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_CLAIM_LEASE_MINUTES',
     'HBC_MY_PROJECTS_PROJECTION_SYNC_LEASE_MINUTES',
     'HBC_MY_PROJECTS_PROJECTION_REBUILD_LEASE_MINUTES',
     'HBC_MY_PROJECTS_PROJECTION_DRIFT_AUDIT_LEASE_MINUTES',
@@ -426,8 +479,28 @@ export function getProjectionConfig(env: EnvReader = (key) => process.env[key]):
       DEFAULT_SUBSCRIPTION_RENEWAL_TIMER_SCHEDULE,
   };
 
+  const pendingWork: IProjectionPendingWorkConfig = {
+    processorTimerEnabled: parseBoolean(
+      readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_PROCESSOR_TIMER_ENABLED'),
+      DEFAULT_PENDING_WORK_PROCESSOR_TIMER_ENABLED,
+    ),
+    processorTimerSchedule:
+      readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_PROCESSOR_TIMER_SCHEDULE') ||
+      DEFAULT_PENDING_WORK_PROCESSOR_TIMER_SCHEDULE,
+    maxAttempts:
+      parsePositiveInteger(
+        readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_MAX_ATTEMPTS'),
+      ) ?? DEFAULT_PENDING_WORK_MAX_ATTEMPTS,
+    claimLeaseMinutes:
+      parsePositiveInteger(
+        readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_CLAIM_LEASE_MINUTES'),
+      ) ?? DEFAULT_PENDING_WORK_CLAIM_LEASE_MINUTES,
+  };
+
   const queue: IProjectionQueueConfig = {
+    // Quarantined compatibility seam from the superseded Service Bus MVP path.
     queueName: readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_QUEUE_NAME') || DEFAULT_QUEUE_NAME,
+    // Quarantined compatibility seam from the superseded Service Bus MVP path.
     serviceBusFqdn: readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_SERVICEBUS_FQDN'),
     debounceWindowSeconds:
       parsePositiveInteger(
@@ -436,14 +509,19 @@ export function getProjectionConfig(env: EnvReader = (key) => process.env[key]):
   };
 
   const tables: IProjectionTablesConfig = {
+    // Quarantined compatibility seam from the superseded Azure Table MVP path.
     accountUrl: readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_TABLE_ACCOUNT_URL'),
+    // Quarantined compatibility seam from the superseded Azure Table MVP path.
     subscriptionsTable:
       readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_SUBSCRIPTIONS_TABLE') ||
       DEFAULT_SUBSCRIPTIONS_TABLE,
+    // Quarantined compatibility seam from the superseded Azure Table MVP path.
     deltaStateTable:
       readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_DELTA_STATE_TABLE') || DEFAULT_DELTA_STATE_TABLE,
+    // Quarantined compatibility seam from the superseded Azure Table MVP path.
     leasesTable:
       readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_LEASES_TABLE') || DEFAULT_LEASES_TABLE,
+    // Quarantined compatibility seam from the superseded Azure Table MVP path.
     runsTable: readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_RUNS_TABLE') || DEFAULT_RUNS_TABLE,
   };
 
@@ -472,10 +550,25 @@ export function getProjectionConfig(env: EnvReader = (key) => process.env[key]):
     monthlyPurgeTimerSchedule:
       readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_MONTHLY_PURGE_TIMER_SCHEDULE') ||
       DEFAULT_MONTHLY_PURGE_TIMER_SCHEDULE,
-    inactiveRetentionDays:
+    registryInactiveRetentionDays:
       parsePositiveInteger(
-        readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_INACTIVE_RETENTION_DAYS'),
+        readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_REGISTRY_INACTIVE_RETENTION_DAYS'),
       ) ?? DEFAULT_INACTIVE_RETENTION_DAYS,
+    pendingWorkSuccessRetentionDays:
+      parsePositiveInteger(
+        readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_SUCCESS_RETENTION_DAYS'),
+      ) ?? DEFAULT_PENDING_WORK_SUCCESS_RETENTION_DAYS,
+    pendingWorkFailureRetentionDays:
+      parsePositiveInteger(
+        readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_PENDING_WORK_FAILURE_RETENTION_DAYS'),
+      ) ?? DEFAULT_PENDING_WORK_FAILURE_RETENTION_DAYS,
+    runRetentionDays:
+      parsePositiveInteger(readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_RUN_RETENTION_DAYS')) ??
+      DEFAULT_RUN_RETENTION_DAYS,
+    resolvedFailureRetentionDays:
+      parsePositiveInteger(
+        readTrimmed(env, 'HBC_MY_PROJECTS_PROJECTION_RESOLVED_FAILURE_RETENTION_DAYS'),
+      ) ?? DEFAULT_RESOLVED_FAILURE_RETENTION_DAYS,
   };
 
   const leases: IProjectionLeasesConfig = {
@@ -503,6 +596,7 @@ export function getProjectionConfig(env: EnvReader = (key) => process.env[key]):
     sites,
     webhook,
     subscriptions,
+    pendingWork,
     queue,
     tables,
     drift,
