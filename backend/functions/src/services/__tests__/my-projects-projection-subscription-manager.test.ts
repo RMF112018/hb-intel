@@ -479,6 +479,49 @@ describe('ProjectionSubscriptionManager.ensureSubscription — healthy + renewal
       events.some((entry) => entry.name === 'myProjectsProjection.subscription.renew.failure'),
     ).toBe(true);
   });
+
+  it('preserves explicit throttling classification on renew failures', async () => {
+    const repoFixture = makeRepository({
+      Projects: {
+        partitionKey: 'MyProjectsProjection',
+        rowKey: 'Subscription:Projects',
+        SourceListKind: 'Projects',
+        SourceSiteId: 'site-1',
+        SourceListId: 'list-projects',
+        SubscriptionId: 'sub-abc',
+        ExpirationDateTimeUtc: '2026-05-22T12:00:00.000Z',
+        Status: 'healthy',
+      },
+    });
+    const clientFixture = makeGraphClient({
+      renew: {
+        ok: false,
+        failureCode: 'graph-429-throttled',
+        sanitizedReason: 'throttled',
+        status: 429,
+      },
+    });
+    const { events, logger } = makeLogger();
+    const manager = new ProjectionSubscriptionManager({
+      stateRepository: repoFixture.repo,
+      graphClient: clientFixture.client,
+      locator: makeLocator(),
+      config: BASE_CONFIG,
+      logger,
+      now: () => new Date('2026-05-17T12:00:00.000Z'),
+      correlationIdProvider: () => 'corr-1',
+    });
+    const outcome = await manager.ensureSubscription('Projects');
+    expect(outcome).toMatchObject({ action: 'renew-failed', failureCode: 'graph-429-throttled' });
+    expect(repoFixture.recordedFailures[0]).toMatchObject({
+      failureCode: 'graph-429-throttled',
+      status: 'renewal-required',
+    });
+    const renewFailure = events.find(
+      (entry) => entry.name === 'myProjectsProjection.subscription.renew.failure',
+    );
+    expect(renewFailure?.properties.failureCode).toBe('graph-429-throttled');
+  });
 });
 
 describe('ProjectionSubscriptionManager.ensureAllSubscriptions', () => {

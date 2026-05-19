@@ -131,7 +131,12 @@ The seed service does **not** currently emit `customEvents` (Doc 08 § 2.4 spec)
 | Sync worker silent                    | Lease table — possibly stuck lease; `lease.skipped` events name the holder.                    |
 | Helper list rows drifting from source | `worker.projection.write.failure` events; check delta-state markFailure rows.                  |
 | Subscription expired                  | `subscription.health.missing` + `health.nearingExpiry`; check renewal-timer run history.       |
-| Seed never completed                  | `MyProjectsProjectionRuns` ledger via `projection-admin-cli --command=status --run-type=seed`. |
+| Seed never completed                  | `My Projects Projection Runs` SharePoint list ledger via `projection-admin-cli --command=status --run-type=seed`. |
+
+Subscription and delta checkpoint persistence note:
+- Active MVP runtime persists Graph subscription health/status in SharePoint `Subscription State`.
+- Active MVP runtime persists Graph delta checkpoint + `NeedsResync` in SharePoint `Source Sync State`.
+- Azure Table subscription/delta repositories remain quarantined compatibility seams and are not part of enabled MVP composition.
 
 ---
 

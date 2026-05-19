@@ -382,7 +382,7 @@ describe('handleProjectionSyncMessage — failure paths', () => {
     expect(resyncEvent?.properties.reason).toBe('410');
   });
 
-  it('routes other delta failures to markFailure and rethrows for Service Bus retry', async () => {
+  it('routes other delta failures to markFailure and rethrows for pending-work retry scheduling', async () => {
     const state = makeStateRepo({ initial: makeHealthyState() });
     const lease = makeLeaseRepo();
     const delta = makeDeltaClient({

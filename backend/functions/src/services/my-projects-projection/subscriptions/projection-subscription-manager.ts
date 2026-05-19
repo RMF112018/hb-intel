@@ -2,7 +2,8 @@
  * My Projects projection — Graph subscription lifecycle manager.
  *
  * Orchestrates create/renew/reset across the two source-list subscriptions,
- * persists state via `ProjectionSubscriptionStateRepository`, and emits
+ * persists state via the configured subscription-state repository
+ * (SharePoint `Subscription State` list in active MVP composition), and emits
  * closed-set telemetry events per `08_Telemetry…§2.2`.
  *
  * Per-source flow inside `ensureSubscription`:
