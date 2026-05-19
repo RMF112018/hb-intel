@@ -151,3 +151,8 @@ When sections 1–6 pass and `Sites.Read.All` is granted:
   - local `@hbc/functions` typecheck fails on unrelated active drift in `adobe-sign-webhook-receiver-routes.ts`;
   - provisioning verify/apply lane returned `401` in the current execution lane;
   - hosted live proof sequence (Runbook 04) not yet captured in authorized operator lane.
+
+## Prompt 11 Documentation Closeout (2026-05-19)
+
+- Final package closeout report: `docs/architecture/plans/MASTER/spfx/my-dashboard/B05.16 - m-p-sp-cache/resources/Prompt_11_Closeout_Report.md`
+- Documentation posture: SharePoint-first MVP is canonical; Azure Table/Service Bus are superseded/quarantined compatibility seams only.
