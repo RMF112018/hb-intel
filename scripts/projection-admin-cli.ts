@@ -7,10 +7,8 @@
  * Doc 07 §6), one-off source-rebuild during repair, status sweep ahead of
  * cutover readiness.
  *
- * Auth: relies on the same federated Graph token + Azure Table managed-identity
- * paths as the Function App. In a local operator session, set
- * SHAREPOINT_BEARER_TOKEN (Graph) and AZURE_TABLES_* env vars per the
- * Operations Runbook.
+ * Auth: relies on the same federated Graph token + SharePoint list
+ * managed-identity paths as the Function App.
  *
  * Usage:
  *   pnpm tsx scripts/projection-admin-cli.ts --command=seed [--dry-run] [--notes "..."]
@@ -24,8 +22,11 @@ import { randomUUID } from 'node:crypto';
 
 import { GraphListClient } from '../backend/functions/src/services/legacy-fallback/graph-list-client.js';
 import { getProjectionConfig } from '../backend/functions/src/services/my-projects-projection/projection-config.js';
-import { ProjectionLeaseRepository } from '../backend/functions/src/services/my-projects-projection/state/lease-repository.js';
-import { ProjectionRunRepository } from '../backend/functions/src/services/my-projects-projection/state/run-repository.js';
+import { SharePointProjectionControlStateRepository } from '../backend/functions/src/services/my-projects-projection/state/sharepoint-control-state-repository.js';
+import { SharePointProjectionRunRepository } from '../backend/functions/src/services/my-projects-projection/state/sharepoint-run-repository.js';
+import { ProjectionSourceSyncStateRepository } from '../backend/functions/src/services/my-projects-projection/state/source-sync-state-repository.js';
+import { SharePointStateStore } from '../backend/functions/src/services/my-projects-projection/state/sharepoint-state-store.js';
+import { SyncFailureRepository } from '../backend/functions/src/services/my-projects-projection/state/sync-failure-repository.js';
 import { createGraphMyProjectsRegistryRepository } from '../backend/functions/src/services/my-projects-projection/registry/my-projects-registry-repository.js';
 import { createGraphProjectionSourceFetchClient } from '../backend/functions/src/services/my-projects-projection/engine/projection-source-fetch-client.js';
 import {
@@ -33,6 +34,7 @@ import {
   type IProjectionSeedService,
   type ISeedRunResult,
 } from '../backend/functions/src/services/my-projects-projection/engine/projection-seed-service.js';
+import { createProjectionGraphDeltaClient } from '../backend/functions/src/services/my-projects-projection/delta/projection-graph-delta-client.js';
 import type { IProjectionAdminRebuildRequest } from '../backend/functions/src/services/my-projects-projection/projection-admin-contracts.js';
 import {
   isProjectionRunType,
@@ -40,6 +42,11 @@ import {
   type ProjectionRunType,
   type SourceListKind,
 } from '../backend/functions/src/services/my-projects-projection/projection-types.js';
+import type { IProjectionRunEntity } from '../backend/functions/src/services/my-projects-projection/projection-state-entities.js';
+import {
+  createProjectionSourceListLocator,
+  type IGraphSiteListResolver,
+} from '../backend/functions/src/services/my-projects-projection/subscriptions/projection-source-list-locator.js';
 
 export type CliCommand = 'seed' | 'rebuild' | 'status';
 
@@ -162,7 +169,13 @@ function usageMessage(): string {
 
 export interface ICliDeps {
   readonly seedService: IProjectionSeedService;
-  readonly runRepository: ProjectionRunRepository;
+  readonly runRepository: {
+    listRecent(args: {
+      runType?: ProjectionRunType;
+      sourceListKind?: SourceListKind;
+      limit: number;
+    }): Promise<ReadonlyArray<IProjectionRunEntity>>;
+  };
   readonly rebuildLeaseTtlMinutes: number;
   readonly runIdProvider: () => string;
   readonly projectionBatchIdProvider: () => string;
@@ -241,12 +254,32 @@ function buildProductionDeps(): ICliDeps {
   const config = getProjectionConfig();
   const sourceGraph = new GraphListClient(config.sites.sourceSiteUrl);
   const registryGraph = new GraphListClient(config.sites.registrySiteUrl);
-  const runRepository = new ProjectionRunRepository();
+  const store = new SharePointStateStore(config.sites.registrySiteUrl);
+  const runRepository = new SharePointProjectionRunRepository(store);
+  const resolver: IGraphSiteListResolver = {
+    async resolveSiteId() {
+      return sourceGraph.resolveSiteId();
+    },
+    async resolveListId(_siteId, listTitle) {
+      return sourceGraph.resolveListId(listTitle);
+    },
+  };
   const seedService = createProjectionSeedService({
     sourceFetchClient: createGraphProjectionSourceFetchClient({ graph: sourceGraph }),
     registryRepository: createGraphMyProjectsRegistryRepository({ graph: registryGraph }),
-    leaseRepository: new ProjectionLeaseRepository(),
+    leaseRepository: new SharePointProjectionControlStateRepository(store),
     runRepository,
+    sourceSyncStateRepository: new ProjectionSourceSyncStateRepository(store),
+    failureRepository: new SyncFailureRepository(store),
+    sourceListLocator: createProjectionSourceListLocator({
+      resolver,
+      config: {
+        sourceSiteUrl: config.sites.sourceSiteUrl,
+        projectsListTitle: config.sites.projectsListTitle,
+        legacyRegistryListTitle: config.sites.legacyRegistryListTitle,
+      },
+    }),
+    deltaClient: createProjectionGraphDeltaClient(),
   });
   return {
     seedService,

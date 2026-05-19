@@ -101,6 +101,16 @@ interface IFakeRunRepoState {
   finalizes: Array<Record<string, unknown>>;
 }
 
+interface IFakeSourceSyncState {
+  initialized: Array<{ sourceListKind: string; deltaLink: string; batchId: string }>;
+  cleared: Array<{ sourceListKind: string; deltaLink: string; batchId: string }>;
+  existingByKind: Map<string, { etag: string }>;
+}
+
+interface IFakeFailureState {
+  failures: Array<{ failureId: string; failureCode: string; sourceListKind?: string }>;
+}
+
 function makeRunRepo(state: IFakeRunRepoState): IProjectionSeedServiceDeps['runRepository'] {
   return {
     async start(args) {
@@ -142,6 +152,50 @@ function makeSourceClient(args: {
   };
 }
 
+function makeSourceSyncRepo(state: IFakeSourceSyncState): IProjectionSeedServiceDeps['sourceSyncStateRepository'] {
+  return {
+    async get(sourceListKind) {
+      return state.existingByKind.has(sourceListKind) ? { SourceListKind: sourceListKind } : null;
+    },
+    async getWithEtag(sourceListKind) {
+      const existing = state.existingByKind.get(sourceListKind);
+      if (!existing) return null;
+      return {
+        entity: { SourceListKind: sourceListKind },
+        etag: existing.etag,
+      };
+    },
+    async initializeBaseline(args) {
+      state.initialized.push({
+        sourceListKind: args.sourceListKind,
+        deltaLink: args.deltaLink,
+        batchId: args.batchId,
+      });
+      state.existingByKind.set(args.sourceListKind, { etag: `W/${args.batchId}` });
+    },
+    async clearNeedsResync(args) {
+      state.cleared.push({
+        sourceListKind: args.sourceListKind,
+        deltaLink: args.deltaLink,
+        batchId: args.batchId,
+      });
+      state.existingByKind.set(args.sourceListKind, { etag: args.expectedEtag });
+    },
+  };
+}
+
+function makeFailureRepo(state: IFakeFailureState): IProjectionSeedServiceDeps['failureRepository'] {
+  return {
+    async upsertFailure(args) {
+      state.failures.push({
+        failureId: args.failureId,
+        failureCode: args.failureCode,
+        sourceListKind: args.sourceListKind,
+      });
+    },
+  };
+}
+
 function makeProject(overrides: Partial<IProjectSourceRow> = {}): IProjectSourceRow {
   return {
     id: 101,
@@ -175,12 +229,39 @@ function makeService(args: {
   repoState: IFakeRepoState;
   leaseState: IFakeLeaseState;
   runState: IFakeRunRepoState;
+  sourceSyncState: IFakeSourceSyncState;
+  failureState: IFakeFailureState;
 }): ProjectionSeedService {
   return new ProjectionSeedService({
     sourceFetchClient: makeSourceClient({ projects: args.projects, registry: args.registry }),
     registryRepository: makeRepo(args.repoState),
     leaseRepository: makeLease(args.leaseState),
     runRepository: makeRunRepo(args.runState),
+    sourceSyncStateRepository: makeSourceSyncRepo(args.sourceSyncState),
+    failureRepository: makeFailureRepo(args.failureState),
+    sourceListLocator: {
+      async resolve(kind) {
+        return {
+          siteId: 'site-1',
+          listId: kind === 'Projects' ? 'projects-list' : 'legacy-list',
+          listTitle: kind,
+        };
+      },
+      async resolveResourcePath() {
+        return 'unused';
+      },
+    },
+    deltaClient: {
+      async acquireInitialDeltaLink(args) {
+        return {
+          ok: true,
+          deltaLink: `https://graph/delta/${args.listId}?token=latest`,
+        } as const;
+      },
+      async drainDelta() {
+        throw new Error('unused');
+      },
+    },
     now: () => NOW,
   });
 }
@@ -201,12 +282,20 @@ describe('ProjectionSeedService — full rebuild', () => {
       acquireOutcome: { acquired: true, expiresAtUtc: NOW.toISOString() },
     };
     const runState: IFakeRunRepoState = { starts: [], finalizes: [] };
+    const sourceSyncState: IFakeSourceSyncState = {
+      initialized: [],
+      cleared: [],
+      existingByKind: new Map(),
+    };
+    const failureState: IFakeFailureState = { failures: [] };
     const svc = makeService({
       projects: [makeProject()],
       registry: [makeRegistry()],
       repoState,
       leaseState,
       runState,
+      sourceSyncState,
+      failureState,
     });
 
     const result = await svc.runSeedOrRebuild({
@@ -223,6 +312,12 @@ describe('ProjectionSeedService — full rebuild', () => {
     expect(runState.starts).toHaveLength(1);
     expect(runState.finalizes).toHaveLength(1);
     expect(runState.finalizes[0].status).toBe('succeeded');
+    expect(sourceSyncState.initialized).toHaveLength(2);
+    expect(sourceSyncState.initialized.map((row) => row.sourceListKind).sort()).toEqual([
+      'LegacyRegistry',
+      'Projects',
+    ]);
+    expect(failureState.failures).toHaveLength(0);
   });
 
   it('seed kind records runType=seed', async () => {
@@ -233,12 +328,20 @@ describe('ProjectionSeedService — full rebuild', () => {
       acquireOutcome: { acquired: true, expiresAtUtc: NOW.toISOString() },
     };
     const runState: IFakeRunRepoState = { starts: [], finalizes: [] };
+    const sourceSyncState: IFakeSourceSyncState = {
+      initialized: [],
+      cleared: [],
+      existingByKind: new Map(),
+    };
+    const failureState: IFakeFailureState = { failures: [] };
     const svc = makeService({
       projects: [makeProject()],
       registry: [],
       repoState,
       leaseState,
       runState,
+      sourceSyncState,
+      failureState,
     });
 
     const result = await svc.runSeedOrRebuild({
@@ -247,6 +350,7 @@ describe('ProjectionSeedService — full rebuild', () => {
     });
     expect(result.runType).toBe('seed');
     expect(runState.starts[0].runType).toBe('seed');
+    expect(sourceSyncState.initialized).toHaveLength(2);
   });
 
   it('soft-deactivates active helper rows whose ProjectionKey is not in the expected set with reason rebuild-obsolete', async () => {
@@ -277,12 +381,20 @@ describe('ProjectionSeedService — full rebuild', () => {
       acquireOutcome: { acquired: true, expiresAtUtc: NOW.toISOString() },
     };
     const runState: IFakeRunRepoState = { starts: [], finalizes: [] };
+    const sourceSyncState: IFakeSourceSyncState = {
+      initialized: [],
+      cleared: [],
+      existingByKind: new Map(),
+    };
+    const failureState: IFakeFailureState = { failures: [] };
     const svc = makeService({
       projects: [makeProject()],
       registry: [],
       repoState,
       leaseState,
       runState,
+      sourceSyncState,
+      failureState,
     });
 
     const result: ISeedRunResult = await svc.runSeedOrRebuild({
@@ -297,6 +409,7 @@ describe('ProjectionSeedService — full rebuild', () => {
     );
     expect(deactivationPatch).toBeDefined();
     expect(deactivationPatch!.listItemId).toEqual(501);
+    expect(sourceSyncState.initialized).toHaveLength(2);
   });
 
   it('source-rebuild scoped to LegacyRegistry does not load Projects and does not deactivate Projects-scoped stale rows', async () => {
@@ -326,12 +439,20 @@ describe('ProjectionSeedService — full rebuild', () => {
       acquireOutcome: { acquired: true, expiresAtUtc: NOW.toISOString() },
     };
     const runState: IFakeRunRepoState = { starts: [], finalizes: [] };
+    const sourceSyncState: IFakeSourceSyncState = {
+      initialized: [],
+      cleared: [],
+      existingByKind: new Map(),
+    };
+    const failureState: IFakeFailureState = { failures: [] };
     const svc = makeService({
       projects: [],
       registry: [makeRegistry()],
       repoState,
       leaseState,
       runState,
+      sourceSyncState,
+      failureState,
     });
 
     const result = await svc.runSeedOrRebuild({
@@ -345,6 +466,8 @@ describe('ProjectionSeedService — full rebuild', () => {
       repoState.patches.find((p) => p.listItemId === 801 && p.fields.IsActive === false),
     ).toBeUndefined();
     expect(result.sourceListKind).toBe('LegacyRegistry');
+    expect(sourceSyncState.initialized).toHaveLength(1);
+    expect(sourceSyncState.initialized[0]?.sourceListKind).toBe('LegacyRegistry');
   });
 
   it('dry-run writes no rows and reports counts only', async () => {
@@ -355,12 +478,20 @@ describe('ProjectionSeedService — full rebuild', () => {
       acquireOutcome: { acquired: true, expiresAtUtc: NOW.toISOString() },
     };
     const runState: IFakeRunRepoState = { starts: [], finalizes: [] };
+    const sourceSyncState: IFakeSourceSyncState = {
+      initialized: [],
+      cleared: [],
+      existingByKind: new Map(),
+    };
+    const failureState: IFakeFailureState = { failures: [] };
     const svc = makeService({
       projects: [makeProject()],
       registry: [makeRegistry()],
       repoState,
       leaseState,
       runState,
+      sourceSyncState,
+      failureState,
     });
 
     const result = await svc.runSeedOrRebuild({
@@ -373,6 +504,7 @@ describe('ProjectionSeedService — full rebuild', () => {
     expect(repoState.inserts).toHaveLength(0);
     expect(repoState.patches).toHaveLength(0);
     expect(result.counts.helperRowsInserted).toBeGreaterThan(0);
+    expect(sourceSyncState.initialized).toHaveLength(0);
   });
 
   it('returns status=skipped with failureCode=rebuild-lease-active when the rebuild lease is held', async () => {
@@ -388,12 +520,20 @@ describe('ProjectionSeedService — full rebuild', () => {
       },
     };
     const runState: IFakeRunRepoState = { starts: [], finalizes: [] };
+    const sourceSyncState: IFakeSourceSyncState = {
+      initialized: [],
+      cleared: [],
+      existingByKind: new Map(),
+    };
+    const failureState: IFakeFailureState = { failures: [] };
     const svc = makeService({
       projects: [],
       registry: [],
       repoState,
       leaseState,
       runState,
+      sourceSyncState,
+      failureState,
     });
 
     const result = await svc.runSeedOrRebuild({
@@ -406,6 +546,7 @@ describe('ProjectionSeedService — full rebuild', () => {
     expect(runState.starts).toHaveLength(0);
     expect(runState.finalizes).toHaveLength(0);
     expect(leaseState.releaseCalls).toEqual(0);
+    expect(failureState.failures).toHaveLength(0);
   });
 
   it('rejects source-rebuild without sourceListKind', async () => {
@@ -416,12 +557,20 @@ describe('ProjectionSeedService — full rebuild', () => {
       acquireOutcome: { acquired: true, expiresAtUtc: NOW.toISOString() },
     };
     const runState: IFakeRunRepoState = { starts: [], finalizes: [] };
+    const sourceSyncState: IFakeSourceSyncState = {
+      initialized: [],
+      cleared: [],
+      existingByKind: new Map(),
+    };
+    const failureState: IFakeFailureState = { failures: [] };
     const svc = makeService({
       projects: [],
       registry: [],
       repoState,
       leaseState,
       runState,
+      sourceSyncState,
+      failureState,
     });
 
     const result = await svc.runSeedOrRebuild({
@@ -432,5 +581,56 @@ describe('ProjectionSeedService — full rebuild', () => {
     expect(result.status).toBe('failed');
     expect(result.failureCode).toBe('invalid-request');
     expect(leaseState.acquireCalls).toEqual(0);
+  });
+
+  it('persists Sync Failure when baseline initialization fails after run start', async () => {
+    const repoState: IFakeRepoState = { inserts: [], patches: [], rowsById: new Map() };
+    const leaseState: IFakeLeaseState = {
+      acquireCalls: 0,
+      releaseCalls: 0,
+      acquireOutcome: { acquired: true, expiresAtUtc: NOW.toISOString() },
+    };
+    const runState: IFakeRunRepoState = { starts: [], finalizes: [] };
+    const sourceSyncState: IFakeSourceSyncState = {
+      initialized: [],
+      cleared: [],
+      existingByKind: new Map(),
+    };
+    const failureState: IFakeFailureState = { failures: [] };
+    const svc = new ProjectionSeedService({
+      sourceFetchClient: makeSourceClient({ projects: [makeProject()], registry: [] }),
+      registryRepository: makeRepo(repoState),
+      leaseRepository: makeLease(leaseState),
+      runRepository: makeRunRepo(runState),
+      sourceSyncStateRepository: makeSourceSyncRepo(sourceSyncState),
+      failureRepository: makeFailureRepo(failureState),
+      sourceListLocator: {
+        async resolve(kind) {
+          return { siteId: 'site-1', listId: kind, listTitle: kind };
+        },
+        async resolveResourcePath() {
+          return 'unused';
+        },
+      },
+      deltaClient: {
+        async acquireInitialDeltaLink() {
+          return { ok: false, failureCode: 'graph-403-forbidden', sanitizedReason: 'forbidden' };
+        },
+        async drainDelta() {
+          throw new Error('unused');
+        },
+      },
+      now: () => NOW,
+    });
+
+    const result = await svc.runSeedOrRebuild({
+      ...BASE_REQUEST,
+      request: { rebuildKind: 'full-rebuild' },
+    });
+
+    expect(result.status).toBe('failed');
+    expect(runState.finalizes.at(-1)?.status).toBe('failed');
+    expect(failureState.failures).toHaveLength(1);
+    expect(failureState.failures[0]?.failureCode).toBe('rebuild-failed');
   });
 });

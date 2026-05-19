@@ -70,6 +70,12 @@ Prompt 04 active-state redirect note:
 - Webhook ingress writes deterministic `Pending Work` rows and the 1-minute pending-work timer is the active worker lane.
 - Azure Table state repositories and Service Bus sender/queue-trigger seams are superseded/quarantined compatibility artifacts and are not required active MVP blockers.
 
+Prompt 07 seed/rebuild redirect note:
+- Seed/rebuild control lease persistence uses SharePoint `Control State`.
+- Seed/rebuild run ledger persistence uses SharePoint `Runs`.
+- Seed/rebuild failure diagnostics persist in SharePoint `Sync Failures`.
+- Seed/rebuild baseline initialization persists in SharePoint `Source Sync State`.
+
 ## 3.1 Storage provisioning/verifier scripts
 
 Use the seven-list MyDashboard storage scripts before cutover:

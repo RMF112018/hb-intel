@@ -53,6 +53,8 @@ import {
 } from '../registry/my-projects-registry-row-mapper.js';
 import type { IMyProjectsRegistryRepository } from '../registry/my-projects-registry-repository.js';
 import type { IProjectionSourceFetchClient } from './projection-source-fetch-client.js';
+import type { IProjectionSourceListLocator } from '../subscriptions/projection-source-list-locator.js';
+import type { IProjectionGraphDeltaClient } from '../delta/projection-graph-delta-client.js';
 
 const OK_SOURCE_FLAGS = Object.freeze({ ok: true, bounded: false });
 const OK_SOURCE_STATUSES = Object.freeze({
@@ -123,6 +125,38 @@ export interface IProjectionSeedServiceDeps {
       notes?: string;
     }): Promise<void>;
   };
+  readonly sourceSyncStateRepository: {
+    get(sourceListKind: SourceListKind): Promise<{ SourceListKind: SourceListKind } | null>;
+    getWithEtag(
+      sourceListKind: SourceListKind,
+    ): Promise<{ entity: { SourceListKind: SourceListKind }; etag: string } | null>;
+    initializeBaseline(args: {
+      sourceListKind: SourceListKind;
+      deltaLink: string;
+      batchId: string;
+      atUtc: string;
+    }): Promise<void>;
+    clearNeedsResync(args: {
+      sourceListKind: SourceListKind;
+      deltaLink: string;
+      batchId: string;
+      atUtc: string;
+      expectedEtag: string;
+    }): Promise<void>;
+  };
+  readonly failureRepository: {
+    upsertFailure(args: {
+      failureId: string;
+      failureClass: 'reconciliation';
+      failureCode: string;
+      sourceListKind?: SourceListKind;
+      relatedRunId?: string;
+      sanitizedMessage?: string;
+      atUtc: string;
+    }): Promise<void>;
+  };
+  readonly sourceListLocator: IProjectionSourceListLocator;
+  readonly deltaClient: IProjectionGraphDeltaClient;
   readonly now?: () => Date;
 }
 
@@ -163,8 +197,53 @@ export class ProjectionSeedService implements IProjectionSeedService {
       registryRepository: deps.registryRepository,
       leaseRepository: deps.leaseRepository,
       runRepository: deps.runRepository,
+      sourceSyncStateRepository: deps.sourceSyncStateRepository,
+      failureRepository: deps.failureRepository,
+      sourceListLocator: deps.sourceListLocator,
+      deltaClient: deps.deltaClient,
       now: deps.now ?? (() => new Date()),
     };
+  }
+
+  private scopeKinds(sourceScope: SourceListKind | undefined): readonly SourceListKind[] {
+    if (sourceScope) return [sourceScope];
+    return ['Projects', 'LegacyRegistry'];
+  }
+
+  private async initializeOrRefreshBaselines(args: {
+    sourceScope: SourceListKind | undefined;
+    projectionBatchId: string;
+  }): Promise<void> {
+    const atUtc = this.deps.now().toISOString();
+    for (const kind of this.scopeKinds(args.sourceScope)) {
+      const location = await this.deps.sourceListLocator.resolve(kind);
+      const initial = await this.deps.deltaClient.acquireInitialDeltaLink({
+        siteId: location.siteId,
+        listId: location.listId,
+      });
+      if (!initial.ok) {
+        throw new Error(
+          `baseline-init-failed:${kind}:${initial.failureCode}:${initial.sanitizedReason}`,
+        );
+      }
+      const withEtag = await this.deps.sourceSyncStateRepository.getWithEtag(kind);
+      if (withEtag === null) {
+        await this.deps.sourceSyncStateRepository.initializeBaseline({
+          sourceListKind: kind,
+          deltaLink: initial.deltaLink,
+          batchId: args.projectionBatchId,
+          atUtc,
+        });
+        continue;
+      }
+      await this.deps.sourceSyncStateRepository.clearNeedsResync({
+        sourceListKind: kind,
+        deltaLink: initial.deltaLink,
+        batchId: args.projectionBatchId,
+        atUtc,
+        expectedEtag: withEtag.etag,
+      });
+    }
   }
 
   async runSeedOrRebuild(args: {
@@ -198,6 +277,7 @@ export class ProjectionSeedService implements IProjectionSeedService {
     const counts = zeroCounts();
     let runRowKey: string | null = null;
     let leaseAcquired = false;
+    let failureForPersistence: { code: string; reason: string } | null = null;
 
     try {
       const leaseOutcome = await this.deps.leaseRepository.tryAcquire({
@@ -395,6 +475,11 @@ export class ProjectionSeedService implements IProjectionSeedService {
         counts.helperRowsDeactivated += 1;
       }
 
+      await this.initializeOrRefreshBaselines({
+        sourceScope,
+        projectionBatchId,
+      });
+
       const completedAtUtc = this.deps.now().toISOString();
       await this.deps.runRepository.finalize({
         rowKey: runRowKey,
@@ -423,6 +508,7 @@ export class ProjectionSeedService implements IProjectionSeedService {
     } catch (error) {
       const failedAtUtc = this.deps.now().toISOString();
       const reason = sanitize(error);
+      failureForPersistence = { code: 'rebuild-failed', reason };
       if (runRowKey !== null) {
         try {
           await this.deps.runRepository.finalize({
@@ -456,6 +542,21 @@ export class ProjectionSeedService implements IProjectionSeedService {
         sanitizedReason: reason,
       };
     } finally {
+      if (failureForPersistence) {
+        try {
+          await this.deps.failureRepository.upsertFailure({
+            failureId: `${runId}:rebuild`,
+            failureClass: 'reconciliation',
+            failureCode: failureForPersistence.code,
+            ...(sourceScope ? { sourceListKind: sourceScope } : {}),
+            relatedRunId: runId,
+            sanitizedMessage: failureForPersistence.reason,
+            atUtc: this.deps.now().toISOString(),
+          });
+        } catch {
+          // no-op, failure repository is best-effort on this path.
+        }
+      }
       if (leaseAcquired) {
         try {
           await this.deps.leaseRepository.release({

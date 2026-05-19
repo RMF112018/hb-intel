@@ -7,10 +7,11 @@ import {
   type ICliDeps,
 } from '../../../../../scripts/projection-admin-cli.js';
 import type { ISeedRunResult } from '../my-projects-projection/engine/projection-seed-service.js';
+import type { IProjectionRunEntity } from '../my-projects-projection/projection-state-entities.js';
 
 function makeDeps(
   result: ISeedRunResult,
-  recent: ReadonlyArray<Record<string, unknown>> = [],
+  recent: ReadonlyArray<IProjectionRunEntity> = [],
 ): ICliDeps {
   return {
     seedService: {
@@ -146,6 +147,8 @@ describe('runCli', () => {
   it('renders a status report from the run repository', async () => {
     const deps = makeDeps(RESULT_OK, [
       {
+        partitionKey: 'MyProjectsProjection',
+        rowKey: 'Run:2026-05-18T11:00:00.000Z:r1',
         RunId: 'r1',
         RunType: 'seed',
         Status: 'succeeded',

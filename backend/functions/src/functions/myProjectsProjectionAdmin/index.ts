@@ -34,10 +34,14 @@ import { GraphListClient } from '../../services/legacy-fallback/graph-list-clien
 import { getProjectionConfig } from '../../services/my-projects-projection/projection-config.js';
 import { SharePointProjectionControlStateRepository } from '../../services/my-projects-projection/state/sharepoint-control-state-repository.js';
 import { SharePointProjectionRunRepository } from '../../services/my-projects-projection/state/sharepoint-run-repository.js';
+import { ProjectionSourceSyncStateRepository } from '../../services/my-projects-projection/state/source-sync-state-repository.js';
+import { SyncFailureRepository } from '../../services/my-projects-projection/state/sync-failure-repository.js';
 import { SharePointStateStore } from '../../services/my-projects-projection/state/sharepoint-state-store.js';
 import { createGraphMyProjectsRegistryRepository } from '../../services/my-projects-projection/registry/my-projects-registry-repository.js';
 import { createGraphProjectionSourceFetchClient } from '../../services/my-projects-projection/engine/projection-source-fetch-client.js';
 import { createProjectionSeedService } from '../../services/my-projects-projection/engine/projection-seed-service.js';
+import { createProjectionGraphDeltaClient } from '../../services/my-projects-projection/delta/projection-graph-delta-client.js';
+import { createProjectionSourceListLocator, type IGraphSiteListResolver } from '../../services/my-projects-projection/subscriptions/projection-source-list-locator.js';
 import {
   handleProjectionRebuild,
   handleProjectionSeed,
@@ -71,11 +75,32 @@ function buildDeps(context: InvocationContext): IProjectionAdminRebuildHandlerDe
   const config = getProjectionConfig();
   const sourceGraph = new GraphListClient(config.sites.sourceSiteUrl);
   const registryGraph = new GraphListClient(config.sites.registrySiteUrl);
+  const resolver: IGraphSiteListResolver = {
+    async resolveSiteId() {
+      return sourceGraph.resolveSiteId();
+    },
+    async resolveListId(_siteId, listTitle) {
+      return sourceGraph.resolveListId(listTitle);
+    },
+  };
   const seedService = createProjectionSeedService({
     sourceFetchClient: createGraphProjectionSourceFetchClient({ graph: sourceGraph }),
     registryRepository: createGraphMyProjectsRegistryRepository({ graph: registryGraph }),
     leaseRepository: new SharePointProjectionControlStateRepository(getStore(config.sites.registrySiteUrl)),
     runRepository: getRunRepository(config.sites.registrySiteUrl),
+    sourceSyncStateRepository: new ProjectionSourceSyncStateRepository(
+      getStore(config.sites.registrySiteUrl),
+    ),
+    failureRepository: new SyncFailureRepository(getStore(config.sites.registrySiteUrl)),
+    sourceListLocator: createProjectionSourceListLocator({
+      resolver,
+      config: {
+        sourceSiteUrl: config.sites.sourceSiteUrl,
+        projectsListTitle: config.sites.projectsListTitle,
+        legacyRegistryListTitle: config.sites.legacyRegistryListTitle,
+      },
+    }),
+    deltaClient: createProjectionGraphDeltaClient(),
   });
   cachedDeps = {
     seedService,
