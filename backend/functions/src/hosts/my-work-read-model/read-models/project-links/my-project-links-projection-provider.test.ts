@@ -9,6 +9,8 @@ import type {
 } from './my-project-links-runtime-diagnostics.js';
 import type { IMyProjectsRegistryRepository } from '../../../../services/my-projects-projection/registry/my-projects-registry-repository.js';
 import type { IMyProjectsRegistryReadRow } from '../../../../services/my-projects-projection/registry/my-projects-registry-row-mapper.js';
+import type { SourceListKind } from '../../../../services/my-projects-projection/projection-types.js';
+import type { IProjectionDeltaStateEntity } from '../../../../services/my-projects-projection/projection-state-entities.js';
 
 const FIXED_NOW = '2026-05-18T15:00:00.000Z';
 
@@ -109,6 +111,38 @@ function makeRepo(
   };
 }
 
+function makeDeltaState(
+  sourceListKind: SourceListKind,
+  overrides: Partial<IProjectionDeltaStateEntity> = {},
+): IProjectionDeltaStateEntity {
+  return {
+    partitionKey: 'MyProjectsProjection',
+    rowKey: `DeltaState:${sourceListKind}`,
+    SourceListKind: sourceListKind,
+    DeltaLink: 'token=latest',
+    NeedsResync: false,
+    LastDeltaPullStartedUtc: '2026-05-18T14:00:00.000Z',
+    LastDeltaPullSucceededUtc: '2026-05-18T14:01:00.000Z',
+    LastDeltaPullFailedUtc: undefined,
+    LastFailureCode: undefined,
+    LastChangedItemCount: 0,
+    LastDeletedItemCount: 0,
+    LastProjectionBatchId: 'batch-A',
+    ...overrides,
+  };
+}
+
+function makeSourceSyncRepo(args: {
+  bySource: Partial<Record<SourceListKind, IProjectionDeltaStateEntity | null>>;
+}) {
+  return {
+    async get(sourceListKind: SourceListKind): Promise<IProjectionDeltaStateEntity | null> {
+      if (!(sourceListKind in args.bySource)) return null;
+      return args.bySource[sourceListKind] ?? null;
+    },
+  };
+}
+
 const NOW = (): string => FIXED_NOW;
 
 describe('ProjectionMyProjectLinksReadModelProvider — happy path', () => {
@@ -183,6 +217,23 @@ describe('ProjectionMyProjectLinksReadModelProvider — happy path', () => {
     expect(envelope.data.items[0].projectName).toBe('Alpha');
     expect(envelope.data.items[1].projectName).toBe('Zeta');
   });
+
+  it('adds projectionSourceSyncHealth=healthy when source sync lanes are initialized and not marked resync', async () => {
+    const { context } = makeContext();
+    const provider = new ProjectionMyProjectLinksReadModelProvider({
+      registryRepository: makeRepo({ rows: [makeReadRow()] }),
+      sourceSyncStateRepository: makeSourceSyncRepo({
+        bySource: {
+          Projects: makeDeltaState('Projects', { NeedsResync: false }),
+          LegacyRegistry: makeDeltaState('LegacyRegistry', { NeedsResync: false }),
+        },
+      }),
+      now: NOW,
+    });
+
+    const envelope = await provider.getMyProjectLinks(context);
+    expect(envelope.data.diagnostics?.projectionSourceSyncHealth).toBe('healthy');
+  });
 });
 
 describe('ProjectionMyProjectLinksReadModelProvider — empty rows', () => {
@@ -255,5 +306,39 @@ describe('ProjectionMyProjectLinksReadModelProvider — repository failure (no a
     const failedEvent = events.find((e) => e.name === 'myProjectLinks.read.projection.failed');
     expect(failedEvent).toBeDefined();
     expect(typeof failedEvent!.properties.stage).toBe('string');
+  });
+});
+
+describe('ProjectionMyProjectLinksReadModelProvider — projection source sync health', () => {
+  it('reports needs-resync when any source lane is marked NeedsResync', async () => {
+    const { context } = makeContext();
+    const provider = new ProjectionMyProjectLinksReadModelProvider({
+      registryRepository: makeRepo({ rows: [makeReadRow()] }),
+      sourceSyncStateRepository: makeSourceSyncRepo({
+        bySource: {
+          Projects: makeDeltaState('Projects', { NeedsResync: true }),
+          LegacyRegistry: makeDeltaState('LegacyRegistry', { NeedsResync: false }),
+        },
+      }),
+      now: NOW,
+    });
+    const envelope = await provider.getMyProjectLinks(context);
+    expect(envelope.data.diagnostics?.projectionSourceSyncHealth).toBe('needs-resync');
+  });
+
+  it('reports uninitialized when a source lane has no persisted baseline row', async () => {
+    const { context } = makeContext();
+    const provider = new ProjectionMyProjectLinksReadModelProvider({
+      registryRepository: makeRepo({ rows: [makeReadRow()] }),
+      sourceSyncStateRepository: makeSourceSyncRepo({
+        bySource: {
+          Projects: makeDeltaState('Projects'),
+          LegacyRegistry: null,
+        },
+      }),
+      now: NOW,
+    });
+    const envelope = await provider.getMyProjectLinks(context);
+    expect(envelope.data.diagnostics?.projectionSourceSyncHealth).toBe('uninitialized');
   });
 });

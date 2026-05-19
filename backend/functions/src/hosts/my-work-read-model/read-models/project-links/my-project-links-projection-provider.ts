@@ -39,9 +39,14 @@ import {
   type IMyProjectsRegistryReadRow,
 } from '../../../../services/my-projects-projection/registry/my-projects-registry-row-mapper.js';
 import type { MyProjectLinksPrincipalUnresolvedReason } from '@hbc/models/myWork';
+import { SOURCE_LIST_KINDS, type SourceListKind } from '../../../../services/my-projects-projection/projection-types.js';
+import type { IProjectionDeltaStateEntity } from '../../../../services/my-projects-projection/projection-state-entities.js';
 
 export interface IProjectionMyProjectLinksReadModelProviderDeps {
   readonly registryRepository: IMyProjectsRegistryRepository;
+  readonly sourceSyncStateRepository?: {
+    get(sourceListKind: SourceListKind): Promise<IProjectionDeltaStateEntity | null>;
+  };
   readonly now?: () => string;
 }
 
@@ -64,11 +69,28 @@ function pickMaxIsoString(values: readonly string[]): string | undefined {
 
 export class ProjectionMyProjectLinksReadModelProvider {
   private readonly registryRepository: IMyProjectsRegistryRepository;
+  private readonly sourceSyncStateRepository?: IProjectionMyProjectLinksReadModelProviderDeps['sourceSyncStateRepository'];
   private readonly now: () => string;
 
   constructor(deps: IProjectionMyProjectLinksReadModelProviderDeps) {
     this.registryRepository = deps.registryRepository;
+    this.sourceSyncStateRepository = deps.sourceSyncStateRepository;
     this.now = deps.now ?? (() => new Date().toISOString());
+  }
+
+  private async resolveProjectionSourceSyncHealth():
+    Promise<'healthy' | 'needs-resync' | 'uninitialized' | 'unknown' | undefined> {
+    if (!this.sourceSyncStateRepository) return undefined;
+    try {
+      const states = await Promise.all(
+        SOURCE_LIST_KINDS.map((sourceListKind) => this.sourceSyncStateRepository!.get(sourceListKind)),
+      );
+      if (states.some((state) => state === null)) return 'uninitialized';
+      if (states.some((state) => state?.NeedsResync === true)) return 'needs-resync';
+      return 'healthy';
+    } catch {
+      return 'unknown';
+    }
   }
 
   async getMyProjectLinks(
@@ -192,6 +214,7 @@ export class ProjectionMyProjectLinksReadModelProvider {
       );
     }
 
+    const projectionSourceSyncHealth = await this.resolveProjectionSourceSyncHealth();
     const diagnostics: MyProjectLinksDiagnostics = {
       classification: sortedItems.length === 0 ? 'zero-match-available-sources' : 'available',
       principalResolution: 'resolved',
@@ -201,6 +224,7 @@ export class ProjectionMyProjectLinksReadModelProvider {
       projectionMode: 'projection',
       ...(maxLastProjectedAtUtc ? { projectionMaxLastProjectedAtUtc: maxLastProjectedAtUtc } : {}),
       ...(projectionBatchId ? { projectionBatchId } : {}),
+      ...(projectionSourceSyncHealth ? { projectionSourceSyncHealth } : {}),
     };
 
     return {

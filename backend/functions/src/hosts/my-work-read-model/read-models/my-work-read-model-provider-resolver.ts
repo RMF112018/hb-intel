@@ -59,6 +59,8 @@ import { ProjectionMyProjectLinksReadModelProvider } from './project-links/my-pr
 import { GraphListClient } from '../../../services/legacy-fallback/graph-list-client.js';
 import { getProjectionConfig } from '../../../services/my-projects-projection/projection-config.js';
 import { createGraphMyProjectsRegistryRepository } from '../../../services/my-projects-projection/registry/my-projects-registry-repository.js';
+import { ProjectionSourceSyncStateRepository } from '../../../services/my-projects-projection/state/source-sync-state-repository.js';
+import { SharePointStateStore } from '../../../services/my-projects-projection/state/sharepoint-state-store.js';
 import { getMyDashboardAdobeSignCacheListHostSiteUrl } from '../../../services/adobe-sign-cache/cache-list-descriptors.js';
 import { createGraphAdobeSignAgreementProjectionCacheRepository } from '../../../services/adobe-sign-cache/repositories/agreement-projection-cache-repository.js';
 import { createGraphAdobeSignUserCacheRepository } from '../../../services/adobe-sign-cache/repositories/user-cache-repository.js';
@@ -93,8 +95,12 @@ export function buildProjectLinksProvider(
       if (opts.projectionProviderFactory) return opts.projectionProviderFactory();
       const fullCfg = getProjectionConfig();
       const registryGraph = new GraphListClient(fullCfg.sites.registrySiteUrl);
+      const sourceSyncStateRepository = new ProjectionSourceSyncStateRepository(
+        new SharePointStateStore(fullCfg.sites.registrySiteUrl),
+      );
       return new ProjectionMyProjectLinksReadModelProvider({
         registryRepository: createGraphMyProjectsRegistryRepository({ graph: registryGraph }),
+        sourceSyncStateRepository,
       });
     }
   } catch {

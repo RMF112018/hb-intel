@@ -45,11 +45,16 @@ These do NOT fire in the harness (the harness runs both paths with `ok: true, bo
 
 ## Diagnostic envelope additions (additive, backward compatible)
 
-The projection-backed provider stamps three optional fields on `MyProjectLinksDiagnostics`:
+The projection-backed provider stamps optional fields on `MyProjectLinksDiagnostics`:
 
 - `projectionMode: 'projection'` (legacy provider stamps `'legacy'`).
 - `projectionMaxLastProjectedAtUtc` — max `LastProjectedAtUtc` across the helper rows that produced the response.
 - `projectionBatchId` — most recent batch id observed.
+- `projectionSourceSyncHealth` — aggregate Source Sync State health:
+  - `healthy` (all lanes initialized, no `NeedsResync`),
+  - `needs-resync` (one or more lanes marked `NeedsResync`),
+  - `uninitialized` (baseline row missing for a lane),
+  - `unknown` (health lookup failure; envelope remains backward compatible).
 
 Existing SPFx fixtures and tests do not assert on these fields; the additions are forward-compatible.
 

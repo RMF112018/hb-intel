@@ -103,6 +103,11 @@ export type MyProjectLinksPrincipalUnresolvedReason =
  * server-side configuration.
  */
 export type MyProjectLinksProjectionMode = 'legacy' | 'projection';
+export type MyProjectLinksProjectionSourceSyncHealth =
+  | 'healthy'
+  | 'needs-resync'
+  | 'uninitialized'
+  | 'unknown';
 
 export interface MyProjectLinksDiagnostics {
   readonly classification: MyProjectLinksDiagnosticClassification;
@@ -127,6 +132,14 @@ export interface MyProjectLinksDiagnostics {
    * the helper rows in this response. Omitted in legacy mode.
    */
   readonly projectionBatchId?: string;
+  /**
+   * Aggregated source-sync health from the projection control plane:
+   * - `healthy`: both source lanes are initialized and not marked NeedsResync.
+   * - `needs-resync`: at least one source lane is marked NeedsResync.
+   * - `uninitialized`: one or more source lanes have no persisted baseline yet.
+   * - `unknown`: sync-health read failed; read envelope remains backward-compatible.
+   */
+  readonly projectionSourceSyncHealth?: MyProjectLinksProjectionSourceSyncHealth;
 }
 
 export interface MyProjectLinksReadModel {
